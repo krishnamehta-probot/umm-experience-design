@@ -54,8 +54,8 @@ export const hero = {
   titleLast: 'enterprise can',
   titleAccent: 'deliver.',
   lead: 'UMM helps businesses improve how customers use their products and services. We combine research, journey mapping, UX and service design to simplify interactions across websites, apps, portals and support channels.',
-  primaryCta: 'Discuss Our CX Project',
-  secondaryCta: 'View Our Work',
+  primaryCta: 'Discuss our CX project',
+  secondaryCta: 'View our work',
   journey: {
     label: 'Account onboarding',
     title: 'One clear path, mapped end to end.',
