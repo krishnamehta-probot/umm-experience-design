@@ -1,0 +1,11 @@
+node_modules
+dist
+*.local
+.DS_Store
+.tools
+
+# build noise
+*.tsbuildinfo
+perf.tmp.cjs
+*.tmp.mjs
+*.tmp.cjs

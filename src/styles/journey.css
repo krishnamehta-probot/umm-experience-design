@@ -1,0 +1,268 @@
+/* ============================================================================
+   UMM DESIGN SYSTEM — THE JOURNEY SPINE
+   Scroll-position made visible. Reads --umm-spine-progress (0..1), which the
+   journey engine sets on the element each frame.
+   ========================================================================== */
+
+.umm-spine {
+  position: fixed;
+  left: clamp(1.25rem, 2.4vw, 2.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--umm-z-spine);
+  display: none;
+  flex-direction: column;
+  gap: var(--umm-sp-5);
+  pointer-events: none;
+}
+
+/* The spine only appears once there is room for it beside the content. */
+@media (min-width: 1180px) {
+  .umm-spine {
+    display: flex;
+  }
+}
+
+.umm-spine__count {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-ink-quiet);
+  font-variant-numeric: tabular-nums;
+  padding-left: 3px;
+}
+
+.umm-spine__count i {
+  font-style: normal;
+  opacity: 0.4;
+  padding-inline: 2px;
+}
+
+.umm-spine__rail {
+  position: relative;
+  width: 14px;
+  height: 52vh;
+  max-height: 460px;
+}
+
+/* The unwalked path. */
+.umm-spine__track {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--umm-hairline);
+  opacity: 0.55;
+}
+
+/* The walked path, drawn top-down from the scroll position. */
+.umm-spine__fill {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  width: 1px;
+  height: calc(var(--umm-spine-progress, 0) * 100%);
+  background: var(--umm-ink);
+  transition: height 120ms linear;
+}
+
+/* The reader's position on the line. */
+.umm-spine__marker {
+  position: absolute;
+  left: 6.5px;
+  top: calc(var(--umm-spine-progress, 0) * 100%);
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  transition: top 120ms linear;
+}
+
+.umm-spine__marker::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--umm-ink);
+  opacity: 0.22;
+}
+
+.umm-spine__stations {
+  position: absolute;
+  inset: 0;
+}
+
+.umm-spine__station {
+  position: absolute;
+  top: var(--umm-station-y);
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.umm-spine__station button {
+  display: flex;
+  align-items: center;
+  gap: var(--umm-sp-4);
+  pointer-events: auto;
+  padding: 6px 0;
+}
+
+.umm-spine__dot {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--umm-hairline);
+  background: var(--umm-canvas);
+  transition:
+    background var(--umm-dur) var(--umm-ease-out),
+    border-color var(--umm-dur) var(--umm-ease-out),
+    transform var(--umm-dur) var(--umm-ease-spring);
+}
+
+.umm-spine__station[data-state='passed'] .umm-spine__dot {
+  background: var(--umm-ink);
+  border-color: var(--umm-ink);
+}
+
+.umm-spine__station[data-state='active'] .umm-spine__dot {
+  background: var(--umm-sky);
+  border-color: var(--umm-ink);
+  transform: scale(1.32);
+}
+
+/* The label is the "where to focus" cue: only the current chapter names
+   itself, so the rail stays quiet until it has something to say. */
+.umm-spine__label {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--umm-ink);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity var(--umm-dur) var(--umm-ease-out),
+    transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-spine__station[data-state='active'] .umm-spine__label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.umm-spine__station button:hover .umm-spine__label,
+.umm-spine__station button:focus-visible .umm-spine__label {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--umm-ink-soft);
+}
+
+.umm-spine__station button:hover .umm-spine__dot {
+  border-color: var(--umm-ink);
+}
+
+/* --- Narrow screens -------------------------------------------------------
+   The rail is replaced by a hairline across the top of the viewport.
+   ------------------------------------------------------------------------ */
+
+.umm-journey-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: var(--umm-z-nav);
+  background: transparent;
+  pointer-events: none;
+}
+
+.umm-journey-bar span {
+  display: block;
+  height: 100%;
+  width: calc(var(--umm-spine-progress, 0) * 100%);
+  background: var(--umm-ink);
+  transition: width 120ms linear;
+}
+
+@media (min-width: 1180px) {
+  .umm-journey-bar {
+    display: none;
+  }
+}
+
+/* Under reduced motion the rail still reports position, it just stops
+   animating between positions. */
+@media (prefers-reduced-motion: reduce) {
+  .umm-spine__fill,
+  .umm-spine__marker,
+  .umm-journey-bar span {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   OVER INK
+   The rail is fixed, so it travels across the dark closing band. Without this
+   it would simply disappear at the end of the journey — the one place the
+   reader most wants to know they have arrived.
+   ------------------------------------------------------------------------- */
+
+.umm-spine[data-over-ink='true'] .umm-spine__count {
+  color: var(--umm-ink-paper-soft);
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__track {
+  background: var(--umm-ink-paper);
+  opacity: 0.22;
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__fill,
+.umm-spine[data-over-ink='true'] .umm-spine__marker {
+  background: var(--umm-ink-paper);
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__marker::after {
+  border-color: var(--umm-ink-paper);
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__dot {
+  background: var(--umm-ink);
+  border-color: color-mix(in srgb, var(--umm-ink-paper) 40%, transparent);
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__station[data-state='passed'] .umm-spine__dot {
+  background: var(--umm-ink-paper);
+  border-color: var(--umm-ink-paper);
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__station[data-state='active'] .umm-spine__dot {
+  background: var(--umm-sky);
+  border-color: var(--umm-ink-paper);
+}
+
+.umm-spine[data-over-ink='true'] .umm-spine__label {
+  color: var(--umm-ink-paper);
+}
+
+/* The colour swap is a state change, not an entrance, so it eases rather than
+   snapping as the reader crosses the boundary. */
+.umm-spine__count,
+.umm-spine__track,
+.umm-spine__fill,
+.umm-spine__marker,
+.umm-spine__dot,
+.umm-spine__label {
+  transition-property: background, border-color, color, opacity, transform, height, top;
+  transition-duration: var(--umm-dur);
+  transition-timing-function: var(--umm-ease-out);
+}
+
+.umm-spine__fill,
+.umm-spine__marker {
+  transition-duration: 120ms, 120ms, 120ms, 120ms, 120ms, 120ms, 120ms;
+}

@@ -1,0 +1,218 @@
+/* ============================================================================
+   MASTHEAD
+   ========================================================================== */
+
+.umm-nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--umm-z-nav);
+  transition: background var(--umm-dur) var(--umm-ease-out),
+    border-color var(--umm-dur) var(--umm-ease-out),
+    box-shadow var(--umm-dur) var(--umm-ease-out);
+  border-bottom: 1px solid transparent;
+}
+
+.umm-nav[data-condensed='true'] {
+  background: color-mix(in srgb, var(--umm-canvas) 84%, transparent);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom-color: var(--umm-border);
+}
+
+.umm-nav__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--umm-sp-8);
+  width: 100%;
+  max-width: var(--umm-container);
+  margin-inline: auto;
+  padding: var(--umm-sp-5) var(--umm-gutter);
+  transition: padding var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-nav[data-condensed='true'] .umm-nav__inner {
+  padding-block: var(--umm-sp-3);
+}
+
+/* --- Wordmark ------------------------------------------------------------ */
+
+.umm-wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--umm-sp-3);
+  margin-right: auto;
+}
+
+.umm-wordmark__mark {
+  font-family: var(--umm-font-display);
+  font-size: 1.375rem;
+  font-weight: var(--umm-weight-bold);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--umm-ink);
+}
+
+.umm-wordmark__full {
+  font-family: var(--umm-font-mono);
+  font-size: 0.625rem;
+  line-height: 1.24;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+  padding-left: var(--umm-sp-3);
+  border-left: 1px solid var(--umm-hairline);
+}
+
+/* --- Links --------------------------------------------------------------- */
+
+.umm-nav__links {
+  display: none;
+  align-items: center;
+  gap: var(--umm-sp-8);
+}
+
+.umm-nav__links a {
+  position: relative;
+  font-size: var(--umm-text-body-s);
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink-soft);
+  transition: color var(--umm-dur-fast) var(--umm-ease-out);
+  padding-block: var(--umm-sp-2);
+}
+
+.umm-nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-nav__links a:hover {
+  color: var(--umm-ink);
+}
+
+.umm-nav__links a:hover::after {
+  transform: scaleX(1);
+}
+
+.umm-nav__cta {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .umm-nav__links,
+  .umm-nav__cta {
+    display: inline-flex;
+  }
+}
+
+/* --- Mobile toggle + sheet ------------------------------------------------ */
+
+.umm-nav__toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--umm-border-strong);
+  color: var(--umm-ink);
+  transition: background var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-nav__toggle:hover {
+  background: var(--umm-veil);
+}
+
+@media (min-width: 1024px) {
+  .umm-nav__toggle {
+    display: none;
+  }
+}
+
+/* The sheet covers the whole viewport, the masthead included — so the row
+   that carries the close button has to be lifted above it, or the only way
+   out of the menu is to pick something from it. */
+.umm-nav__inner {
+  position: relative;
+  z-index: calc(var(--umm-z-overlay) + 1);
+}
+
+.umm-nav__sheet {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  z-index: var(--umm-z-overlay);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--umm-sp-10);
+  /* Full-bleed overlay, so the notch and home indicator are added to the
+     padding rather than left to overlap the first and last link. */
+  padding: calc(var(--umm-sp-16) + env(safe-area-inset-top)) calc(var(--umm-gutter) + env(safe-area-inset-right))
+    calc(var(--umm-sp-12) + env(safe-area-inset-bottom)) calc(var(--umm-gutter) + env(safe-area-inset-left));
+  background: var(--umm-canvas);
+  /* The sheet is a full-screen overlay: let it scroll if the links outgrow the
+     viewport, but stop the scroll chaining through to the page behind it. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The `hidden` attribute sets display:none at a lower precedence than the
+   rule above, so it has to be restated here or the sheet stays on screen. */
+.umm-nav__sheet[hidden] {
+  display: none;
+}
+
+.umm-nav__sheet nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.umm-nav__sheet nav a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--umm-sp-5);
+  padding-block: var(--umm-sp-5);
+  border-bottom: 1px solid var(--umm-border);
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.5rem, 7vw, 2.25rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-heading);
+  color: var(--umm-ink);
+  opacity: 0;
+  transform: translateY(14px);
+  animation: umm-sheet-in var(--umm-dur) var(--umm-ease-out) forwards;
+  animation-delay: calc(var(--i) * 60ms + 80ms);
+}
+
+.umm-nav__sheet nav a span {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-ink-quiet);
+}
+
+.umm-nav__sheet-cta {
+  align-self: flex-start;
+}
+
+@keyframes umm-sheet-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-nav__sheet nav a {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}

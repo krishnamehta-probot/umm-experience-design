@@ -1,0 +1,2409 @@
+/* ============================================================================
+   UMM DESIGN SYSTEM — LAYER 4: PAGE SECTIONS
+   Compositions of the component library. Page-specific layout only; anything
+   reusable belongs in components.css.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   WHY — three numbered steps
+   ------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   PINNED SECTION
+
+   The section is taller than the viewport; the stage inside it sticks. That
+   difference is the scroll distance spent inside the section, and
+   usePinProgress reports position within exactly that window.
+   ------------------------------------------------------------------------- */
+
+.umm-pin {
+  padding-block: 0;
+}
+
+.umm-pin__inner {
+  display: grid;
+  align-content: center;
+  gap: clamp(2rem, 4vw, 4rem);
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .umm-pin {
+    /* One viewport to read it in, plus a lane of travel per card. */
+    min-height: calc(100svh + var(--umm-pin-steps) * 88svh);
+  }
+
+  .umm-pin__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: stretch;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .umm-pin__inner {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    /* Stretch, not centre — the beam has to be able to run the full height of
+       the stage. The copy re-centres itself below. */
+    align-items: stretch;
+    align-content: stretch;
+    height: 100%;
+    gap: clamp(2.5rem, 5vw, 5.5rem);
+  }
+
+  .umm-pin__copy {
+    align-self: center;
+  }
+
+  /* Track on the left, argument on the right. The columns swap width too —
+     the beam column is the wider of the two wherever it sits. */
+  .umm-pin__inner--flip {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+
+  /* The beam has to be free to run the full height of the stage. */
+  .umm-beam {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 899px) {
+  .umm-pin__stage {
+    padding-block: var(--umm-section-y);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   BEAM JOURNEY
+
+   A road the full height of the stage. Each stop is one object — checkpoint,
+   arm and card welded together — and the stop is what moves. --pos is where a
+   stop sits relative to the centre: 0 parked, positive above and travelling
+   away, negative below and still to arrive.
+   ------------------------------------------------------------------------- */
+
+.umm-beam {
+  --beam-x: 26px;
+  --beam-gap: 86px;
+  /* One lane of travel. Far enough that a parked card owns the centre, close
+     enough that the one before it is still receding at the top — which is
+     what makes it read as a road rather than a slideshow. Shorter than it
+     looks it should be: the distance is what sets the apparent speed, and a
+     card crossing more than the page scrolls reads as a lurch. */
+  --beam-travel: 36svh;
+  /* --beam-tone is set per frame from the checkpoint nearest the centre, and
+     --card-tone per stop, both from the brand five. */
+  --beam-tone: var(--umm-sun);
+  position: relative;
+  align-self: stretch;
+  min-height: 460px;
+  /* The close: the whole road goes out together, the reverse of the intro. */
+  opacity: calc(1 - var(--exit, 0));
+}
+
+/* --- The road ------------------------------------------------------------- */
+
+.umm-beam__line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--beam-x);
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--beam-tone);
+  /* Laid from the top as you travel: half of it by the time the road reaches
+     the centre, the rest as the journey runs. */
+  transform: scaleY(var(--draw, 0));
+  transform-origin: top center;
+  transition: background var(--umm-dur-slow) var(--umm-ease-out);
+}
+
+.umm-beam__spark {
+  position: absolute;
+  left: var(--beam-x);
+  top: calc(var(--draw, 0) * 100%);
+  width: 5px;
+  height: 56px;
+  margin-left: -2.5px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to bottom,
+    var(--beam-tone),
+    transparent
+  );
+  opacity: calc(var(--intro, 0) * 0.8);
+}
+
+/* --- A stop: checkpoint, arm and card, moving as one ---------------------- */
+
+.umm-beam__cards {
+  position: absolute;
+  inset: 0;
+}
+
+.umm-beam__stop {
+  position: absolute;
+  top: 50%;
+  inset-inline: 0;
+  display: grid;
+  grid-template-columns: var(--beam-gap) minmax(0, 1fr);
+  align-items: center;
+  /* --pos is positive once a stop is past the centre, so it is pushed the
+     opposite way: the road always travels upward as the page scrolls. */
+  transform: translateY(-50%)
+    translateY(calc(var(--pos, 0) * var(--beam-travel) * -1))
+    scale(var(--scale, 1));
+  opacity: var(--op, 1);
+  will-change: transform;
+}
+
+.umm-beam__mark {
+  position: relative;
+  align-self: stretch;
+}
+
+/* The arm from the checkpoint to the card it is holding. */
+.umm-beam__arm {
+  position: absolute;
+  top: 50%;
+  left: var(--beam-x);
+  width: calc(var(--beam-gap) - var(--beam-x));
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--card-tone);
+  transform: scaleX(var(--appear, 1));
+  transform-origin: left center;
+}
+
+/* Filled core, clear gap, then a ring — the stop on the line. */
+.umm-beam__node {
+  position: absolute;
+  top: 50%;
+  left: var(--beam-x);
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid var(--card-tone);
+  border-radius: 50%;
+  background: var(--umm-canvas);
+  /* Opens with the checkpoint, then swells slightly at the centre so the stop
+     you are at is the one that reads. */
+  transform: scale(calc(var(--appear, 1) * (0.84 + var(--near, 0) * 0.16)));
+}
+
+.umm-beam__node::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--card-tone);
+  opacity: calc(0.35 + var(--near, 0) * 0.65);
+}
+
+.umm-beam__card {
+  position: relative;
+  width: min(100%, 460px);
+  display: grid;
+  justify-items: start;
+  padding: 38px 40px 60px;
+  border-radius: 20px;
+  background: var(--umm-veil-raise);
+  overflow: hidden;
+  box-shadow: 0 30px 70px -48px rgb(16 14 20 / 0.45);
+}
+
+/* --- Inside the card ------------------------------------------------------ */
+
+.umm-beam__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--umm-sp-5);
+  width: 100%;
+  margin-bottom: clamp(1.75rem, 3vw, 2.625rem);
+}
+
+.umm-beam__eyebrow {
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+.umm-beam__star {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  fill: var(--card-tone, var(--umm-sun));
+}
+
+.umm-beam__title {
+  font-size: clamp(2rem, 2.9vw, 2.875rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--umm-ink);
+  max-width: 14ch;
+}
+
+/* A short mark under the title rather than a full rule: the card is already
+   a box, and a line across it would read as a second edge. */
+.umm-beam__rule {
+  width: 96px;
+  height: 1px;
+  margin-block: clamp(1.25rem, 2.2vw, 1.75rem);
+  background: var(--umm-hairline);
+}
+
+.umm-beam__text {
+  font-size: 1rem;
+  line-height: 1.62;
+  color: var(--umm-ink-soft);
+  max-width: 38ch;
+}
+
+/* The stop's own clock, filling across the window the card is parked, so the
+   hand-off to the next checkpoint is something you can see coming. */
+.umm-beam__bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 14px;
+  background: color-mix(in srgb, var(--card-tone) 28%, transparent);
+}
+
+.umm-beam__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--card-tone);
+  transform: scaleX(var(--fill, 0));
+  transform-origin: left center;
+}
+
+/* ---------------------------------------------------------------------------
+   NO PIN — below the breakpoint, and for anyone who asked for stillness.
+   The journey becomes a plain stack of cards, all present, nothing moving.
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  .umm-beam__spark {
+    display: none;
+  }
+
+  /* The road stops being drawn and becomes a plain rail the stops hang off. */
+  .umm-beam__line {
+    transform: none;
+    background: linear-gradient(
+      to bottom,
+      var(--umm-sun),
+      var(--umm-blossom),
+      var(--umm-sky)
+    );
+  }
+
+  .umm-beam__arm {
+    display: none;
+  }
+
+  .umm-beam__cards {
+    position: static;
+    display: grid;
+    gap: var(--umm-sp-6);
+  }
+
+  .umm-beam__stop {
+    position: static;
+    opacity: 1;
+    transform: none;
+  }
+
+  .umm-beam__node {
+    top: 46px;
+    transform: none;
+  }
+
+  .umm-beam__card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .umm-beam__bar::after {
+    transform: none;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-pin {
+    min-height: 0;
+  }
+
+  .umm-pin__stage {
+    position: static;
+    height: auto;
+    padding-block: var(--umm-section-y);
+  }
+
+  .umm-beam__spark {
+    display: none;
+  }
+
+  /* The road stops being drawn and becomes a plain rail the stops hang off. */
+  .umm-beam__line {
+    transform: none;
+    background: linear-gradient(
+      to bottom,
+      var(--umm-sun),
+      var(--umm-blossom),
+      var(--umm-sky)
+    );
+  }
+
+  .umm-beam__arm {
+    display: none;
+  }
+
+  .umm-beam__cards {
+    position: static;
+    display: grid;
+    gap: var(--umm-sp-6);
+  }
+
+  .umm-beam__stop {
+    position: static;
+    opacity: 1;
+    transform: none;
+  }
+
+  .umm-beam__node {
+    top: 46px;
+    transform: none;
+  }
+
+  .umm-beam__card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .umm-beam__bar::after {
+    transform: none;
+  }
+
+}
+
+/* ---------------------------------------------------------------------------
+   HOW WE WORK
+   The beam journey mirrored: track on the left, argument on the right.
+   ------------------------------------------------------------------------- */
+
+.umm-hand {
+  display: grid;
+  gap: clamp(0.875rem, 1.5vw, 1.25rem);
+  margin-top: clamp(1.5rem, 2.4vw, 2.25rem);
+  padding-top: clamp(1.25rem, 2vw, 1.75rem);
+  border-top: 1px solid var(--umm-hairline);
+}
+
+.umm-hand__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.umm-hand__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--umm-veil);
+  border: 1px solid var(--umm-hairline);
+  color: var(--umm-ink);
+}
+
+.umm-hand__title {
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-ink);
+}
+
+.umm-hand__text {
+  margin-top: 4px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   ENGAGEMENT MODELS
+   The Stages mechanism, with four equal facts instead of one figure.
+   ------------------------------------------------------------------------- */
+
+/* Four labels where Stages has three: the strip only fits on one line at a
+   smaller size, and a wrapped strip breaks the rule that runs under it. */
+.umm-stage__tabs--four .umm-stage__name {
+  font-size: clamp(1rem, 1.5vw, 1.375rem);
+}
+
+.umm-eng__panels {
+  position: relative;
+  min-height: clamp(280px, 34svh, 370px);
+}
+
+.umm-eng__panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: clamp(1rem, 1.7vw, 1.5rem);
+  opacity: var(--op, 1);
+}
+
+.umm-eng__head {
+  display: grid;
+  gap: 8px;
+  transform: translate3d(0, var(--lift, 0px), 0);
+}
+
+.umm-eng__title {
+  font-size: clamp(1.5rem, 2.4vw, 2.125rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.12;
+  letter-spacing: -0.024em;
+  color: var(--umm-ink);
+}
+
+.umm-eng__lead {
+  font-size: clamp(1rem, 1.25vw, 1.125rem);
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+  max-width: 62ch;
+}
+
+.umm-eng__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.2vw, 1.125rem);
+}
+
+.umm-eng__tile {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: clamp(126px, 15svh, 158px);
+  padding: clamp(0.875rem, 1.3vw, 1.125rem);
+  border-radius: 16px;
+  background: var(--tone);
+  transform: translate3d(0, var(--lift, 0px), 0);
+  will-change: transform;
+}
+
+.umm-eng__label {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: rgb(16 14 20 / 0.62);
+}
+
+.umm-eng__text {
+  font-size: 0.9375rem;
+  line-height: 1.42;
+  color: var(--umm-ink);
+}
+
+@media (max-width: 899px) {
+  .umm-eng__tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Four labels where Stages has three: the strip only fits on one line at a
+   smaller size, and a wrapped strip breaks the rule that runs under it. */
+.umm-stage__tabs--four .umm-stage__name {
+  font-size: clamp(1rem, 1.5vw, 1.375rem);
+}
+
+.umm-eng__panels {
+    min-height: clamp(300px, 44svh, 420px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   TECHNOLOGY
+   The argument on the left, the deck on the right. Everything that changes is
+   driven by one clock in useCardSwap, so nothing here animates on its own —
+   these rules only describe the resting look of each state.
+   ------------------------------------------------------------------------- */
+
+.umm-tech {
+  background: var(--umm-canvas-deep);
+  /* The outgoing card falls below the stack; let it. */
+  overflow: clip;
+}
+
+.umm-tech__inner {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  align-items: center;
+}
+
+/* Held back from 1000px: between there and here the left column is too narrow
+   for the index to keep "Journey & personalisation" on one line. */
+@media (min-width: 1100px) {
+  .umm-tech__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  }
+}
+
+.umm-tech__say {
+  display: grid;
+  align-content: start;
+  gap: clamp(1.5rem, 2.4vw, 2.25rem);
+}
+
+/* --- The live panel ------------------------------------------------------ */
+
+.umm-tech__live {
+  display: grid;
+  gap: 14px;
+  padding: clamp(1.25rem, 1.8vw, 1.75rem) clamp(1.25rem, 2vw, 1.875rem);
+  border-radius: 18px;
+  background: var(--umm-paper);
+  /* The tone is carried by an edge rather than a fill, so the panel stays
+     legible while the deck supplies the colour. */
+  border-left: 5px solid var(--tone, var(--umm-sun));
+  transition: border-color 520ms var(--umm-ease-out);
+}
+
+.umm-tech__role {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.umm-tech__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tone, var(--umm-sun));
+  transition: background 520ms var(--umm-ease-out);
+}
+
+.umm-tech__verb {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.umm-tech__count {
+  margin-left: auto;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-ink-quiet);
+}
+
+.umm-tech__count i {
+  font-style: normal;
+  padding-inline: 3px;
+  opacity: 0.5;
+}
+
+.umm-tech__claim {
+  font-size: clamp(1.125rem, 1.65vw, 1.5rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.32;
+  letter-spacing: -0.018em;
+  color: var(--umm-ink);
+  /* Two lines always. A shorter claim still holds the second, so the index
+     below does not jog every time the deck turns over. */
+  min-height: 2.64em;
+  animation: umm-tech-claim 620ms var(--umm-ease-out) both;
+}
+
+@keyframes umm-tech-claim {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 9px, 0);
+  }
+}
+
+/* --- The index ----------------------------------------------------------- */
+
+.umm-tech__index {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.25vw, 1.5rem);
+}
+
+.umm-tech__cat-label {
+  display: block;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--umm-hairline);
+  transition: color 320ms var(--umm-ease-out);
+}
+
+.umm-tech__cat[data-on='true'] .umm-tech__cat-label {
+  color: var(--umm-ink);
+}
+
+.umm-tech__rows {
+  display: grid;
+  gap: 2px;
+  padding-top: 8px;
+}
+
+.umm-tech__row {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 7px 0 7px 12px;
+  text-align: left;
+  /* Tracks the column it sits in. "Journey & personalisation" is the longest
+     label by some way, and every row has to hold one line at every width. */
+  font-size: clamp(0.8125rem, 1.16vw, 0.9375rem);
+  line-height: 1.3;
+  color: var(--umm-ink-quiet);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 320ms var(--umm-ease-out);
+}
+
+.umm-tech__row:hover {
+  color: var(--umm-ink-soft);
+}
+
+/* The lit row grows a tone-coloured stem. It is the only marker, so there is
+   never a question of which card is up. */
+.umm-tech__row-line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--tone, var(--umm-sun));
+  transform: translateY(-50%);
+  /* Short enough to keep up with the swap — a slow stem leaves the marker
+     pointing at a card that has already gone. */
+  transition:
+    height 240ms var(--umm-ease-out),
+    opacity 240ms var(--umm-ease-out);
+  opacity: 0;
+}
+
+/* Colour and the stem carry the state, not weight. Setting the lit row in
+   medium made it wider than the row it replaced, and "Journey &
+   personalisation" fell onto a second line the moment it was selected — the
+   list jumped every time the deck turned over. */
+.umm-tech__row[data-on='true'] {
+  color: var(--umm-ink);
+}
+
+.umm-tech__row[data-on='true'] .umm-tech__row-line {
+  height: calc(100% - 10px);
+  opacity: 1;
+}
+
+.umm-tech__tally {
+  font-size: 0.875rem;
+  color: var(--umm-ink-quiet);
+  padding-top: clamp(0.5rem, 1vw, 1rem);
+  border-top: 1px solid var(--umm-hairline);
+}
+
+.umm-tech__tally strong {
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-ink);
+}
+
+.umm-tech__tally i {
+  font-style: normal;
+  padding-inline: 9px;
+  opacity: 0.55;
+}
+
+/* --- The deck ------------------------------------------------------------ */
+
+.umm-tech__deck {
+  /* Room for the fan up-and-right and for the fall at the bottom. */
+  --card-w: clamp(300px, 34vw, 398px);
+  --card-h: clamp(300px, 24vw, 344px);
+  position: relative;
+  /* Room for the fan going up-and-back and for the fall at the bottom, so the
+     outgoing card never reaches the note below the section. */
+  min-height: calc(var(--card-h) + 330px);
+  perspective: 1100px;
+}
+
+.umm-tech__stack {
+  position: absolute;
+  left: 0;
+  bottom: 164px;
+  width: var(--card-w);
+  height: var(--card-h);
+  transform-style: preserve-3d;
+}
+
+.umm-tcard {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(0.75rem, 1.2vw, 1.125rem);
+  padding: clamp(1.25rem, 1.8vw, 1.625rem);
+  border-radius: 20px;
+  background: var(--tone, var(--umm-sun));
+  /* A hairline of ink keeps the pastels apart where they overlap. */
+  box-shadow:
+    0 0 0 1px rgb(16 14 20 / 0.08),
+    0 26px 44px -30px rgb(16 14 20 / 0.5);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.umm-tcard__ghost {
+  position: absolute;
+  left: clamp(1.25rem, 1.8vw, 1.625rem);
+  bottom: clamp(3rem, 4.2vw, 3.625rem);
+  z-index: 0;
+  font-family: var(--umm-font-mono);
+  font-size: 8rem;
+  line-height: 0.78;
+  font-weight: var(--umm-weight-bold);
+  color: rgb(16 14 20 / 0.085);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Everything real sits over the watermark — and dims together as the card
+   falls back through the deck, so only the top card is speaking. */
+/* stylelint-disable-next-line no-descending-specificity */
+.umm-tcard__label,
+.umm-tcard__items,
+.umm-tcard__foot {
+  position: relative;
+  z-index: 1;
+  opacity: var(--ink, 1);
+}
+
+.umm-tcard__ghost {
+  opacity: var(--ink, 1);
+}
+
+.umm-tcard__label {
+  font-size: clamp(1.375rem, 1.9vw, 1.75rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.12;
+  letter-spacing: -0.024em;
+  color: var(--umm-ink);
+}
+
+.umm-tcard__items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 8px;
+}
+
+/* A seven-tool card would otherwise set a taller row than a two-tool one. */
+.umm-tcard__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 7px 10px 7px 7px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.66);
+}
+
+.umm-tcard__mark {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  /* The marks arrive at every aspect ratio their owners chose — Figma's is
+     two units tall. Contain keeps them all sitting on the same optical size. */
+  object-fit: contain;
+  object-position: center;
+}
+
+.umm-tcard__name {
+  font-size: 0.75rem;
+  line-height: 1.22;
+  color: var(--umm-ink);
+  /* Long vendor names sit on two lines rather than pushing the card wide. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.umm-tcard__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: clamp(0.625rem, 1vw, 0.875rem);
+  border-top: 1px solid rgb(16 14 20 / 0.14);
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.umm-tcard__tools {
+  color: rgb(16 14 20 / 0.55);
+}
+
+/* With motion off the deck holds still and the index does the switching. */
+.umm-tech__deck[data-still='true'] .umm-tcard {
+  transition: none;
+}
+
+.umm-tech__note {
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+}
+
+@media (max-width: 1099px) {
+  .umm-tech__deck {
+    --card-w: min(100%, 398px);
+    min-height: calc(var(--card-h) + 286px);
+  }
+
+  .umm-tech__stack {
+    left: 50%;
+    margin-left: calc(var(--card-w) / -2 - 40px);
+  }
+}
+
+@media (max-width: 599px) {
+  .umm-tech__index {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   SECTORS
+   ------------------------------------------------------------------------- */
+
+/* The panel outlives the content inside it, which is what lets the colour
+   cross from one sector to the next instead of cutting. It is also set to the
+   tab you just clicked rather than the content still on screen, so the colour
+   leads the change and the words follow it. */
+/* The frame. It holds the rounded corner and clips the roll; the colour lives
+   on the panels inside it, so each sector's wash rolls in with its own content
+   instead of changing underneath the sector still on screen. */
+.umm-sector {
+  margin-top: var(--umm-sp-10);
+  border-radius: var(--umm-r-xl);
+  border: 1px solid color-mix(in srgb, var(--umm-tone) 45%, transparent);
+  overflow: hidden;
+  transition: border-color 620ms var(--umm-ease-out);
+}
+
+/* The slot shows exactly one panel. Its height travels on the same curve as
+   the reel, so a taller sector opens the panel as it arrives.
+
+   Both transitions are armed only while a roll is staged, and that is not a
+   refinement — it is what stops the roll happening twice. On landing the
+   component swaps the panel and drops the inline transform in one commit; a
+   transition left armed would read that as "animate back to none" and slide
+   the brand-new panel down from above over another full roll. Disarmed, the
+   same commit snaps the reel to a position that is pixel-identical to where
+   the roll left it, so nothing moves and the board simply holds. */
+.umm-sector__slot {
+  position: relative;
+  overflow: hidden;
+}
+
+.umm-sector__slot[data-rolling='true'] {
+  transition: height var(--roll, 720ms) var(--umm-ease-in-out);
+}
+
+.umm-sector__reel {
+  will-change: transform;
+}
+
+.umm-sector__reel[data-rolling='true'] {
+  transition: transform var(--roll, 720ms) var(--umm-ease-in-out);
+}
+
+.umm-sector__inner {
+  display: grid;
+  gap: var(--umm-sp-10);
+  padding: clamp(1.75rem, 3.5vw, 3rem);
+  background: var(--umm-tone-wash);
+}
+
+@media (min-width: 940px) {
+  .umm-sector__inner {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+    align-items: start;
+  }
+}
+
+.umm-sector__copy {
+  display: grid;
+  gap: var(--umm-sp-5);
+  align-content: start;
+}
+
+.umm-sector__count {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-ink-quiet);
+}
+
+.umm-sector__title {
+  display: flex;
+  align-items: center;
+  gap: var(--umm-sp-4);
+  font-size: var(--umm-text-display-s);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-display);
+}
+
+.umm-sector__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--umm-r-sm);
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+}
+
+.umm-sector__body {
+  font-size: var(--umm-text-body-l);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-ink-soft);
+  max-width: 54ch;
+}
+
+.umm-sector [role='tabpanel']:focus-visible {
+  outline: 2px solid var(--umm-focus);
+  outline-offset: 6px;
+  border-radius: var(--umm-r-xl);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-sector,
+  .umm-sector__slot,
+  .umm-sector__slot[data-rolling='true'],
+  .umm-sector__reel,
+  .umm-sector__reel[data-rolling='true'] {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   DELIVERY TRACK
+
+   Each step draws its own connector to the next one rather than the section
+   drawing a single absolute rule. That is what keeps the line registered to
+   the dots: the segment is positioned relative to its own dot, so it stays
+   aligned through any grid, gap or breakpoint change.
+
+   --umm-seg (0..1, set per step in Delivery.tsx) is how much of that step's
+   segment the reader has travelled.
+   ------------------------------------------------------------------------- */
+
+.umm-track {
+  position: relative;
+  padding-block: var(--umm-sp-6);
+}
+
+.umm-track__steps {
+  display: grid;
+  gap: var(--umm-sp-8);
+  position: relative;
+}
+
+.umm-track__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  grid-template-areas:
+    'dot ordinal'
+    'dot title'
+    'dot text';
+  column-gap: var(--umm-sp-5);
+  row-gap: var(--umm-sp-1);
+  align-items: start;
+}
+
+/* --- Connector: vertical by default ------------------------------------- */
+
+.umm-track__step::before,
+.umm-track__step::after {
+  content: '';
+  position: absolute;
+  left: 23px;
+  top: 56px;
+  width: 2px;
+  height: calc(100% - 56px + var(--umm-sp-8));
+  border-radius: var(--umm-r-pill);
+  transform-origin: top center;
+}
+
+.umm-track__step::before {
+  background: var(--umm-border-strong);
+}
+
+.umm-track__step::after {
+  background: var(--umm-ink);
+  transform: scaleY(var(--umm-seg, 0));
+  transition: transform 140ms linear;
+}
+
+.umm-track__step:last-child::before,
+.umm-track__step:last-child::after {
+  display: none;
+}
+
+.umm-track__dot {
+  grid-area: dot;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--umm-canvas);
+  border: 1px solid var(--umm-border-strong);
+  color: var(--umm-ink-quiet);
+  transition:
+    background var(--umm-dur) var(--umm-ease-out),
+    border-color var(--umm-dur) var(--umm-ease-out),
+    color var(--umm-dur) var(--umm-ease-out),
+    transform var(--umm-dur) var(--umm-ease-spring);
+}
+
+.umm-track__step[data-reached='true'] .umm-track__dot {
+  background: var(--umm-ink);
+  border-color: var(--umm-ink);
+  color: var(--umm-ink-paper);
+  transform: scale(1.06);
+}
+
+.umm-track__ordinal {
+  grid-area: ordinal;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-ink-quiet);
+}
+
+.umm-track__title {
+  grid-area: title;
+  font-size: var(--umm-text-heading-l);
+  font-weight: var(--umm-weight-medium);
+}
+
+.umm-track__text {
+  grid-area: text;
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-ink-soft);
+  max-width: 34ch;
+}
+
+/* --- Wide: the same steps, laid out horizontally ------------------------- */
+
+@media (min-width: 1024px) {
+  .umm-track__steps {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--umm-sp-6);
+  }
+
+  .umm-track__step {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'dot'
+      'ordinal'
+      'title'
+      'text';
+    justify-items: start;
+    row-gap: var(--umm-sp-2);
+  }
+
+  /* Run from the right edge of this dot to the left edge of the next one. */
+  .umm-track__step::before,
+  .umm-track__step::after {
+    left: 56px;
+    top: 23px;
+    width: calc(100% - 56px + var(--umm-sp-6));
+    height: 2px;
+    transform-origin: left center;
+  }
+
+  .umm-track__step::after {
+    transform: scaleX(var(--umm-seg, 0));
+  }
+
+  .umm-track__dot {
+    margin-bottom: var(--umm-sp-3);
+  }
+
+  .umm-track__text {
+    max-width: 28ch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-track__step::after {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   RESPONSIBILITY
+   ------------------------------------------------------------------------- */
+
+.umm-responsibility {
+  display: grid;
+  gap: var(--umm-sp-6);
+  margin-top: var(--umm-sp-16);
+}
+
+@media (min-width: 860px) {
+  .umm-responsibility {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.umm-responsibility__item {
+  display: grid;
+  gap: var(--umm-sp-4);
+  align-content: start;
+  padding: var(--umm-sp-8);
+  border-radius: var(--umm-r-lg);
+  background: var(--umm-paper);
+  border: 1px solid var(--umm-border);
+}
+
+.umm-responsibility__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--umm-r-sm);
+  background: var(--umm-veil);
+  color: var(--umm-ink);
+}
+
+.umm-responsibility__item h3 {
+  font-size: var(--umm-text-heading-l);
+  font-weight: var(--umm-weight-medium);
+}
+
+.umm-responsibility__item p {
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-ink-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   ENGAGEMENT MODELS
+   ------------------------------------------------------------------------- */
+
+.umm-engagements {
+  display: grid;
+  gap: var(--umm-sp-6);
+}
+
+@media (min-width: 760px) {
+  .umm-engagements {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .umm-engagements {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.umm-engagement {
+  display: grid;
+  gap: var(--umm-sp-4);
+  align-content: start;
+  padding: var(--umm-sp-8);
+  border-radius: var(--umm-r-lg);
+  background: var(--umm-paper);
+  border: 1px solid var(--umm-border);
+  transition:
+    transform var(--umm-dur) var(--umm-ease-out),
+    box-shadow var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-engagement:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--umm-shadow-2);
+}
+
+.umm-engagement__head {
+  display: flex;
+  align-items: center;
+  gap: var(--umm-sp-4);
+}
+
+.umm-engagement__rule {
+  flex: 1;
+  height: 3px;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-tone);
+}
+
+.umm-engagement__title {
+  font-size: var(--umm-text-heading-l);
+  font-weight: var(--umm-weight-medium);
+  line-height: var(--umm-leading-snug);
+}
+
+.umm-engagement__lead {
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-ink-soft);
+  padding-bottom: var(--umm-sp-2);
+}
+
+/* ---------------------------------------------------------------------------
+   HOW WE EVIDENCE WORK
+
+   Four deliverables as a numbered list. The tone lives on the edge of the row
+   and is pulled across it when the row opens, so the colour arrives from the
+   place it was already sitting.
+   ------------------------------------------------------------------------- */
+
+.umm-proof__inner {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .umm-proof__inner {
+    grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  }
+}
+
+.umm-proof__copy {
+  display: grid;
+  align-content: start;
+  gap: var(--umm-sp-5);
+}
+
+.umm-proof__title {
+  font-size: var(--umm-text-display-s);
+  font-weight: var(--umm-weight-medium);
+  line-height: var(--umm-leading-display);
+  letter-spacing: var(--umm-tracking-display);
+}
+
+.umm-proof__text {
+  font-size: var(--umm-text-body);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-ink-soft);
+  max-width: 52ch;
+}
+
+.umm-proof__cta {
+  justify-self: start;
+  margin-top: var(--umm-sp-2);
+}
+
+.umm-proof__list {
+  display: grid;
+  border: 1px solid var(--umm-hairline);
+  border-radius: var(--umm-r-lg);
+  overflow: hidden;
+  background: var(--umm-veil);
+}
+
+.umm-proof__list > li + li {
+  border-top: 1px solid var(--umm-hairline);
+}
+
+.umm-proof__row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(0.875rem, 1.5vw, 1.375rem);
+  width: 100%;
+  /* Right padding clears the colour edge. */
+  padding: clamp(1rem, 1.7vw, 1.375rem) clamp(1.75rem, 2.4vw, 2.25rem)
+    clamp(1rem, 1.7vw, 1.375rem) clamp(1rem, 1.6vw, 1.375rem);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Pulled across from the edge rather than faded in on the spot. */
+.umm-proof__wash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--tone) 55%, var(--umm-paper));
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 560ms var(--umm-ease-out);
+}
+
+.umm-proof__row[data-on='true'] .umm-proof__wash {
+  transform: scaleX(1);
+}
+
+.umm-proof__edge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 7px;
+  background: var(--tone);
+  transition: width 400ms var(--umm-ease-out);
+}
+
+.umm-proof__row[data-on='true'] .umm-proof__edge {
+  width: 12px;
+}
+
+.umm-proof__num {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-ink-quiet);
+  transition: color 320ms var(--umm-ease-out);
+}
+
+.umm-proof__row[data-on='true'] .umm-proof__num {
+  color: var(--umm-ink);
+}
+
+.umm-proof__mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--umm-hairline);
+  background: var(--umm-paper);
+  color: var(--umm-ink);
+  transition:
+    background-color 380ms var(--umm-ease-out),
+    border-color 380ms var(--umm-ease-out),
+    color 380ms var(--umm-ease-out);
+}
+
+/* Ink, not the tone — the wash behind it is already the tone, and the mark
+   has to stay the focal point of the open row. */
+.umm-proof__row[data-on='true'] .umm-proof__mark {
+  background: var(--umm-ink);
+  border-color: var(--umm-ink);
+  color: var(--umm-ink-paper);
+}
+
+.umm-proof__lines {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.umm-proof__name {
+  font-size: clamp(1.0625rem, 1.35vw, 1.25rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.018em;
+  color: var(--umm-ink);
+}
+
+.umm-proof__body {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.umm-proof__row:focus-visible {
+  outline: 2px solid var(--umm-focus);
+  outline-offset: -3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-proof__wash,
+  .umm-proof__edge {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   FAQ
+   ------------------------------------------------------------------------- */
+
+.umm-faq {
+  display: grid;
+  gap: var(--umm-sp-10);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .umm-faq {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    gap: clamp(3rem, 6vw, 6rem);
+  }
+
+  .umm-faq__head {
+    position: sticky;
+    top: 9rem;
+    margin-bottom: 0;
+  }
+}
+
+/* The open question grows a coloured stem, drawn downward as it opens, so the
+   list reads with the same language as the index in Technology. Each question
+   keeps one brand colour, cycling through all five. */
+.umm-faq .umm-accordion__item {
+  position: relative;
+  padding-left: 20px;
+}
+
+.umm-faq .umm-accordion__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--stem, var(--umm-sun));
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 520ms var(--umm-ease-out);
+}
+
+.umm-faq .umm-accordion__item[data-open='true']::before {
+  transform: scaleY(1);
+}
+
+.umm-faq .umm-accordion__item:nth-child(5n + 1) {
+  --stem: var(--umm-sun);
+}
+.umm-faq .umm-accordion__item:nth-child(5n + 2) {
+  --stem: var(--umm-sky);
+}
+.umm-faq .umm-accordion__item:nth-child(5n + 3) {
+  --stem: var(--umm-blossom);
+}
+.umm-faq .umm-accordion__item:nth-child(5n + 4) {
+  --stem: var(--umm-citrus);
+}
+.umm-faq .umm-accordion__item:nth-child(5n + 5) {
+  --stem: var(--umm-coral);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-faq .umm-accordion__item::before {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   CLOSING — the page's full stop, on ink
+   ------------------------------------------------------------------------- */
+
+.umm-closing {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Tall enough to be the hero's twin, short enough to read as an ending. A
+     closing that fills the viewport invites you to stay on it. */
+  min-height: clamp(560px, 76vh, 820px);
+  padding-block: clamp(4rem, 8vw, 7rem);
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+  overflow: hidden;
+
+  /* The hero's two colours, on the hero's terms. */
+  --umm-bloom-warm: var(--umm-sun);
+  --umm-bloom-rose: var(--umm-blossom);
+}
+
+/* The hero can let the bloom run under its copy because that copy is ink on
+   white: the brighter the ground gets, the better it reads. Invert the ground
+   and the relationship inverts with it -- paper type over a lit tile is the
+   one combination that fails, and measured against the brightest pixel behind
+   it the outline button came out at 1.09:1.
+
+   So the colour is held off the column the type sits in. Not a flat overlay,
+   which would dim the whole thing back to the mud this started as: a lateral
+   scrim that is solid where the words are and gone by the time it reaches the
+   bloom. */
+.umm-closing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Above the field, below the words. The tile field is z-index 0 and comes
+     later in the DOM, so an equal z-index would put this behind it. */
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    96deg,
+    var(--umm-ink) 0%,
+    var(--umm-ink) 22%,
+    color-mix(in srgb, var(--umm-ink) 72%, transparent) 42%,
+    transparent 64%
+  );
+}
+
+/* A lateral scrim only works while the copy is in a column. Once the type
+   spans the full width there is no "away" to push the bloom toward, so the
+   scrim turns through ninety degrees: dense through the block the words
+   occupy, open at the top and bottom edges where the colour can still be
+   seen past them. */
+@media (max-width: 760px) {
+  .umm-closing::before {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--umm-ink) 34%, transparent) 0%,
+      color-mix(in srgb, var(--umm-ink) 92%, transparent) 15%,
+      color-mix(in srgb, var(--umm-ink) 92%, transparent) 85%,
+      color-mix(in srgb, var(--umm-ink) 40%, transparent) 100%
+    );
+  }
+}
+
+.umm-closing__inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+/* The hero's type, inverted. Same scale, same weight, same tracking -- the
+   two ends of the page are the same statement twice. */
+.umm-closing__title {
+  margin-top: var(--umm-sp-5);
+  font-size: clamp(1.75rem, 5.2vw, 4rem);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--umm-ink-paper);
+  max-width: 17ch;
+}
+
+/* As in the hero: the accent is weight, not colour. There is no colour in the
+   palette that holds a word at this size against either ground. */
+.umm-closing__accent {
+  font-weight: var(--umm-weight-semibold);
+}
+
+.umm-closing__lead {
+  margin-top: clamp(1.25rem, 2.2vw, 2rem);
+  font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+  line-height: 1.58;
+  color: var(--umm-ink-paper-soft);
+  max-width: 54ch;
+}
+
+.umm-closing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--umm-sp-4);
+  margin-top: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+/* ---------------------------------------------------------------------------
+   FOOTER
+   ------------------------------------------------------------------------- */
+
+.umm-footer {
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+  border-top: 1px solid var(--umm-ink-line);
+  padding-block: var(--umm-sp-12);
+}
+
+.umm-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--umm-sp-8);
+}
+
+.umm-footer .umm-wordmark__mark {
+  color: var(--umm-ink-paper);
+}
+
+.umm-footer .umm-wordmark__full {
+  color: var(--umm-ink-paper-soft);
+  border-left-color: var(--umm-ink-line);
+}
+
+.umm-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--umm-sp-6);
+}
+
+.umm-footer__links a {
+  font-size: var(--umm-text-body-s);
+  color: var(--umm-ink-paper-soft);
+  transition: color var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-footer__links a:hover {
+  color: var(--umm-ink-paper);
+}
+
+.umm-footer__meta {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.08em;
+  color: var(--umm-ink-paper-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   SERVICES
+
+   Six cards shown three at a time. The page of three is positioned from the
+   centre of the stage and pushed by --pos, exactly as the journey cards are:
+   +1 waiting below, 0 in frame, -1 gone above.
+   ------------------------------------------------------------------------- */
+
+.umm-pin__inner--stack {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: clamp(1.5rem, 2.4vw, 2.25rem);
+}
+
+/* The pages share one box and are stacked in it, so a page leaving and a page
+   arriving never push each other around. */
+.umm-svc__pages {
+  position: relative;
+  /* Sized to the card, not to the viewport — the old value left the cards
+     standing in a tall empty box and pushed the head off the top. */
+  min-height: clamp(330px, 38svh, 412px);
+}
+
+.umm-svc__page {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: clamp(1rem, 1.8vw, 1.75rem);
+}
+
+.umm-svc__slot {
+  position: relative;
+  /* Lift, shrink and dissolve together, all from one scroll-derived value, so
+     a card is always most transparent exactly when it is furthest from home. */
+  transform: translate3d(0, var(--lift, 0px), 0) scale(var(--scale, 1));
+  opacity: var(--op, 1);
+  will-change: transform, opacity;
+}
+
+/* --- The card ------------------------------------------------------------- */
+
+.umm-svc {
+  position: relative;
+  display: grid;
+  height: 100%;
+  /* Just enough for the content and the strip at its foot. Any taller and the
+     card is mostly dead space below "What we do". */
+  min-height: clamp(300px, 36svh, 390px);
+  padding: 30px 28px 46px;
+  border-radius: 18px;
+  background: var(--umm-veil-raise);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* The corner is cut away and the toggle sits in the cut. Painted in the page
+   ground rather than masked out, so it works the same whatever the card
+   underneath is doing — including while the colour is rising through it. */
+.umm-svc__notch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 80px;
+  height: 72px;
+  background: var(--umm-canvas);
+  border-top-right-radius: 18px;
+  border-bottom-left-radius: 22px;
+}
+
+/* Both faces occupy the same cell, so opening never changes the card's size. */
+.umm-svc__face {
+  position: relative;
+  z-index: 1;
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  gap: var(--umm-sp-5);
+  transition: opacity 260ms var(--umm-ease-out);
+}
+
+.umm-svc[data-open='true'] .umm-svc__face--back {
+  /* Held back until the colour has actually reached the type. */
+  transition: opacity 300ms var(--umm-ease-out) 300ms;
+}
+
+.umm-svc__face--back {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.umm-svc[data-open='true'] .umm-svc__face--front {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.umm-svc[data-open='true'] .umm-svc__face--back {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.umm-svc__title {
+  font-size: clamp(1.25rem, 1.6vw, 1.5rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  /* Clear of the cut corner. */
+  padding-right: 62px;
+  /* Always exactly two lines, whether the title needs them or not. A one-line
+     title still reserves the second, so "When you need it" starts at the same
+     height in every card of the row. */
+  min-height: 2.32em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.umm-svc__detail {
+  display: grid;
+  gap: 6px;
+}
+
+.umm-svc__label {
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-ink);
+}
+
+.umm-svc__detail p {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.umm-svc__receive {
+  font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  padding-right: 62px;
+}
+
+.umm-lottie {
+  /* Takes whatever the shortened card leaves below the receive line. */
+  width: clamp(104px, 9vw, 144px);
+  aspect-ratio: 1;
+  margin-top: auto;
+  justify-self: center;
+}
+
+.umm-lottie svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* The strip at the foot of the card is not a decoration — it is the colour
+   waiting. Opening the card sends it up until it has filled the whole box. */
+.umm-svc__bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 0;
+  height: 20px;
+  background: var(--tone);
+  transition: height 620ms cubic-bezier(0.22, 1, 0.3, 1);
+}
+
+.umm-svc[data-open='true'] .umm-svc__bar {
+  height: 100%;
+}
+
+/* --- The toggle ----------------------------------------------------------- */
+
+.umm-svc__toggle {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: #ffffff;
+  z-index: 3;
+}
+
+.umm-svc__toggle svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Plus becomes minus by retiring the upright, not by swapping glyphs. */
+.umm-svc__stem {
+  transform-origin: center;
+  transform: scaleY(1) rotate(0deg);
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-svc__toggle[aria-expanded='true'] .umm-svc__stem {
+  transform: scaleY(0) rotate(90deg);
+}
+
+/* --- Unpinned ------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  .umm-svc__pages {
+    min-height: 0;
+    display: grid;
+    gap: var(--umm-sp-6);
+  }
+
+  .umm-svc__page {
+    position: static;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .umm-svc__slot {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto !important;
+  }
+
+  .umm-svc {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-svc__pages {
+    min-height: 0;
+    display: grid;
+    gap: var(--umm-sp-6);
+  }
+
+  .umm-svc__page {
+    position: static;
+  }
+
+  .umm-svc__slot {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   SECTION HEADS — one shape for all of them
+
+   Every section reads the same way: two lines of heading over two lines of
+   lead. The levers differ because the columns do — a head in the narrow copy
+   column of a pinned journey is sized down to reach two lines, a head running
+   the full width is held in instead.
+   ------------------------------------------------------------------------- */
+
+@media (min-width: 900px) {
+  /* Sized to its column rather than to the page: the narrow copy column of a
+     pinned section needs a smaller head to land on two lines, and two lines is
+     the thing being kept consistent, not the point size. */
+  .umm-pin__copy .umm-section-head__title {
+    font-size: clamp(1.5rem, 1.9vw, 2rem);
+  }
+
+  .umm-pin__copy .umm-section-head__lead {
+    max-width: 46ch;
+  }
+
+  /* Held to roughly half its own length so it breaks onto exactly two lines.
+     The number differs per section because the titles differ in length — one
+     shared value cannot give two lines to both a 32 and a 58 character head. */
+  .umm-pin__inner--stack .umm-section-head__title {
+    max-width: var(--head-ch, 17ch);
+    font-size: clamp(1.875rem, 3.1vw, 2.75rem);
+  }
+
+  #stages .umm-section-head__title {
+    --head-ch: 31ch;
+  }
+
+  .umm-pin__inner--stack .umm-section-head__lead {
+    max-width: 52ch;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   FOR EVERY STAGE
+
+   Numbered tabs over a single panel. The underline is placed in pixels by the
+   fractional scroll position, so it slides between tabs rather than snapping.
+   ------------------------------------------------------------------------- */
+
+.umm-stage {
+  display: grid;
+  gap: clamp(1.25rem, 1.9vw, 1.75rem);
+}
+
+/* --- Tabs ----------------------------------------------------------------- */
+
+.umm-stage__tabs {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  /* Spread, so the last tab finishes at the right edge — which is what lets
+     the rule beneath them be complete exactly when Enterprises is live. */
+  justify-content: space-between;
+  align-items: baseline;
+  gap: clamp(1.5rem, 3.4vw, 3.5rem);
+  padding-bottom: 14px;
+}
+
+/* The unfilled part of the rule. */
+.umm-stage__tabs::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: var(--umm-border-strong);
+}
+
+.umm-stage__tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55em;
+  /* --near runs 1 at the tab's own seat to 0 a full stage away, so the tabs
+     lighten and darken with the scroll instead of flipping. */
+  color: color-mix(in srgb, var(--umm-ink) calc(18% + var(--near, 0) * 82%), transparent);
+  transition: color 180ms var(--umm-ease-out);
+}
+
+.umm-stage__num {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  letter-spacing: var(--umm-tracking-label);
+}
+
+.umm-stage__name {
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.375rem, 2.4vw, 2.25rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.umm-stage__underline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 2px;
+  background: var(--umm-ink);
+  /* No transition: the width is already a continuous function of scroll, and
+     easing it on top would make it lag the thing it is reporting. */
+  pointer-events: none;
+}
+
+/* --- Body ----------------------------------------------------------------- */
+
+.umm-stage__body {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
+@media (min-width: 900px) {
+  .umm-stage__body {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+
+/* The figure sits in a filled box that takes the stage's colour. Blended
+   between the two neighbouring stages by the same fraction that drives the
+   reels, so the colour slides rather than switching at a threshold. */
+.umm-stage__figure {
+  display: grid;
+  align-content: start;
+  /* Sized by its contents. Left to stretch it matches the height of the text
+     column beside it and stands the figure in a half-empty box. */
+  align-self: start;
+  gap: var(--umm-sp-5);
+  padding: clamp(1.5rem, 2.2vw, 2.25rem);
+  border-radius: 20px;
+  background: color-mix(
+    in srgb,
+    var(--tone-a) calc((1 - var(--frac, 0)) * 100%),
+    var(--tone-b)
+  );
+}
+
+/* --- The odometer ---------------------------------------------------------
+   One reel per glyph column, all wound by the same scroll value. A column
+   whose glyph is the same in two neighbouring stages simply does not appear to
+   move, which is exactly how a real counter behaves.
+
+   --odo-h is the height of one cell, and it has to clear the full ink extent
+   of every glyph in every reel — not the em box. At 1.16em the dollar sign's
+   descender and the feet of the digits were being sliced off by the clip.
+   ------------------------------------------------------------------------ */
+
+.umm-odo {
+  /* Replaced at runtime with a value measured from the real glyph ink. */
+  --odo-h: 1.5em;
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--umm-font-display);
+  font-size: clamp(3rem, 6.4vw, 5.5rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: var(--odo-h);
+  letter-spacing: -0.045em;
+  /* Fixed-width figures, so a winding reel cannot shift its neighbours. */
+  font-variant-numeric: tabular-nums;
+  color: var(--umm-ink);
+}
+
+.umm-odo {
+  width: fit-content;
+}
+
+.umm-odo__col {
+  display: block;
+  flex: none;
+  height: var(--odo-h);
+  /* Both axes: the reel is taller than the box and, mid-roll, narrower
+     glyphs must not bleed sideways out of a shrinking column either. */
+  overflow: hidden;
+}
+
+.umm-odo__reel {
+  display: block;
+  transform: translate3d(0, calc(var(--u, 0) * var(--odo-h) * -1), 0);
+  will-change: transform;
+}
+
+.umm-odo__cell {
+  display: block;
+  height: var(--odo-h);
+  white-space: pre;
+}
+
+/* --- Captions and panels --------------------------------------------------- */
+
+.umm-stage__captions {
+  position: relative;
+  min-height: 3.4em;
+}
+
+.umm-stage__caption {
+  position: absolute;
+  inset: 0;
+  max-width: 26ch;
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-ink-soft);
+  transform: translate3d(0, var(--lift, 0px), 0);
+  opacity: var(--op, 1);
+}
+
+.umm-stage__panels {
+  position: relative;
+  min-height: clamp(170px, 21svh, 230px);
+}
+
+.umm-stage__detail {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 0;
+  transform: translate3d(0, var(--lift, 0px), 0);
+  opacity: var(--op, 1);
+  will-change: transform, opacity;
+}
+
+.umm-stage__detail dt {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.umm-stage__detail dd {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: clamp(1rem, 1.15vw, 1.0625rem);
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+/* The rule between the two answers, drawn in the stage's own colour. */
+.umm-stage__detail dt:nth-of-type(2) {
+  margin-top: clamp(1.5rem, 2.4vw, 2.25rem);
+  padding-top: clamp(1.5rem, 2.4vw, 2.25rem);
+  border-top: 2px solid var(--tone, var(--umm-hairline));
+}
+
+@media (max-width: 899px) {
+  .umm-stage__panels,
+  .umm-stage__captions {
+    min-height: 0;
+  }
+
+  .umm-stage__detail,
+  .umm-stage__caption {
+    position: static;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto !important;
+  }
+
+  /* Unpinned there is no scroll position to report, so only the chosen stage
+     is shown and the tabs become an ordinary control. */
+  .umm-stage__detail[aria-hidden='true'],
+  .umm-stage__caption[aria-hidden='true'] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-stage__detail,
+  .umm-stage__caption {
+    transform: none;
+  }
+}
+
+/* ===========================================================================
+   NARROW SCREENS
+
+   Below 900px nothing pins, so every section that used the scroll as a
+   control has to hand that job back to something tappable, and everything
+   sized against a pinned stage has to be sized against a phone instead.
+   ========================================================================= */
+
+@media (max-width: 899px) {
+  /* --- Tab strips (For every stage, Engagement) --------------------------
+     One row that scrolls sideways. Wrapped onto two rows the strip breaks the
+     rule beneath it, which is measured as a single horizontal run. */
+  .umm-stage__tabs {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: clamp(1.25rem, 5vw, 2rem);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .umm-stage__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Softens the last label at the edge, so it is obvious the strip carries on
+     rather than ending in a clean cut. */
+  .umm-stage__tabs {
+    mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+  }
+
+  .umm-stage__tab {
+    flex: none;
+    /* A comfortable target; the desktop strip relies on the label alone. */
+    padding-block: 6px;
+  }
+
+  .umm-stage__name,
+  .umm-stage__tabs--four .umm-stage__name {
+    font-size: 1.125rem;
+  }
+
+  /* --- For every stage --------------------------------------------------- */
+  .umm-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .umm-stage__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .umm-odo {
+    font-size: clamp(2.75rem, 14vw, 4rem);
+  }
+
+  /* Tapped rather than scrolled, so the reel has to carry itself between
+     values instead of being wound by the page. */
+  .umm-odo__reel {
+    transition: transform 560ms var(--umm-ease-out);
+  }
+
+  .umm-stage__panels {
+    min-height: clamp(180px, 34svh, 260px);
+  }
+
+  /* --- Engagement -------------------------------------------------------- */
+  .umm-eng__panels {
+    min-height: clamp(360px, 52svh, 520px);
+  }
+
+  /* --- Services ---------------------------------------------------------- */
+  .umm-svc__notch {
+    width: 58px;
+    height: 54px;
+  }
+
+  .umm-svc__toggle {
+    top: 7px;
+    right: 7px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .umm-svc__toggle svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .umm-svc__title,
+  .umm-svc__receive {
+    padding-right: 48px;
+  }
+
+  .umm-svc {
+    padding: 24px 22px 40px;
+  }
+
+  /* --- The journey, unpinned ---------------------------------------------
+     It stops being a stage the cards travel across and becomes a timeline:
+     one rail down the left, a node per stop. The metaphor survives a phone;
+     the mechanism does not. */
+  /* The checkpoints are real elements now, so the phone gets the same
+     vocabulary as the desktop road — just standing still. */
+  .umm-beam {
+    --beam-x: 8px;
+    --beam-gap: 34px;
+    min-height: 0;
+  }
+
+  .umm-beam__cards {
+    gap: var(--umm-sp-5);
+  }
+
+  .umm-beam__node {
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-width: 2px;
+  }
+
+  .umm-beam__card {
+    padding: 26px 24px 44px;
+  }
+
+  .umm-beam__title {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
+
+  .umm-beam__text {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  /* --- Technology --------------------------------------------------------- */
+  .umm-tech__deck {
+    --card-w: min(300px, calc(100vw - 86px));
+    --card-h: clamp(310px, 62vw, 360px);
+    min-height: calc(var(--card-h) + 190px);
+  }
+
+  .umm-tech__stack {
+    left: 0;
+    margin-left: 0;
+    bottom: 96px;
+  }
+
+  .umm-tcard {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .umm-tcard__items {
+    gap: 6px;
+  }
+
+  .umm-tcard__item {
+    padding: 6px 8px 6px 6px;
+  }
+
+  .umm-tcard__ghost {
+    font-size: 5.5rem;
+    bottom: 2.5rem;
+  }
+
+  /* --- How we evidence work ---------------------------------------------- */
+  .umm-proof__row {
+    gap: 0.875rem;
+    padding-right: 1.5rem;
+  }
+
+  .umm-proof__mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 599px) {
+  .umm-eng__tiles {
+    gap: 0.625rem;
+  }
+
+  .umm-eng__tile {
+    min-height: 0;
+  }
+
+  .umm-hand__item {
+    gap: 12px;
+  }
+}

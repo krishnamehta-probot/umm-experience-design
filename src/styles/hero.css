@@ -1,0 +1,574 @@
+/* ============================================================================
+   HERO
+   A full-bleed field of frosted glass tiles over a two-colour bloom, with the
+   statement set on top. Nothing here is an image.
+   ========================================================================== */
+
+.umm-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Full screen on any device. svh tracks the real visible height on mobile
+     once the browser chrome collapses; vh is the fallback. */
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #ffffff;
+
+  /* The only two colours in the hero. */
+  --umm-bloom-warm: var(--umm-sun);
+  --umm-bloom-rose: var(--umm-blossom);
+}
+
+/* ---------------------------------------------------------------------------
+   TILE FIELD
+   ------------------------------------------------------------------------- */
+
+.umm-tiles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #ffffff;
+  /* Pointer position, eased in TileField.tsx. Defaults keep the light parked
+     over the bloom before the pointer ever arrives. */
+  --mx: 70%;
+  --my: 45%;
+}
+
+/* --- The bloom ------------------------------------------------------------
+   Two colours only. The depth in the core is not a third colour — it is the
+   same rose multiplied over itself where the radials overlap, which is also
+   what turns the yellow/rose boundary peach.
+
+   The two washes orbit on separate clocks (37s and 53s, opposite directions)
+   with linear timing, so neither ever decelerates to a stop and the pair never
+   lands on the same arrangement twice in a sitting. Each is oversized to
+   -18% and never translates further than its own overhang, so no edge shows.
+   ------------------------------------------------------------------------ */
+
+.umm-tiles__bloom {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.umm-tiles__wash {
+  position: absolute;
+  inset: -18%;
+  background-blend-mode: multiply;
+  will-change: transform;
+}
+
+.umm-tiles__wash--warm {
+  background:
+    radial-gradient(28% 25% at 78% 16%, var(--umm-bloom-warm) 0%, transparent 70%),
+    radial-gradient(22% 21% at 65% 24%, var(--umm-bloom-warm) 0%, transparent 72%),
+    radial-gradient(25% 31% at 86% 53%, var(--umm-bloom-warm) 0%, transparent 74%),
+    radial-gradient(24% 22% at 59% 86%, var(--umm-bloom-warm) 0%, transparent 72%);
+  animation: umm-bloom-warm 37s linear infinite;
+}
+
+.umm-tiles__wash--rose {
+  mix-blend-mode: multiply;
+  background:
+    radial-gradient(18% 18% at 63% 52%, var(--umm-bloom-rose) 0%, transparent 68%),
+    radial-gradient(22% 22% at 60% 57%, var(--umm-bloom-rose) 0%, transparent 70%),
+    radial-gradient(28% 28% at 66% 46%, var(--umm-bloom-rose) 0%, transparent 74%),
+    radial-gradient(34% 34% at 56% 66%, var(--umm-bloom-rose) 0%, transparent 78%);
+  animation: umm-bloom-rose 53s linear infinite;
+}
+
+/* Four-point orbits that return exactly to their origin, so the loop closes
+   without a seam and the motion reads as continuous rather than cyclic. */
+@keyframes umm-bloom-warm {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+  25% {
+    transform: translate3d(4%, -3%, 0) scale(1.09);
+  }
+  50% {
+    transform: translate3d(1.5%, 4%, 0) scale(1.03);
+  }
+  75% {
+    transform: translate3d(-4%, 1.5%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+}
+
+@keyframes umm-bloom-rose {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1.06);
+  }
+  25% {
+    transform: translate3d(-3.5%, 2.5%, 0) scale(1.01);
+  }
+  50% {
+    transform: translate3d(-1%, -4%, 0) scale(1.08);
+  }
+  75% {
+    transform: translate3d(3.5%, -1%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.06);
+  }
+}
+
+/* --- The glass ------------------------------------------------------------
+   Square tiles, auto-filled across the width and overflowing the bottom. The
+   grid carries its own white veil so the seams read lighter than the tiles,
+   the way frosted glass sits on a lightbox.
+   ------------------------------------------------------------------------ */
+
+.umm-tiles__grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(70px, 8.2vw, 148px), 1fr));
+  grid-auto-rows: clamp(70px, 8.2vw, 148px);
+  gap: 6px;
+  padding: 6px;
+  align-content: start;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.umm-tiles__tile {
+  border-radius: clamp(12px, 1.5vw, 26px);
+  /* --v (0..1) shifts how much white each tile holds, so the field reads as
+     placed glass rather than a printed lattice. */
+  background: linear-gradient(
+    142deg,
+    rgb(255 255 255 / calc(0.4 + var(--v) * 0.2)) 0%,
+    rgb(255 255 255 / calc(0.12 + var(--v) * 0.14)) 48%,
+    rgb(255 255 255 / calc(0.26 + var(--v) * 0.18)) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.55);
+  transition: transform 700ms var(--umm-ease-out);
+}
+
+/* --- The pointer light ----------------------------------------------------
+   A soft screen-blended glow above the glass. It brightens whichever tiles it
+   crosses, so the surface answers the pointer without anything jumping.
+   ------------------------------------------------------------------------ */
+
+.umm-tiles__lamp {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    26vw 26vw at var(--mx) var(--my),
+    rgb(255 255 255 / 0.55) 0%,
+    rgb(255 255 255 / 0.22) 38%,
+    transparent 68%
+  );
+  transition: opacity 600ms var(--umm-ease-out);
+}
+
+.umm-tiles[data-lit='on'] .umm-tiles__lamp {
+  opacity: 1;
+}
+
+/* --- The hand-off ---------------------------------------------------------
+   Without this the hero stops dead on the section below: white-and-bloom above
+   a flat grey, with the tile grid sliced through a row. The field dissolves
+   into the page ground instead, so the two sections share an edge rather than
+   meeting at one. Painted last, so it sits over the glass and the lamp both.
+   ------------------------------------------------------------------------ */
+
+.umm-tiles::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: clamp(150px, 24vh, 320px);
+  background: linear-gradient(to bottom, transparent 0%, var(--umm-canvas) 88%);
+  pointer-events: none;
+}
+
+/* --- The same field, on ink -----------------------------------------------
+   Everything that makes this read as frosted glass is a claim about the
+   surface behind it, so none of it survives a change of ground unaltered.
+
+   The washes are the part that actually breaks: `multiply` darkens whatever
+   it lands on, which is the whole point on white and completely useless on
+   ink -- pastels multiplied into near-black are just near-black. On a dark
+   ground they have to `screen`, so the colour is light added to the dark
+   rather than subtracted from the light, and the bloom glows out of the
+   section instead of staining it.
+
+   The glass follows the same logic in the other direction: on paper a tile
+   holds up to 60% white and still reads as a tint, while on ink that much
+   white is a lit panel. It holds about a sixth of it here, and the grid's
+   veil turns from a white haze into a dark one so the seams still read as
+   the lighter line between tiles.
+   ------------------------------------------------------------------------ */
+
+.umm-tiles--ink,
+.umm-tiles--ink .umm-tiles__bloom {
+  background: var(--umm-ink);
+}
+
+.umm-tiles--ink .umm-tiles__wash {
+  background-blend-mode: screen;
+}
+
+/* Damped, and this is the part that is easy to get wrong. `multiply` drives
+   an overlap toward the darker colour, which is what turns the hero's yellow
+   and rose into peach where they cross. `screen` does the exact opposite: it
+   drives the overlap toward white, so two pastels at full strength meet as a
+   grey-white blowout with no hue left in it. Held down, each wash reads as
+   its own colour and the crossing reads as a warm light rather than a hole. */
+.umm-tiles--ink .umm-tiles__wash--warm {
+  opacity: 1;
+}
+
+.umm-tiles--ink .umm-tiles__wash--rose {
+  mix-blend-mode: screen;
+  opacity: 0.66;
+}
+
+/* The veil is the seam colour, and it is also the only thing between the
+   viewer and the bloom -- push it up for contrast and the colour behind it
+   goes grey. It sits low, and the tiles earn their edge from their own white
+   instead. */
+.umm-tiles--ink .umm-tiles__grid {
+  background: rgb(6 5 9 / 0.12);
+}
+
+.umm-tiles--ink .umm-tiles__tile {
+  background: linear-gradient(
+    142deg,
+    rgb(255 255 255 / calc(0.075 + var(--v) * 0.055)) 0%,
+    rgb(255 255 255 / calc(0.018 + var(--v) * 0.028)) 48%,
+    rgb(255 255 255 / calc(0.05 + var(--v) * 0.045)) 100%
+  );
+  /* The rim does the work the fill used to: it draws the tile edge without
+     laying white over the colour behind it. */
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.2),
+    inset 0 0 0 1px rgb(255 255 255 / 0.05);
+}
+
+.umm-tiles--ink .umm-tiles__lamp {
+  background: radial-gradient(
+    26vw 26vw at var(--mx) var(--my),
+    rgb(255 255 255 / 0.2) 0%,
+    rgb(255 255 255 / 0.08) 38%,
+    transparent 68%
+  );
+}
+
+/* Down into the footer's ink rather than up into the page ground, so the
+   bottom row of tiles is dissolved rather than sliced. */
+.umm-tiles--ink::after {
+  height: clamp(90px, 14vh, 190px);
+  background: linear-gradient(to bottom, transparent 0%, var(--umm-ink) 92%);
+}
+
+/* ---------------------------------------------------------------------------
+   THE STATEMENT
+   ------------------------------------------------------------------------- */
+
+.umm-hero__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* --- Title ----------------------------------------------------------------
+   Three fixed lines at every width. The type scale is tied to viewport width
+   so the longest line always fits rather than wrapping to a fourth.
+   ------------------------------------------------------------------------ */
+
+.umm-hero__title {
+  font-size: clamp(1.75rem, 6.6vw, 5rem);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--umm-ink);
+  max-width: none;
+  text-wrap: nowrap;
+}
+
+.umm-hero__line {
+  display: block;
+  white-space: nowrap;
+}
+
+/* The palette is five pastels, so there is no colour here that could hold a
+   word at 80px against a white ground and still be read. The bloom behind the
+   statement is already doing the colour — sun and blossom — so the accent word
+   earns its emphasis from weight instead, and the headline stays ink. */
+.umm-hero__accent {
+  color: var(--umm-ink);
+  font-weight: var(--umm-weight-semibold);
+}
+
+/* --- Lead ---------------------------------------------------------------- */
+
+.umm-hero__lead {
+  margin-top: clamp(1.25rem, 2.2vw, 2rem);
+  /* Capped so the paragraph runs to four lines, never a dense block. */
+  max-width: 58ch;
+  font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+  line-height: 1.58;
+  color: var(--umm-ink-soft);
+}
+
+/* --- Actions ------------------------------------------------------------- */
+
+.umm-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--umm-sp-4);
+  margin-top: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-tiles__wash {
+    animation: none;
+  }
+  .umm-tiles__lamp {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE DIAGRAM
+   ------------------------------------------------------------------------- */
+
+.umm-diagram {
+  position: relative;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: var(--umm-r-2xl);
+  background: color-mix(in srgb, var(--umm-paper) 72%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--umm-paper) 90%, transparent);
+  box-shadow: var(--umm-shadow-2);
+}
+
+.umm-diagram__caption {
+  display: grid;
+  gap: var(--umm-sp-2);
+  margin-bottom: var(--umm-sp-4);
+}
+
+.umm-diagram__eyebrow {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.umm-diagram__caption strong {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-heading-l);
+  font-weight: var(--umm-weight-medium);
+  line-height: var(--umm-leading-snug);
+  letter-spacing: var(--umm-tracking-heading);
+}
+
+/* Locking the stage to the viewBox ratio is what keeps the HTML labels
+   registered to the SVG nodes at every width. */
+.umm-diagram__stage {
+  position: relative;
+  aspect-ratio: 760 / 520;
+  width: 100%;
+}
+
+.umm-diagram__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.umm-diagram__ghost {
+  stroke: var(--umm-hairline);
+  stroke-width: 1.5;
+  opacity: 0.5;
+  stroke-dasharray: 3 6;
+}
+
+.umm-diagram__path {
+  stroke: var(--umm-ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+}
+
+[data-umm-reveal='in'] .umm-diagram__path {
+  animation: umm-draw var(--umm-dur-draw) var(--umm-ease-in-out) forwards 200ms;
+}
+
+@keyframes umm-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.umm-diagram__node {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.4);
+}
+
+[data-umm-reveal='in'] .umm-diagram__node {
+  animation: umm-node-in var(--umm-dur) var(--umm-ease-spring) forwards;
+  /* Each node lands as the drawn line reaches it. */
+  animation-delay: calc(var(--i) * 300ms + 500ms);
+}
+
+@keyframes umm-node-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.umm-diagram__halo {
+  fill: var(--umm-sky);
+  opacity: 0.45;
+}
+
+.umm-diagram__core {
+  fill: var(--umm-ink);
+}
+
+/* The pulse that never stops travelling — the page's promise that the journey
+   is continuous rather than a set of stages. Driven by <animateMotion> inside
+   the SVG, so it tracks the path at any rendered size. */
+.umm-diagram__pulse {
+  opacity: 0;
+}
+
+[data-umm-reveal='in'] .umm-diagram__pulse {
+  opacity: 1;
+  transition: opacity var(--umm-dur) ease 1.6s;
+}
+
+.umm-diagram__pulse-halo {
+  fill: var(--umm-ink);
+  opacity: 0.16;
+}
+
+.umm-diagram__pulse-core {
+  fill: var(--umm-ink);
+}
+
+.umm-diagram__label {
+  position: absolute;
+  transform: translate(-50%, 0);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+  font-family: var(--umm-font-mono);
+  font-size: clamp(0.5625rem, 1.05vw, 0.6875rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.umm-diagram__label[data-place='above'] {
+  transform: translate(-50%, -190%);
+}
+
+.umm-diagram__label[data-place='below'] {
+  transform: translate(-50%, 90%);
+}
+
+[data-umm-reveal='in'] .umm-diagram__label {
+  animation: umm-fade-in var(--umm-dur) var(--umm-ease-out) forwards;
+  animation-delay: calc(var(--i) * 300ms + 700ms);
+}
+
+@keyframes umm-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.umm-diagram__proof {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--umm-sp-2);
+  margin-top: var(--umm-sp-4);
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-citrus);
+  color: var(--umm-ink);
+  font-size: var(--umm-text-body-s);
+}
+
+.umm-diagram__proof strong {
+  font-weight: var(--umm-weight-semibold);
+}
+
+/* Soft orbital rings, drawn not photographed. */
+.umm-diagram__orbit {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed var(--umm-hairline);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.umm-diagram__orbit--one {
+  width: 46%;
+  aspect-ratio: 1;
+  top: -14%;
+  right: -8%;
+  animation: umm-spin 46s linear infinite;
+}
+
+.umm-diagram__orbit--two {
+  width: 30%;
+  aspect-ratio: 1;
+  bottom: -10%;
+  left: -6%;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--umm-sky) 70%, transparent);
+  animation: umm-spin 34s linear infinite reverse;
+}
+
+@keyframes umm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-diagram__path {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+  .umm-diagram__node,
+  .umm-diagram__label {
+    opacity: 1;
+    transform: scale(1);
+    animation: none;
+  }
+  .umm-diagram__label[data-place='above'] {
+    transform: translate(-50%, -190%);
+  }
+  .umm-diagram__label[data-place='below'] {
+    transform: translate(-50%, 90%);
+  }
+  .umm-diagram__orbit {
+    animation: none;
+  }
+}

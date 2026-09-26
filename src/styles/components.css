@@ -1,0 +1,1055 @@
+/* ============================================================================
+   UMM DESIGN SYSTEM — LAYER 3: COMPONENTS
+   The reusable library. Everything here is page-agnostic and is intended to be
+   lifted wholesale onto any UMM service page.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   CHAPTER
+   The eyebrow that opens every section. The rule extends on reveal, which is
+   the smallest possible signal that a new chapter of the journey has begun.
+   ------------------------------------------------------------------------- */
+
+.umm-chapter {
+  display: flex;
+  align-items: center;
+  gap: var(--umm-sp-4);
+  margin-bottom: var(--umm-sp-6);
+}
+
+.umm-chapter__dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--umm-tone-signal, var(--umm-accent));
+}
+
+.umm-chapter__label {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-text-tertiary);
+  white-space: nowrap;
+}
+
+[data-umm-reveal='in'] .umm-chapter__rule,
+[data-umm-reveal='in'].umm-chapter /* ---------------------------------------------------------------------------
+   SECTION HEAD
+   ------------------------------------------------------------------------- */
+
+.umm-section-head {
+  max-width: 62ch;
+  margin-bottom: var(--umm-sp-16);
+}
+
+.umm-section-head--wide {
+  max-width: 78ch;
+}
+
+.umm-section-head__title {
+  font-size: var(--umm-text-display-m);
+  font-weight: var(--umm-weight-medium);
+  line-height: var(--umm-leading-display);
+  letter-spacing: var(--umm-tracking-display);
+  color: var(--umm-text);
+}
+
+/* The one word per heading that carries the argument. It is marked but no
+   longer decorated — the highlight rule under it has been removed site-wide. */
+.umm-section-head__title em,
+.umm-accent-word {
+  font-style: normal;
+  color: var(--umm-text);
+  white-space: nowrap;
+}
+
+.umm-section-head__lead {
+  margin-top: var(--umm-sp-6);
+  font-size: var(--umm-text-body-l);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-text-secondary);
+  max-width: var(--umm-container-text);
+}
+
+/* ---------------------------------------------------------------------------
+   BUTTON
+   ------------------------------------------------------------------------- */
+
+.umm-btn {
+  --btn-bg: var(--umm-ink);
+  --btn-fg: var(--umm-ink-paper);
+  --btn-border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--umm-sp-3);
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--umm-r-pill);
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--umm-font-body);
+  font-size: var(--umm-text-body-s);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-body);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--umm-dur-fast) var(--umm-ease-out),
+    color var(--umm-dur-fast) var(--umm-ease-out),
+    border-color var(--umm-dur-fast) var(--umm-ease-out),
+    transform var(--umm-dur-fast) var(--umm-ease-out),
+    box-shadow var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-btn svg {
+  flex: none;
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--umm-shadow-2);
+}
+
+.umm-btn:hover svg {
+  transform: translateX(3px);
+}
+
+.umm-btn:active {
+  transform: translateY(0);
+}
+
+/* Variants */
+
+.umm-btn--accent {
+  --btn-bg: var(--umm-accent);
+  --btn-fg: var(--umm-accent-ink);
+}
+
+.umm-btn--tone {
+  --btn-bg: var(--umm-tone, var(--umm-sky));
+  --btn-fg: var(--umm-ink);
+}
+
+.umm-btn--outline {
+  --btn-bg: transparent;
+  --btn-fg: var(--umm-text);
+  --btn-border: var(--umm-border-strong);
+}
+
+.umm-btn--outline:hover {
+  --btn-bg: var(--umm-ink);
+  --btn-fg: var(--umm-ink-paper);
+  --btn-border: var(--umm-ink);
+}
+
+.umm-btn--paper {
+  --btn-bg: var(--umm-paper);
+  --btn-fg: var(--umm-ink);
+  --btn-border: var(--umm-border);
+}
+
+.umm-btn--lg {
+  padding: 1.0625rem 1.875rem;
+  font-size: var(--umm-text-body);
+}
+
+.umm-btn--sm {
+  padding: 0.625rem 1.125rem;
+  font-size: var(--umm-text-body-s);
+}
+
+/* ---------------------------------------------------------------------------
+   TEXT LINK
+   ------------------------------------------------------------------------- */
+
+.umm-textlink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--umm-sp-2);
+  font-size: var(--umm-text-body-s);
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-text);
+  padding-block: var(--umm-sp-2);
+  position: relative;
+}
+
+.umm-textlink::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 1.75rem;
+  bottom: 0.35rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.28;
+  transform-origin: right center;
+  transition: transform var(--umm-dur) var(--umm-ease-out), opacity var(--umm-dur-fast);
+}
+
+.umm-textlink:hover::after {
+  transform: scaleX(0);
+  opacity: 0;
+}
+
+.umm-textlink svg {
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-textlink:hover svg {
+  transform: translate(3px, -3px);
+}
+
+/* ---------------------------------------------------------------------------
+   TAG / PILL
+   ------------------------------------------------------------------------- */
+
+.umm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--umm-sp-2);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-veil);
+  border: 1px solid var(--umm-border);
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-text-secondary);
+  white-space: nowrap;
+}
+
+.umm-tag--tone {
+  background: var(--umm-tone-wash, var(--umm-veil));
+  border-color: var(--umm-tone, var(--umm-border));
+  color: var(--umm-ink);
+}
+
+.umm-tag--solid {
+  background: var(--umm-tone, var(--umm-sky));
+  border-color: transparent;
+  color: var(--umm-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   ORDINAL
+   The oversized 01 / 02 / 03 that numbers the journey. Outlined by default so
+   it structures the page without competing with the heading; it fills in when
+   its row becomes the reader's focus.
+   ------------------------------------------------------------------------- */
+
+.umm-ordinal {
+  display: block;
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-ordinal);
+  font-weight: var(--umm-weight-semibold);
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--umm-border-strong);
+  transition:
+    color var(--umm-dur-slow) var(--umm-ease-out),
+    -webkit-text-stroke-color var(--umm-dur-slow) var(--umm-ease-out);
+  user-select: none;
+}
+
+.umm-ordinal--filled,
+[data-umm-active='true'] .umm-ordinal {
+  color: var(--umm-tone, var(--umm-sky));
+  -webkit-text-stroke-color: transparent;
+}
+
+.umm-ordinal--sm {
+  font-size: clamp(2rem, 3vw, 2.75rem);
+}
+
+.umm-ordinal--mono {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-text-tertiary);
+  -webkit-text-stroke: 0;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   CARD
+   ------------------------------------------------------------------------- */
+
+.umm-card {
+  position: relative;
+  background: var(--umm-surface-raised);
+  border: 1px solid var(--umm-border);
+  border-radius: var(--umm-r-lg);
+  padding: var(--umm-sp-8);
+  transition:
+    transform var(--umm-dur) var(--umm-ease-out),
+    box-shadow var(--umm-dur) var(--umm-ease-out),
+    border-color var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-card--tone {
+  background: var(--umm-tone, var(--umm-sky));
+  border-color: transparent;
+  color: var(--umm-ink);
+}
+
+.umm-card--wash {
+  background: var(--umm-tone-wash, var(--umm-veil));
+  border-color: transparent;
+}
+
+.umm-card--quiet {
+  background: transparent;
+  border-color: var(--umm-border-strong);
+}
+
+.umm-card--lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--umm-shadow-2);
+}
+
+.umm-card--pad-lg {
+  padding: var(--umm-sp-10);
+}
+
+/* --- The UMM notch --------------------------------------------------------
+   A circular bite out of the bottom-right corner with the action arrow seated
+   inside it. Carried over from the brand cards on umm.digital and made into a
+   system primitive so every UMM surface can wear the same signature.
+   ------------------------------------------------------------------------ */
+
+.umm-card--notch {
+  /* Bite diameter, and how far its centre sits in from the card's right and
+     bottom edges. Centre < radius, so the circle breaks through both edges and
+     removes the corner cleanly rather than leaving slivers behind. */
+  --umm-notch-d: 88px;
+  --umm-notch-c: 37px;
+  padding-bottom: calc(var(--umm-notch-d) * 0.5);
+
+  -webkit-mask-image: linear-gradient(#000 0 0),
+    radial-gradient(
+      circle calc(var(--umm-notch-d) / 2) at calc(100% - var(--umm-notch-c))
+        calc(100% - var(--umm-notch-c)),
+      #000 98%,
+      transparent 100%
+    );
+  mask-image: linear-gradient(#000 0 0),
+    radial-gradient(
+      circle calc(var(--umm-notch-d) / 2) at calc(100% - var(--umm-notch-c))
+        calc(100% - var(--umm-notch-c)),
+      #000 98%,
+      transparent 100%
+    );
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  /* A masked element cannot also paint a border, so the notch card relies on
+     its fill for definition. Tone and wash variants already do. */
+  border-color: transparent;
+}
+
+/* The arrow lives outside the masked card, otherwise the mask would clip it. */
+.umm-notch-wrap {
+  position: relative;
+  display: flex;
+}
+
+.umm-notch-wrap > .umm-card--notch {
+  flex: 1;
+}
+
+.umm-notch-action {
+  position: absolute;
+  /* Centred on the bite: 37px in from each edge, matching --umm-notch-c. */
+  right: 7px;
+  bottom: 7px;
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--umm-text);
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-notch-wrap:hover .umm-notch-action {
+  transform: rotate(45deg) scale(1.08);
+}
+
+/* ---------------------------------------------------------------------------
+   DEFINITION LIST
+   The Challenge / Approach / What you get pattern.
+   ------------------------------------------------------------------------- */
+
+.umm-deflist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--umm-sp-5);
+}
+
+.umm-deflist__row {
+  display: grid;
+  gap: var(--umm-sp-2);
+  padding-top: var(--umm-sp-5);
+  border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.umm-deflist__row:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.umm-deflist__term {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.umm-deflist__desc {
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-body);
+}
+
+.umm-deflist__desc strong {
+  font-weight: var(--umm-weight-semibold);
+}
+
+/* ---------------------------------------------------------------------------
+   OUTCOME
+   "You receive ..." — the promise at the end of a service row. Set apart
+   because it is the line a buyer actually scans for.
+   ------------------------------------------------------------------------- */
+
+.umm-outcome {
+  display: grid;
+  gap: var(--umm-sp-2);
+  padding: var(--umm-sp-5);
+  border-radius: var(--umm-r-md);
+  background: var(--umm-tone-wash, var(--umm-veil));
+}
+
+.umm-outcome__label {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-text-tertiary);
+}
+
+.umm-outcome__value {
+  font-size: var(--umm-text-heading-m);
+  font-weight: var(--umm-weight-medium);
+  line-height: var(--umm-leading-snug);
+  letter-spacing: var(--umm-tracking-heading);
+  color: var(--umm-text);
+}
+
+/* ---------------------------------------------------------------------------
+   MARQUEE
+   A slow, continuous band of capability names. Pauses on hover so the words
+   can actually be read, and stops entirely under reduced motion.
+   ------------------------------------------------------------------------- */
+
+.umm-marquee {
+  --umm-marquee-duration: 52s;
+  overflow: hidden;
+  padding-block: var(--umm-sp-5);
+  border-block: 1px solid var(--umm-border);
+  background: var(--umm-surface);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.umm-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: umm-marquee var(--umm-marquee-duration) linear infinite;
+}
+
+.umm-marquee:hover .umm-marquee__track {
+  animation-play-state: paused;
+}
+
+.umm-marquee__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--umm-sp-4);
+  padding-inline: var(--umm-sp-6);
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-text-secondary);
+  white-space: nowrap;
+}
+
+.umm-marquee__item svg {
+  color: var(--umm-hairline);
+}
+
+@keyframes umm-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* The track renders the list twice; -50% loops it seamlessly. */
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-marquee__track {
+    animation: none;
+    transform: none;
+  }
+  .umm-marquee {
+    overflow-x: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ACCORDION
+   ------------------------------------------------------------------------- */
+
+.umm-accordion {
+  border-top: 1px solid var(--umm-border-strong);
+}
+
+.umm-accordion__item {
+  border-bottom: 1px solid var(--umm-border-strong);
+}
+
+.umm-accordion__trigger {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--umm-sp-5);
+  width: 100%;
+  padding-block: var(--umm-sp-6);
+  text-align: left;
+  color: var(--umm-text);
+  transition: color var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-accordion__trigger:hover {
+  color: var(--umm-accent);
+}
+
+.umm-accordion__index {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  letter-spacing: var(--umm-tracking-label);
+  color: var(--umm-text-tertiary);
+}
+
+.umm-accordion__question {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-heading-l);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-heading);
+  line-height: var(--umm-leading-snug);
+}
+
+.umm-accordion__marker {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--umm-border-strong);
+  color: var(--umm-text);
+  transition:
+    transform var(--umm-dur) var(--umm-ease-out),
+    background var(--umm-dur-fast) var(--umm-ease-out),
+    border-color var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-accordion__item[data-open='true'] .umm-accordion__marker {
+  transform: rotate(45deg);
+  background: var(--umm-ink);
+  border-color: var(--umm-ink);
+  color: var(--umm-ink-paper);
+}
+
+/* Height is animated via a grid track, which needs no measured pixel value
+   and therefore survives reflow, font swaps and responsive changes. */
+.umm-accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--umm-dur) var(--umm-ease-in-out);
+}
+
+.umm-accordion__item[data-open='true'] .umm-accordion__panel {
+  grid-template-rows: 1fr;
+}
+
+.umm-accordion__panel > div {
+  overflow: hidden;
+}
+
+.umm-accordion__answer {
+  padding-bottom: var(--umm-sp-8);
+  padding-left: calc(var(--umm-text-label) + var(--umm-sp-5) + 1.6ch);
+  max-width: var(--umm-container-text);
+  color: var(--umm-text-secondary);
+  line-height: var(--umm-leading-relaxed);
+}
+
+@media (max-width: 640px) {
+  .umm-accordion__answer {
+    padding-left: 0;
+  }
+  .umm-accordion__question {
+    font-size: var(--umm-text-heading-m);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   TABS
+   ------------------------------------------------------------------------- */
+
+.umm-tabs {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--umm-sp-2);
+  padding: var(--umm-sp-2);
+  background: var(--umm-veil);
+  border: 1px solid var(--umm-border);
+  border-radius: var(--umm-r-pill);
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* One pill for the whole strip. It is placed from measured button geometry,
+   so it changes width as it travels between labels of different lengths —
+   which is the part that makes it read as a single object moving rather than
+   two backgrounds swapping. */
+.umm-tabs__pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-ink);
+  transition:
+    transform 560ms var(--umm-ease-out),
+    width 560ms var(--umm-ease-out),
+    height 200ms var(--umm-ease-out),
+    background-color 560ms var(--umm-ease-out);
+}
+
+.umm-tabs__tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--umm-sp-2);
+  padding: 0.625rem 1.125rem;
+  border-radius: var(--umm-r-pill);
+  font-size: var(--umm-text-body-s);
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-text-secondary);
+  white-space: nowrap;
+  transition:
+    background var(--umm-dur-fast) var(--umm-ease-out),
+    color var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-tabs__tab:hover {
+  color: var(--umm-text);
+}
+
+/* The pill supplies the ground; the tab only changes its ink. */
+.umm-tabs__tab[aria-selected='true'] {
+  color: var(--umm-ink-paper);
+}
+
+.umm-tabs__tab svg {
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-tabs__pill {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .umm-tabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    border-radius: var(--umm-r-md);
+    scrollbar-width: none;
+  }
+  .umm-tabs::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   BOARD
+   A small panel of agreed facts — "what good looks like".
+   ------------------------------------------------------------------------- */
+
+.umm-board {
+  display: grid;
+  gap: var(--umm-sp-5);
+  padding: var(--umm-sp-8);
+  border-radius: var(--umm-r-lg);
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+}
+
+.umm-board__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--umm-sp-4);
+  padding-bottom: var(--umm-sp-5);
+  border-bottom: 1px solid var(--umm-ink-line);
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-paper-soft);
+}
+
+.umm-board__row {
+  display: grid;
+  gap: var(--umm-sp-1);
+}
+
+.umm-board__label {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-paper-soft);
+}
+
+.umm-board__value {
+  font-size: var(--umm-text-heading-m);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-heading);
+}
+
+/* ---------------------------------------------------------------------------
+   NOTE
+   The scoping / disclaimer line that keeps enterprise copy honest.
+   ------------------------------------------------------------------------- */
+
+.umm-note {
+  display: flex;
+  gap: var(--umm-sp-4);
+  padding: var(--umm-sp-6);
+  border-radius: var(--umm-r-md);
+  background: var(--umm-veil);
+  border: 1px solid var(--umm-border);
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-text-secondary);
+  max-width: 88ch;
+}
+
+.umm-note svg {
+  flex: none;
+  margin-top: 0.2em;
+  color: var(--umm-text-tertiary);
+}
+
+.umm-note a,
+.umm-note u {
+  color: var(--umm-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--umm-hairline);
+}
+
+.umm-note--bare {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   TICK LIST
+   ------------------------------------------------------------------------- */
+
+.umm-ticks {
+  display: grid;
+  gap: var(--umm-sp-3);
+}
+
+.umm-ticks__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--umm-sp-3);
+  font-size: var(--umm-text-body-s);
+  line-height: var(--umm-leading-body);
+  color: var(--umm-text-secondary);
+}
+
+.umm-ticks__item svg {
+  flex: none;
+  margin-top: 0.22em;
+  color: var(--umm-tone-signal, var(--umm-accent));
+}
+
+/* ---------------------------------------------------------------------------
+   DIVIDER
+   ------------------------------------------------------------------------- */
+
+.umm-divider {
+  height: 1px;
+  background: var(--umm-border);
+  border: none;
+}
+
+.umm-divider--strong {
+  background: var(--umm-border-strong);
+}
+
+/* ---------------------------------------------------------------------------
+   SPLIT BUTTON
+   UMM's primary action shape: a fully-rounded pill and a circle holding the
+   arrow, sitting flush against each other with no gap.
+   ------------------------------------------------------------------------- */
+
+.umm-split {
+  --split-h: clamp(46px, 3.6vw, 56px);
+  --split-bg: var(--umm-ink);
+  --split-fg: #ffffff;
+  --split-border: transparent;
+  /* The gap is the shape. Flush, the two halves read as one lozenge with a
+     seam in it; apart, they read as a button and its arrow, which is the
+     mark. It widens on hover, so the response is the shape's own idea rather
+     than a colour change bolted onto it. */
+  --split-gap: 6px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--split-gap);
+  transition: gap var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-split:hover,
+.umm-split:focus-visible {
+  --split-gap: 11px;
+}
+
+.umm-split__pill,
+.umm-split__orb {
+  height: var(--split-h);
+  background: var(--split-bg);
+  color: var(--split-fg);
+  border: 1px solid var(--split-border);
+  transition: background-color var(--umm-dur-fast) var(--umm-ease-out),
+    color var(--umm-dur-fast) var(--umm-ease-out),
+    border-color var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.umm-split__pill {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: clamp(1.1rem, 1.6vw, 1.6rem);
+  border-radius: var(--umm-r-pill);
+  font-size: clamp(0.875rem, 1vw, 0.9375rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+.umm-split__orb {
+  flex: none;
+  /* Circle diameter matches the pill height exactly. */
+  width: var(--split-h);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  /* The outgoing arrow has to be clipped by the circle, or it just flies off
+     across the page. */
+  overflow: hidden;
+}
+
+/* Two arrows in one cell. The first leaves up-right, the second takes its
+   place from down-left, both on the same curve. */
+.umm-split__arrow {
+  display: grid;
+}
+
+.umm-split__arrow > * {
+  grid-area: 1 / 1;
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.umm-split__arrow > :nth-child(2) {
+  transform: translate(-130%, 130%);
+}
+
+.umm-split:hover .umm-split__arrow > :nth-child(1),
+.umm-split:focus-visible .umm-split__arrow > :nth-child(1) {
+  transform: translate(130%, -130%);
+}
+
+.umm-split:hover .umm-split__arrow > :nth-child(2),
+.umm-split:focus-visible .umm-split__arrow > :nth-child(2) {
+  transform: translate(0, 0);
+}
+
+/* Hollow variant: black stroke only. */
+.umm-split--outline {
+  --split-bg: transparent;
+  --split-fg: var(--umm-ink);
+  --split-border: var(--umm-ink);
+}
+
+/* Hovering the hollow one fills it in — the two variants trade places rather
+   than each inventing a separate response. */
+.umm-split--outline:hover,
+.umm-split--outline:focus-visible {
+  --split-bg: var(--umm-ink);
+  --split-fg: #ffffff;
+}
+
+.umm-split--solid:hover,
+.umm-split--solid:focus-visible {
+  --split-bg: color-mix(in srgb, var(--umm-ink) 82%, var(--umm-ink-paper));
+}
+
+/* On ink the two halves swap: a black pill on a black ground is a hole, so
+   the solid variant becomes paper and the hollow one strokes in paper too. */
+[data-umm-theme='ink'] .umm-split {
+  --split-bg: var(--umm-ink-paper);
+  --split-fg: var(--umm-ink);
+}
+
+[data-umm-theme='ink'] .umm-split--outline {
+  --split-bg: transparent;
+  --split-fg: var(--umm-ink-paper);
+  --split-border: color-mix(in srgb, var(--umm-ink-paper) 44%, transparent);
+}
+
+[data-umm-theme='ink'] .umm-split--outline:hover,
+[data-umm-theme='ink'] .umm-split--outline:focus-visible {
+  --split-bg: var(--umm-ink-paper);
+  --split-fg: var(--umm-ink);
+  --split-border: var(--umm-ink-paper);
+}
+
+[data-umm-theme='ink'] .umm-split--solid:hover,
+[data-umm-theme='ink'] .umm-split--solid:focus-visible {
+  --split-bg: #ffffff;
+}
+
+.umm-split:focus-visible {
+  outline: 2px solid var(--umm-focus);
+  outline-offset: 4px;
+  border-radius: var(--umm-r-pill);
+}
+
+/* ============================================================================
+   RIBBON LOOP
+   A band of colour on a single S-wave, carrying the wordmarks. Full bleed, and
+   lifted slightly over the section above so it reads as laid across the page
+   rather than parked between two blocks.
+   ========================================================================== */
+
+.umm-ribbon {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-block: clamp(-5rem, -6vw, -3rem) clamp(-4rem, -5vw, -2.5rem);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.umm-ribbon:active {
+  cursor: grabbing;
+}
+
+.umm-ribbon__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.umm-ribbon__band {
+  fill: none;
+  stroke: var(--umm-ribbon-band, var(--umm-sky));
+  stroke-width: 72;
+  stroke-linecap: round;
+  filter: drop-shadow(0 18px 30px rgb(16 14 20 / 0.16));
+}
+
+.umm-ribbon__text {
+  /* The symbol font is a fallback for the separator glyph, which the display
+     face does not carry. */
+  font-family: var(--umm-font-display), 'Segoe UI Symbol', sans-serif;
+  font-size: 42px;
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: -0.01em;
+  fill: var(--umm-ribbon-ink, var(--umm-ink));
+  dominant-baseline: middle;
+}
+
+@media (max-width: 720px) {
+  .umm-ribbon__band {
+    stroke-width: 96;
+  }
+  .umm-ribbon__text {
+    font-size: 54px;
+  }
+}
+
+/* The arrow swap and the opening gap are both motion, not information: the
+   fill change alone carries the state when motion is not wanted. */
+@media (prefers-reduced-motion: reduce) {
+  .umm-split,
+  .umm-split__arrow > * {
+    transition: none;
+  }
+
+  .umm-split:hover,
+  .umm-split:focus-visible {
+    --split-gap: 6px;
+  }
+
+  .umm-split:hover .umm-split__arrow > :nth-child(1),
+  .umm-split:focus-visible .umm-split__arrow > :nth-child(1) {
+    transform: none;
+  }
+
+  .umm-split:hover .umm-split__arrow > :nth-child(2),
+  .umm-split:focus-visible .umm-split__arrow > :nth-child(2) {
+    transform: translate(-130%, 130%);
+  }
+}

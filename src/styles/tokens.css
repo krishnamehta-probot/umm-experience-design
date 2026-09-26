@@ -1,0 +1,325 @@
+/* ============================================================================
+   UMM DESIGN SYSTEM — LAYER 1: TOKENS
+   Unified Modern Minds · Enterprise service pages
+   ----------------------------------------------------------------------------
+   The single source of truth. Nothing below this layer may hard-code a value.
+   Every component reads from here, so a rebrand is a change to this file only.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. TYPEFACE
+   Mosvita is the approved display face from the signed-off prototype.
+   To swap the brand face, change --umm-font-display / --umm-font-body ONLY.
+   ------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Mosvita';
+  src: url('/fonts/Mosvita-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mosvita';
+  src: url('/fonts/Mosvita-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mosvita';
+  src: url('/fonts/Mosvita-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mosvita';
+  src: url('/fonts/Mosvita-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mosvita';
+  src: url('/fonts/Mosvita-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* -------------------------------------------------------------------------
+     2. COLOR — FOUNDATION
+     A light, neutral enterprise ground. Hue 286 keeps the greys fractionally
+     cool so the pastel accents read as deliberate rather than accidental.
+     ----------------------------------------------------------------------- */
+
+  --umm-canvas: #eeeeee;      /* page ground                                */
+  --umm-canvas-deep: #e4e4e7; /* recessed bands, wells, inset panels        */
+  --umm-paper: #ffffff;       /* cards, raised surfaces                     */
+  --umm-ink: #100e14;         /* primary text, inverted surfaces            */
+  --umm-ink-soft: #41414d;    /* secondary text                             */
+  --umm-ink-quiet: #737380;   /* tertiary text, meta, captions              */
+  --umm-hairline: #c3c3c9;    /* visible dividers on canvas                 */
+  --umm-line: #e7e7ed;        /* quiet dividers on paper                    */
+  --umm-veil: #f1f1f4;        /* subtle fills, hover grounds                */
+  --umm-veil-raise: #f4f4f5;  /* veil one step up, for wells on canvas      */
+
+  /* On the inverted (ink) surface */
+  --umm-ink-paper: #f6f6f8;   /* primary text on ink                        */
+  --umm-ink-paper-soft: #a9a9b4;
+  --umm-ink-line: #2a2731;    /* dividers on ink                            */
+  --umm-ink-raise: #1a1720;   /* raised card on ink                         */
+  --umm-ink-line-strong: #3a3644; /* strong divider on ink                  */
+
+  /* -------------------------------------------------------------------------
+     3. COLOR — ACCENT SURFACES
+     Pastel fills. These are SURFACES, never text colors. Ink always sits on
+     top of them, which is what keeps contrast compliant at any size.
+     ----------------------------------------------------------------------- */
+
+  /* THE BRAND PALETTE. Five colours, and only these five. */
+  --umm-blossom: #ffc4f2; /* magenta pink */
+  --umm-citrus: #f0ff70; /* lime        */
+  --umm-sky: #d1e7ff; /* light blue  */
+  --umm-sun: #ffe58f; /* yellow      */
+  --umm-coral: #ffc3c4; /* salmon      */
+
+  /* Tinted washes — derived from the five, never an independent colour.
+     Ratios are chosen so each wash resolves to the value it had when it was
+     hand-picked, which keeps the palette provably closed: change a brand
+     colour and its wash follows. */
+  --umm-blossom-wash: color-mix(in srgb, var(--umm-blossom) 20%, var(--umm-paper));
+  --umm-citrus-wash: color-mix(in srgb, var(--umm-citrus) 18%, var(--umm-paper));
+  --umm-sky-wash: color-mix(in srgb, var(--umm-sky) 28%, var(--umm-paper));
+  --umm-sun-wash: color-mix(in srgb, var(--umm-sun) 18%, var(--umm-paper));
+  --umm-coral-wash: color-mix(in srgb, var(--umm-coral) 18%, var(--umm-paper));
+
+  /* -------------------------------------------------------------------------
+     4. COLOR — SIGNAL
+     The palette is five pastels and nothing else, so there is no saturated
+     tier to draw on: anything that needs to hold contrast on a light ground
+     is ink. Colour does the identifying, ink does the reading.
+     ----------------------------------------------------------------------- */
+
+  --umm-signal: var(--umm-ink);
+
+  /* Brand primary — the action color */
+  --umm-accent: var(--umm-ink);
+  --umm-accent-ink: #ffffff;
+
+  /* -------------------------------------------------------------------------
+     5. SEMANTIC ROLES
+     Components address these, not raw colors. Re-point a role and every
+     component that uses it follows.
+     ----------------------------------------------------------------------- */
+
+  --umm-surface: var(--umm-canvas);
+  --umm-surface-raised: var(--umm-paper);
+  --umm-text: var(--umm-ink);
+  --umm-text-secondary: var(--umm-ink-soft);
+  --umm-text-tertiary: var(--umm-ink-quiet);
+  --umm-border: var(--umm-line);
+  --umm-border-strong: var(--umm-hairline);
+  --umm-focus: var(--umm-ink);
+
+  /* -------------------------------------------------------------------------
+     6. TYPOGRAPHY
+     ----------------------------------------------------------------------- */
+
+  --umm-font-display: 'Mosvita', 'Aeonik Pro', 'Inter', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --umm-font-body: 'Mosvita', 'Inter', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  --umm-font-mono: ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas',
+    'Liberation Mono', monospace;
+
+  /* Fluid display scale — clamps against a 1440px design width */
+  --umm-text-display-xl: clamp(3rem, 6.6vw, 6.25rem);
+  --umm-text-display-l: clamp(2.5rem, 4.8vw, 4.25rem);
+  --umm-text-display-m: clamp(2rem, 3.3vw, 3rem);
+  --umm-text-display-s: clamp(1.625rem, 2.4vw, 2.25rem);
+
+  --umm-text-heading-l: clamp(1.375rem, 1.8vw, 1.75rem);
+  --umm-text-heading-m: clamp(1.125rem, 1.35vw, 1.3125rem);
+  --umm-text-heading-s: 1.0625rem;
+
+  --umm-text-body-l: clamp(1.0625rem, 1.05vw, 1.1875rem);
+  --umm-text-body: 1rem;
+  --umm-text-body-s: 0.9375rem;
+
+  --umm-text-label: 0.75rem;   /* mono, uppercase, tracked */
+  --umm-text-micro: 0.6875rem;
+
+  /* Giant ordinals — the 01 / 02 / 03 markers that carry the journey */
+  --umm-text-ordinal: clamp(3.5rem, 7vw, 7rem);
+
+  --umm-leading-tight: 1.02;
+  --umm-leading-display: 1.06;
+  --umm-leading-snug: 1.22;
+  --umm-leading-body: 1.62;
+  --umm-leading-relaxed: 1.72;
+
+  --umm-tracking-display: -0.035em;
+  --umm-tracking-heading: -0.02em;
+  --umm-tracking-body: -0.005em;
+  --umm-tracking-label: 0.14em;
+
+  --umm-weight-light: 300;
+  --umm-weight-regular: 400;
+  --umm-weight-medium: 500;
+  --umm-weight-semibold: 600;
+  --umm-weight-bold: 700;
+
+  /* -------------------------------------------------------------------------
+     7. SPACE — 4px base
+     ----------------------------------------------------------------------- */
+
+  --umm-sp-1: 0.25rem;   /*  4 */
+  --umm-sp-2: 0.5rem;    /*  8 */
+  --umm-sp-3: 0.75rem;   /* 12 */
+  --umm-sp-4: 1rem;      /* 16 */
+  --umm-sp-5: 1.25rem;   /* 20 */
+  --umm-sp-6: 1.5rem;    /* 24 */
+  --umm-sp-8: 2rem;      /* 32 */
+  --umm-sp-10: 2.5rem;   /* 40 */
+  --umm-sp-12: 3rem;     /* 48 */
+  --umm-sp-16: 4rem;     /* 64 */
+  --umm-sp-20: 5rem;     /* 80 */
+  --umm-sp-24: 6rem;     /* 96 */
+  --umm-sp-32: 8rem;     /* 128 */
+
+  /* Section rhythm — the vertical beat of a long enterprise page */
+  --umm-section-y: clamp(5rem, 9vw, 9.5rem);
+  --umm-section-y-tight: clamp(3.5rem, 6vw, 6rem);
+
+  /* -------------------------------------------------------------------------
+     8. LAYOUT
+     ----------------------------------------------------------------------- */
+
+  --umm-container: 1320px;
+  --umm-container-narrow: 940px;
+  --umm-container-text: 68ch;
+  --umm-gutter: clamp(1.25rem, 4vw, 4rem);
+
+  /* Width reserved at the left edge for the journey spine on wide screens */
+  --umm-spine-rail: 116px;
+
+  /* -------------------------------------------------------------------------
+     9. SHAPE
+     ----------------------------------------------------------------------- */
+
+  --umm-r-xs: 6px;
+  --umm-r-sm: 10px;
+  --umm-r-md: 16px;
+  --umm-r-lg: 22px;
+  --umm-r-xl: 30px;
+  --umm-r-2xl: 40px;
+  --umm-r-pill: 999px;
+
+  /* UMM signature notch — the cut corner carried over from the brand cards.
+     Used by .umm-notch to clip a card's bottom-right and seat an arrow in it. */
+  --umm-notch-size: 68px;
+  --umm-notch-radius: 20px;
+
+  --umm-stroke: 1px;
+  --umm-stroke-bold: 1.5px;
+
+  /* -------------------------------------------------------------------------
+     10. ELEVATION
+     Restrained. On a light enterprise ground, shadow is a whisper — hierarchy
+     comes from the hairline and the fill, not from depth.
+     ----------------------------------------------------------------------- */
+
+  --umm-shadow-0: none;
+  --umm-shadow-1: 0 1px 2px rgba(16, 14, 20, 0.04),
+    0 2px 8px rgba(16, 14, 20, 0.035);
+  --umm-shadow-2: 0 2px 4px rgba(16, 14, 20, 0.04),
+    0 12px 28px rgba(16, 14, 20, 0.06);
+  --umm-shadow-3: 0 4px 8px rgba(16, 14, 20, 0.05),
+    0 24px 56px rgba(16, 14, 20, 0.09);
+  --umm-shadow-focus: 0 0 0 3px rgba(16, 14, 20, 0.22);
+
+  /* -------------------------------------------------------------------------
+     11. MOTION
+     One easing for entrances, one for reversible state, one for long draws.
+     ----------------------------------------------------------------------- */
+
+  --umm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --umm-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --umm-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --umm-dur-instant: 120ms;
+  --umm-dur-fast: 200ms;
+  --umm-dur: 420ms;
+  --umm-dur-slow: 720ms;
+  --umm-dur-draw: 1400ms;
+
+  /* Stagger step for sequenced reveals */
+  --umm-stagger: 70ms;
+
+  /* -------------------------------------------------------------------------
+     12. Z-INDEX
+     ----------------------------------------------------------------------- */
+
+  /* Masthead height, used by scroll-margin so anchor jumps clear the nav */
+  --umm-nav-h: 84px;
+
+  --umm-z-base: 0;
+  --umm-z-raised: 10;
+  --umm-z-spine: 40;
+  --umm-z-nav: 60;
+  --umm-z-overlay: 80;
+  --umm-z-modal: 100;
+}
+
+/* ---------------------------------------------------------------------------
+   13. INVERTED CONTEXT
+   Any subtree marked [data-umm-theme="ink"] re-points the semantic roles, so
+   every component renders correctly on a dark band with no component changes.
+   ------------------------------------------------------------------------- */
+
+[data-umm-theme='ink'] {
+  --umm-surface: var(--umm-ink);
+  --umm-surface-raised: var(--umm-ink-raise);
+  --umm-text: var(--umm-ink-paper);
+  --umm-text-secondary: var(--umm-ink-paper-soft);
+  --umm-text-tertiary: var(--umm-ink-paper-soft);
+  --umm-border: var(--umm-ink-line);
+  --umm-border-strong: var(--umm-ink-line-strong);
+  --umm-accent: var(--umm-sky);
+  --umm-accent-ink: var(--umm-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   14. ACCENT CONTEXT
+   Sets --umm-tone (surface) and --umm-tone-signal (stroke) for a subtree.
+   Components read --umm-tone and never name a color directly.
+   ------------------------------------------------------------------------- */
+
+[data-umm-tone='sky'] {
+  --umm-tone: var(--umm-sky);
+  --umm-tone-wash: var(--umm-sky-wash);
+  --umm-tone-signal: var(--umm-ink);
+}
+[data-umm-tone='citrus'] {
+  --umm-tone: var(--umm-citrus);
+  --umm-tone-wash: var(--umm-citrus-wash);
+  --umm-tone-signal: var(--umm-ink);
+}
+[data-umm-tone='blossom'] {
+  --umm-tone: var(--umm-blossom);
+  --umm-tone-wash: var(--umm-blossom-wash);
+  --umm-tone-signal: var(--umm-ink);
+}
+[data-umm-tone='sun'] {
+  --umm-tone: var(--umm-sun);
+  --umm-tone-wash: var(--umm-sun-wash);
+  --umm-tone-signal: var(--umm-ink);
+}
+[data-umm-tone='coral'] {
+  --umm-tone: var(--umm-coral);
+  --umm-tone-wash: var(--umm-coral-wash);
+  --umm-tone-signal: var(--umm-ink);
+}
