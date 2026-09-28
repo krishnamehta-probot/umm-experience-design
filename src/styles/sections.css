@@ -1577,11 +1577,16 @@
 }
 
 /* A lateral scrim only works while the copy is in a column. Once the type
-   spans the full width there is no "away" to push the bloom toward, so the
-   scrim turns through ninety degrees: dense through the block the words
-   occupy, open at the top and bottom edges where the colour can still be
-   seen past them. */
-@media (max-width: 760px) {
+   spans most of the width there is no "away" left to push the bloom toward,
+   so the scrim turns through ninety degrees: dense through the block the
+   words occupy, open at the top and bottom edges where the colour can still
+   be seen past them.
+
+   The switch is at 900px, not at a phone width. Between the two the copy is
+   still nearly full-bleed while the lateral gradient has already cleared, and
+   the tail of the lead ends up sitting on lit glass -- measured at 1.68:1 at
+   768px, which is unreadable. */
+@media (max-width: 899px) {
   .umm-closing::before {
     background: linear-gradient(
       180deg,
@@ -1599,16 +1604,29 @@
   width: 100%;
 }
 
-/* The hero's type, inverted. Same scale, same weight, same tracking -- the
-   two ends of the page are the same statement twice. */
+/* The hero's type, inverted -- same weight, same tracking, the two ends of
+   the page reading as one statement made twice.
+
+   Two lines, long ones, broken at the sentence rather than wherever the box
+   happens to run out. The size is set by what has to fit: the longer line has
+   to clear the scrim before it reaches the bloom, because paper type over a
+   lit tile is the one combination this section cannot hold. Bigger type would
+   push it into the light; a narrower box would give it four short lines. */
 .umm-closing__title {
   margin-top: var(--umm-sp-5);
-  font-size: clamp(1.75rem, 5.2vw, 4rem);
+  font-size: clamp(1.5rem, 3.45vw, 3.125rem);
   font-weight: var(--umm-weight-regular);
-  line-height: 1.05;
+  line-height: 1.08;
   letter-spacing: -0.035em;
   color: var(--umm-ink-paper);
-  max-width: 17ch;
+  max-width: 42ch;
+}
+
+/* Blocks, not nowrap. Each holds its own line wherever there is room for it,
+   and folds like ordinary text on a phone, where no size would fit
+   thirty-five characters across. */
+.umm-closing__line {
+  display: block;
 }
 
 /* As in the hero: the accent is weight, not colour. There is no colour in the

@@ -574,7 +574,11 @@ export const faq = {
 
 export const closing = {
   chapter: "Let’s begin",
-  titleLead: 'Every brand makes a promise. The experience is where it is',
+  /* Set as two fixed lines rather than left to wrap, and broken at the full
+     stop: the two sentences are the two halves of the argument, so the break
+     that reads best is the one that was already in the sentence. */
+  titleLines: ['Every brand makes a promise.'],
+  titleLast: 'The experience is where it is',
   titleAccent: 'kept.',
   lead: "Start with a CX assessment. We’ll show you where the experience is losing value, and a prioritised plan to improve it.",
   primaryCta: 'Discuss your CX project',

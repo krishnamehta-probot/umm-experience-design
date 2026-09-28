@@ -25,8 +25,15 @@ export function Closing() {
           <Chapter>{closing.chapter}</Chapter>
 
           <h2 className="umm-closing__title">
-            {closing.titleLead}{' '}
-            <span className="umm-closing__accent">{closing.titleAccent}</span>
+            {closing.titleLines.map((line) => (
+              <span className="umm-closing__line" key={line}>
+                {line}
+              </span>
+            ))}
+            <span className="umm-closing__line">
+              {closing.titleLast}{' '}
+              <span className="umm-closing__accent">{closing.titleAccent}</span>
+            </span>
           </h2>
 
           <p className="umm-closing__lead">{closing.lead}</p>

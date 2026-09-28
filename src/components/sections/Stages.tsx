@@ -128,11 +128,24 @@ export function Stages() {
 
       setReelW(
         REELS.map((glyphs) =>
-          glyphs.map((g) =>
+          glyphs.map((g) => {
             /* Blank pad collapses to nothing, so a short figure carries no
                trailing air and the rule beneath it ends with the glyphs. */
-            g.trim() === '' ? 0 : (ctx.measureText(g).width + track) / size,
-          ),
+            if (g.trim() === '') return 0
+            const m = ctx.measureText(g)
+            /* The column clips on both axes, so its width has to clear the
+               glyph's INK, not its advance. Those are not the same number
+               here: the tracking is negative, so it pulls the advance in by
+               about 4px at full size while leaving the drawn shape exactly
+               where it was. Sizing to the advance alone shaves the right-hand
+               edge off anything that fills its own box -- which is why the
+               per-cent sign of "30-50%" came out sliced, and the dollar and
+               the en-dash with it. Take whichever is wider, plus a pixel for
+               the antialiased edge. */
+            const advance = m.width + track
+            const ink = m.actualBoundingBoxRight + 1
+            return Math.max(advance, ink) / size
+          }),
         ),
       )
     }
