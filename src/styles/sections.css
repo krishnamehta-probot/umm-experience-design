@@ -1698,31 +1698,33 @@
   gap: clamp(1.5rem, 2.4vw, 2.25rem);
 }
 
-/* The pages share one box and are stacked in it, so a page leaving and a page
-   arriving never push each other around. */
-.umm-svc__pages {
-  position: relative;
-  /* Sized to the card, not to the viewport — the old value left the cards
-     standing in a tall empty box and pushed the head off the top. */
-  min-height: clamp(330px, 38svh, 412px);
+/* All six at once. One column on a phone, two when there is room for a pair,
+   three across and two down once the full set fits -- which is the comparison
+   the section exists to make, so that last step is what the layout is built
+   around rather than what it degrades to. */
+.umm-svc__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(1rem, 1.8vw, 1.75rem);
+  margin-top: clamp(2.25rem, 4vw, 3.5rem);
 }
 
-.umm-svc__page {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-content: start;
-  gap: clamp(1rem, 1.8vw, 1.75rem);
+@media (min-width: 640px) {
+  .umm-svc__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  .umm-svc__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .umm-svc__slot {
   position: relative;
-  /* Lift, shrink and dissolve together, all from one scroll-derived value, so
-     a card is always most transparent exactly when it is furthest from home. */
-  transform: translate3d(0, var(--lift, 0px), 0) scale(var(--scale, 1));
-  opacity: var(--op, 1);
-  will-change: transform, opacity;
+  display: grid;
 }
 
 /* --- The card ------------------------------------------------------------- */
@@ -1731,9 +1733,12 @@
   position: relative;
   display: grid;
   height: 100%;
-  /* Just enough for the content and the strip at its foot. Any taller and the
-     card is mostly dead space below "What we do". */
-  min-height: clamp(300px, 36svh, 390px);
+  /* A floor, not a height. The grid stretches every card in a row to match its
+     tallest neighbour, so the content sets the height and this only stops a
+     short card collapsing. The old value was tuned for a single row on a
+     pinned stage and, with two rows, left every card mostly empty below
+     "What we do". */
+  min-height: clamp(240px, 22svh, 300px);
   padding: 30px 28px 46px;
   border-radius: 18px;
   background: var(--umm-veil-raise);
@@ -1895,46 +1900,79 @@
   transform: scaleY(0) rotate(90deg);
 }
 
-/* --- Unpinned ------------------------------------------------------------- */
+/* The cards no longer travel, so there is nothing here to switch off at the
+   narrow breakpoint or under reduced motion -- the grid simply reflows. */
 
-@media (max-width: 899px) {
-  .umm-svc__pages {
-    min-height: 0;
-    display: grid;
-    gap: var(--umm-sp-6);
-  }
+/* ---------------------------------------------------------------------------
+   SCOPE SIGNPOST
 
-  .umm-svc__page {
-    position: static;
-    grid-template-columns: minmax(0, 1fr);
-  }
+   The note under the services grid. Its job is to send some readers away, to
+   the commerce page, so it is built to be findable while skimming and easy to
+   drop the moment the first line does not apply to you. That is why only the
+   question is set in ink: everything after it is addressed to the small number
+   of people the question caught.
+   ------------------------------------------------------------------------- */
 
-  .umm-svc__slot {
-    transform: none;
-    opacity: 1;
-    pointer-events: auto !important;
-  }
-
-  .umm-svc {
-    min-height: 0;
-  }
+.umm-scope {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+  margin-top: clamp(2.5rem, 4.5vw, 4rem);
+  padding: clamp(1.25rem, 2.2vw, 1.75rem) clamp(1.25rem, 2.4vw, 2rem);
+  border: 1px solid var(--umm-border);
+  border-radius: var(--umm-r-lg);
+  background: var(--umm-surface-raised);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .umm-svc__pages {
-    min-height: 0;
-    display: grid;
-    gap: var(--umm-sp-6);
-  }
+.umm-scope__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--umm-r-sm);
+  background: var(--umm-sky);
+  color: var(--umm-ink);
+}
 
-  .umm-svc__page {
-    position: static;
-  }
+.umm-scope__text {
+  font-size: var(--umm-text-body);
+  line-height: var(--umm-leading-relaxed);
+  color: var(--umm-text-secondary);
+  max-width: 88ch;
+}
 
-  .umm-svc__slot {
-    transform: none;
-    opacity: 1;
-    pointer-events: auto !important;
+.umm-scope__question {
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-text);
+}
+
+/* Named, not decorated. It becomes a real link the moment the sister page's
+   URL is known -- set `services.boundary.href` and the component swaps this
+   for an anchor. */
+.umm-scope__page {
+  font-style: normal;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-text);
+}
+
+.umm-scope__link {
+  color: var(--umm-text);
+  font-weight: var(--umm-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--umm-border-strong);
+}
+
+.umm-scope__link:hover {
+  text-decoration-color: currentColor;
+}
+
+@media (max-width: 560px) {
+  .umm-scope {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

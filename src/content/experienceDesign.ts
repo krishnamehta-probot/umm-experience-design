@@ -169,8 +169,18 @@ export const services = {
       receive: 'An operating model and design standards.',
     },
   ] satisfies Service[],
-  boundaryNote:
-    'Looking for commerce interfaces, checkout, storefront development or merchandising? That work lives on our UX & Digital Commerce page. This page covers customer research, CX strategy, journeys, service design and experience improvement.',
+  /* The scope signpost under the grid. Split rather than held as one string
+     so the sister page can be named as a link the moment its URL is known --
+     set `href` and the component renders an anchor instead of emphasis. */
+  boundary: {
+    question:
+      'Looking for commerce interfaces, checkout, storefront development or merchandising?',
+    before: 'That work lives on our',
+    page: 'UX & Digital Commerce',
+    after:
+      'page. This page covers customer research, CX strategy, journeys, service design and experience improvement.',
+    href: null as string | null,
+  },
 }
 
 export const stages = {
