@@ -983,7 +983,24 @@
   position: relative;
   z-index: 2;
   width: 100%;
-  margin-block: clamp(-5rem, -6vw, -3rem) clamp(-4rem, -5vw, -2.5rem);
+  /* How far the band's drop shadow reaches below it: the filter's 18px offset
+     plus its 30px blur, rounded up. */
+  --ribbon-shade: 56px;
+
+  /* The ribbon is a hinge between two sections, not a section of its own, so
+     it is pulled into both of them rather than sitting in a lane between.
+
+     The padding is not spacing. `overflow: hidden` below is what lets the band
+     run off both edges of the screen instead of stopping in mid-air -- but it
+     clips every direction, not only the two that need it, and the band's
+     shadow is still fading when it meets the bottom of the box. A soft shadow
+     cut off mid-fade leaves a hard line straight across the page, which is
+     exactly what a seam between two sections looks like. The padding gives the
+     shadow somewhere to finish inside the clip, and the margin takes the same
+     amount straight back so nothing below it moves. */
+  padding-bottom: var(--ribbon-shade);
+  margin-block: clamp(-5rem, -6vw, -3rem)
+    calc(clamp(-4rem, -5vw, -2.5rem) - var(--ribbon-shade));
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y;
@@ -993,6 +1010,25 @@
 
 .umm-ribbon:active {
   cursor: grabbing;
+}
+
+/* The far larger pull below, and it is not the ribbon that needs it -- it is
+   what the ribbon lands on. `Why` is a pinned section: above this breakpoint
+   its stage is a full viewport tall with the copy centred in it, so half a
+   screen of the section is deliberately empty before the first word. Left
+   alone that empty half reads as a gap belonging to the ribbon.
+
+   Scoped to the breakpoint deliberately. Below it nothing pins, there is no
+   empty stage to take up, and the same pull drags the copy over the band. */
+@media (min-width: 900px) {
+  .umm-ribbon {
+    /* The band's own height scales with viewport WIDTH -- the svg is
+       width-driven -- while the stage it has to reach across is a constant
+       viewport HEIGHT. So a narrow-but-tall window has the shortest band and
+       the most ground to cover, and the upper bound here is what stops that
+       case being the loosest of the lot. */
+    margin-bottom: calc(clamp(-19rem, -19.5vw, -16rem) - var(--ribbon-shade));
+  }
 }
 
 .umm-ribbon__svg {

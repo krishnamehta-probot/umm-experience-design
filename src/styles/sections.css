@@ -1948,15 +1948,19 @@
    ------------------------------------------------------------------------- */
 
 @media (min-width: 900px) {
-  /* Sized to its column rather than to the page: the narrow copy column of a
-     pinned section needs a smaller head to land on two lines, and two lines is
-     the thing being kept consistent, not the point size. */
+  /* Sized against the card beside it, not against its own column. Holding the
+     head to two lines kept it at 32px while the card's title runs to 46px --
+     the section's own heading smaller than a caption inside one of its steps.
+     That inverted hierarchy is what made the left column read as mostly empty:
+     not too much space, too little weight to fill it. Three lines of type at
+     this size balances the card; two lines of smaller type did not. */
   .umm-pin__copy .umm-section-head__title {
-    font-size: clamp(1.5rem, 1.9vw, 2rem);
+    font-size: clamp(1.875rem, 3.3vw, 3.25rem);
   }
 
   .umm-pin__copy .umm-section-head__lead {
-    max-width: 46ch;
+    max-width: 44ch;
+    font-size: clamp(1.0625rem, 1.25vw, 1.3125rem);
   }
 
   /* Held to roughly half its own length so it breaks onto exactly two lines.
