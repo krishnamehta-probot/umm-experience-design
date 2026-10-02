@@ -9,3 +9,6 @@ dist
 perf.tmp.cjs
 *.tmp.mjs
 *.tmp.cjs
+
+# rendered videos (npm run render:film); large binaries, shared outside git
+exports/

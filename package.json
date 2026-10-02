@@ -8,18 +8,23 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "render:film": "node scripts/render-film.mjs"
   },
   "dependencies": {
+    "gsap": "^3.15.0",
     "lottie-web": "^5.13.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "ffmpeg-static": "^5.3.0",
     "playwright": "^1.63.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.0"
