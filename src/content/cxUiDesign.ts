@@ -255,8 +255,8 @@ export const work = {
 
 /* ── 4 · What we do ───────────────────────────────────────────────────────── */
 
-/** The Lottie mark each service card plays; see scripts/build_lottie.py. */
-export type ServiceMark = 'compass' | 'journey' | 'design' | 'brand' | 'data' | 'measure'
+/** The scene each service card plays on its back; see scripts/build_service_marks.py. */
+export type ServiceMark = 'research' | 'journey' | 'interface' | 'brand' | 'data' | 'testing'
 
 export const services = {
   chip: '6 ways we help',
@@ -271,7 +271,7 @@ export const services = {
       what: "Talk to your customers, look at every step they take today, and rank what to fix by value and effort.",
       get: 'A ranked plan of what to fix first, and a research report.',
       seeIt: { label: 'Fintuit', href: 'https://umm.digital/casestudies/fintuit/' },
-      mark: 'compass' as ServiceMark,
+      mark: 'research' as ServiceMark,
       tone: 'sun' as Tone,
     },
     {
@@ -289,7 +289,7 @@ export const services = {
       what: 'Design clear, good-looking screens, and test them with real users before anything gets built.',
       get: 'A clickable, tested prototype and design files your developers can build from.',
       seeIt: { label: 'Aladdin Commercial', href: 'https://umm.digital/casestudies/aladdin-commercial/' },
-      mark: 'design' as ServiceMark,
+      mark: 'interface' as ServiceMark,
       tone: 'blossom' as Tone,
     },
     {
@@ -317,7 +317,7 @@ export const services = {
       what: 'Agree what success looks like, track it, keep testing improvements, and set your team up to run it after we leave.',
       get: 'A simple scorecard, a regular testing rhythm, and design standards your team can own.',
       seeIt: { label: 'Coco & Coir', href: 'https://umm.digital/casestudies/coco-coir/' },
-      mark: 'measure' as ServiceMark,
+      mark: 'testing' as ServiceMark,
       tone: 'sun' as Tone,
     },
   ],

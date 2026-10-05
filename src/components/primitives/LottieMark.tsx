@@ -16,11 +16,14 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
 export function LottieMark({
   data,
   playing,
+  still = 30,
   className = '',
 }: {
   data: unknown
   /** Mount and run only while the card holding it is open. */
   playing: boolean
+  /** The frame held for reduced motion. */
+  still?: number
   className?: string
 }) {
   const host = useRef<HTMLDivElement>(null)
@@ -43,7 +46,7 @@ export function LottieMark({
         animationData: data as object,
       })
       /* Reduced motion still gets the mark, just held on a legible frame. */
-      if (reduced) instance.goToAndStop(30, true)
+      if (reduced) instance.goToAndStop(still, true)
       anim = instance
     })
 
@@ -52,7 +55,7 @@ export function LottieMark({
       anim?.destroy()
       node.replaceChildren()
     }
-  }, [playing, data, reduced])
+  }, [playing, data, reduced, still])
 
   return <div className={`umm-lottie ${className}`.trim()} ref={host} aria-hidden="true" />
 }

@@ -6,19 +6,19 @@ import { gsap, prefersReducedMotion } from '@/lib/gsap'
 import { measurePeel, peelFrame, sheetPath, type PeelGeometry } from '@/lib/cornerPeel'
 import { services, type ServiceMark } from '@/content/cxUiDesign'
 
-import compass from '@/lottie/compass.json'
-import journey from '@/lottie/journey.json'
-import design from '@/lottie/design.json'
-import brand from '@/lottie/brand.json'
-import data from '@/lottie/data.json'
-import measure from '@/lottie/measure.json'
+import research from '@/lottie/services/research.json'
+import journey from '@/lottie/services/journey.json'
+import interfaces from '@/lottie/services/interface.json'
+import brand from '@/lottie/services/brand.json'
+import data from '@/lottie/services/data.json'
+import testing from '@/lottie/services/testing.json'
 
 /* ============================================================================
    4 · WHAT WE DO — six services, all at once, each a card with two sides
 
    The front says when you need the service and what we do; the back says
-   what you walk away with, with a live mark (a short Lottie loop acting the
-   service out) and the case study. All six are on screen together and all
+   what you walk away with, with a live scene of it (an 8-second Lottie loop,
+   built by scripts/build_service_marks.py) and the case study. All six are on screen together and all
    the same size, because the question a reader brings here is about the
    whole set.
 
@@ -33,7 +33,14 @@ import measure from '@/lottie/measure.json'
    page pays nothing for them.
    ========================================================================== */
 
-const MARKS: Record<ServiceMark, unknown> = { compass, journey, design, brand, data, measure }
+const MARKS: Record<ServiceMark, unknown> = {
+  research,
+  journey,
+  interface: interfaces,
+  brand,
+  data,
+  testing,
+}
 
 type Service = (typeof services.items)[number]
 type Side = 'front' | 'back'
@@ -275,7 +282,7 @@ function ServiceCard({
           <span className="cx-svc__index">{number}</span>
           <span className="cx-svc__name">{s.title}</span>
         </div>
-        <LottieMark data={MARKS[s.mark]} playing={live && (showsBack || busy)} className="cx-svc__mark" />
+        <LottieMark data={MARKS[s.mark]} playing={live && (showsBack || busy)} still={150} className="cx-svc__mark" />
         <dl className="cx-svc__get">
           <dt>What you get</dt>
           <dd>{s.get}</dd>

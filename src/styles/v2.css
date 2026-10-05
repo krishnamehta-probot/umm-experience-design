@@ -2395,13 +2395,15 @@ html.cx-v2 body {
   text-align: right;
 }
 
-/* Overrides the v1 card placement (.umm-lottie centres itself at the foot). */
+/* The scene takes whatever height the card has left, at 4:3, centred.
+   Overrides the v1 card placement (.umm-lottie centres itself at the foot). */
 .cx-svc__mark.umm-lottie {
-  flex: 1 1 auto;
-  width: clamp(124px, 11vw, 168px);
-  min-height: 0;
-  max-height: clamp(124px, 11vw, 168px);
-  margin: auto;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 132px;
+  max-height: 210px;
+  aspect-ratio: auto;
+  margin: 0;
   justify-self: auto;
 }
 

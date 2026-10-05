@@ -2,7 +2,7 @@
 ============================================================================
 SERVICE MARKS -- LOTTIE SOURCE
 
-The marks on the service cards, generated rather than
+The six marks on the back of the service cards, generated rather than
 hand-edited: a 240x240 composition is a few thousand lines of JSON, and the
 part worth editing is the timing, not the punctuation.
 
@@ -449,47 +449,6 @@ def operations():
     ])
 
 
-def brand():
-    """Digital branding -- one mark tried in three forms and three colours,
-    each landing on its own swatch, the way a brand kit settles.
-
-    A single rounded rectangle does all of it: the corner radius takes it
-    from square to circle and back, a quarter turn makes the diamond, and the
-    fill steps through the swatches below. The loop ends on a square turned
-    half way round, which is the square it started as."""
-    B = 96                                   # the mark's box
-    Y = -16                                  # sat a little above centre
-    lands = [36, 92, 148]
-    swatch = [BLOSSOM, CORAL, SKY]           # what each landing turns it to
-    hold = lambda t: t - 18                  # each change takes 18 frames
-
-    r = kf([(0, 14, LIN), (hold(36), 14, INOUT), (36, B / 2, LIN),
-            (hold(92), B / 2, INOUT), (92, 14, LIN), (OP, 14)])
-    rot = kf([(0, 0, LIN), (hold(36), 0, INOUT), (36, 90, LIN),
-              (hold(92), 90, INOUT), (92, 135, LIN),
-              (hold(148), 135, INOUT), (148, 180, LIN), (OP, 180)])
-    col = kf([(0, SKY, LIN), (hold(36), SKY, INOUT), (36, BLOSSOM, LIN),
-              (hold(92), BLOSSOM, INOUT), (92, CORAL, LIN),
-              (hold(148), CORAL, INOUT), (148, SKY, LIN), (OP, SKY)])
-
-    xs = [-34, 0, 34]
-    dots = [
-        group([ell((x, 0), (22, 22)), fill(c), stroke(INK, 4)], "swatch%d" % i,
-              tr(a=(x, 0), p=(x, 0), s=pop([t], over=150)))
-        for i, (x, c, t) in enumerate(zip(xs, swatch, lands))
-    ]
-    return comp("brand", [
-        layer("swatches", dots, p=at(0, 74)),
-        layer("mark", [
-            group([rect((0, 0), (B, B), r), fill(col), stroke(INK, 6)], "form",
-                  tr(r=rot, s=pop(lands, over=112, lead=6, land=14))),
-        ], p=at(0, Y)),
-        # Under the mark, so it is only seen once it has grown past the edge.
-        layer("pulse", [pulse(lands, INK, start=70, end=190, width=2.5,
-                              hold=18, peak=30)], p=at(0, Y)),
-    ])
-
-
 MARKS = {
     "compass": compass,
     "journey": journey,
@@ -497,7 +456,6 @@ MARKS = {
     "data": data_mark,
     "measure": measure,
     "operations": operations,
-    "brand": brand,
 }
 
 if __name__ == "__main__":

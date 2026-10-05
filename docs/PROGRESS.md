@@ -90,6 +90,28 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 5 Oct 2026, section 4: illustrated scenes on the card backs
+- **Brief:** the Lottie marks weren't good enough; make them feel premium
+  and true to each service.
+- **Built:** six new 8-second scenes on a 4:3 canvas, each showing what the
+  client walks away with, in the page's drawing language (white paper,
+  ink outline, hard ink shadow, pastel fills). Source:
+  `scripts/build_service_marks.py` → `src/lottie/services/`.
+  - **Research:** a lens reads down a report, the findings grow, then
+    sort themselves biggest-first and the top one is marked.
+  - **Journey:** a customer walks four touchpoints; each lights up and
+    drops through the line of visibility to the work behind it.
+  - **UI/UX:** a cursor taps through the app prototype, the tests come back
+    green, then it frames a block in the site's design file.
+  - **Branding:** a mark tries on forms and colours with its swatches; the
+    type changes weight and a component switches with it.
+  - **Data:** shop, email and app feed one customer card, which sends out a
+    different tailored message each time.
+  - **Testing:** A against B, meters fill, B wins and lifts, the score ring
+    climbs and the week's dot lights in the rhythm.
+- Every scene is a cycle that opens on a finished picture; reduced motion
+  holds frame 150, the "result" moment. The v1 marks are untouched.
+
 ### 5 Oct 2026, section 4: two-sided cards that peel over from the corner
 - **Brief:** "You need this when" and "What we do" on the front; the arrow
   turns the card to a back with "What you get" and the Lottie, instead of
