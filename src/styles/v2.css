@@ -2249,70 +2249,73 @@ html.cx-v2 body {
    4 · WHAT WE DO
    ========================================================================= */
 
-/* White ground, so the bite out of each card's corner shows the page through
-   it. The notch is painted in this colour rather than masked, so the two have
-   to move together: change one, change --cx-svc-ground. */
+/* White ground: the bite out of each card's corner is a real cut-out (see
+   lib/cornerPeel.ts), so whatever is behind the card shows through it. */
 .cx-svcs {
-  --cx-svc-ground: var(--umm-paper);
-  --cx-svc-step: clamp(0px, 3vw, 44px);
-  background: var(--cx-svc-ground);
+  background: var(--umm-paper);
 }
 
 .cx-svc__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* every row as tall as the tallest, so all six cards are one size */
+  grid-auto-rows: 1fr;
   gap: clamp(14px, 1.6vw, 22px);
   margin: 0;
-  /* the middle column hangs lower; leave room for it under the grid */
-  padding: 0 0 var(--cx-svc-step);
+  padding: 0;
   list-style: none;
 }
 
 .cx-svc {
-  /* the bite: its size, the curve of its inside corner, and the small
-     rounds where it meets the card's own edges */
   --notch: clamp(64px, 5.6vw, 80px);
-  --notch-r: calc(var(--notch) * 0.5);
-  --notch-j: clamp(14px, 1.3vw, 20px);
+  --pad: clamp(1.25rem, 2vw, 1.85rem);
+  /* the front's underside, seen while it turns: paler out at the tip,
+     darker where it bends away from the light at the fold */
+  --peel-tip: color-mix(in srgb, var(--umm-tone) 58%, white);
+  --peel-mid: color-mix(in srgb, var(--umm-tone) 80%, white);
+  --peel-fold: color-mix(in srgb, var(--umm-tone) 86%, var(--umm-ink));
   position: relative;
   display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: 0.9rem;
-  padding: clamp(1.25rem, 2vw, 1.85rem) clamp(1.25rem, 2vw, 1.85rem)
-    calc(var(--notch) + 0.75rem);
-  border-radius: var(--cx-r-card);
-  background: var(--umm-tone);
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   color: var(--umm-ink);
 }
 
-.cx-svc:nth-child(3n + 2) {
-  translate: 0 var(--cx-svc-step);
+.cx-svc__sheet,
+.cx-svc__rest {
+  grid-area: 1 / 1;
+  min-width: 0;
 }
 
-.cx-svc__top {
+.cx-svc__rest {
+  display: grid;
+}
+
+.cx-svc__sheet {
+  position: relative;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: var(--pad) var(--pad) calc(var(--notch) + 0.6rem);
+  /* the clip-path cuts the real outline; this is the fallback before it is
+     measured, and where the script reads the corner radius from */
+  border-radius: var(--cx-r-card);
+  background: var(--umm-tone);
+}
+
+/* At rest only one side exists; mid-turn both are painted. */
+.cx-svc:not([data-busy]) [inert] {
+  visibility: hidden;
 }
 
 .cx-svc__index {
-  padding-top: 0.25rem;
   font-family: var(--umm-font-mono);
   font-size: var(--umm-text-micro);
   letter-spacing: 0.1em;
   color: color-mix(in srgb, var(--umm-ink) 62%, transparent);
 }
 
-/* Overrides the v1 card placement (.umm-lottie centres itself at the foot). */
-.cx-svc__mark.umm-lottie {
-  width: clamp(92px, 8vw, 120px);
-  margin: calc(-0.35 * clamp(1.25rem, 2vw, 1.85rem)) calc(-0.35 * clamp(1.25rem, 2vw, 1.85rem)) 0 0;
-  justify-self: auto;
-}
-
 .cx-svc__title {
-  margin: 0;
+  margin: 0.15rem 0 0;
   font-size: clamp(1.3rem, 1.8vw, 1.65rem);
   letter-spacing: -0.025em;
   line-height: 1.12;
@@ -2325,7 +2328,8 @@ html.cx-v2 body {
   margin: 0;
 }
 
-.cx-svc__lines dt {
+.cx-svc__lines dt,
+.cx-svc__get dt {
   font-family: var(--umm-font-mono);
   font-size: var(--umm-text-micro);
   letter-spacing: 0.1em;
@@ -2339,72 +2343,32 @@ html.cx-v2 body {
   line-height: 1.5;
 }
 
-.cx-svc__lines div:last-child dd {
-  font-weight: var(--umm-weight-medium);
-}
-
-/* The bite. A ground-coloured block with a round inside corner, plus two
-   small pieces that round the card's corners where it meets them. */
-.cx-svc__notch {
-  /* a pixel past the card's edges, so no antialiased sliver of the card's
-     own rounded corner shows round the outside */
+/* The line along the bottom, beside the bite: the hint on the front, the
+   case study on the back. */
+.cx-svc__foot {
   position: absolute;
-  right: -1px;
-  bottom: -1px;
-  width: calc(var(--notch) + 1px);
-  height: calc(var(--notch) + 1px);
-  border-top-left-radius: var(--notch-r);
-  background: var(--cx-svc-ground);
-  pointer-events: none;
-}
-
-.cx-svc__notch::before,
-.cx-svc__notch::after {
-  content: '';
-  position: absolute;
-  width: var(--notch-j);
-  height: var(--notch-j);
-  background: radial-gradient(
-    circle at 0 0,
-    transparent calc(var(--notch-j) - 0.5px),
-    var(--cx-svc-ground) var(--notch-j)
-  );
-}
-
-/* on the card's right edge, just above the bite */
-.cx-svc__notch::before {
-  right: 0;
-  bottom: calc(100% - 0.5px);
-}
-
-/* on the card's bottom edge, just left of the bite */
-.cx-svc__notch::after {
-  right: calc(100% - 0.5px);
+  left: var(--pad);
+  right: calc(var(--notch) + 0.75rem);
   bottom: 0;
-}
-
-/* One link: the caption sits on the card, the arrow sits in the bite. */
-.cx-svc__go {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: clamp(1.25rem, 2vw, 1.85rem);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.4em;
   height: var(--notch);
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--umm-ink) 72%, transparent);
+}
+
+.cx-svc__hint {
+  cursor: pointer;
+  font-weight: var(--umm-weight-medium);
   color: var(--umm-ink);
+}
+
+.cx-svc__case {
   text-decoration: none;
 }
 
-.cx-svc__go-label {
-  font-size: 0.8125rem;
-  color: color-mix(in srgb, var(--umm-ink) 72%, transparent);
-  transition: color var(--umm-dur-fast) ease;
-}
-
-.cx-svc__go-label strong {
+.cx-svc__case strong {
   font-weight: var(--umm-weight-semibold);
   color: var(--umm-ink);
   text-decoration: underline;
@@ -2412,41 +2376,135 @@ html.cx-v2 body {
   text-underline-offset: 3px;
 }
 
-.cx-svc__go-mark {
-  flex: none;
+.cx-svc__case:hover strong {
+  text-decoration-thickness: 2.5px;
+}
+
+/* --- the back --- */
+
+.cx-svc__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cx-svc__name {
+  font-size: 0.875rem;
+  font-weight: var(--umm-weight-semibold);
+  text-align: right;
+}
+
+/* Overrides the v1 card placement (.umm-lottie centres itself at the foot). */
+.cx-svc__mark.umm-lottie {
+  flex: 1 1 auto;
+  width: clamp(124px, 11vw, 168px);
+  min-height: 0;
+  max-height: clamp(124px, 11vw, 168px);
+  margin: auto;
+  justify-self: auto;
+}
+
+.cx-svc__get {
+  margin: 0;
+}
+
+.cx-svc__get dd {
+  margin: 6px 0 0;
+  font-size: clamp(1.1rem, 1.45vw, 1.35rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.cx-svc__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* --- the turn --- */
+
+/* Clipped to the card's outline (set by the script, like the sheets), and
+   the depth the flap lifts into comes from here. */
+.cx-svc__flap-clip {
+  position: absolute;
+  inset: 0;
+  display: none;
+  perspective: 1600px;
+  pointer-events: none;
+}
+
+.cx-svc[data-busy] .cx-svc__flap-clip {
+  display: block;
+}
+
+.cx-svc__flap {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  filter: drop-shadow(0 2px 12px rgb(16 14 20 / 0.3));
+}
+
+.cx-svc__flap-sheet,
+.cx-svc__flap-paper {
+  position: absolute;
+  inset: 0;
+}
+
+.cx-svc__flap-paper {
+  background: var(--peel-mid);
+}
+
+/* --- the button in the bite --- */
+
+.cx-svc__bite {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
-  /* centred in the bite, nudged off the round corner */
-  width: calc(var(--notch) * 0.62);
-  height: calc(var(--notch) * 0.62);
-  margin: calc(var(--notch) * 0.12) calc(var(--notch) * 0.06) 0 0;
+  width: var(--notch);
+  height: var(--notch);
+  pointer-events: none;
+}
+
+.cx-svc__flip {
+  display: grid;
+  place-items: center;
+  width: calc(var(--notch) - 16px);
+  height: calc(var(--notch) - 16px);
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  background: var(--umm-tone);
-  color: var(--umm-ink);
-  transition:
-    background var(--umm-dur-fast) ease,
-    color var(--umm-dur-fast) ease,
-    transform 0.5s var(--umm-ease-spring);
-}
-
-.cx-svc__go:hover .cx-svc__go-label,
-.cx-svc__go:focus-visible .cx-svc__go-label {
-  color: var(--umm-ink);
-}
-
-.cx-svc__go:hover .cx-svc__go-mark,
-.cx-svc__go:focus-visible .cx-svc__go-mark {
   background: var(--umm-ink);
-  color: var(--umm-ink-paper);
-  transform: rotate(45deg);
+  color: var(--umm-tone);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.45s var(--umm-ease-spring);
 }
 
-.cx-svc__go:focus-visible {
-  outline: none;
+.cx-svc__flip svg {
+  transition: transform 0.8s var(--umm-ease-spring);
 }
 
-.cx-svc__go:focus-visible .cx-svc__go-mark {
-  box-shadow: 0 0 0 3px var(--cx-svc-ground), 0 0 0 5px var(--umm-ink);
+.cx-svc__flip:hover {
+  transform: scale(1.08);
+}
+
+.cx-svc__flip:active {
+  transform: scale(0.9);
+}
+
+/* pointing back the way it came */
+.cx-svc[data-side='back'] .cx-svc__flip svg {
+  transform: rotate(180deg);
+}
+
+.cx-svc__flip:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 4px;
 }
 
 .cx-signpost {
@@ -2489,9 +2547,6 @@ html.cx-v2 body {
 }
 
 @media (max-width: 1023px) {
-  .cx-svcs {
-    --cx-svc-step: 0px;
-  }
   .cx-svc__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

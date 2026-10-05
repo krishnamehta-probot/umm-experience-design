@@ -18,7 +18,7 @@ of the **Log**. Tick boxes as things land.
 | 1 | Hero + ribbon curtain into a dark section 2 | 🔁 revision 1 built (Krish's brief), awaiting review | Artifact layout; Krish's ribbon-reveal idea |
 | 2 | Why it matters (dark band) | 🔁 rebuilt as a scroll story ("ten teams → one company"), awaiting review | Krish's go on the scroll-story concept |
 | 3 | Our work → a 30-second film | 🔁 replaced (Krish), awaiting review | Krish: "After Effects-style, hook them, our numbers, real work" |
-| 4 | What we do: 6 service cards | ✅ built, awaiting review | Truus stickers, Google shape icons, Cool Shapes |
+| 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
 | 5 | Built for where you are: size tabs | ✅ built, awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
 | 6 | How we design: 5 rules + tools wheel | ✅ built, awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
 | 7 | How we work + FAQ + closing band | ✅ built, awaiting review | Designjoy steps, Cal.com FAQ + CTA |
@@ -89,6 +89,36 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 5 Oct 2026, section 4: two-sided cards that peel over from the corner
+- **Brief:** "You need this when" and "What we do" on the front; the arrow
+  turns the card to a back with "What you get" and the Lottie, instead of
+  going to a new page; an out-of-the-box animation for the turn; a black
+  arrow circle with the arrow in the card's colour; all cards one size.
+- **Built:**
+  - White section ground. Every card has a real bite out of its
+    bottom-right corner (a clip-path drawn from the card's measured size),
+    with the black button sitting in it.
+  - Front: number, title, when, what, and a "See what you get" hint.
+    Back: number and title, the service's Lottie mark, what you get, and
+    the case-study link.
+  - The turn is a corner peel: a fold sweeps from the bite to the far
+    corner, the lifted paper turns back over the sheet (lit underside, soft
+    shadow, held off the paper in perspective) and rolls off at the far
+    corner. Pressing again lays the sheet back down. Geometry in
+    `src/lib/cornerPeel.ts`.
+  - Digital branding has a new Lottie mark (one form tried as square,
+    circle and diamond over three swatches), added to
+    `scripts/build_lottie.py`.
+  - Marks run only while a card shows its back and the grid is near the
+    screen. Grid rows are `1fr`, so all six cards share the tallest size.
+- **Accessibility:** the hidden side is `inert`; the button carries
+  `aria-expanded`/`aria-controls` and names the card. **Reduced motion:**
+  the side changes without the peel, and the mark holds a still frame.
+- **Open:** digital branding still has no case study, so its back has no
+  link.
+- **Checked** at 1440×900 and 390×844: the turn both ways, a second press
+  mid-turn, keyboard, reduced motion. Typecheck and build pass.
 
 ### 2 Oct 2026, the film's entrance: a window that opens with the scroll
 - **Krish:** after section 2 the film should come in "in a frame", ultra
