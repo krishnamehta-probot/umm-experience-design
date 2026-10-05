@@ -255,6 +255,9 @@ export const work = {
 
 /* ── 4 · What we do ───────────────────────────────────────────────────────── */
 
+/** The Lottie mark each service card plays; see scripts/build_lottie.py. */
+export type ServiceMark = 'compass' | 'journey' | 'design' | 'brand' | 'data' | 'measure'
+
 export const services = {
   chip: '6 ways we help',
   line1: 'What we',
@@ -268,7 +271,7 @@ export const services = {
       what: "Talk to your customers, look at every step they take today, and rank what to fix by value and effort.",
       get: 'A ranked plan of what to fix first, and a research report.',
       seeIt: { label: 'Fintuit', href: 'https://umm.digital/casestudies/fintuit/' },
-      shape: 'star-1' as ShapeName,
+      mark: 'compass' as ServiceMark,
       tone: 'sun' as Tone,
     },
     {
@@ -277,7 +280,7 @@ export const services = {
       what: 'Map the whole journey from first click to final step, find where it breaks, and redesign the path.',
       get: 'A journey map, and a service blueprint: the plan for what happens behind each screen.',
       seeIt: { label: 'QCare', href: 'https://umm.digital/casestudies/qcare/' },
-      shape: 'misc-11' as ShapeName,
+      mark: 'journey' as ServiceMark,
       tone: 'sky' as Tone,
     },
     {
@@ -286,7 +289,7 @@ export const services = {
       what: 'Design clear, good-looking screens, and test them with real users before anything gets built.',
       get: 'A clickable, tested prototype and design files your developers can build from.',
       seeIt: { label: 'Aladdin Commercial', href: 'https://umm.digital/casestudies/aladdin-commercial/' },
-      shape: 'ellipse-10' as ShapeName,
+      mark: 'design' as ServiceMark,
       tone: 'blossom' as Tone,
     },
     {
@@ -296,7 +299,7 @@ export const services = {
       get: 'A digital brand kit and a design system for web and app.',
       /* open item: Krish to pick the branding project */
       seeIt: null as { label: string; href: string } | null,
-      shape: 'star-11' as ShapeName,
+      mark: 'brand' as ServiceMark,
       tone: 'citrus' as Tone,
     },
     {
@@ -305,7 +308,7 @@ export const services = {
       what: 'Pull your data into one view of each customer, and design where personal touches and AI genuinely help.',
       get: 'One view of each customer, and a personalisation plan.',
       seeIt: { label: 'Zceppa', href: 'https://umm.digital/casestudies/zceppa/' },
-      shape: 'ellipse-5' as ShapeName,
+      mark: 'data' as ServiceMark,
       tone: 'coral' as Tone,
     },
     {
@@ -314,7 +317,7 @@ export const services = {
       what: 'Agree what success looks like, track it, keep testing improvements, and set your team up to run it after we leave.',
       get: 'A simple scorecard, a regular testing rhythm, and design standards your team can own.',
       seeIt: { label: 'Coco & Coir', href: 'https://umm.digital/casestudies/coco-coir/' },
-      shape: 'misc-3' as ShapeName,
+      mark: 'measure' as ServiceMark,
       tone: 'sun' as Tone,
     },
   ],

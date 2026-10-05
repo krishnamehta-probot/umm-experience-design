@@ -2249,39 +2249,70 @@ html.cx-v2 body {
    4 · WHAT WE DO
    ========================================================================= */
 
+/* White ground, so the bite out of each card's corner shows the page through
+   it. The notch is painted in this colour rather than masked, so the two have
+   to move together: change one, change --cx-svc-ground. */
+.cx-svcs {
+  --cx-svc-ground: var(--umm-paper);
+  --cx-svc-step: clamp(0px, 3vw, 44px);
+  background: var(--cx-svc-ground);
+}
+
 .cx-svc__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(14px, 1.6vw, 22px);
   margin: 0;
-  padding: 0;
+  /* the middle column hangs lower; leave room for it under the grid */
+  padding: 0 0 var(--cx-svc-step);
   list-style: none;
 }
 
 .cx-svc {
+  /* the bite: its size, the curve of its inside corner, and the small
+     rounds where it meets the card's own edges */
+  --notch: clamp(64px, 5.6vw, 80px);
+  --notch-r: calc(var(--notch) * 0.5);
+  --notch-j: clamp(14px, 1.3vw, 20px);
   position: relative;
   display: grid;
   grid-template-rows: auto auto 1fr;
   gap: 0.9rem;
-  padding: clamp(1.25rem, 2vw, 1.85rem) clamp(1.25rem, 2vw, 1.85rem) clamp(2.5rem, 3.6vw, 3.25rem);
+  padding: clamp(1.25rem, 2vw, 1.85rem) clamp(1.25rem, 2vw, 1.85rem)
+    calc(var(--notch) + 0.75rem);
   border-radius: var(--cx-r-card);
   background: var(--umm-tone);
   color: var(--umm-ink);
 }
 
-.cx-svc__shape {
-  width: clamp(54px, 5vw, 72px);
-  height: clamp(54px, 5vw, 72px);
-  color: var(--umm-ink);
-  transition: transform 0.7s var(--umm-ease-spring);
+.cx-svc:nth-child(3n + 2) {
+  translate: 0 var(--cx-svc-step);
 }
 
-.cx-svc:hover .cx-svc__shape {
-  transform: rotate(-24deg) scale(1.08);
+.cx-svc__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cx-svc__index {
+  padding-top: 0.25rem;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--umm-ink) 62%, transparent);
+}
+
+/* Overrides the v1 card placement (.umm-lottie centres itself at the foot). */
+.cx-svc__mark.umm-lottie {
+  width: clamp(92px, 8vw, 120px);
+  margin: calc(-0.35 * clamp(1.25rem, 2vw, 1.85rem)) calc(-0.35 * clamp(1.25rem, 2vw, 1.85rem)) 0 0;
+  justify-self: auto;
 }
 
 .cx-svc__title {
-  margin: 0.35rem 0 0;
+  margin: 0;
   font-size: clamp(1.3rem, 1.8vw, 1.65rem);
   letter-spacing: -0.025em;
   line-height: 1.12;
@@ -2312,33 +2343,110 @@ html.cx-v2 body {
   font-weight: var(--umm-weight-medium);
 }
 
-.cx-svc__sticker {
+/* The bite. A ground-coloured block with a round inside corner, plus two
+   small pieces that round the card's corners where it meets them. */
+.cx-svc__notch {
+  /* a pixel past the card's edges, so no antialiased sliver of the card's
+     own rounded corner shows round the outside */
   position: absolute;
-  right: clamp(14px, 1.6vw, 22px);
-  bottom: -14px;
-  display: inline-flex;
+  right: -1px;
+  bottom: -1px;
+  width: calc(var(--notch) + 1px);
+  height: calc(var(--notch) + 1px);
+  border-top-left-radius: var(--notch-r);
+  background: var(--cx-svc-ground);
+  pointer-events: none;
+}
+
+.cx-svc__notch::before,
+.cx-svc__notch::after {
+  content: '';
+  position: absolute;
+  width: var(--notch-j);
+  height: var(--notch-j);
+  background: radial-gradient(
+    circle at 0 0,
+    transparent calc(var(--notch-j) - 0.5px),
+    var(--cx-svc-ground) var(--notch-j)
+  );
+}
+
+/* on the card's right edge, just above the bite */
+.cx-svc__notch::before {
+  right: 0;
+  bottom: calc(100% - 0.5px);
+}
+
+/* on the card's bottom edge, just left of the bite */
+.cx-svc__notch::after {
+  right: calc(100% - 0.5px);
+  bottom: 0;
+}
+
+/* One link: the caption sits on the card, the arrow sits in the bite. */
+.cx-svc__go {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: clamp(1.25rem, 2vw, 1.85rem);
+  display: flex;
   align-items: center;
-  gap: 0.4em;
-  padding: 0.55em 1em;
-  border-radius: var(--umm-r-pill);
-  background: var(--umm-paper);
+  justify-content: space-between;
+  gap: 0.75rem;
+  height: var(--notch);
   color: var(--umm-ink);
+  text-decoration: none;
+}
+
+.cx-svc__go-label {
   font-size: 0.8125rem;
-  font-weight: var(--umm-weight-medium);
-  white-space: nowrap;
-  transform: rotate(-5deg);
-  box-shadow: 0 8px 18px -10px rgb(16 14 20 / 0.5), 0 0 0 1px rgb(16 14 20 / 0.08);
-  transition: transform 0.4s var(--umm-ease-spring), background var(--umm-dur-fast) ease;
+  color: color-mix(in srgb, var(--umm-ink) 72%, transparent);
+  transition: color var(--umm-dur-fast) ease;
 }
 
-.cx-svc:nth-child(even) .cx-svc__sticker {
-  transform: rotate(4deg);
+.cx-svc__go-label strong {
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
 }
 
-.cx-svc__sticker:hover {
+.cx-svc__go-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  /* centred in the bite, nudged off the round corner */
+  width: calc(var(--notch) * 0.62);
+  height: calc(var(--notch) * 0.62);
+  margin: calc(var(--notch) * 0.12) calc(var(--notch) * 0.06) 0 0;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+  transition:
+    background var(--umm-dur-fast) ease,
+    color var(--umm-dur-fast) ease,
+    transform 0.5s var(--umm-ease-spring);
+}
+
+.cx-svc__go:hover .cx-svc__go-label,
+.cx-svc__go:focus-visible .cx-svc__go-label {
+  color: var(--umm-ink);
+}
+
+.cx-svc__go:hover .cx-svc__go-mark,
+.cx-svc__go:focus-visible .cx-svc__go-mark {
   background: var(--umm-ink);
   color: var(--umm-ink-paper);
-  transform: rotate(0deg) scale(1.04);
+  transform: rotate(45deg);
+}
+
+.cx-svc__go:focus-visible {
+  outline: none;
+}
+
+.cx-svc__go:focus-visible .cx-svc__go-mark {
+  box-shadow: 0 0 0 3px var(--cx-svc-ground), 0 0 0 5px var(--umm-ink);
 }
 
 .cx-signpost {
@@ -2381,9 +2489,11 @@ html.cx-v2 body {
 }
 
 @media (max-width: 1023px) {
+  .cx-svcs {
+    --cx-svc-step: 0px;
+  }
   .cx-svc__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 30px;
   }
 }
 

@@ -1,27 +1,56 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { IconArrowUpRight } from '../icons'
+import { LottieMark } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
-import { Shape } from './Shape'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
-import { services } from '@/content/cxUiDesign'
+import { services, type ServiceMark } from '@/content/cxUiDesign'
+
+import compass from '@/lottie/compass.json'
+import journey from '@/lottie/journey.json'
+import design from '@/lottie/design.json'
+import brand from '@/lottie/brand.json'
+import data from '@/lottie/data.json'
+import measure from '@/lottie/measure.json'
 
 /* ============================================================================
    4 · WHAT WE DO — six services, all at once
 
-   Pastel tiles with a bold shape, the Truus recipe from the reference board:
-   each card is one flat brand colour with a solid ink silhouette and three
-   short lines that answer "when would I need this, what do you do, what do I
-   walk away with". All six are on screen together, because the question a
-   reader brings here is about the whole set.
+   Pastel cards on a white ground, each with a live mark: a short Lottie loop
+   that acts out the service (a bearing taken, a route walked, a row chosen,
+   a brand tried on, four sources arriving as one, a line held to a target).
+   All six are on screen together, because the question a reader brings here
+   is about the whole set.
 
-   The "See it in" link is a tilted sticker hanging off the card's edge and
-   goes straight to the case study, so sections 3 and 4 point at each other.
-   Only the shape moves on hover; the text never does, so it is always
-   readable (the Google "The Web Can Do What" rule).
+   The bottom-right corner of every card is bitten out, and the arrow sits in
+   the bite: it goes straight to the case study, so sections 3 and 4 point at
+   each other. The middle column hangs a step lower than its neighbours, which
+   keeps a grid of six from reading as a spreadsheet.
+
+   The marks only run while the grid is near the screen; scrolled away, each
+   player is destroyed rather than paused, so the rest of the page pays
+   nothing for them. Only the marks and the arrow move; the text never does,
+   so it is always readable (the Google "The Web Can Do What" rule).
    ========================================================================== */
+
+const MARKS: Record<ServiceMark, unknown> = { compass, journey, design, brand, data, measure }
+
+/** Where the arrow goes when a service has no case study picked yet. */
+const FALLBACK = { label: 'Talk to us', href: '#contact' }
 
 export function ServicesV2() {
   const ref = useRef<HTMLElement>(null)
+  const grid = useRef<HTMLUListElement>(null)
+  const [live, setLive] = useState(false)
+
+  useEffect(() => {
+    const node = grid.current
+    if (!node) return
+    const io = new IntersectionObserver(([entry]) => setLive(entry.isIntersecting), {
+      rootMargin: '240px 0px',
+    })
+    io.observe(node)
+    return () => io.disconnect()
+  }, [])
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -36,14 +65,15 @@ export function ServicesV2() {
         ease: 'back.out(1.3)',
         scrollTrigger: { trigger: '.cx-svc__grid', start: 'top 80%', once: true },
       })
-      gsap.from('.cx-svc__sticker', {
-        opacity: 0,
-        scale: 0.4,
-        rotate: '+=30',
+      gsap.from('.cx-svc__go-mark', {
+        scale: 0,
+        rotate: -90,
         duration: 0.6,
         stagger: 0.08,
         ease: 'back.out(2.4)',
         delay: 0.5,
+        /* hand the transform back to CSS, or the hover turn never shows */
+        clearProps: 'transform',
         scrollTrigger: { trigger: '.cx-svc__grid', start: 'top 80%', once: true },
       })
     }, el)
@@ -67,33 +97,56 @@ export function ServicesV2() {
           <p className="cx-lead">{services.lead}</p>
         </div>
 
-        <ul className="cx-svc__grid">
-          {services.items.map((s) => (
-            <li className="cx-svc" key={s.title} data-umm-tone={s.tone}>
-              <Shape name={s.shape} className="cx-svc__shape" />
-              <h3 className="cx-svc__title">{s.title}</h3>
-              <dl className="cx-svc__lines">
-                <div>
-                  <dt>You need this when</dt>
-                  <dd>{s.when}</dd>
+        <ul className="cx-svc__grid" ref={grid}>
+          {services.items.map((s, i) => {
+            const go = s.seeIt ?? FALLBACK
+            const external = /^https?:/.test(go.href)
+            return (
+              <li className="cx-svc" key={s.title} data-umm-tone={s.tone}>
+                <div className="cx-svc__top">
+                  <span className="cx-svc__index">
+                    {String(i + 1).padStart(2, '0')} / {String(services.items.length).padStart(2, '0')}
+                  </span>
+                  <LottieMark data={MARKS[s.mark]} playing={live} className="cx-svc__mark" />
                 </div>
-                <div>
-                  <dt>What we do</dt>
-                  <dd>{s.what}</dd>
-                </div>
-                <div>
-                  <dt>What you get</dt>
-                  <dd>{s.get}</dd>
-                </div>
-              </dl>
-              {s.seeIt ? (
-                <a className="cx-svc__sticker" href={s.seeIt.href} target="_blank" rel="noreferrer">
-                  See it in: {s.seeIt.label}
-                  <IconArrowUpRight size={14} strokeWidth={2.2} />
+                <h3 className="cx-svc__title">{s.title}</h3>
+                <dl className="cx-svc__lines">
+                  <div>
+                    <dt>You need this when</dt>
+                    <dd>{s.when}</dd>
+                  </div>
+                  <div>
+                    <dt>What we do</dt>
+                    <dd>{s.what}</dd>
+                  </div>
+                  <div>
+                    <dt>What you get</dt>
+                    <dd>{s.get}</dd>
+                  </div>
+                </dl>
+
+                <span className="cx-svc__notch" aria-hidden="true" />
+                <a
+                  className="cx-svc__go"
+                  href={go.href}
+                  {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                >
+                  <span className="cx-svc__go-label">
+                    {s.seeIt ? (
+                      <>
+                        See it in <strong>{s.seeIt.label}</strong>
+                      </>
+                    ) : (
+                      go.label
+                    )}
+                  </span>
+                  <span className="cx-svc__go-mark">
+                    <IconArrowUpRight size={18} strokeWidth={2} />
+                  </span>
                 </a>
-              ) : null}
-            </li>
-          ))}
+              </li>
+            )
+          })}
         </ul>
 
         <aside className="cx-signpost">
