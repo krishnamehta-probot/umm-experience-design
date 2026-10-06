@@ -19,7 +19,7 @@ of the **Log**. Tick boxes as things land.
 | 2 | Why it matters (dark band) | 🔁 rebuilt as a scroll story ("ten teams → one company"), awaiting review | Krish's go on the scroll-story concept |
 | 3 | Our work → a 30-second film | 🔁 replaced (Krish), awaiting review | Krish: "After Effects-style, hook them, our numbers, real work" |
 | 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
-| 5 | Built for where you are: size tabs | ✅ built, awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
+| 5 | Built for where you are: size tabs | 🔄 revised (light picture behind the number), awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
 | 6 | How we design: 5 rules + tools wheel | ✅ built, awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
 | 7 | How we work + FAQ + closing band | ✅ built, awaiting review | Designjoy steps, Cal.com FAQ + CTA |
 | 8 | Phones, reduced motion, build check | ✅ build passes; runtime smoke test clean | — |
@@ -36,7 +36,7 @@ reviewer; no screenshot review was done on my side).
 | Page | `src/pages/CxUiDesignPage.tsx` |
 | All copy | `src/content/cxUiDesign.ts` (mirrors the copy deck word for word) |
 | Film | `src/components/v2/ProofFilm.tsx` (timeline + scenes), `/film` page, `scripts/render-film.mjs` (MP4 export) |
-| Sections | `src/components/v2/` (HeroV2, RibbonCurtain, WhyBand, WorkShowcase, ScreenLoop, ServicesV2, StagesV2, Principles, ToolsWheel, ProcessClose, NavV2) |
+| Sections | `src/components/v2/` (HeroV2, RibbonCurtain, WhyBand, WorkShowcase, ScreenLoop, ServicesV2, StagesV2, StageLight, Principles, ToolsWheel, ProcessClose, NavV2) |
 | Chip headline | `src/components/v2/ChipHead.tsx` (6 line recipes × 4 chip recipes) |
 | Shape icons | `src/components/v2/Shape.tsx` + `shapes.data.ts` (36 Cool Shapes, MIT) |
 | Glass cube (CSS stand-in) | `src/components/v2/GlassCube.tsx` |
@@ -89,6 +89,22 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, section 5: a picture of light behind each stage's number
+- Krish: make it image-worthy, in the same aesthetic as section 2's light,
+  but relatable to the section.
+- The stage figure is now a dark tile with a live fluted-glass light shader
+  behind the number (`src/components/v2/StageLight.tsx`), the same material
+  as `why-light.webp`. What the light is grows with the company:
+  **Startups** one spark (sun), **Growing** a rising J-curve (blossom),
+  **Enterprises** a lit skyline, every flute a tower (sky). It morphs on the
+  same scroll value as the odometer; the top-left corner stays dark for the
+  number, which is now white.
+- Replaces the three Cool Shapes in that tile.
+- Draws only on screen; reduced motion gets a still frame; without WebGL the
+  tile falls back to the stage colour glowing on ink.
+- Checks: `npm run build` passes; screenshots at 1440 (all three stages and
+  mid-morph), 390 (tapped tabs) and with reduced motion; no console errors.
 
 ### 5 Oct 2026, section 4: illustrated scenes on the card backs
 - **Brief:** the Lottie marks weren't good enough; make them feel premium

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { IconArrowUpRight } from '../icons'
 import { ChipHead, withAccent } from './ChipHead'
-import { Shape } from './Shape'
+import { StageLight } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
 import { stages } from '@/content/cxUiDesign'
@@ -12,8 +12,9 @@ import { stages } from '@/content/cxUiDesign'
    Santosh singled this interaction out, so the mechanics are v1's Stages
    unchanged and only the content and the skin are new: a verb headline per
    stage (Pitch), one big number as the hero of each stage (Stripe), the
-   engagement model folded in as "how we'd work together", and one Cool Shape
-   per stage that grows with the company (sprout, flower, full wheel).
+   engagement model folded in as "how we'd work together", and a picture of
+   light behind the number that grows with the company (StageLight: a spark,
+   a rising curve, a lit skyline).
 
    v1's notes on the mechanics follow.
 
@@ -293,21 +294,10 @@ export function StagesV2() {
                   ))}
                 </div>
 
-                {/* the shape grows with the company: a sprout, a flower, a full
-                    wheel, cross-fading on the same scroll value as the reels */}
-                <div className="cx-stage__shapes" aria-hidden="true">
-                  {items.map((item, i) => (
-                    <Shape
-                      key={item.tab}
-                      name={item.shape}
-                      className="cx-stage__shape"
-                      style={{
-                        opacity: Math.max(0, 1 - Math.abs(u - i) * 1.6),
-                        transform: `scale(${(0.55 + 0.45 * Math.max(0, 1 - Math.abs(u - i))).toFixed(3)}) rotate(${((u - i) * 70).toFixed(1)}deg)`,
-                      }}
-                    />
-                  ))}
-                </div>
+                {/* the picture behind the number grows with the company: a
+                    spark, a rising curve, a lit skyline, morphing on the same
+                    scroll value as the reels */}
+                <StageLight u={u} />
 
                 <div className="umm-stage__captions">
                   {items.map((item, i) => {
