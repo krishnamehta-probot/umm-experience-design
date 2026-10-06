@@ -3698,24 +3698,20 @@ html.cx-v2 body {
 }
 
 /* ===========================================================================
-   6b · THE SYSTEMS YOU ALREADY HAVE — six groups, six colours
+   6b · THE SYSTEMS YOU ALREADY HAVE — the tools wheel
 
-   Laid out like the rules above it: the list on the right, one picture on
-   the left. The picture is a rounded tile in the open group's pastel, light
-   at the top and deepening down: --p0 (tint), --p1 (the brand pastel), --p2
-   (a deeper pastel, still in the family). Registered, so the tile's colour
-   glides from group to group.
+   The groups on a wheel down the left; the open group's tools as a register
+   of tiles in a dark frame on the right. Each group's tiles are its pastel,
+   deepening a little from the top row to the bottom: --p1 (the brand
+   pastel) towards --p2 (a deeper pastel, still in the family), with --p0
+   (a tint) for the sheen and the lines between rows.
    ========================================================================= */
 
-@property --p0 { syntax: '<color>'; inherits: true; initial-value: #fff6d6; }
-@property --p1 { syntax: '<color>'; inherits: true; initial-value: #ffe58f; }
-@property --p2 { syntax: '<color>'; inherits: true; initial-value: #ffd45e; }
-
-[data-ramp='sun'] { --p0: #fff6d6; --p1: #ffe58f; --p2: #ffd45e; }
-[data-ramp='sky'] { --p0: #eef6ff; --p1: #d1e7ff; --p2: #a9cdf6; }
-[data-ramp='blossom'] { --p0: #fff0fb; --p1: #ffc4f2; --p2: #f6a2e1; }
-[data-ramp='citrus'] { --p0: #fbffd9; --p1: #f0ff70; --p2: #dcee3f; }
-[data-ramp='coral'] { --p0: #fff0f0; --p1: #ffc3c4; --p2: #ffa0a3; }
+[data-ramp='sun'] { --p0: #fff6d6; --p1: #ffe58f; --p2: #ffd25a; }
+[data-ramp='sky'] { --p0: #eef6ff; --p1: #d1e7ff; --p2: #a6cbf6; }
+[data-ramp='blossom'] { --p0: #fff0fb; --p1: #ffc4f2; --p2: #f5a0e0; }
+[data-ramp='citrus'] { --p0: #fbffd9; --p1: #f0ff70; --p2: #d8ec3c; }
+[data-ramp='coral'] { --p0: #fff0f0; --p1: #ffc3c4; --p2: #ff9ea1; }
 
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
   .cx-kit.umm-pin {
@@ -3747,255 +3743,109 @@ html.cx-v2 body {
 
 .cx-kit__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: clamp(2rem, 4.5vw, 5rem);
-  align-items: center;
   min-height: 0;
 }
 
-/* --- the tile ------------------------------------------------------------ */
+/* --- the wheel ----------------------------------------------------------- */
 
-.cx-kit__tile {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  border-radius: clamp(20px, 2.2vw, 32px);
-  background: linear-gradient(180deg, var(--p0) 0%, var(--p1) 78%, color-mix(in srgb, var(--p1) 70%, var(--p2)) 100%);
-  transition:
-    --p0 0.9s cubic-bezier(0.65, 0, 0.35, 1),
-    --p1 0.9s cubic-bezier(0.65, 0, 0.35, 1),
-    --p2 0.9s cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-.cx-kit__body .cx-kit__tile {
-  height: min(100%, 540px);
-  max-height: 100%;
-}
-
-.cx-kit__count-big {
-  position: absolute;
-  top: clamp(18px, 2vw, 28px);
-  left: clamp(20px, 2.2vw, 32px);
-  z-index: 2;
-  display: flex;
-  align-items: baseline;
-  gap: 0.45em;
-  font-family: var(--umm-font-display);
-  font-size: clamp(2.5rem, 4.6vw, 4.25rem);
-  font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-.cx-kit__count-big small {
-  font-family: var(--umm-font-mono);
-  font-size: var(--umm-text-micro);
-  font-weight: 400;
-  letter-spacing: var(--umm-tracking-label);
-  text-transform: uppercase;
-  color: var(--umm-ink-soft);
-}
-
-.cx-kit__set {
-  position: absolute;
-  inset: 0;
-}
-
-/* The group's Cool Shape: flat, in the deeper pastel, low on the right and
-   cropped by the tile, turning slowly. */
-.cx-kit__shape {
-  position: absolute;
-  right: -9%;
-  bottom: -14%;
-  width: 66%;
-  aspect-ratio: 1;
-  opacity: 0;
-  transform: rotate(-70deg) scale(0.6);
-  transition:
-    transform 0.8s cubic-bezier(0.65, 0, 0.35, 1),
-    opacity 0.5s var(--umm-ease-out);
-}
-
-.cx-kit__set[data-on='true'] .cx-kit__shape {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-  transition:
-    transform 1s cubic-bezier(0.34, 1.3, 0.5, 1) 0.15s,
-    opacity 0.5s var(--umm-ease-out) 0.15s;
-}
-
-.cx-kit__set[data-on='false'] .cx-kit__shape {
-  transform: rotate(50deg) scale(1.15);
-}
-
-.cx-kit__shape .cx-shape {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.cx-kit__fill {
-  color: var(--p2);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .cx-kit__set[data-on='true'] .cx-kit__fill {
-    animation: cx-kit-turn 26s linear infinite;
-  }
-}
-
-@keyframes cx-kit-turn {
-  to { rotate: 360deg; }
-}
-
-/* The tools: white stickers, dropped on one after another. */
-.cx-kit__stickers {
-  position: absolute;
-  left: clamp(20px, 2.2vw, 32px);
-  right: 30%;
-  bottom: clamp(20px, 2.4vw, 34px);
-  z-index: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-end;
-  gap: 10px 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cx-kit__stickers li {
-  padding: 0.6em 1em;
-  border-radius: 999px;
-  background: var(--umm-paper);
-  box-shadow: 0 1px 0 rgb(16 14 20 / 0.06), 0 8px 20px -10px rgb(16 14 20 / 0.28);
-  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
-  font-weight: var(--umm-weight-medium);
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateY(-26px) rotate(calc(var(--tilt) * 3)) scale(0.9);
-  transition:
-    transform 0.35s var(--umm-ease-out),
-    opacity 0.25s var(--umm-ease-out);
-}
-
-.cx-kit__set[data-on='true'] .cx-kit__stickers li {
-  opacity: 1;
-  transform: translateY(0) rotate(var(--tilt)) scale(1);
-  transition:
-    transform 0.7s cubic-bezier(0.34, 1.45, 0.5, 1) calc(0.4s + var(--i) * 0.08s),
-    opacity 0.3s var(--umm-ease-out) calc(0.4s + var(--i) * 0.08s);
-}
-
-/* --- the list: the readout and the control, as in the rules -------------- */
-
-.cx-kit__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-bottom: 1px solid var(--umm-hairline);
-}
-
-.cx-kit__row {
+.cx-kit__side {
   display: grid;
-  grid-template-columns: 14px 26px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: clamp(10px, 1.5svh, 15px) 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+}
+
+.cx-kit__wheel {
+  --step: clamp(34px, 5.8svh, 58px);
+  position: relative;
+  margin: 0 0 clamp(0.75rem, 2svh, 1.5rem);
+  padding: 0;
+  list-style: none;
+  perspective: 900px;
+  /* the far ends of the wheel fade into the page */
+  mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent);
+}
+
+.cx-kit__wheel li {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform-origin: left center;
+  transform:
+    translateY(calc(-50% + var(--y) * var(--step)))
+    translateX(calc(var(--x) * 30px))
+    rotateX(var(--r))
+    scale(var(--s));
+  opacity: var(--o);
+  transition:
+    transform 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.7s var(--umm-ease-out);
+}
+
+.cx-kit__wheel button {
+  position: relative;
+  padding: 0.1em 0;
   border: 0;
-  border-top: 1px solid var(--umm-hairline);
   background: none;
-  font: inherit;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  white-space: nowrap;
   color: var(--umm-ink);
-  text-align: left;
   cursor: pointer;
 }
 
-.cx-kit__row:focus-visible {
+.cx-kit__wheel button:focus-visible {
   outline: 2px solid var(--umm-ink);
-  outline-offset: 2px;
+  outline-offset: 4px;
   border-radius: 6px;
 }
 
-.cx-kit__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1.5px solid var(--umm-hairline);
-  transition:
-    background-color 0.35s var(--umm-ease-out),
-    border-color 0.35s var(--umm-ease-out),
-    transform 0.35s var(--umm-ease-out);
-}
-
-.cx-kit__row[data-open='true'] .cx-kit__dot {
+/* the open group's pastel line under it */
+.cx-kit__wheel button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.08em;
+  width: 3.2em;
+  height: 3px;
+  border-radius: 4px;
   background: var(--umm-tone);
-  border-color: var(--umm-ink);
-  transform: scale(1.35);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--umm-ease-out);
 }
 
-.cx-kit__row[data-done='true'] .cx-kit__dot {
-  background: var(--umm-tone);
-  border-color: transparent;
+.cx-kit__wheel li[data-on='true'] button::after {
+  transform: scaleX(1);
+  transition-delay: 0.45s;
 }
 
-.cx-kit__n {
+.cx-kit__claims {
+  min-height: 5.5em;
+}
+
+.cx-kit__claim {
   margin: 0;
-  font-family: var(--umm-font-mono);
-  font-size: var(--umm-text-micro);
-  color: var(--umm-ink-quiet);
+  max-width: 42ch;
+  font-size: var(--umm-text-body-s);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
 }
 
-.cx-kit__label {
-  margin: 0;
-  font-family: var(--umm-font-display);
-  font-size: clamp(1.125rem, 1.6vw, 1.4rem);
-  font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.02em;
+.cx-kit__claims .cx-kit__claim {
+  animation: cx-kit-rise 0.6s var(--umm-ease-out) 0.35s both;
 }
 
-.cx-kit__row .cx-kit__label {
-  opacity: 0.45;
-  transition: opacity 0.35s var(--umm-ease-out);
-}
-
-.cx-kit__row[data-open='true'] .cx-kit__label {
-  opacity: 1;
-}
-
-.cx-kit__count {
-  font-family: var(--umm-font-mono);
-  font-size: var(--umm-text-micro);
-  letter-spacing: var(--umm-tracking-label);
-  text-transform: uppercase;
-  color: var(--umm-ink-quiet);
-}
-
-.cx-kit__more {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.45s var(--umm-ease-out);
-}
-
-.cx-kit__row[data-open='true'] + .cx-kit__more {
-  grid-template-rows: 1fr;
-}
-
-.cx-kit__more > div {
-  min-height: 0;
-  overflow: hidden;
-  padding-left: 54px;
-}
-
-.cx-kit__row[data-open='true'] + .cx-kit__more > div {
-  padding-bottom: 14px;
+@keyframes cx-kit-rise {
+  from { opacity: 0; transform: translateY(12px); }
 }
 
 .cx-kit__role {
-  display: inline-block;
-  margin: 0 0 0.5rem;
+  display: table;
+  margin: 0 0 0.6rem;
   padding: 0.35em 0.8em;
   border-radius: 999px;
   background: var(--umm-tone);
@@ -4003,14 +3853,99 @@ html.cx-v2 body {
   font-size: var(--umm-text-micro);
   letter-spacing: var(--umm-tracking-label);
   text-transform: uppercase;
+  color: var(--umm-ink);
 }
 
-.cx-kit__claim {
+/* --- the frame of tiles -------------------------------------------------- */
+
+.cx-kit__frame {
+  position: relative;
+  min-height: 0;
+  padding: clamp(10px, 1vw, 14px);
+  border-radius: clamp(26px, 2.6vw, 38px);
+  background: var(--umm-ink);
+  box-shadow: 0 30px 60px -36px rgb(16 14 20 / 0.55);
+}
+
+.cx-kit__body .cx-kit__frame {
+  align-self: stretch;
+  max-height: 540px;
+}
+
+.cx-kit__tiles {
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 1px;
   margin: 0;
-  max-width: 44ch;
-  font-size: var(--umm-text-body-s);
-  line-height: 1.5;
-  color: var(--umm-ink-soft);
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  border-radius: clamp(17px, 1.7vw, 26px);
+  /* the fine lines between rows: the group's tint */
+  background: var(--p0);
+}
+
+.cx-kit__body .cx-kit__tiles {
+  position: absolute;
+  inset: clamp(10px, 1vw, 14px);
+}
+
+.cx-kit__tiles li {
+  /* each row a touch deeper than the one above, with a sheen across it */
+  --base: color-mix(in oklab, var(--p2) var(--t), var(--p1));
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding-inline: clamp(16px, 1.8vw, 26px);
+  background: linear-gradient(100deg, var(--base) 30%, color-mix(in oklab, var(--base), var(--p0) 70%) 100%);
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.05rem, 1.7vw, 1.6rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.cx-kit__body .cx-kit__tiles li {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.3s var(--umm-ease-out);
+}
+
+.cx-kit__body .cx-kit__tiles li span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(70%);
+  transition:
+    transform 0.3s var(--umm-ease-out),
+    opacity 0.2s var(--umm-ease-out);
+}
+
+/* coming in: each row wipes across, top to bottom, and its name rises */
+.cx-kit__body .cx-kit__tiles[data-on='true'] li {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.75s cubic-bezier(0.7, 0, 0.2, 1) calc(0.25s + var(--i) * 0.07s);
+}
+
+.cx-kit__body .cx-kit__tiles[data-on='true'] li span {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    transform 0.7s var(--umm-ease-out) calc(0.6s + var(--i) * 0.07s),
+    opacity 0.5s var(--umm-ease-out) calc(0.6s + var(--i) * 0.07s);
+}
+
+/* going out: the whole register lifts and fades, quickly */
+.cx-kit__body .cx-kit__tiles[data-on='false'] {
+  opacity: 0;
+  transform: translateY(-14px);
+  transition:
+    opacity 0.35s var(--umm-ease-out),
+    transform 0.35s var(--umm-ease-out),
+    visibility 0s linear 0.35s;
+  visibility: hidden;
+}
+
+.cx-kit__body .cx-kit__tiles[data-on='false'] li {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0s linear 0.35s;
 }
 
 .cx-kit__note {
@@ -4021,73 +3956,48 @@ html.cx-v2 body {
   color: var(--umm-ink-quiet);
 }
 
-/* --- phones and reduced motion: one tile per group ----------------------- */
+/* --- phones and reduced motion: each group over its frame ---------------- */
 
 .cx-kit__cards {
   display: grid;
-  gap: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+  gap: clamp(2.5rem, 6vw, 3.5rem) clamp(1.5rem, 3vw, 2.5rem);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 900px) {
   .cx-kit__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1100px) {
-  .cx-kit__cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 .cx-kit__card {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
   align-content: start;
 }
 
-.cx-kit__card .cx-kit__tile {
-  aspect-ratio: 4 / 3.4;
+.cx-kit__label {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
 }
 
-.cx-kit__card .cx-kit__stickers {
-  right: 24%;
+.cx-kit__card .cx-kit__tiles li {
+  min-height: 52px;
+  font-size: 1.0625rem;
 }
-
-.cx-kit__card .cx-kit__stickers li {
-  font-size: 0.8125rem;
-}
-
-.cx-kit__text {
-  display: grid;
-  gap: 0.4rem;
-  justify-items: start;
-}
-
-.cx-kit__text .cx-kit__role {
-  margin: 0.2rem 0 0.1rem;
-}
-
-.cx-kit__card:nth-child(1) .cx-kit__role { background: var(--umm-sun); }
-.cx-kit__card:nth-child(2) .cx-kit__role { background: var(--umm-sky); }
-.cx-kit__card:nth-child(3) .cx-kit__role { background: var(--umm-blossom); }
-.cx-kit__card:nth-child(4) .cx-kit__role { background: var(--umm-citrus); }
-.cx-kit__card:nth-child(5) .cx-kit__role { background: var(--umm-coral); }
-.cx-kit__card:nth-child(6) .cx-kit__role { background: var(--umm-sun); }
 
 /* Short laptop screens */
 @media (min-width: 900px) and (max-height: 820px) {
   .cx-kit .cx-h {
     font-size: clamp(1.75rem, 2.9vw, 2.5rem);
   }
-  .cx-kit__row {
-    padding-block: 8px;
-  }
-  .cx-kit__stickers li {
-    font-size: 0.8125rem;
+  .cx-kit__wheel button {
+    font-size: clamp(1.35rem, 2.2vw, 1.9rem);
   }
 }
 

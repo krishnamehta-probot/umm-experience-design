@@ -1,8 +1,9 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { withAccent } from './ChipHead'
 import { Shape } from './Shape'
 import { RibbonCurtain } from './RibbonCurtain'
-import { gsap } from '@/lib/gsap'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { ribbon, why } from '@/content/cxUiDesign'
 
 /* ============================================================================
@@ -18,8 +19,13 @@ import { ribbon, why } from '@/content/cxUiDesign'
      2–4. Each pain sits big in the middle. The scroll scratches it out, then
         the fix rises in with its shape and one line of explanation.
 
-   A 01 · 02 · 03 counter tracks the three pairs. Everything is scrubbed, so
-   scrolling up plays it backwards.
+   A 01 · 02 · 03 counter tracks the three pairs. The four beats are
+   magnetic stops (lib/useMagneticStops), like the pinned sections further
+   down: the scroll picks the beat and the beat plays through as a whole
+   animation at its own pace, however fast the wheel turns, and the page
+   settles on the nearest beat when the reader stops. Scrolling up plays
+   the beats back in reverse. The light fades out over the last stretch,
+   so the section hands over to the film's black without a seam.
 
    Phones, short windows: the same story stacked, each beat playing once as
    it arrives. Reduced motion: the finished state, no motion.
@@ -54,9 +60,33 @@ function within(n: HTMLElement, stage: HTMLElement) {
   return { x, y }
 }
 
+/** The beats the section rests on: the headline, then each pain → fix. */
+const STOPS = why.pairs.length + 1
+
+/** Where the hold starts and how long it lasts: from the strip reaching the
+ *  top of the screen until the section's bottom meets the screen's. */
+const holdOf = (el: HTMLElement) => {
+  const top = el.getBoundingClientRect().top + window.scrollY + stripTop()
+  return { top, travel: el.offsetHeight - window.innerHeight - stripTop() }
+}
+
+function usePinMedia() {
+  const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(PIN).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(PIN)
+    const fn = () => setOn(mq.matches)
+    fn()
+    mq.addEventListener('change', fn)
+    return () => mq.removeEventListener('change', fn)
+  }, [])
+  return on
+}
+
 export function WhyBand() {
   const ref = useRef<HTMLElement>(null)
   const [before, after] = why.line1.split(why.one)
+  const pinned = usePinMedia()
+  useMagneticStops(ref, STOPS, pinned, holdOf)
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -154,39 +184,73 @@ export function WhyBand() {
       PIN,
       () => {
         el.dataset.mode = 'pin'
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: {
-            trigger: el,
-            start: () => `top top-=${stripTop()}`,
-            end: 'bottom bottom',
-            scrub: 0.8,
-            invalidateOnRefresh: true,
-          },
-        })
+        const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } })
 
         const introDone = teamsBeat(tl, 0, 1)
+        /* where each beat rests: -1 is before the hold, 0 the headline,
+           then each pair with its fix fully in */
+        const rest = [0, introDone + 0.2]
         const outAt = introDone + 0.7
         tl.to(intro, { autoAlpha: 0, y: -70, duration: 0.6, ease: 'power2.in' }, outAt)
         tl.from('.cx-why__count', { autoAlpha: 0, x: 16, duration: 0.4 }, outAt + 0.2)
 
-        const STEP = 2
+        const STEP = 2.6
         pairs.forEach((pair, i) => {
           const at = outAt + 0.4 + i * STEP
           gsap.set(pair, { autoAlpha: 0 })
           tl.set(pair, { autoAlpha: 1 }, at)
           pairBeat(tl, pair, at, 1)
+          rest.push(at + 2.15)
           tl.fromTo(counts[i], { opacity: 0.3 }, { opacity: 1, duration: 0.2 }, at)
           if (i < pairs.length - 1) {
             tl.to(counts[i], { opacity: 0.3, duration: 0.2 }, at + STEP)
             tl.to(pair, { autoAlpha: 0, y: -70, duration: 0.5, ease: 'power2.in' }, at + STEP - 0.15)
           }
         })
-        /* On the last fix the light goes out, so the section leaves as plain
-           black and hands over to the film's black without a seam. */
-        tl.to(q('.cx-why__light'), { autoAlpha: 0, duration: 0.8, ease: 'power1.inOut' }, '+=0.2')
+        /* The scroll picks the beat; the timeline plays to it at its own
+           pace (about 0.8s per unit of the timeline, so a whole beat takes
+           a second and a half to two). */
+        let beat = -2
+        let play: gsap.core.Tween | null = null
+        const goTo = (b: number) => {
+          if (b === beat) return
+          beat = b
+          const to = rest[b + 1]
+          play?.kill()
+          const d = Math.abs(to - tl.time())
+          play = tl.tweenTo(to, { duration: Math.min(3.2, Math.max(0.5, d * 0.8)), ease: 'power1.inOut' })
+        }
+        const st = ScrollTrigger.create({
+          trigger: el,
+          start: () => `top top-=${stripTop()}`,
+          end: 'bottom bottom',
+          invalidateOnRefresh: true,
+          onUpdate: (self) => goTo(self.progress <= 0 ? -1 : stopAt(self.progress, STOPS)),
+          onLeaveBack: () => goTo(-1),
+        })
+        goTo(st.progress <= 0 ? -1 : stopAt(st.progress, STOPS))
+
+        /* After the last fix the light goes out over the last stretch, so the
+           section leaves as plain black and hands over to the film's black
+           without a seam. */
+        const fade = gsap.to(q('.cx-why__light'), {
+          autoAlpha: 0,
+          ease: 'power1.inOut',
+          scrollTrigger: {
+            trigger: el,
+            start: () => `bottom bottom+=${Math.round(window.innerHeight * 0.3)}`,
+            end: 'bottom bottom',
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        })
 
         return () => {
+          play?.kill()
+          st.kill()
+          fade.scrollTrigger?.kill()
+          fade.kill()
+          tl.kill()
           el.dataset.mode = 'stack'
         }
       },

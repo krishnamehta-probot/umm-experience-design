@@ -14,6 +14,11 @@ import { useEffect, useRef, type RefObject } from 'react'
    key input cancels a glide in progress, so the reader always wins.
 
    Returns `glideTo(stop)`, for controls that jump to a stop.
+
+   By default the section's travel is its own scroll while it holds (CSS
+   sticky: top to bottom-minus-a-screen). A section that holds over a
+   different stretch passes `geometry`, giving the page scroll where its
+   travel starts and how long it is.
    ========================================================================== */
 
 /** Scroll position (share of the section's travel) at which a stop rests. */
@@ -23,8 +28,22 @@ function easeInOut(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
-export function useMagneticStops(ref: RefObject<HTMLElement | null>, stops: number, enabled: boolean) {
+type Geometry = (el: HTMLElement) => { top: number; travel: number }
+
+const ownTravel: Geometry = (el) => ({
+  top: el.getBoundingClientRect().top + window.scrollY,
+  travel: el.offsetHeight - window.innerHeight,
+})
+
+export function useMagneticStops(
+  ref: RefObject<HTMLElement | null>,
+  stops: number,
+  enabled: boolean,
+  geometryOf: Geometry = ownTravel,
+) {
   const glide = useRef<(stop: number) => void>(() => {})
+  const geo = useRef(geometryOf)
+  geo.current = geometryOf
 
   useEffect(() => {
     const el = ref.current
@@ -33,10 +52,7 @@ export function useMagneticStops(ref: RefObject<HTMLElement | null>, stops: numb
     let tween = 0
     let gliding = false
 
-    const geometry = () => ({
-      top: el.getBoundingClientRect().top + window.scrollY,
-      travel: el.offsetHeight - window.innerHeight,
-    })
+    const geometry = () => geo.current(el)
 
     const cancel = () => {
       if (tween) cancelAnimationFrame(tween)

@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react'
-import { Shape } from './Shape'
 import { ChipHead, withAccent } from './ChipHead'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
@@ -8,32 +7,42 @@ import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { tools } from '@/content/cxUiDesign'
 
 /* ============================================================================
-   6b · THE SYSTEMS YOU ALREADY HAVE — six groups, six colours
+   6b · THE SYSTEMS YOU ALREADY HAVE — the tools wheel
 
    Santosh approved this section's words as they stand; only the form is new.
-   It reads the way the rules above it do: the groups are a list on the
-   right (hairline rows, a mono number, the open one showing its claim), and
-   the picture on the left is one rounded tile in the open group's pastel,
-   light at the top and deepening towards the bottom. In the tile stands the
-   group's Cool Shape, flat in a deeper pastel, and the group's tools
-   land on it as white stickers.
+   The form is the AI & Automation page's tools section, which Krish pointed
+   to: the six groups curve down the left on a wheel (the open one forward
+   and full size, its neighbours tilting back and fading), and on the right
+   a dark frame holds the open group's tools as a register of tiles, equal
+   rows that fill the frame whether there are two tools or seven. The tiles
+   are the group's pastel, each a little deeper than the one above, with a
+   soft sheen across it.
 
    The section pins and each group is a magnetic stop (lib/useMagneticStops),
-   on the same rhythm as the rules: the scroll picks the group, the tile's
-   colour glides to the next pastel, the old shape turns away as the new one
-   turns in, and the tools drop on one after another. Clicking a row glides
-   to it.
+   on the same rhythm as the rules: the scroll turns the wheel one place, the
+   old tiles slip away and the new ones wipe in one after another. Clicking
+   a group glides to it.
 
-   Phones and reduced motion: nothing pins; each group is its own tile with
-   its text under it.
+   Phones and reduced motion: nothing pins; each group is its label over its
+   frame of tiles.
    ========================================================================== */
 
 const groups = tools.groups
 const STOPS = groups.length
 type Group = (typeof groups)[number]
 
-/** A few hand-set sticker tilts, so the tools never land in a grid. */
-const TILT = [-4, 3, -2, 5, -5, 2, -3]
+/** The wheel: where an option sits for d places off the line. */
+function spoke(d: number): CSSProperties {
+  const ad = Math.abs(d)
+  const c = Math.min(ad, 3.2)
+  return {
+    ['--y' as string]: `${Math.sign(d) * c}`,
+    ['--x' as string]: `${Math.pow(c, 1.35)}`,
+    ['--r' as string]: `${-d * 9}deg`,
+    ['--s' as string]: `${1 - Math.min(0.42, ad * 0.14)}`,
+    ['--o' as string]: `${ad > 3.2 ? 0 : Math.max(0.14, 1 - ad * 0.32)}`,
+  }
+}
 
 export function ToolsStack() {
   const { ref, progress } = usePinProgress<HTMLElement>()
@@ -69,45 +78,52 @@ export function ToolsStack() {
 
           {pinMode ? (
             <div className="cx-kit__body">
-              <Tile shown={groups} on={stop} />
+              <div className="cx-kit__side">
+                <ol className="cx-kit__wheel">
+                  {groups.map((g, i) => (
+                    <li key={g.label} style={spoke(i - stop)} data-on={i === stop} data-umm-tone={g.tone}>
+                      <button
+                        type="button"
+                        onClick={() => glideTo(i)}
+                        aria-current={i === stop ? 'step' : undefined}
+                        tabIndex={Math.abs(i - stop) > 3 ? -1 : 0}
+                      >
+                        {g.label}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+                <div className="cx-kit__claims" aria-live="polite">
+                  {groups.map((g, i) => (
+                    <p key={g.label} className="cx-kit__claim" data-on={i === stop} hidden={i !== stop}>
+                      <span className="cx-kit__role" data-umm-tone={g.tone}>
+                        {g.role}
+                      </span>
+                      {g.claim}
+                    </p>
+                  ))}
+                </div>
+              </div>
 
-              <ol className="cx-kit__list">
+              <div className="cx-kit__frame">
                 {groups.map((g, i) => (
-                  <li key={g.label} data-umm-tone={g.tone}>
-                    <button
-                      type="button"
-                      className="cx-kit__row"
-                      onClick={() => glideTo(i)}
-                      data-open={i === stop}
-                      data-done={i < stop}
-                      aria-current={i === stop ? 'step' : undefined}
-                    >
-                      <span className="cx-kit__dot" aria-hidden="true" />
-                      <span className="cx-kit__n">{String(i + 1).padStart(2, '0')}</span>
-                      <span className="cx-kit__label">{g.label}</span>
-                      <span className="cx-kit__count">{g.items.length} tools</span>
-                    </button>
-                    <div className="cx-kit__more">
-                      <div>
-                        <p className="cx-kit__role">{g.role}</p>
-                        <p className="cx-kit__claim">{g.claim}</p>
-                        <p className="umm-sr-only">Tools: {g.items.join(', ')}.</p>
-                      </div>
-                    </div>
-                  </li>
+                  <Tiles key={g.label} group={g} on={i === stop} />
                 ))}
-              </ol>
+              </div>
             </div>
           ) : (
             <ol className="cx-kit__cards">
-              {groups.map((g, i) => (
+              {groups.map((g) => (
                 <li key={g.label} className="cx-kit__card">
-                  <Tile shown={[g]} on={0} />
-                  <div className="cx-kit__text">
-                    <p className="cx-kit__n">{String(i + 1).padStart(2, '0')}</p>
-                    <h3 className="cx-kit__label">{g.label}</h3>
-                    <p className="cx-kit__role">{g.role}</p>
-                    <p className="cx-kit__claim">{g.claim}</p>
+                  <h3 className="cx-kit__label">{g.label}</h3>
+                  <p className="cx-kit__claim">
+                    <span className="cx-kit__role" data-umm-tone={g.tone}>
+                      {g.role}
+                    </span>
+                    {g.claim}
+                  </p>
+                  <div className="cx-kit__frame">
+                    <Tiles group={g} on />
                   </div>
                 </li>
               ))}
@@ -121,31 +137,19 @@ export function ToolsStack() {
   )
 }
 
-/** The picture: a rounded tile in the open group's pastel, its Cool Shape,
- *  and its tools as stickers. Every group's shape and stickers are drawn;
- *  only the open group's are up. */
-function Tile({ shown, on }: { shown: readonly Group[]; on: number }) {
+/** One group's tools as tiles: its pastel, deepening a little row by row. */
+function Tiles({ group, on }: { group: Group; on: boolean }) {
+  const n = group.items.length
   return (
-    <div className="cx-kit__tile" data-ramp={shown[on].tone} aria-hidden="true">
-      <span className="cx-kit__count-big">
-        {String(shown[on].items.length).padStart(2, '0')}
-        <small>{shown[on].items.length === 1 ? 'tool' : 'tools'}</small>
-      </span>
-
-      {shown.map((g, i) => (
-        <div className="cx-kit__set" key={g.label} data-on={i === on} data-ramp={g.tone}>
-          <span className="cx-kit__shape">
-            <Shape name={g.shape} className="cx-kit__fill" />
-          </span>
-          <ul className="cx-kit__stickers">
-            {g.items.map((t, j) => (
-              <li key={t} style={{ ['--i' as string]: j, ['--tilt' as string]: `${TILT[j % TILT.length]}deg` } as CSSProperties}>
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
+    <ul className="cx-kit__tiles" data-ramp={group.tone} data-on={on} aria-hidden={!on} inert={!on}>
+      {group.items.map((t, j) => (
+        <li
+          key={t}
+          style={{ ['--i' as string]: j, ['--t' as string]: `${n > 1 ? (j / (n - 1)) * 100 : 0}%` } as CSSProperties}
+        >
+          <span>{t}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

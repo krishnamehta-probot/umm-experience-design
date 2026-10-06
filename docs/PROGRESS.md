@@ -16,11 +16,11 @@ of the **Log**. Tick boxes as things land.
 |---|---|---|---|
 | 0 | Setup: route, content, chip headlines, shapes, GSAP | ✅ done | — |
 | 1 | Hero + ribbon curtain into a dark section 2 | 🔁 revision 1 built (Krish's brief), awaiting review | Artifact layout; Krish's ribbon-reveal idea |
-| 2 | Why it matters (dark band) | 🔁 rebuilt as a scroll story ("ten teams → one company"), awaiting review | Krish's go on the scroll-story concept |
+| 2 | Why it matters (dark band) | 🔁 scroll story ("ten teams → one company"), now four magnetic beats, awaiting review | Krish's go on the scroll-story concept |
 | 3 | Our work → a 30-second film | 🔁 replaced (Krish), awaiting review | Krish: "After Effects-style, hook them, our numbers, real work" |
 | 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
 | 5 | Built for where you are: size tabs | 🔄 revised (light picture behind the number), awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
-| 6 | How we design: 5 rules + tools | 🔄 revised (rules: realistic phone, magnetic stops; tools: rebuilt in the rules' language, pastel tile + list), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
+| 6 | How we design: 5 rules + tools | 🔄 revised (rules: realistic phone, magnetic stops; tools: the AI & Automation wheel + a frame of gradient tiles, magnetic), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
 | 7 | How we work + FAQ + closing band | 🔄 revised (steps as a roadmap board, magnetic; curtain; footer wordmark), awaiting review | Designjoy steps, Cal.com FAQ + CTA |
 | 8 | Phones, reduced motion, build check | ✅ build passes; runtime smoke test clean | — |
 
@@ -89,6 +89,27 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, tools as the wheel; section 2 on magnetic beats
+- Krish, on the tools: no shapes; make it like the AI & Automation page's
+  tools section (his screenshot): the groups on a wheel on the left, the
+  tools as tiles in a dark frame on the right, a little gradient, and a
+  good animation.
+- `ToolsStack`: the six groups curve down the left on a wheel (open one
+  forward with a pastel line under it, neighbours tilting back and fading
+  at the ends). The frame holds the open group's tools as equal-height
+  tiles in its pastel, each row a touch deeper than the one above, with a
+  sheen across; light lines between rows. On each stop the wheel turns one
+  place, the old tiles lift away and the new ones wipe in row by row with
+  their names rising. Role and claim sit under the wheel. Magnetic, 55svh
+  per stop like the rules. Phones / reduced motion: label, claim, frame.
+- Krish, on section 2 ("They get stuck. We find out where."): too fast.
+  It was scrubbed straight off the scroll. Now four magnetic beats
+  (headline, then each pain → fix): the scroll picks the beat and the beat
+  plays through at its own pace (1.5 to 2s), forwards or back, and the
+  page settles on the nearest beat. The light fades out over the last
+  stretch as before. `useMagneticStops` takes an optional geometry, as
+  this section holds from the strip's edge rather than its own top.
 
 ### 6 Oct 2026, sections 6b and 7 brought back to the brand
 - Krish: the road and the deep colour screens were not in the brand's
