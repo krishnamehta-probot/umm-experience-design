@@ -20,8 +20,8 @@ of the **Log**. Tick boxes as things land.
 | 3 | Our work → a 30-second film | 🔁 replaced (Krish), awaiting review | Krish: "After Effects-style, hook them, our numbers, real work" |
 | 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
 | 5 | Built for where you are: size tabs | 🔄 revised (light picture behind the number), awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
-| 6 | How we design: 5 rules + tools | 🔄 revised (rules: realistic phone, magnetic stops; tools: six colour ramps, glass shapes), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
-| 7 | How we work + FAQ + closing band | 🔄 revised (steps as a pastel roadmap, magnetic; curtain; footer wordmark), awaiting review | Designjoy steps, Cal.com FAQ + CTA |
+| 6 | How we design: 5 rules + tools | 🔄 revised (rules: realistic phone, magnetic stops; tools: rebuilt in the rules' language, pastel tile + list), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
+| 7 | How we work + FAQ + closing band | 🔄 revised (steps as a roadmap board, magnetic; curtain; footer wordmark), awaiting review | Designjoy steps, Cal.com FAQ + CTA |
 | 8 | Phones, reduced motion, build check | ✅ build passes; runtime smoke test clean | — |
 
 **Not yet done:** Krish's visual review of every section (he is the only
@@ -89,6 +89,28 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, sections 6b and 7 brought back to the brand
+- Krish: the road and the deep colour screens were not in the brand's
+  aesthetic; the tools section's scroll also felt different from the rest.
+- Both now use the language of the sections he approved (stages, rules):
+  canvas ground, ink type, hairline rows with a mono number, one rounded
+  picture, flat pastels, no deep shades, glass or dark labels.
+- 6b `ToolsStack`: the six groups are a list on the right, as the rules
+  are; the open one shows its role and claim. On the left, one rounded tile
+  in the group's pastel (tint at the top, deepening to the pastel at the
+  bottom), its Cool Shape flat in a deeper pastel, and its tools dropped on
+  as white stickers. Colour glides between groups (registered `--p0..2`).
+- 7 `Roadmap`: a roadmap board. Steps down the left, a timeline on the
+  right with each step a rounded pastel bar, slightly overlapping; the axis
+  is marked only First call, Launch and Ongoing (no invented weeks). A
+  "today" line moves to the end of each step; the bars it passes fill, and
+  each finished step gets a "Signed off" sticker.
+- Scroll: both use the rules' rhythm exactly (55svh per stop, the same
+  magnetic settle), so the three pinned sections feel like one system.
+- Phones and reduced motion: tools become one tile per group; the roadmap
+  keeps the board with each bar under its step, and today sweeps the plan
+  once it is in view (reduced motion: done).
 
 ### 6 Oct 2026, section 7: the steps as a roadmap
 - Krish: the pile of squares looked like the tools section and was not what

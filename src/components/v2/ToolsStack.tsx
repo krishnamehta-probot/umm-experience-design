@@ -1,6 +1,6 @@
+import type { CSSProperties } from 'react'
 import { Shape } from './Shape'
 import { ChipHead, withAccent } from './ChipHead'
-import { SHAPES, type ShapeName } from './shapes.data'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
@@ -11,24 +11,29 @@ import { tools } from '@/content/cxUiDesign'
    6b · THE SYSTEMS YOU ALREADY HAVE — six groups, six colours
 
    Santosh approved this section's words as they stand; only the form is new.
-   Each of the six tool groups is a full screen in its own brand colour, and
-   within it the colour deepens from a light tint at the top to a deep shade
-   at the bottom. The group's Cool Shape stands in it as a large piece of
-   frosted glass, with a couple of solid shapes drifting behind it so the
-   glass has something to blur.
+   It reads the way the rules above it do: the groups are a list on the
+   right (hairline rows, a mono number, the open one showing its claim), and
+   the picture on the left is one rounded tile in the open group's pastel,
+   light at the top and deepening towards the bottom. In the tile stands the
+   group's Cool Shape, flat in a deeper pastel, and the group's tools
+   land on it as white stickers.
 
-   The section pins and each group is a magnetic stop (lib/useMagneticStops):
-   the scroll picks the group, the next colour wipes up over the last as a
-   full animation, and the page settles on the nearest group when the reader
-   stops. Scrolling back up wipes it down again. The rail on the left is the
-   readout and the control: clicking a group glides to it.
+   The section pins and each group is a magnetic stop (lib/useMagneticStops),
+   on the same rhythm as the rules: the scroll picks the group, the tile's
+   colour glides to the next pastel, the old shape turns away as the new one
+   turns in, and the tools drop on one after another. Clicking a row glides
+   to it.
 
-   Phones and reduced motion: nothing pins; the six groups stack as bands,
-   each in its own colour.
+   Phones and reduced motion: nothing pins; each group is its own tile with
+   its text under it.
    ========================================================================== */
 
 const groups = tools.groups
 const STOPS = groups.length
+type Group = (typeof groups)[number]
+
+/** A few hand-set sticker tilts, so the tools never land in a grid. */
+const TILT = [-4, 3, -2, 5, -5, 2, -3]
 
 export function ToolsStack() {
   const { ref, progress } = usePinProgress<HTMLElement>()
@@ -40,34 +45,14 @@ export function ToolsStack() {
 
   return (
     <section
-      className="umm-section umm-pin cx-stack"
+      className="umm-section umm-pin cx-kit"
       id="tools"
       ref={ref}
       data-mode={pinMode ? 'scroll' : 'stack'}
-      data-ramp={groups[stop].tone}
       style={{ ['--umm-pin-steps' as string]: STOPS }}
     >
       <div className="umm-pin__stage">
-        {/* the colours, one per group, wiping up over each other */}
-        {pinMode ? (
-          <div className="cx-stack__grounds" aria-hidden="true">
-            {groups.map((g, i) => (
-              <div
-                className="cx-ground"
-                key={g.label}
-                data-ramp={g.tone}
-                data-shown={i <= stop}
-                data-on={i === stop}
-              >
-                <Shape name={g.shape} className="cx-ground__drift cx-ground__drift--a" />
-                <Shape name={g.shape} className="cx-ground__drift cx-ground__drift--b" />
-                <GlassShape name={g.shape} className="cx-ground__glass" />
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="umm-container cx-stack__inner">
+        <div className="umm-container cx-kit__inner">
           <div className="cx-head cx-head--tight">
             <ChipHead
               line1={tools.line1}
@@ -82,76 +67,85 @@ export function ToolsStack() {
             <p className="cx-lead">{tools.lead}</p>
           </div>
 
-          <div className="cx-stack__body">
-            {pinMode ? (
-              <ol className="cx-stack__rail">
+          {pinMode ? (
+            <div className="cx-kit__body">
+              <Tile shown={groups} on={stop} />
+
+              <ol className="cx-kit__list">
                 {groups.map((g, i) => (
-                  <li key={g.label}>
+                  <li key={g.label} data-umm-tone={g.tone}>
                     <button
                       type="button"
+                      className="cx-kit__row"
                       onClick={() => glideTo(i)}
-                      data-on={i === stop}
+                      data-open={i === stop}
+                      data-done={i < stop}
                       aria-current={i === stop ? 'step' : undefined}
                     >
-                      <span className="cx-stack__n">{String(i + 1).padStart(2, '0')}</span>
-                      {g.label}
+                      <span className="cx-kit__dot" aria-hidden="true" />
+                      <span className="cx-kit__n">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="cx-kit__label">{g.label}</span>
+                      <span className="cx-kit__count">{g.items.length} tools</span>
                     </button>
+                    <div className="cx-kit__more">
+                      <div>
+                        <p className="cx-kit__role">{g.role}</p>
+                        <p className="cx-kit__claim">{g.claim}</p>
+                        <p className="umm-sr-only">Tools: {g.items.join(', ')}.</p>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ol>
-            ) : null}
-
-            <div className="cx-stack__panes">
-              {groups.map((g, i) => (
-                <article
-                  className="cx-stack__pane"
-                  key={g.label}
-                  data-ramp={g.tone}
-                  data-on={!pinMode || i === stop}
-                  inert={pinMode && i !== stop}
-                >
-                  {pinMode ? null : <GlassShape name={g.shape} className="cx-stack__mark" />}
-                  <p className="cx-stack__role">{g.role}</p>
-                  <h3 className="cx-stack__label">{g.label}</h3>
-                  <p className="cx-stack__claim">{g.claim}</p>
-                  <ul className="cx-stack__tools">
-                    {g.items.map((t, j) => (
-                      <li key={t} style={{ ['--i' as string]: j }}>
-                        {t}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
             </div>
-          </div>
+          ) : (
+            <ol className="cx-kit__cards">
+              {groups.map((g, i) => (
+                <li key={g.label} className="cx-kit__card">
+                  <Tile shown={[g]} on={0} />
+                  <div className="cx-kit__text">
+                    <p className="cx-kit__n">{String(i + 1).padStart(2, '0')}</p>
+                    <h3 className="cx-kit__label">{g.label}</h3>
+                    <p className="cx-kit__role">{g.role}</p>
+                    <p className="cx-kit__claim">{g.claim}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
 
-          <p className="cx-stack__note">{tools.note}</p>
+          <p className="cx-kit__note">{tools.note}</p>
         </div>
       </div>
     </section>
   )
 }
 
-/** A Cool Shape as a piece of frosted glass: the shape's silhouette masks a
- *  blurred, lit pane, with a fine rim of light round its edge and a soft
- *  shadow below. */
-function GlassShape({ name, className = '' }: { name: ShapeName; className?: string }) {
-  const parts = SHAPES[name]
-  const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>` +
-    parts.map((p) => `<path d='${p.d}'${'evenodd' in p ? " fill-rule='evenodd'" : ''}/>`).join('') +
-    `</svg>`
-  const mask = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
+/** The picture: a rounded tile in the open group's pastel, its Cool Shape,
+ *  and its tools as stickers. Every group's shape and stickers are drawn;
+ *  only the open group's are up. */
+function Tile({ shown, on }: { shown: readonly Group[]; on: number }) {
   return (
-    <span className={`cx-glass ${className}`.trim()} aria-hidden="true">
-      <Shape name={name} className="cx-glass__shadow" />
-      <span className="cx-glass__body" style={{ maskImage: mask, WebkitMaskImage: mask }} />
-      <svg className="cx-glass__rim" viewBox="0 0 200 200">
-        {parts.map((p, i) => (
-          <path key={i} d={p.d} fillRule={'evenodd' in p ? 'evenodd' : undefined} />
-        ))}
-      </svg>
-    </span>
+    <div className="cx-kit__tile" data-ramp={shown[on].tone} aria-hidden="true">
+      <span className="cx-kit__count-big">
+        {String(shown[on].items.length).padStart(2, '0')}
+        <small>{shown[on].items.length === 1 ? 'tool' : 'tools'}</small>
+      </span>
+
+      {shown.map((g, i) => (
+        <div className="cx-kit__set" key={g.label} data-on={i === on} data-ramp={g.tone}>
+          <span className="cx-kit__shape">
+            <Shape name={g.shape} className="cx-kit__fill" />
+          </span>
+          <ul className="cx-kit__stickers">
+            {g.items.map((t, j) => (
+              <li key={t} style={{ ['--i' as string]: j, ['--tilt' as string]: `${TILT[j % TILT.length]}deg` } as CSSProperties}>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
   )
 }

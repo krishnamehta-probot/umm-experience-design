@@ -3700,436 +3700,394 @@ html.cx-v2 body {
 /* ===========================================================================
    6b · THE SYSTEMS YOU ALREADY HAVE — six groups, six colours
 
-   Each group's colour runs from a light tint at the top of the screen to a
-   deep shade at the bottom: --g0 (top), --g1 (the brand pastel), --g2
-   (saturated), --g3 (deep). Hand-picked per tone so each ramp stays in its
-   own hue rather than going muddy on the way down.
+   Laid out like the rules above it: the list on the right, one picture on
+   the left. The picture is a rounded tile in the open group's pastel, light
+   at the top and deepening down: --p0 (tint), --p1 (the brand pastel), --p2
+   (a deeper pastel, still in the family). Registered, so the tile's colour
+   glides from group to group.
    ========================================================================= */
 
-[data-ramp='sun'] { --g0: #fff8db; --g1: #ffe58f; --g2: #f6b830; --g3: #8f5400; }
-[data-ramp='sky'] { --g0: #f2f8ff; --g1: #d1e7ff; --g2: #6fa6ef; --g3: #1d4796; }
-[data-ramp='blossom'] { --g0: #fff3fc; --g1: #ffc4f2; --g2: #e57acd; --g3: #77205f; }
-[data-ramp='citrus'] { --g0: #fcffe2; --g1: #f0ff70; --g2: #b5d128; --g3: #4a6606; }
-[data-ramp='coral'] { --g0: #fff3f3; --g1: #ffc3c4; --g2: #ee7a7e; --g3: #8b2832; }
+@property --p0 { syntax: '<color>'; inherits: true; initial-value: #fff6d6; }
+@property --p1 { syntax: '<color>'; inherits: true; initial-value: #ffe58f; }
+@property --p2 { syntax: '<color>'; inherits: true; initial-value: #ffd45e; }
 
-.cx-stack {
-  position: relative;
-  color: var(--umm-ink);
-}
+[data-ramp='sun'] { --p0: #fff6d6; --p1: #ffe58f; --p2: #ffd45e; }
+[data-ramp='sky'] { --p0: #eef6ff; --p1: #d1e7ff; --p2: #a9cdf6; }
+[data-ramp='blossom'] { --p0: #fff0fb; --p1: #ffc4f2; --p2: #f6a2e1; }
+[data-ramp='citrus'] { --p0: #fbffd9; --p1: #f0ff70; --p2: #dcee3f; }
+[data-ramp='coral'] { --p0: #fff0f0; --p1: #ffc3c4; --p2: #ffa0a3; }
 
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .cx-stack.umm-pin {
-    min-height: calc(100svh + var(--umm-pin-steps) * 60svh);
+  .cx-kit.umm-pin {
+    /* the same steady stretch per stop as the rules */
+    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
   }
 }
 
-.cx-stack[data-mode='scroll'] .umm-pin__stage {
-  position: sticky;
-  isolation: isolate;
+.cx-kit {
+  color: var(--umm-ink);
 }
 
-/* --- the grounds: one per group, each wiping up over the one before ------- */
-
-.cx-stack__grounds {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-}
-
-.cx-ground {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: linear-gradient(180deg, var(--g0) 0%, var(--g1) 34%, var(--g2) 72%, var(--g3) 100%);
-  clip-path: inset(100% 0 0 0);
-  transition: clip-path 1.05s cubic-bezier(0.7, 0, 0.2, 1);
-}
-
-.cx-ground[data-shown='true'] {
-  clip-path: inset(0 0 0 0);
-}
-
-/* Once a ground is fully covered, or fully wiped away, stop drawing it (its
-   glass blurs whatever is behind it, which is not free). The one on its
-   stop always draws at once, so going back up never shows a gap. */
-.cx-ground[data-on='false'] {
-  visibility: hidden;
-  transition:
-    clip-path 1.05s cubic-bezier(0.7, 0, 0.2, 1),
-    visibility 0s linear 1.1s;
-}
-
-/* a whisper of grain, so the long gradients never band */
-.cx-ground::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-  opacity: 0.18;
-  pointer-events: none;
-}
-
-/* the big glass shape, low on the right; --gw is its size, --gr its inset
-   from the right, so the drifting shapes can be placed behind it */
-.cx-ground {
-  --gw: min(50svh, 33vw);
-  --gr: max(1.5vw, calc((100vw - 1380px) / 2));
-}
-
-.cx-ground .cx-ground__glass {
-  position: absolute;
-  right: var(--gr);
-  bottom: -12svh;
-  width: var(--gw);
-  aspect-ratio: 1;
-  opacity: 0;
-  transform: translateY(18%) rotate(-28deg) scale(0.82);
-  transition:
-    opacity 0.7s var(--umm-ease-out) 0.25s,
-    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
-}
-
-.cx-ground[data-on='true'] .cx-ground__glass {
-  opacity: 1;
-  transform: none;
-}
-
-/* two solid shapes drifting behind the glass, for it to blur */
-.cx-ground__drift {
-  position: absolute;
-  aspect-ratio: 1;
-  opacity: 0;
-  transition: opacity 0.8s var(--umm-ease-out) 0.3s;
-  animation: cx-drift 14s ease-in-out infinite alternate;
-  animation-play-state: paused;
-}
-
-.cx-ground[data-on='true'] .cx-ground__drift {
-  opacity: 1;
-  animation-play-state: running;
-}
-
-.cx-ground__drift--a {
-  right: calc(var(--gr) + var(--gw) * 0.52);
-  bottom: calc(var(--gw) * 0.3);
-  width: calc(var(--gw) * 0.3);
-  color: var(--g3);
-}
-
-.cx-ground__drift--b {
-  right: calc(var(--gr) + var(--gw) * 0.08);
-  bottom: calc(var(--gw) * 0.62);
-  width: calc(var(--gw) * 0.2);
-  color: var(--g2);
-  animation-duration: 11s;
-  animation-direction: alternate-reverse;
-}
-
-@keyframes cx-drift {
-  from { transform: translate(0, 0) rotate(0deg); }
-  to { transform: translate(-18px, -26px) rotate(24deg); }
-}
-
-/* --- glass --------------------------------------------------------------- */
-
-.cx-glass {
-  position: relative;
-  display: block;
-}
-
-.cx-glass > * {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.cx-glass__shadow {
-  color: var(--g3);
-  opacity: 0.45;
-  filter: blur(26px);
-  transform: translate(4%, 9%) scale(0.94);
-}
-
-.cx-glass__body {
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  background:
-    radial-gradient(70% 55% at 28% 18%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 70%),
-    linear-gradient(160deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0.16) 42%, rgb(255 255 255 / 0.06) 68%, rgb(255 255 255 / 0.32) 100%);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
-}
-
-.cx-glass__rim {
-  overflow: visible;
-}
-
-.cx-glass__rim path {
-  fill: none;
-  stroke: rgb(255 255 255 / 0.85);
-  stroke-width: 1.4px;
-  vector-effect: non-scaling-stroke;
-}
-
-/* --- the words over it ---------------------------------------------------- */
-
-.cx-stack__inner {
+.cx-kit__inner {
   display: grid;
-  gap: clamp(1.25rem, 2.6vw, 2.25rem);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
   width: 100%;
 }
 
-.cx-stack[data-mode='scroll'] .cx-stack__inner {
-  grid-template-rows: auto 1fr auto;
+.cx-kit[data-mode='scroll'] .cx-kit__inner {
+  grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100%;
-  padding-block: clamp(4.5rem, 10svh, 6.5rem) clamp(1.25rem, 3svh, 2rem);
+  padding-block: clamp(4.5rem, 10svh, 6.5rem) clamp(1rem, 2.5svh, 1.75rem);
+  gap: clamp(1rem, 2.4svh, 2rem);
 }
 
-.cx-stack .cx-head {
+.cx-kit .cx-head {
   margin-bottom: 0;
 }
 
-.cx-stack__body {
+.cx-kit__body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 4.5vw, 5rem);
+  align-items: center;
   min-height: 0;
 }
 
-.cx-stack[data-mode='scroll'] .cx-stack__body {
-  grid-template-columns: minmax(200px, 0.62fr) minmax(0, 1.38fr);
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
+/* --- the tile ------------------------------------------------------------ */
+
+.cx-kit__tile {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: clamp(20px, 2.2vw, 32px);
+  background: linear-gradient(180deg, var(--p0) 0%, var(--p1) 78%, color-mix(in srgb, var(--p1) 70%, var(--p2)) 100%);
+  transition:
+    --p0 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+    --p1 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+    --p2 0.9s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* the rail: the readout, and the control */
+.cx-kit__body .cx-kit__tile {
+  height: min(100%, 540px);
+  max-height: 100%;
+}
 
-.cx-stack__rail {
-  display: grid;
-  gap: 2px;
+.cx-kit__count-big {
+  position: absolute;
+  top: clamp(18px, 2vw, 28px);
+  left: clamp(20px, 2.2vw, 32px);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45em;
+  font-family: var(--umm-font-display);
+  font-size: clamp(2.5rem, 4.6vw, 4.25rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.cx-kit__count-big small {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  font-weight: 400;
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.cx-kit__set {
+  position: absolute;
+  inset: 0;
+}
+
+/* The group's Cool Shape: flat, in the deeper pastel, low on the right and
+   cropped by the tile, turning slowly. */
+.cx-kit__shape {
+  position: absolute;
+  right: -9%;
+  bottom: -14%;
+  width: 66%;
+  aspect-ratio: 1;
+  opacity: 0;
+  transform: rotate(-70deg) scale(0.6);
+  transition:
+    transform 0.8s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.5s var(--umm-ease-out);
+}
+
+.cx-kit__set[data-on='true'] .cx-kit__shape {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  transition:
+    transform 1s cubic-bezier(0.34, 1.3, 0.5, 1) 0.15s,
+    opacity 0.5s var(--umm-ease-out) 0.15s;
+}
+
+.cx-kit__set[data-on='false'] .cx-kit__shape {
+  transform: rotate(50deg) scale(1.15);
+}
+
+.cx-kit__shape .cx-shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cx-kit__fill {
+  color: var(--p2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cx-kit__set[data-on='true'] .cx-kit__fill {
+    animation: cx-kit-turn 26s linear infinite;
+  }
+}
+
+@keyframes cx-kit-turn {
+  to { rotate: 360deg; }
+}
+
+/* The tools: white stickers, dropped on one after another. */
+.cx-kit__stickers {
+  position: absolute;
+  left: clamp(20px, 2.2vw, 32px);
+  right: 30%;
+  bottom: clamp(20px, 2.4vw, 34px);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-end;
+  gap: 10px 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.cx-stack__rail button {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  width: 100%;
-  padding: 8px 0;
-  border: 0;
-  background: none;
-  font-family: var(--umm-font-display);
-  font-size: clamp(1rem, 1.3vw, 1.2rem);
+.cx-kit__stickers li {
+  padding: 0.6em 1em;
+  border-radius: 999px;
+  background: var(--umm-paper);
+  box-shadow: 0 1px 0 rgb(16 14 20 / 0.06), 0 8px 20px -10px rgb(16 14 20 / 0.28);
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
   font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.015em;
-  text-align: left;
-  color: var(--umm-ink);
-  opacity: 0.42;
-  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-26px) rotate(calc(var(--tilt) * 3)) scale(0.9);
   transition:
-    opacity 0.4s var(--umm-ease-out),
-    transform 0.5s var(--umm-ease-out);
+    transform 0.35s var(--umm-ease-out),
+    opacity 0.25s var(--umm-ease-out);
 }
 
-.cx-stack__rail button[data-on='true'] {
+.cx-kit__set[data-on='true'] .cx-kit__stickers li {
   opacity: 1;
-  transform: translateX(10px);
+  transform: translateY(0) rotate(var(--tilt)) scale(1);
+  transition:
+    transform 0.7s cubic-bezier(0.34, 1.45, 0.5, 1) calc(0.4s + var(--i) * 0.08s),
+    opacity 0.3s var(--umm-ease-out) calc(0.4s + var(--i) * 0.08s);
 }
 
-.cx-stack__rail button:focus-visible {
+/* --- the list: the readout and the control, as in the rules -------------- */
+
+.cx-kit__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--umm-hairline);
+}
+
+.cx-kit__row {
+  display: grid;
+  grid-template-columns: 14px 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: clamp(10px, 1.5svh, 15px) 0;
+  border: 0;
+  border-top: 1px solid var(--umm-hairline);
+  background: none;
+  font: inherit;
+  color: var(--umm-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cx-kit__row:focus-visible {
   outline: 2px solid var(--umm-ink);
-  outline-offset: 3px;
+  outline-offset: 2px;
   border-radius: 6px;
 }
 
-.cx-stack__n {
+.cx-kit__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--umm-hairline);
+  transition:
+    background-color 0.35s var(--umm-ease-out),
+    border-color 0.35s var(--umm-ease-out),
+    transform 0.35s var(--umm-ease-out);
+}
+
+.cx-kit__row[data-open='true'] .cx-kit__dot {
+  background: var(--umm-tone);
+  border-color: var(--umm-ink);
+  transform: scale(1.35);
+}
+
+.cx-kit__row[data-done='true'] .cx-kit__dot {
+  background: var(--umm-tone);
+  border-color: transparent;
+}
+
+.cx-kit__n {
+  margin: 0;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  color: var(--umm-ink-quiet);
+}
+
+.cx-kit__label {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.125rem, 1.6vw, 1.4rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.cx-kit__row .cx-kit__label {
+  opacity: 0.45;
+  transition: opacity 0.35s var(--umm-ease-out);
+}
+
+.cx-kit__row[data-open='true'] .cx-kit__label {
+  opacity: 1;
+}
+
+.cx-kit__count {
   font-family: var(--umm-font-mono);
   font-size: var(--umm-text-micro);
   letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
 }
 
-.cx-stack__rail button[data-on='true'] .cx-stack__n::after {
-  content: '';
+.cx-kit__more {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--umm-ease-out);
+}
+
+.cx-kit__row[data-open='true'] + .cx-kit__more {
+  grid-template-rows: 1fr;
+}
+
+.cx-kit__more > div {
+  min-height: 0;
+  overflow: hidden;
+  padding-left: 54px;
+}
+
+.cx-kit__row[data-open='true'] + .cx-kit__more > div {
+  padding-bottom: 14px;
+}
+
+.cx-kit__role {
   display: inline-block;
-  width: 18px;
-  height: 1.5px;
-  margin-left: 8px;
-  vertical-align: middle;
-  background: currentColor;
-}
-
-/* the panes: one group at a time, its tools as frosted tiles */
-
-.cx-stack__panes {
-  display: grid;
-}
-
-.cx-stack[data-mode='scroll'] .cx-stack__pane {
-  grid-area: 1 / 1;
-  align-self: center;
-}
-
-.cx-stack__pane {
-  position: relative;
-  display: grid;
-  justify-items: start;
-  gap: 0.75rem;
-  max-width: 540px;
-}
-
-.cx-stack__role {
-  margin: 0;
-  padding: 6px 12px;
+  margin: 0 0 0.5rem;
+  padding: 0.35em 0.8em;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.7);
+  background: var(--umm-tone);
   font-family: var(--umm-font-mono);
   font-size: var(--umm-text-micro);
   letter-spacing: var(--umm-tracking-label);
   text-transform: uppercase;
 }
 
-.cx-stack__label {
+.cx-kit__claim {
   margin: 0;
-  font-family: var(--umm-font-display);
-  font-size: clamp(2.1rem, 3.8vw, 3.5rem);
-  font-weight: var(--umm-weight-medium);
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
-
-.cx-stack__claim {
-  margin: 0;
-  max-width: 36ch;
-  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
-  line-height: 1.45;
-  color: var(--umm-ink);
-}
-
-.cx-stack__tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  max-width: 520px;
-  margin: 0.5rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cx-stack__tools li {
-  padding: 10px 16px;
-  border: 1px solid rgb(255 255 255 / 0.75);
-  border-radius: 14px;
-  background: rgb(255 255 255 / 0.55);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
-  box-shadow: 0 10px 24px -16px rgb(16 14 20 / 0.45);
-  font-family: var(--umm-font-display);
-  font-size: 0.9375rem;
-  font-weight: var(--umm-weight-medium);
-  color: var(--umm-ink);
-}
-
-/* scroll mode: the pane on its stop rises in, its tiles one after another */
-.cx-stack[data-mode='scroll'] .cx-stack__pane > * {
-  opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity 0.45s var(--umm-ease-out),
-    transform 0.6s var(--umm-ease-out);
-}
-
-.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] > * {
-  opacity: 1;
-  transform: none;
-  transition-delay: 0.35s;
-}
-
-.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] > .cx-stack__label { transition-delay: 0.42s; }
-.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] > .cx-stack__claim { transition-delay: 0.5s; }
-
-.cx-stack[data-mode='scroll'] .cx-stack__pane .cx-stack__tools {
-  opacity: 1;
-  transform: none;
-}
-
-.cx-stack[data-mode='scroll'] .cx-stack__tools li {
-  opacity: 0;
-  transform: translateY(16px) scale(0.96);
-  transition:
-    opacity 0.4s var(--umm-ease-out),
-    transform 0.55s var(--umm-ease-out);
-}
-
-.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] .cx-stack__tools li {
-  opacity: 1;
-  transform: none;
-  transition-delay: calc(0.58s + var(--i) * 0.06s);
-}
-
-.cx-stack__note {
-  margin: 0;
-  max-width: 62ch;
-  font-size: 0.75rem;
+  max-width: 44ch;
+  font-size: var(--umm-text-body-s);
   line-height: 1.5;
   color: var(--umm-ink-soft);
 }
 
-/* over the deep bottom of the colour, the note reads in white */
-.cx-stack[data-mode='scroll'] .cx-stack__note {
-  color: rgb(255 255 255 / 0.82);
+.cx-kit__note {
+  margin: 0;
+  max-width: 64ch;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--umm-ink-quiet);
 }
 
-/* --- phones and reduced motion: six bands, each in its own colour -------- */
+/* --- phones and reduced motion: one tile per group ----------------------- */
 
-.cx-stack[data-mode='stack'] {
-  padding-block: var(--umm-section-y);
-  background: var(--umm-paper);
+.cx-kit__cards {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.cx-stack[data-mode='stack'] .cx-stack__panes {
-  gap: 14px;
+@media (min-width: 700px) {
+  .cx-kit__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.cx-stack[data-mode='stack'] .cx-stack__pane {
-  overflow: hidden;
-  max-width: none;
-  padding: clamp(1.5rem, 5vw, 2.5rem);
-  padding-bottom: clamp(7rem, 30vw, 10rem);
-  border-radius: var(--cx-r-card);
-  background: linear-gradient(180deg, var(--g0) 0%, var(--g1) 38%, var(--g2) 78%, var(--g3) 100%);
+@media (min-width: 1100px) {
+  .cx-kit__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.cx-stack[data-mode='stack'] .cx-stack__label {
-  font-size: clamp(1.75rem, 7vw, 2.75rem);
+.cx-kit__card {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
 }
 
-.cx-stack__pane .cx-stack__mark {
-  position: absolute;
-  right: -6%;
-  bottom: -14%;
-  width: min(220px, 52%);
-  aspect-ratio: 1;
-  transform: rotate(-12deg);
+.cx-kit__card .cx-kit__tile {
+  aspect-ratio: 4 / 3.4;
 }
 
-.cx-stack[data-mode='stack'] .cx-stack__pane > :not(.cx-stack__mark) {
-  position: relative;
-  z-index: 1;
+.cx-kit__card .cx-kit__stickers {
+  right: 24%;
 }
 
-/* Short laptop screens: the headline gives way so the group fits. */
+.cx-kit__card .cx-kit__stickers li {
+  font-size: 0.8125rem;
+}
+
+.cx-kit__text {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+
+.cx-kit__text .cx-kit__role {
+  margin: 0.2rem 0 0.1rem;
+}
+
+.cx-kit__card:nth-child(1) .cx-kit__role { background: var(--umm-sun); }
+.cx-kit__card:nth-child(2) .cx-kit__role { background: var(--umm-sky); }
+.cx-kit__card:nth-child(3) .cx-kit__role { background: var(--umm-blossom); }
+.cx-kit__card:nth-child(4) .cx-kit__role { background: var(--umm-citrus); }
+.cx-kit__card:nth-child(5) .cx-kit__role { background: var(--umm-coral); }
+.cx-kit__card:nth-child(6) .cx-kit__role { background: var(--umm-sun); }
+
+/* Short laptop screens */
 @media (min-width: 900px) and (max-height: 820px) {
-  .cx-stack .cx-h {
+  .cx-kit .cx-h {
     font-size: clamp(1.75rem, 2.9vw, 2.5rem);
   }
-  .cx-stack .cx-lead {
-    font-size: 0.9375rem;
+  .cx-kit__row {
+    padding-block: 8px;
   }
-  .cx-stack__label {
-    font-size: clamp(2rem, 3.8vw, 3.25rem);
+  .cx-kit__stickers li {
+    font-size: 0.8125rem;
   }
 }
 
@@ -4137,409 +4095,486 @@ html.cx-v2 body {
    7 · HOW WE WORK + LET'S TALK
    ========================================================================= */
 
-/* --- the five steps: a roadmap, in flat pastels ---------------------------- */
+/* --- the five steps: a roadmap board -------------------------------------- */
+
+@property --today { syntax: '<number>'; inherits: true; initial-value: 0; }
 
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .cx-road.umm-pin {
-    min-height: calc(100svh + var(--umm-pin-steps) * 62svh);
+  .cx-plan.umm-pin {
+    /* the same steady stretch per stop as the rules and the tools */
+    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
   }
 }
 
-.cx-road__inner {
+.cx-plan {
+  color: var(--umm-ink);
+}
+
+.cx-plan__inner {
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   width: 100%;
 }
 
-.cx-road[data-mode='scroll'] .cx-road__inner {
+.cx-plan[data-mode='scroll'] .cx-plan__inner {
   grid-template-rows: auto minmax(0, 1fr);
+  align-content: start;
   height: 100%;
-  padding-block: clamp(5rem, 11svh, 7rem) clamp(1.5rem, 4svh, 3rem);
+  padding-block: clamp(4.5rem, 10svh, 6.5rem) clamp(2.5rem, 6svh, 4.5rem);
+  gap: clamp(1rem, 2.6svh, 2.25rem);
 }
 
-.cx-road .cx-head {
+.cx-plan .cx-head {
   margin-bottom: 0;
 }
 
-.cx-road__map {
-  display: grid;
-  place-items: center;
-  min-height: 0;
-}
-
-.cx-road__box {
+/* The board: white, rounded, two columns (steps | timeline). Rows use
+   subgrid so every step's bar lines up with its label, and the grid lines
+   and the today line can run down the whole timeline column. */
+.cx-plan__board {
+  --lw: minmax(15rem, 0.62fr);
   position: relative;
-  width: min(100%, (100svh - 330px) * 1200 / 560);
-  aspect-ratio: 1200 / 560;
+  display: grid;
+  grid-template-columns: var(--lw) minmax(0, 1.38fr);
+  grid-template-rows: auto auto;
+  column-gap: clamp(1.25rem, 2.6vw, 2.5rem);
+  align-self: start;
+  padding: clamp(18px, 2.2vw, 30px) clamp(20px, 2.4vw, 34px) clamp(26px, 2.6vw, 36px);
+  border-radius: clamp(20px, 2.2vw, 32px);
+  background: var(--umm-paper);
+  box-shadow: var(--umm-shadow-2);
+  transition: --today 1.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.cx-road__svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.cx-plan[data-mode='list'] .cx-plan__board {
+  transition-duration: 3.2s;
+  transition-delay: 0.2s;
 }
 
-.cx-road__svg path {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.cx-plan[data-mode='still'] .cx-plan__board {
+  transition: none;
 }
 
-.cx-road__shadow {
-  stroke: rgb(16 14 20 / 0.06);
-  stroke-width: 46;
-  transform: translateY(8px);
+.cx-plan__axis,
+.cx-plan__rows,
+.cx-plan__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
 }
 
-.cx-road__base {
-  stroke: var(--umm-paper);
-  stroke-width: 36;
-}
-
-.cx-road__done {
-  stroke: url(#cx-road-fill);
-  stroke-width: 36;
-  stroke-linecap: butt;
-}
-
-.cx-road__lane {
-  stroke: rgb(16 14 20 / 0.32);
-  stroke-width: 2;
-  stroke-dasharray: 10 12;
-}
-
-.cx-road__start,
-.cx-road__onward {
-  position: absolute;
-  padding: 6px 12px;
-  border-radius: 999px;
+.cx-plan__axis {
+  grid-row: 1;
+  align-items: end;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--umm-hairline);
   font-family: var(--umm-font-mono);
   font-size: var(--umm-text-micro);
   letter-spacing: var(--umm-tracking-label);
   text-transform: uppercase;
-  white-space: nowrap;
-  translate: -50% -50%;
-}
-
-.cx-road__start {
-  background: var(--umm-ink);
-  color: var(--umm-paper);
-}
-
-.cx-road__onward {
-  left: 97%;
-  top: 52%;
-  border: 1.5px dashed var(--umm-hairline);
-  background: var(--umm-canvas);
   color: var(--umm-ink-quiet);
 }
 
-/* the "you are here" marker */
-.cx-road__marker {
+.cx-plan__axis-track {
+  position: relative;
+  height: 1.4em;
+}
+
+.cx-plan__mark {
   position: absolute;
-  z-index: 4;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: var(--umm-ink);
-  box-shadow: 0 0 0 4px var(--umm-paper), 0 10px 20px -6px rgb(16 14 20 / 0.5);
-}
-
-.cx-road__marker i {
-  width: 8px;
-  height: 8px;
-  margin-left: -3px;
-  border-top: 2.5px solid var(--umm-paper);
-  border-right: 2.5px solid var(--umm-paper);
-  transform: rotate(calc(var(--heading, 0deg) + 45deg));
-}
-
-.cx-road__marker::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid var(--umm-ink);
-  animation: cx-ping 2s var(--umm-ease-out) infinite;
-}
-
-@keyframes cx-ping {
-  from { transform: scale(1); opacity: 0.5; }
-  to { transform: scale(2.4); opacity: 0; }
-}
-
-/* milestones: a pin on the road and a signpost beside it */
-.cx-road__box .cx-mile {
-  position: absolute;
-  z-index: 2;
-  width: 0;
-  height: 0;
-}
-
-.cx-mile__pin {
-  position: absolute;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2.5px solid var(--umm-ink);
-  background: var(--umm-paper);
-  transition: background-color 0.4s var(--umm-ease-out) 0.2s;
-}
-
-.cx-road__box .cx-mile__pin {
-  left: -15px;
-  top: -15px;
-}
-
-.cx-mile__pin svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: var(--umm-ink);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 20;
-  stroke-dashoffset: 20;
-  transition: stroke-dashoffset 0.4s var(--umm-ease-out) 0.3s;
-}
-
-.cx-mile:not([data-state='ahead']) .cx-mile__pin {
-  background: var(--umm-tone);
-}
-
-.cx-mile[data-state='past'] .cx-mile__pin svg {
-  stroke-dashoffset: 0;
-}
-
-.cx-mile__flag {
-  position: absolute;
-  left: 9px;
-  top: 12px;
-  display: flex;
-  align-items: flex-end;
-  font-family: var(--umm-font-mono);
-  font-size: var(--umm-text-micro);
-  letter-spacing: var(--umm-tracking-label);
-  text-transform: uppercase;
-  color: var(--umm-paper);
-}
-
-/* a pole, and the word on a flag at its top */
-.cx-mile__flag i {
-  width: 2px;
-  height: 58px;
-  margin-right: -1px;
-  background: var(--umm-ink);
-}
-
-.cx-mile__flag b {
-  padding: 6px 10px 6px 9px;
-  border-radius: 0 6px 6px 0;
-  background: var(--umm-ink);
-  font-weight: inherit;
-  line-height: 1;
-}
-
-/* the signpost */
-.cx-mile__sign {
-  display: grid;
-  gap: 6px;
-  padding: 16px 18px 18px;
-  border: 1.5px dashed var(--umm-hairline);
-  border-radius: 20px;
-  background: transparent;
-  font: inherit;
-  text-align: left;
-  color: var(--umm-ink);
-  transition:
-    background-color 0.5s var(--umm-ease-out),
-    border-color 0.5s var(--umm-ease-out),
-    box-shadow 0.5s var(--umm-ease-out),
-    transform 0.6s var(--umm-ease-out);
-}
-
-.cx-road__box .cx-mile__sign {
-  position: absolute;
-  left: 0;
-  width: clamp(190px, 16.5vw, 236px);
-  translate: -50% 0;
-  cursor: pointer;
-}
-
-.cx-road__box .cx-mile[data-above='true'] .cx-mile__sign {
-  bottom: 34px;
-  transform-origin: 50% 100%;
-}
-
-.cx-road__box .cx-mile[data-above='false'] .cx-mile__sign {
-  top: 34px;
-  transform-origin: 50% 0;
-}
-
-/* the stem from pin to sign */
-.cx-road__box .cx-mile__sign::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  height: 19px;
-  border-left: 1.5px dashed var(--umm-hairline);
-}
-
-.cx-road__box .cx-mile[data-above='true'] .cx-mile__sign::before {
-  top: 100%;
-}
-
-.cx-road__box .cx-mile[data-above='false'] .cx-mile__sign::before {
-  bottom: 100%;
-}
-
-.cx-mile:not([data-state='ahead']) .cx-mile__sign {
-  border-color: transparent;
-  background: var(--umm-tone);
-  transition-delay: 0.35s;
-}
-
-.cx-road__box .cx-mile:not([data-state='ahead']) .cx-mile__sign::before {
-  border-left-style: solid;
-  border-color: var(--umm-ink);
-}
-
-.cx-road__box .cx-mile[data-state='here'] .cx-mile__sign {
-  transform: scale(1.06);
-  box-shadow: 0 26px 40px -26px rgb(16 14 20 / 0.45);
-}
-
-.cx-mile__sign:focus-visible {
-  outline: 2px solid var(--umm-ink);
-  outline-offset: 3px;
-}
-
-.cx-mile__head {
+  bottom: 0;
+  left: calc(var(--at) / var(--cols) * 100%);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  white-space: nowrap;
 }
 
-.cx-mile__num {
-  display: grid;
-  width: 26px;
-  height: 26px;
-}
-
-.cx-mile__num .cx-shape {
-  width: 100%;
-  height: 100%;
+.cx-plan__mark--launch {
+  /* the words sit left of the launch line, the diamond on it */
+  translate: calc(-100% + 4px) 0;
   color: var(--umm-ink);
 }
 
-.cx-mile[data-state='ahead'] .cx-mile__num .cx-shape {
-  color: var(--umm-hairline);
+.cx-plan__mark--launch i {
+  width: 8px;
+  height: 8px;
+  background: var(--umm-ink);
+  rotate: 45deg;
 }
 
-.cx-mile__step {
-  font-family: var(--umm-font-mono);
-  font-size: var(--umm-text-micro);
-  letter-spacing: var(--umm-tracking-label);
-  text-transform: uppercase;
-  color: var(--umm-ink-soft);
+.cx-plan__mark--end {
+  left: auto;
+  right: 0;
 }
 
-.cx-mile__title {
-  font-family: var(--umm-font-display);
-  font-size: clamp(1.2rem, 1.6vw, 1.5rem);
-  font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-}
-
-.cx-mile__body {
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--umm-ink-soft);
-}
-
-.cx-mile[data-state='ahead'] .cx-mile__title,
-.cx-mile[data-state='ahead'] .cx-mile__body,
-.cx-mile[data-state='ahead'] .cx-mile__step {
-  color: var(--umm-ink-quiet);
-}
-
-.cx-road__box .cx-mile[data-state='ahead'] .cx-mile__body {
-  opacity: 0.55;
-}
-
-/* phones and reduced motion: the road down the side of a list */
-.cx-road[data-mode='list'] {
-  padding-block: var(--umm-section-y);
-}
-
-.cx-road__list {
-  display: grid;
+.cx-plan__rows {
+  grid-row: 2;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.cx-road__list .cx-mile {
-  position: relative;
-  padding: 0 0 18px 58px;
+.cx-plan__row {
+  grid-template-rows: auto auto;
+  border-bottom: 1px solid var(--umm-hairline);
 }
 
-.cx-road__list .cx-mile::before,
-.cx-road__list .cx-mile::after {
-  content: '';
-  position: absolute;
-  left: 14px;
-  top: 0;
-  width: 18px;
-  border-radius: 9px;
+.cx-plan__row:last-child {
+  border-bottom: 0;
 }
 
-.cx-road__list .cx-mile::before {
-  bottom: 0;
-  background: var(--umm-paper);
+/* --- the steps column ---------------------------------------------------- */
+
+.cx-plan__label {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 26px 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: clamp(48px, 7svh, 62px);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--umm-ink);
+  text-align: left;
+  cursor: pointer;
 }
 
-.cx-road__list .cx-mile::after {
-  height: 0;
+.cx-plan[data-mode='list'] .cx-plan__label,
+.cx-plan[data-mode='still'] .cx-plan__label {
+  cursor: default;
+}
+
+.cx-plan__label:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.cx-plan__tick {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--umm-hairline);
+  transition:
+    background-color 0.35s var(--umm-ease-out),
+    border-color 0.35s var(--umm-ease-out),
+    transform 0.35s var(--umm-ease-out);
+}
+
+.cx-plan__tick svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.4s var(--umm-ease-out) 0.1s;
+}
+
+.cx-plan__label[data-done='true'] .cx-plan__tick {
   background: var(--umm-tone);
-  transition: height 0.8s var(--umm-ease-out);
+  border-color: var(--umm-ink);
+  transform: rotate(-8deg);
+  transition-delay: 0.9s;
 }
 
-.cx-road__list .cx-mile[data-state='past']::after {
+.cx-plan__label[data-done='true'] .cx-plan__tick svg {
+  stroke-dashoffset: 0;
+  transition-delay: 1s;
+}
+
+.cx-plan__n {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  color: var(--umm-ink-quiet);
+}
+
+.cx-plan__title {
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.125rem, 1.6vw, 1.4rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  opacity: 0.45;
+  transition: opacity 0.35s var(--umm-ease-out);
+}
+
+.cx-plan__label[data-open='true'] .cx-plan__title,
+.cx-plan__label[data-done='true'] .cx-plan__title {
+  opacity: 1;
+}
+
+.cx-plan__body {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--umm-ease-out);
+}
+
+.cx-plan__body[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+.cx-plan__body p {
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding-left: 60px;
+  max-width: 40ch;
+  font-size: var(--umm-text-body-s);
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.cx-plan__body[data-open='true'] p {
+  padding-bottom: 14px;
+}
+
+/* --- the timeline column ------------------------------------------------- */
+
+.cx-plan__track {
+  position: relative;
+  z-index: 1;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  height: clamp(34px, 4.6svh, 42px);
+}
+
+.cx-plan__bar {
+  position: absolute;
+  inset-block: 0;
+  left: calc(var(--a) / var(--cols) * 100%);
+  width: calc((var(--b) - var(--a)) / var(--cols) * 100%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 10px 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--umm-tone) 30%, var(--umm-paper));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--umm-tone) 70%, var(--umm-ink) 6%);
+  transition: transform 0.45s var(--umm-ease-out), box-shadow 0.45s var(--umm-ease-out);
+}
+
+.cx-plan__bar[data-open='true'] {
+  transform: scaleY(1.12);
+  box-shadow:
+    inset 0 0 0 1.5px var(--umm-ink),
+    0 10px 24px -14px rgb(16 14 20 / 0.45);
+}
+
+/* Improve keeps going: its bar runs off the board, open-ended. */
+.cx-plan__bar[data-last='true'] {
+  border-radius: 999px 0 0 999px;
+  mask-image: linear-gradient(90deg, #000 70%, transparent);
+}
+
+.cx-plan__fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: calc(clamp(0, (var(--today) - var(--a)) / (var(--b) - var(--a)), 1) * 100%);
+  background: var(--umm-tone);
+}
+
+.cx-plan__num,
+.cx-plan__name {
+  position: relative;
+}
+
+.cx-plan__num {
+  display: grid;
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.cx-plan__num .cx-shape {
+  width: 100%;
   height: 100%;
 }
 
-.cx-road__list .cx-mile__pin {
-  left: 8px;
-  top: 18px;
+.cx-plan__name {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: var(--umm-weight-medium);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cx-road__marker::after {
-    animation: none;
+/* A sticker at the end of each finished bar. */
+.cx-plan__signed {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--b) / var(--cols) * 100%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  padding: 0.45em 0.8em 0.45em 0.6em;
+  border-radius: 999px;
+  background: var(--umm-paper);
+  box-shadow: inset 0 0 0 1px var(--umm-ink), 0 6px 14px -8px rgb(16 14 20 / 0.4);
+  font-family: var(--umm-font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-50%) rotate(-14deg) scale(0.7);
+  transition:
+    transform 0.3s var(--umm-ease-out),
+    opacity 0.2s var(--umm-ease-out);
+}
+
+.cx-plan__signed svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cx-plan__signed[data-on='true'] {
+  opacity: 1;
+  transform: translateY(-50%) rotate(-5deg) scale(1);
+  transition:
+    transform 0.6s cubic-bezier(0.34, 1.5, 0.5, 1) 1.05s,
+    opacity 0.25s var(--umm-ease-out) 1.05s;
+}
+
+.cx-plan[data-mode='list'] .cx-plan__signed[data-on='true'] {
+  transition-delay: 0.6s;
+}
+
+.cx-plan[data-mode='still'] .cx-plan__signed {
+  transition: none;
+}
+
+/* The grid lines, the launch line and the today line, down the whole
+   timeline column. The overlay makes no stacking context of its own, so its
+   grid lines paint under the bars (z 1) and the today line over them. */
+.cx-plan__over {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / -1;
+  pointer-events: none;
+  background-image: linear-gradient(90deg, rgb(16 14 20 / 0.07) 1px, transparent 1px);
+  background-size: calc(100% / var(--cols)) 100%;
+}
+
+.cx-plan__launch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--at) / var(--cols) * 100%);
+  border-left: 1.5px dashed rgb(16 14 20 / 0.35);
+}
+
+.cx-plan__today {
+  position: absolute;
+  top: -6px;
+  bottom: -4px;
+  left: calc(var(--today) / var(--cols) * 100%);
+  z-index: 3;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--umm-ink);
+}
+
+.cx-plan__today b {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  translate: -50% 100%;
+  padding: 0.35em 0.7em;
+  border-radius: 999px;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+  font-family: var(--umm-font-mono);
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* --- phones: one column, each row's bar under its text ------------------- */
+
+@media (max-width: 899px) {
+  .cx-plan__board {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px 16px 8px;
+  }
+  .cx-plan__axis-step {
+    display: none;
+  }
+  .cx-plan__axis {
+    font-size: 0.5625rem;
+    letter-spacing: 0.08em;
+  }
+  .cx-plan__mark--end {
+    display: none;
+  }
+  .cx-plan__row {
+    grid-template-rows: auto auto auto;
+    padding-bottom: 16px;
+  }
+  .cx-plan__label {
+    min-height: 52px;
+  }
+  .cx-plan__body {
+    grid-row: 2;
+  }
+  .cx-plan__body p {
+    padding-left: 0;
+    padding-bottom: 12px !important;
+  }
+  .cx-plan__track {
+    grid-column: 1;
+    grid-row: 3;
+    height: 32px;
+    background-image: linear-gradient(90deg, rgb(16 14 20 / 0.07) 1px, transparent 1px);
+    background-size: calc(100% / var(--cols)) 100%;
+  }
+  .cx-plan__name {
+    display: none;
+  }
+  .cx-plan__signed {
+    left: auto;
+    right: 0;
+    margin-left: 0;
+  }
+  .cx-plan__row:nth-child(3) .cx-plan__signed,
+  .cx-plan__row:nth-child(4) .cx-plan__signed {
+    display: none;
+  }
+  .cx-plan__over {
+    display: none;
   }
 }
 
 /* Short laptop screens */
 @media (min-width: 900px) and (max-height: 820px) {
-  .cx-road .cx-h {
+  .cx-plan .cx-h {
     font-size: clamp(1.75rem, 2.9vw, 2.5rem);
   }
-  .cx-road__box {
-    width: min(100%, (100svh - 370px) * 1200 / 560);
-  }
-  .cx-mile__body {
-    font-size: 0.8125rem;
+  .cx-plan__label {
+    min-height: 44px;
   }
 }
 
