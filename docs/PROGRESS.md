@@ -21,7 +21,7 @@ of the **Log**. Tick boxes as things land.
 | 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
 | 5 | Built for where you are: size tabs | 🔄 revised (light picture behind the number), awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
 | 6 | How we design: 5 rules + tools | 🔄 revised (rules: realistic phone, magnetic stops; tools: six colour ramps, glass shapes), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
-| 7 | How we work + FAQ + closing band | 🔄 revised (steps as a pile of big squares, magnetic; curtain; footer wordmark), awaiting review | Designjoy steps, Cal.com FAQ + CTA |
+| 7 | How we work + FAQ + closing band | 🔄 revised (steps as a pastel roadmap, magnetic; curtain; footer wordmark), awaiting review | Designjoy steps, Cal.com FAQ + CTA |
 | 8 | Phones, reduced motion, build check | ✅ build passes; runtime smoke test clean | — |
 
 **Not yet done:** Krish's visual review of every section (he is the only
@@ -89,6 +89,24 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, section 7: the steps as a roadmap
+- Krish: the pile of squares looked like the tools section and was not what
+  he asked for; UMM uses pastels; it should look like a roadmap.
+- `Roadmap.tsx` replaces the pile. A road winds across the section from
+  "First call" through five milestone pins, past a Launch flag at Deliver,
+  and carries on off the edge after Improve ("and on"). Flat brand pastels
+  only: the road behind the marker fills sun → sky → blossom → citrus →
+  coral; the road ahead is the white road with a dashed planned route.
+- Each milestone is a magnetic stop. A "you are here" marker drives along
+  the road to it (turning with the bends); signposts stand on the outside of
+  each bend, a dashed outline while ahead, filled in their pastel once
+  reached, so the last stop shows the whole roadmap. Clicking a signpost
+  drives there.
+- Phones and reduced motion: the road runs down the left of a list and each
+  stretch fills as its step scrolls into view (reduced motion: all filled).
+- Checks: build passes; five stops at 1440×900 and 1366×768, settle, free
+  exit; 390; reduced motion; no console errors; no horizontal scroll.
 
 ### 6 Oct 2026, section 7 and the page's finish
 - Krish: make the final section big squares with a very nice scroll effect,
