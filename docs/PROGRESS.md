@@ -90,6 +90,26 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 6 Oct 2026, section 6: a real phone, compact, and magnetic stops
+- Krish: the phone felt cartoonish and took the whole screen height; the
+  scroll was too quick to take in each change.
+- The phone is now a modern handset (titanium band, thin bezel, camera
+  island, side buttons, glass reflection, real status-bar icons) running an
+  iOS-style checkout: large title, grouped list rows, a shaded product
+  thumbnail, a frosted bottom bar, a home indicator. "Tested" is now a
+  usability-test notification sliding in, plus a tap heat map on Pay.
+  Callouts are plain white cards with a leader, not outlined pills.
+- Compact: the phone is capped at 80% of its column's height (about 68% of
+  the window at 1440×900).
+- Magnetic scroll: six stops (before, then one per rule). The scroll picks
+  the stop; the change plays as a full eased animation (0.8–1.1s) whatever
+  the scroll speed. When scrolling goes quiet the page glides to the nearest
+  stop; entering and leaving the section are never pulled back; any wheel,
+  touch or key input cancels a glide. Clicking a rule glides to its stop.
+- Checks: build passes; stops at 1440×900 and 1366×768, settle test (stopped
+  between stops 2 and 3 → settled on 3), free exit, 390 autoplay and tap; no
+  console errors.
+
 ### 6 Oct 2026, section 6: one checkout, fixed rule by rule
 - Krish picked option A of three: replace the five rule cards (a second grid
   of pastel cards straight after the services cards, two of them with weak

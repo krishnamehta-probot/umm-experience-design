@@ -2720,9 +2720,9 @@ html.cx-v2 body {
 /* ===========================================================================
    6a · HOW WE DESIGN — one checkout, fixed rule by rule
 
-   Every change on the phone is read from --k1 … --k5 (0 to 1), set on the
-   section by the scroll (pinned) or by a tap (phones). Registered, so a tap
-   can ease them instead of jumping.
+   Every change on the phone is read from --k1 … --k5 (0 or 1), set on the
+   section by the scroll stop (pinned) or a tap (phones). Registered, so CSS
+   eases each change as a full animation however fast the scroll went.
    ========================================================================= */
 
 @property --k1 { syntax: '<number>'; inherits: true; initial-value: 0; }
@@ -2731,18 +2731,19 @@ html.cx-v2 body {
 @property --k4 { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --k5 { syntax: '<number>'; inherits: true; initial-value: 0; }
 
-.cx-fix[data-mode='tap'] {
+.cx-fix:not([data-mode='still']) {
   transition:
-    --k1 0.8s var(--umm-ease-out),
-    --k2 0.9s var(--umm-ease-out),
-    --k3 0.8s var(--umm-ease-out),
-    --k4 0.7s var(--umm-ease-out),
-    --k5 0.7s var(--umm-ease-out);
+    --k1 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+    --k2 1.1s cubic-bezier(0.65, 0, 0.35, 1),
+    --k3 1s cubic-bezier(0.65, 0, 0.35, 1),
+    --k4 0.8s cubic-bezier(0.65, 0, 0.35, 1),
+    --k5 0.9s var(--umm-ease-out);
 }
 
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
   .cx-fix.umm-pin {
-    min-height: calc(100svh + var(--umm-pin-steps) * 56svh);
+    /* one stop per rule plus the broken screen, each a steady stretch */
+    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
   }
 }
 
@@ -2754,7 +2755,7 @@ html.cx-v2 body {
 
 @media (min-width: 900px) {
   .cx-fix__inner {
-    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
     align-items: center;
     gap: clamp(2rem, 4vw, 4.5rem);
   }
@@ -2903,7 +2904,7 @@ html.cx-v2 body {
 .cx-fix__slot {
   position: relative;
   min-height: 0;
-  height: min(720px, 86svh);
+  height: min(700px, 84svh);
 }
 
 .cx-fix[data-mode='scroll'] .cx-fix__slot {
@@ -2914,113 +2915,156 @@ html.cx-v2 body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(760px, 120%);
+  width: min(560px, 100%);
   aspect-ratio: 1;
   translate: -50% -50%;
   background-color: var(--umm-tone);
-  -webkit-mask-image: radial-gradient(closest-side, #000 15%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 15%, transparent 100%);
-  opacity: 0.8;
-  transition: background-color 0.6s var(--umm-ease-out);
+  -webkit-mask-image: radial-gradient(closest-side, #000 10%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 10%, transparent 100%);
+  opacity: 0.55;
+  transition: background-color 0.8s var(--umm-ease-out);
 }
 
 @media (min-width: 900px) {
   /* behind the phone, which sits left of the callouts */
   .cx-fix__glow {
-    left: calc(50% - 140px * var(--s, 1));
+    left: calc(50% - 135px * var(--s, 1));
   }
-}
-
-/* above the phone, centred on it */
-.cx-fix__status {
-  position: absolute;
-  top: -50px;
-  left: 160px;
-  margin: 0;
-  padding: 8px 16px;
-  translate: -50% 0;
-  border-radius: 999px;
-  background: var(--umm-paper);
-  box-shadow: 0 6px 20px rgb(16 14 20 / 0.08);
-  font-family: var(--umm-font-mono);
-  font-size: 12px;
-  letter-spacing: var(--umm-tracking-label);
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--umm-ink);
 }
 
 .cx-fix__rig {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 320px;
-  height: 660px;
-  transform: translate(-50%, -46%) scale(var(--s, 1));
+  width: 300px;
+  height: 620px;
+  transform: translate(-50%, -47%) scale(var(--s, 1));
   transform-origin: 50% 50%;
 }
 
 @media (min-width: 900px) {
   .cx-fix__rig {
-    width: 600px;
+    width: 570px;
   }
 }
 
-/* callouts: beside the phone on wide screens, one caption under it on phones */
-
-.cx-fix__callout {
+/* above the phone: five pips and where we are */
+.cx-fix__status {
   position: absolute;
-  left: 346px;
-  padding: 10px 16px;
+  top: -48px;
+  left: 150px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 7px 14px 7px 10px;
+  translate: -50% 0;
   border-radius: 999px;
-  background: var(--umm-tone);
-  border: 1.5px solid var(--umm-ink);
+  background: var(--umm-paper);
+  box-shadow: 0 0 0 1px rgb(16 14 20 / 0.06), 0 8px 22px -12px rgb(16 14 20 / 0.3);
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--umm-ink);
+}
+
+.cx-fix__meter {
+  display: flex;
+  gap: 3px;
+}
+
+.cx-fix__meter i {
+  width: 14px;
+  height: 5px;
+  border-radius: 3px;
+  background: #e2e2e6;
+  transition: background-color 0.5s var(--umm-ease-out);
+}
+
+.cx-fix__meter i[data-on='true'] {
+  background: color-mix(in srgb, var(--umm-tone) 55%, var(--umm-ink));
+}
+
+/* callouts: clean cards beside the phone on wide screens, one under it on
+   phones */
+
+.cx-fix__callout,
+.cx-fix__caption {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px 9px 11px;
+  border-radius: 12px;
+  background: var(--umm-paper);
+  box-shadow:
+    0 0 0 1px rgb(16 14 20 / 0.06),
+    0 14px 30px -14px rgb(16 14 20 / 0.35);
   font-family: var(--umm-font-display);
-  font-size: 17px;
+  font-size: 14.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: -0.01em;
   white-space: nowrap;
   color: var(--umm-ink);
+}
+
+.cx-fix__callout i,
+.cx-fix__caption i {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--umm-tone) 60%, var(--umm-ink));
+  box-shadow: 0 0 0 3px var(--umm-tone);
+}
+
+.cx-fix__callout {
+  position: absolute;
+  left: 336px;
   opacity: 0;
-  transform: translateX(-14px);
+  transform: translateX(-10px);
   transition:
-    opacity 0.4s var(--umm-ease-out),
-    transform 0.5s var(--umm-ease-out);
+    opacity 0.45s var(--umm-ease-out),
+    transform 0.6s var(--umm-ease-out);
   pointer-events: none;
 }
 
+.cx-fix__callout[data-on='true'] {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.35s;
+}
+
+/* the leader, from the card back to the thing that changed */
 .cx-fix__callout::before {
   content: '';
   position: absolute;
   top: 50%;
   right: 100%;
-  width: 40px;
-  height: 1.5px;
-  background: var(--umm-ink);
+  width: 34px;
+  height: 1px;
+  background: rgb(16 14 20 / 0.35);
 }
 
 .cx-fix__callout::after {
   content: '';
   position: absolute;
   top: 50%;
-  right: calc(100% + 38px);
-  width: 9px;
-  height: 9px;
-  margin-top: -3.75px;
+  right: calc(100% + 32px);
+  width: 7px;
+  height: 7px;
+  margin-top: -3px;
   border-radius: 50%;
   background: var(--umm-ink);
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.9);
 }
 
-.cx-fix__callout[data-on='true'] {
-  opacity: 1;
-  transform: none;
-}
-
-.cx-fix__callout--colour { top: 42px; }
-.cx-fix__callout--thumbs { top: 572px; }
-.cx-fix__callout--steps { top: 100px; }
-.cx-fix__callout--same { top: 378px; }
-.cx-fix__callout--tested { top: 500px; }
+.cx-fix__callout--colour { top: 62px; }
+.cx-fix__callout--tested { top: 74px; }
+.cx-fix__callout--steps { top: 146px; }
+.cx-fix__callout--same { top: 402px; }
+.cx-fix__callout--thumbs { top: 536px; }
 
 .cx-fix__caption {
   display: none;
@@ -3040,17 +3084,9 @@ html.cx-v2 body {
     bottom: 0;
     left: 50%;
     z-index: 2;
-    display: block;
+    display: flex;
     margin: 0;
-    padding: 8px 14px;
     translate: -50% 0;
-    border-radius: 999px;
-    border: 1.5px solid var(--umm-ink);
-    background: var(--umm-tone);
-    font-family: var(--umm-font-display);
-    font-size: 0.9375rem;
-    font-weight: var(--umm-weight-medium);
-    white-space: nowrap;
   }
 
   .cx-fix__copy {
@@ -3065,84 +3101,189 @@ html.cx-v2 body {
   .cx-fix__rules { order: 3; }
 }
 
-/* --- the phone, drawn at 320 x 660 --------------------------------------- */
+/* --- the handset, drawn at 300 x 620 ------------------------------------- */
 
 .cx-phone {
   position: absolute;
   top: 0;
   left: 0;
-  width: 320px;
-  height: 660px;
-  padding: 10px;
-  border-radius: 54px;
-  background: var(--umm-ink);
+  width: 300px;
+  height: 620px;
+  border-radius: 52px;
+  /* the titanium band, catching light on two corners */
+  background: linear-gradient(150deg, #a3a4a9 0%, #4a4b50 14%, #1f2023 46%, #2b2c30 70%, #8e8f94 100%);
   box-shadow:
-    0 40px 80px -30px rgb(16 14 20 / 0.45),
-    inset 0 0 0 2px rgb(255 255 255 / 0.08);
-  font-family: var(--umm-font-display);
-  color: var(--umm-ink);
+    0 60px 90px -50px rgb(16 14 20 / 0.6),
+    0 24px 40px -24px rgb(16 14 20 / 0.45),
+    inset 0 0 0 1px rgb(255 255 255 / 0.18);
 }
+
+.cx-phone__btn {
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #6a6b70, #2a2b2e);
+}
+
+.cx-phone__btn--action { left: -2px; top: 108px; height: 24px; }
+.cx-phone__btn--up { left: -2px; top: 150px; height: 46px; }
+.cx-phone__btn--down { left: -2px; top: 206px; height: 46px; }
+.cx-phone__btn--power { right: -2px; top: 172px; height: 72px; transform: scaleX(-1); }
 
 .cx-phone__screen {
-  position: relative;
-  height: 100%;
+  position: absolute;
+  inset: 4px;
   overflow: hidden;
-  padding: 0 18px;
-  border-radius: 44px;
-  background: var(--umm-paper);
+  border: 6px solid #060607;
+  border-radius: 48px;
+  background: #f2f2f7;
   /* 1 · the whole page's text: pale grey to readable */
-  --cx-text: color-mix(in srgb, var(--umm-ink) calc(var(--k1) * 100%), #b4b4be);
-  --cx-quiet: color-mix(in srgb, var(--umm-ink-quiet) calc(var(--k1) * 100%), #cdcdd4);
+  --cx-text: color-mix(in srgb, #111114 calc(var(--k1) * 100%), #b8b8be);
+  --cx-quiet: color-mix(in srgb, #8a8a8e calc(var(--k1) * 100%), #cfcfd4);
 }
 
-.cx-phone__status {
+/* a faint reflection across the glass */
+.cx-phone__screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  border-radius: inherit;
+  background: linear-gradient(118deg, rgb(255 255 255 / 0.16) 0%, rgb(255 255 255 / 0) 34%);
+  pointer-events: none;
+}
+
+.cx-app {
+  height: 100%;
+  padding: 0 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--umm-font-display);
+  letter-spacing: -0.01em;
+  color: var(--cx-text);
+}
+
+.cx-app__island {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 88px;
+  height: 26px;
+  translate: -50% 0;
+  border-radius: 20px;
+  background: #000;
+  z-index: 8;
+}
+
+.cx-app__home {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  width: 104px;
+  height: 4.5px;
+  translate: -50% 0;
+  border-radius: 3px;
+  background: #111114;
+  z-index: 8;
+}
+
+.cx-app__status {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 40px;
-  padding: 10px 10px 0;
-  font-size: 12px;
-  font-weight: var(--umm-weight-semibold);
+  height: 48px;
+  padding: 6px 10px 0 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #111114;
 }
 
-.cx-phone__bars {
+.cx-app__icons {
   display: flex;
-  gap: 3px;
+  align-items: center;
+  gap: 5px;
 }
 
-.cx-phone__bars i {
-  width: 4px;
-  height: 9px;
-  border-radius: 1px;
-  background: var(--umm-ink);
+.cx-app__icons svg {
+  height: 10.5px;
+  width: auto;
+  fill: #111114;
 }
 
-.cx-phone__head {
-  height: 44px;
-  padding-top: 8px;
+.cx-app__battery {
+  position: relative;
+  width: 23px;
+  height: 11px;
+  padding: 1.5px;
+  border: 1px solid rgb(17 17 20 / 0.4);
+  border-radius: 3.5px;
 }
 
-.cx-phone__title {
-  font-size: 24px;
-  font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.03em;
+.cx-app__battery::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: -3px;
+  width: 1.5px;
+  height: 4px;
+  border-radius: 0 1px 1px 0;
+  background: rgb(17 17 20 / 0.4);
+}
+
+.cx-app__battery i {
+  display: block;
+  width: 78%;
+  height: 100%;
+  border-radius: 1.5px;
+  background: #111114;
+}
+
+.cx-app__nav {
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+
+.cx-app__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: -4px;
+  font-size: 16px;
   color: var(--cx-text);
+}
+
+.cx-app__back svg {
+  width: 10px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cx-app__title {
+  display: block;
+  margin: 2px 0 8px;
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 /* 3 · the step track */
 
-.cx-phone__steps {
+.cx-app__steps {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
-.cx-phone__stepnote {
+.cx-app__stepnote {
   display: grid;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--cx-quiet);
 }
 
-.cx-phone__stepnote > span {
+.cx-app__stepnote > span {
   grid-area: 1 / 1;
 }
 
@@ -3154,138 +3295,175 @@ html.cx-v2 body {
   opacity: var(--k3);
 }
 
-.cx-phone__track {
+.cx-app__track {
   display: flex;
-  height: 5px;
+  height: 4px;
 }
 
-.cx-phone__track i {
+.cx-app__track i {
   flex: 1 1 0;
-  margin-left: 4px;
-  border-radius: 3px;
-  background: #e8e8ec;
+  margin-left: 3px;
+  border-radius: 2px;
+  background: #dedee3;
 }
 
-.cx-phone__track i:first-child {
+.cx-app__track i:first-child {
   margin-left: 0;
 }
 
-.cx-phone__track i[data-done='true'] {
-  background: color-mix(in srgb, var(--umm-ink) calc(var(--k1) * 100%), #cfcfd6);
+.cx-app__track i[data-done='true'] {
+  background: var(--cx-text);
 }
 
-.cx-phone__track i[data-extra='true'] {
+.cx-app__track i[data-extra='true'] {
   flex-grow: calc(1 - var(--k3));
-  margin-left: calc(4px * (1 - var(--k3)));
+  margin-left: calc(3px * (1 - var(--k3)));
   opacity: calc(1 - var(--k3));
 }
 
-/* the item */
+/* grouped list, as iOS settings and checkouts do it */
 
-.cx-phone__item {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto;
-  grid-template-rows: auto auto;
-  column-gap: 12px;
-  row-gap: 4px;
-  align-items: center;
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 18px;
-  background: #f5f5f7;
-}
-
-.cx-phone__thumb {
-  grid-row: 1 / 3;
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 70% 30%, var(--umm-sun) 0 28%, transparent 30%),
-    var(--umm-blossom);
-}
-
-.cx-phone__name {
-  display: grid;
-  font-size: 14px;
-  font-weight: var(--umm-weight-medium);
-  color: var(--cx-text);
-}
-
-.cx-phone__name small {
-  font-size: 11px;
-  font-weight: var(--umm-weight-regular);
+.cx-app__label {
+  display: block;
+  margin: 15px 4px 6px;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--cx-quiet);
 }
 
-.cx-phone__price {
-  font-size: 14px;
-  font-weight: var(--umm-weight-semibold);
+.cx-app__group {
+  display: block;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.cx-app__item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px 10px 10px;
+}
+
+/* the product: an amber glass candle on a studio sweep */
+.cx-app__thumb {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+  background: radial-gradient(120% 90% at 50% 20%, #faf7f2, #e6dfd4);
+}
+
+.cx-app__jar {
+  position: relative;
+  width: 22px;
+  height: 27px;
+  margin-top: 5px;
+  border-radius: 4px 4px 6px 6px;
+  background: linear-gradient(90deg, #4a2208 0%, #9a5018 20%, #e3a058 40%, #f2c27e 46%, #c27128 62%, #7a3d10 86%, #3f1c06 100%);
+  box-shadow: 0 4px 5px -3px rgb(40 20 0 / 0.55);
+}
+
+.cx-app__jar::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 1px;
+  right: 1px;
+  height: 6px;
+  border-radius: 2px 2px 1px 1px;
+  background: linear-gradient(90deg, #232326, #77777c 38%, #9a9aa0 46%, #36363a 80%, #1b1b1e);
+}
+
+.cx-app__jar i {
+  position: absolute;
+  inset: 9px 2px 7px;
+  background: linear-gradient(90deg, #d9cfbd, #f4ede0 40%, #e6dccb);
+  opacity: 0.95;
+}
+
+.cx-app__name {
+  display: grid;
+  gap: 1px;
+  font-size: 14.5px;
+  font-weight: 600;
   color: var(--cx-text);
 }
 
-.cx-phone__item .cx-btn {
-  grid-column: 3;
-  justify-self: end;
+.cx-app__name small {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--cx-quiet);
 }
 
-/* the form: five fields, three of which fold away with rule 3 */
-
-.cx-phone__form {
+.cx-app__price {
   display: grid;
-  margin-top: 12px;
+  justify-items: end;
+  gap: 5px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--cx-text);
 }
 
-.cx-field {
+/* the form: five rows, three of which fold away with rule 3 */
+
+.cx-app__field {
   display: block;
-  height: 58px;
+  height: 44px;
   overflow: hidden;
 }
 
-.cx-field[data-extra] {
-  height: calc(58px * (1 - var(--k3)));
-  opacity: calc(1 - var(--k3) * 1.6);
+.cx-app__field[data-extra] {
+  height: calc(44px * (1 - var(--k3)));
+  opacity: calc(1 - var(--k3) * 1.4);
 }
 
-.cx-field__in {
-  display: grid;
-  gap: 4px;
-}
-
-.cx-field__label {
-  font-size: 10.5px;
-  color: var(--cx-quiet);
-}
-
-.cx-field__box {
+.cx-app__field-in {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #e4e4e9;
-  border-radius: 10px;
-  font-size: 13px;
+  height: 44px;
+  padding: 0 14px;
+  font-size: 14.5px;
+}
+
+.cx-app__field + .cx-app__field .cx-app__field-in {
+  margin-left: 14px;
+  padding-left: 0;
+  border-top: 1px solid #e6e6eb;
+}
+
+.cx-app__field-label {
   color: var(--cx-text);
 }
 
-.cx-field__auto {
-  padding: 2px 8px;
+.cx-app__field-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cx-quiet);
+}
+
+.cx-app__auto {
+  padding: 2px 7px;
   border-radius: 999px;
-  background: var(--umm-citrus);
-  font-size: 10px;
+  background: rgb(52 199 89 / 0.15);
+  font-size: 11px;
   font-style: normal;
-  font-weight: var(--umm-weight-semibold);
-  color: var(--umm-ink);
+  font-weight: 600;
+  color: #248a3d;
   opacity: var(--k3);
 }
 
 /* 4 · four button styles settle into one */
 
-.cx-phone__row {
+.cx-app__row {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .cx-btn {
@@ -3297,7 +3475,7 @@ html.cx-v2 body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 34px;
+  height: 32px;
   white-space: nowrap;
 }
 
@@ -3306,171 +3484,207 @@ html.cx-v2 body {
 }
 
 .cx-btn__clean {
-  padding: 0 14px;
-  border: 1.5px solid var(--umm-ink);
-  border-radius: 999px;
-  background: var(--umm-paper);
-  font-size: 12.5px;
-  font-weight: var(--umm-weight-medium);
-  color: var(--umm-ink);
+  padding: 0 12px;
+  border-radius: 9px;
+  background: #e5e5ea;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111114;
   opacity: var(--k4);
-  transform: scale(calc(0.88 + 0.12 * var(--k4)));
+  transform: scale(calc(0.92 + 0.08 * var(--k4)));
 }
 
 .cx-btn--code .cx-btn__messy {
-  padding: 0 12px;
-  border-radius: 3px;
-  background: #3d6bff;
+  padding: 0 11px;
+  border-radius: 2px;
+  background: #2f6bff;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 13px;
+  font-size: 12.5px;
   color: #fff;
-  transform: rotate(calc(-2deg * (1 - var(--k4))));
 }
 
 .cx-btn--save .cx-btn__messy {
   padding: 0 10px;
-  border: 1.5px dashed #ff7a1a;
-  border-radius: 10px;
+  border: 1.5px dashed #ff8a2a;
+  border-radius: 14px;
   font-size: 10px;
-  font-weight: var(--umm-weight-bold);
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #ff7a1a;
-  transform: rotate(calc(3deg * (1 - var(--k4))));
+  color: #ff8a2a;
 }
 
 .cx-btn--edit > span {
-  height: 24px;
+  height: 22px;
 }
 
 .cx-btn--edit .cx-btn__messy {
   font-size: 10px;
-  font-weight: var(--umm-weight-bold);
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-decoration: underline;
   color: #12a150;
 }
 
 .cx-btn--edit .cx-btn__clean {
-  padding: 0 10px;
-  font-size: 11px;
+  padding: 0 9px;
+  border-radius: 7px;
+  font-size: 11.5px;
 }
 
-/* the total */
-
-.cx-phone__total {
+.cx-app__total {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-top: 14px;
-  font-size: 13px;
+  margin: 14px 4px 0;
+  font-size: 14.5px;
   color: var(--cx-quiet);
 }
 
-.cx-phone__total strong {
+.cx-app__total strong {
   font-size: 17px;
-  font-weight: var(--umm-weight-semibold);
+  font-weight: 700;
   color: var(--cx-text);
 }
 
 /* 2 · the thumb's reach, and the bar Pay settles into */
 
-.cx-phone__zone {
+.cx-app__zone {
   position: absolute;
   left: 50%;
-  bottom: -150px;
-  width: 420px;
-  height: 330px;
+  bottom: -170px;
+  width: 400px;
+  height: 340px;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--umm-sky) 90%, transparent) 55%, transparent);
+  background: radial-gradient(closest-side, rgb(10 132 255 / 0.2) 50%, rgb(10 132 255 / 0));
   opacity: calc(var(--k2) * (1 - var(--k3)));
   pointer-events: none;
 }
 
-.cx-phone__dock {
+.cx-app__dock {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 88px;
-  border-top: 1px solid #ececf0;
-  background: rgb(255 255 255 / 0.94);
+  height: 92px;
+  border-top: 1px solid rgb(17 17 20 / 0.08);
+  background: rgb(249 249 251 / 0.86);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
   opacity: var(--k2);
 }
 
 /* 1 + 2 · Pay */
 
-.cx-phone__pay {
+.cx-app__pay {
   position: absolute;
-  top: calc(48px + 522px * var(--k2));
-  left: calc(206px - 190px * var(--k2));
+  top: calc(54px + 464px * var(--k2));
+  left: calc(212px - 196px * var(--k2));
+  display: grid;
+  place-items: center;
+  width: calc(52px + 196px * var(--k2));
+  height: calc(28px + 22px * var(--k2));
+  border-radius: calc(8px + 6px * var(--k2));
+  background: color-mix(in srgb, #111114 calc(var(--k1) * 100%), #f7f1c4);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--umm-font-display);
+  font-size: calc(14px + 2.5px * var(--k2));
+  font-weight: 600;
+  color: color-mix(in srgb, #fff calc(var(--k1) * 100%), #d6cf9f);
+  box-shadow: 0 10px 22px -12px rgb(16 14 20 / calc(0.7 * var(--k1)));
+  z-index: 3;
+}
+
+.cx-app__pay > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.cx-x-short {
+  opacity: calc(1 - var(--k2));
+}
+
+.cx-x-long {
+  opacity: var(--k2);
+}
+
+/* 5 · where testers tapped (a heat map on Pay), and the result arriving */
+
+.cx-app__heat {
+  position: absolute;
+  top: 543px;
+  left: 134px;
+  z-index: 4;
+}
+
+.cx-app__heat i {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 120 80 / 0.95), rgb(255 159 10 / 0.45) 50%, rgb(255 214 10 / 0));
+  mix-blend-mode: screen;
+  opacity: calc(0.85 * var(--k5));
+  transform: scale(calc(0.4 + 0.6 * var(--k5)));
+}
+
+.cx-app__heat i:nth-child(1) { left: -62px; top: 2px; }
+.cx-app__heat i:nth-child(2) { left: -40px; top: -4px; }
+.cx-app__heat i:nth-child(3) { left: 64px; top: 4px; width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+
+.cx-app__note {
+  position: absolute;
+  top: 46px;
+  right: 8px;
+  left: 8px;
+  z-index: 7;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: calc(76px + 192px * var(--k2));
-  height: calc(30px + 24px * var(--k2));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--umm-ink) calc(var(--k1) * 100%), #f7f1c4);
-  font-size: calc(11.5px + 4.5px * var(--k2));
-  font-weight: var(--umm-weight-semibold);
-  color: color-mix(in srgb, #fff calc(var(--k1) * 100%), #d6cf9f);
-  box-shadow: 0 10px 24px -10px rgb(16 14 20 / calc(0.6 * var(--k1)));
-}
-
-/* 5 · taps from testing, landing on Pay */
-
-.cx-phone__taps {
-  position: absolute;
-  top: 597px;
-  left: 150px;
-}
-
-.cx-phone__taps i {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border-radius: 50%;
-  background: var(--umm-coral);
-  opacity: calc(0.9 * var(--k5));
-  transform: scale(calc(0.3 + 0.7 * var(--k5)));
-}
-
-/* where testers tapped: on the button, either side of its label */
-.cx-phone__taps i:nth-child(1) { left: -96px; top: -2px; }
-.cx-phone__taps i:nth-child(2) { left: -70px; top: 9px; }
-.cx-phone__taps i:nth-child(3) { left: 72px; top: -6px; }
-.cx-phone__taps i:nth-child(4) { left: 100px; top: 5px; }
-
-.cx-fix[data-mode='scroll'] .cx-phone__taps i,
-.cx-fix[data-mode='tap'] .cx-phone__taps i {
-  animation: cx-tap 1.8s var(--umm-ease-out) infinite;
-}
-
-.cx-phone__taps i:nth-child(2) { animation-delay: 0.45s; }
-.cx-phone__taps i:nth-child(3) { animation-delay: 0.9s; }
-.cx-phone__taps i:nth-child(4) { animation-delay: 1.35s; }
-
-@keyframes cx-tap {
-  0%, 100% { box-shadow: 0 0 0 0 rgb(255 195 196 / 0.9); }
-  60% { box-shadow: 0 0 0 9px rgb(255 195 196 / 0); }
-}
-
-.cx-phone__stamp {
-  position: absolute;
-  top: 486px;
-  left: -40px;
-  padding: 10px 18px;
-  border: 2px solid var(--umm-ink);
-  border-radius: 999px;
-  background: var(--umm-coral);
-  box-shadow: 0 12px 26px -12px rgb(16 14 20 / 0.5);
-  font-size: 19px;
-  font-weight: var(--umm-weight-semibold);
-  color: var(--umm-ink);
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 20px;
+  background: rgb(250 250 252 / 0.9);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 14px 30px -10px rgb(16 14 20 / 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--umm-font-display);
   opacity: var(--k5);
-  transform: rotate(-12deg) scale(calc(2.2 - 1.2 * var(--k5)));
+  transform: translateY(calc(-80px * (1 - var(--k5)))) scale(calc(0.94 + 0.06 * var(--k5)));
+}
+
+.cx-app__note-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(#3bd36a, #28b553);
+}
+
+.cx-app__note-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cx-app__note-text {
+  display: grid;
+  gap: 1px;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: #3c3c43;
+}
+
+.cx-app__note-text b {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111114;
 }
 
 /* Short laptop screens: the headline gives way so the five rules fit. */
