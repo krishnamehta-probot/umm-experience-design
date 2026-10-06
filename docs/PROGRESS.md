@@ -20,8 +20,8 @@ of the **Log**. Tick boxes as things land.
 | 3 | Our work → a 30-second film | 🔁 replaced (Krish), awaiting review | Krish: "After Effects-style, hook them, our numbers, real work" |
 | 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
 | 5 | Built for where you are: size tabs | 🔄 revised (light picture behind the number), awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
-| 6 | How we design: 5 rules + tools wheel | 🔄 rules revised (one checkout fixed rule by rule), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
-| 7 | How we work + FAQ + closing band | ✅ built, awaiting review | Designjoy steps, Cal.com FAQ + CTA |
+| 6 | How we design: 5 rules + tools | 🔄 revised (rules: realistic phone, magnetic stops; tools: six colour ramps, glass shapes), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
+| 7 | How we work + FAQ + closing band | 🔄 revised (steps as a pile of big squares, magnetic; curtain; footer wordmark), awaiting review | Designjoy steps, Cal.com FAQ + CTA |
 | 8 | Phones, reduced motion, build check | ✅ build passes; runtime smoke test clean | — |
 
 **Not yet done:** Krish's visual review of every section (he is the only
@@ -89,6 +89,29 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, section 7 and the page's finish
+- Krish: make the final section big squares with a very nice scroll effect,
+  and finish the whole page.
+- The five steps are five big squares dealt onto a pile. The section pins;
+  each step is a magnetic stop. The next square slides up from below the
+  screen and lands on top; the ones before sink back (smaller, tilted each
+  way, shaded); the numeral turns into place as its square lands. Each
+  square is its step's colour deepening across the card (the same ramps as
+  6b), with the Cool Shapes numeral large in the deep shade. The index on
+  the left ticks along and glides to a step when clicked.
+- Phones and reduced motion: no pin; the squares stick one below the last as
+  they scroll, so the pile still builds (two columns on wide reduced-motion
+  screens).
+- The dark band now rises over the end of the pile with rounded shoulders;
+  its headline lines rise in, then the copy, then the questions.
+- The footer ends on a full-width "umm" wordmark, fading into the ink, its
+  letters rising as it arrives.
+- 6b: grounds that are covered or wiped away stop drawing after their wipe
+  (their glass blur is not free).
+- Checks: build passes; full walk of the page at 1440×900 (21 screens), five
+  deck stops and the settle, 390 end of page, reduced motion; no console
+  errors; no horizontal scroll at 390.
 
 ### 6 Oct 2026, section 6b: six groups, six colours, glass shapes
 - Krish: make the tools section image-worthy and on brand; each group its own
