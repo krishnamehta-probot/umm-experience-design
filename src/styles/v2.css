@@ -3698,177 +3698,428 @@ html.cx-v2 body {
 }
 
 /* ===========================================================================
-   6b · TOOLS WHEEL
+   6b · THE SYSTEMS YOU ALREADY HAVE — six groups, six colours
+
+   Each group's colour runs from a light tint at the top of the screen to a
+   deep shade at the bottom: --g0 (top), --g1 (the brand pastel), --g2
+   (saturated), --g3 (deep). Hand-picked per tone so each ramp stays in its
+   own hue rather than going muddy on the way down.
    ========================================================================= */
 
-.cx-tools {
+[data-ramp='sun'] { --g0: #fff8db; --g1: #ffe58f; --g2: #f6b830; --g3: #8f5400; }
+[data-ramp='sky'] { --g0: #f2f8ff; --g1: #d1e7ff; --g2: #6fa6ef; --g3: #1d4796; }
+[data-ramp='blossom'] { --g0: #fff3fc; --g1: #ffc4f2; --g2: #e57acd; --g3: #77205f; }
+[data-ramp='citrus'] { --g0: #fcffe2; --g1: #f0ff70; --g2: #b5d128; --g3: #4a6606; }
+[data-ramp='coral'] { --g0: #fff3f3; --g1: #ffc3c4; --g2: #ee7a7e; --g3: #8b2832; }
+
+.cx-stack {
+  position: relative;
+  color: var(--umm-ink);
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .cx-stack.umm-pin {
+    min-height: calc(100svh + var(--umm-pin-steps) * 60svh);
+  }
+}
+
+.cx-stack[data-mode='scroll'] .umm-pin__stage {
+  position: sticky;
+  isolation: isolate;
+}
+
+/* --- the grounds: one per group, each wiping up over the one before ------- */
+
+.cx-stack__grounds {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.cx-ground {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--g0) 0%, var(--g1) 34%, var(--g2) 72%, var(--g3) 100%);
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1.05s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.cx-ground[data-shown='true'] {
+  clip-path: inset(0 0 0 0);
+}
+
+/* a whisper of grain, so the long gradients never band */
+.cx-ground::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+/* the big glass shape, low on the right; --gw is its size, --gr its inset
+   from the right, so the drifting shapes can be placed behind it */
+.cx-ground {
+  --gw: min(50svh, 33vw);
+  --gr: max(1.5vw, calc((100vw - 1380px) / 2));
+}
+
+.cx-ground .cx-ground__glass {
+  position: absolute;
+  right: var(--gr);
+  bottom: -12svh;
+  width: var(--gw);
+  aspect-ratio: 1;
+  opacity: 0;
+  transform: translateY(18%) rotate(-28deg) scale(0.82);
+  transition:
+    opacity 0.7s var(--umm-ease-out) 0.25s,
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+
+.cx-ground[data-on='true'] .cx-ground__glass {
+  opacity: 1;
+  transform: none;
+}
+
+/* two solid shapes drifting behind the glass, for it to blur */
+.cx-ground__drift {
+  position: absolute;
+  aspect-ratio: 1;
+  opacity: 0;
+  transition: opacity 0.8s var(--umm-ease-out) 0.3s;
+  animation: cx-drift 14s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+.cx-ground[data-on='true'] .cx-ground__drift {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+.cx-ground__drift--a {
+  right: calc(var(--gr) + var(--gw) * 0.52);
+  bottom: calc(var(--gw) * 0.3);
+  width: calc(var(--gw) * 0.3);
+  color: var(--g3);
+}
+
+.cx-ground__drift--b {
+  right: calc(var(--gr) + var(--gw) * 0.08);
+  bottom: calc(var(--gw) * 0.62);
+  width: calc(var(--gw) * 0.2);
+  color: var(--g2);
+  animation-duration: 11s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes cx-drift {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(-18px, -26px) rotate(24deg); }
+}
+
+/* --- glass --------------------------------------------------------------- */
+
+.cx-glass {
+  position: relative;
+  display: block;
+}
+
+.cx-glass > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cx-glass__shadow {
+  color: var(--g3);
+  opacity: 0.45;
+  filter: blur(26px);
+  transform: translate(4%, 9%) scale(0.94);
+}
+
+.cx-glass__body {
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  background:
+    radial-gradient(70% 55% at 28% 18%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 70%),
+    linear-gradient(160deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0.16) 42%, rgb(255 255 255 / 0.06) 68%, rgb(255 255 255 / 0.32) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+}
+
+.cx-glass__rim {
+  overflow: visible;
+}
+
+.cx-glass__rim path {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 1.4px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* --- the words over it ---------------------------------------------------- */
+
+.cx-stack__inner {
+  display: grid;
+  gap: clamp(1.25rem, 2.6vw, 2.25rem);
+  width: 100%;
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__inner {
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  padding-block: clamp(4.5rem, 10svh, 6.5rem) clamp(1.25rem, 3svh, 2rem);
+}
+
+.cx-stack .cx-head {
+  margin-bottom: 0;
+}
+
+.cx-stack__body {
+  display: grid;
+  min-height: 0;
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__body {
+  grid-template-columns: minmax(200px, 0.62fr) minmax(0, 1.38fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+/* the rail: the readout, and the control */
+
+.cx-stack__rail {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cx-stack__rail button {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  text-align: left;
+  color: var(--umm-ink);
+  opacity: 0.42;
+  cursor: pointer;
+  transition:
+    opacity 0.4s var(--umm-ease-out),
+    transform 0.5s var(--umm-ease-out);
+}
+
+.cx-stack__rail button[data-on='true'] {
+  opacity: 1;
+  transform: translateX(10px);
+}
+
+.cx-stack__rail button:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.cx-stack__n {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+}
+
+.cx-stack__rail button[data-on='true'] .cx-stack__n::after {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 1.5px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: currentColor;
+}
+
+/* the panes: one group at a time, its tools as frosted tiles */
+
+.cx-stack__panes {
+  display: grid;
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__pane {
+  grid-area: 1 / 1;
+  align-self: center;
+}
+
+.cx-stack__pane {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  max-width: 540px;
+}
+
+.cx-stack__role {
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.7);
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+}
+
+.cx-stack__label {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(2.1rem, 3.8vw, 3.5rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.cx-stack__claim {
+  margin: 0;
+  max-width: 36ch;
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  line-height: 1.45;
+  color: var(--umm-ink);
+}
+
+.cx-stack__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 520px;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cx-stack__tools li {
+  padding: 10px 16px;
+  border: 1px solid rgb(255 255 255 / 0.75);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 10px 24px -16px rgb(16 14 20 / 0.45);
+  font-family: var(--umm-font-display);
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+}
+
+/* scroll mode: the pane on its stop rises in, its tiles one after another */
+.cx-stack[data-mode='scroll'] .cx-stack__pane > * {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.45s var(--umm-ease-out),
+    transform 0.6s var(--umm-ease-out);
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.35s;
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] > .cx-stack__label { transition-delay: 0.42s; }
+.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] > .cx-stack__claim { transition-delay: 0.5s; }
+
+.cx-stack[data-mode='scroll'] .cx-stack__pane .cx-stack__tools {
+  opacity: 1;
+  transform: none;
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__tools li {
+  opacity: 0;
+  transform: translateY(16px) scale(0.96);
+  transition:
+    opacity 0.4s var(--umm-ease-out),
+    transform 0.55s var(--umm-ease-out);
+}
+
+.cx-stack[data-mode='scroll'] .cx-stack__pane[data-on='true'] .cx-stack__tools li {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.58s + var(--i) * 0.06s);
+}
+
+.cx-stack__note {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+/* over the deep bottom of the colour, the note reads in white */
+.cx-stack[data-mode='scroll'] .cx-stack__note {
+  color: rgb(255 255 255 / 0.82);
+}
+
+/* --- phones and reduced motion: six bands, each in its own colour -------- */
+
+.cx-stack[data-mode='stack'] {
   padding-block: var(--umm-section-y);
   background: var(--umm-paper);
 }
 
-.cx-tools__body {
-  display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 86px);
-  height: clamp(330px, 50svh, 520px);
+.cx-stack[data-mode='stack'] .cx-stack__panes {
+  gap: 14px;
 }
 
-.cx-wheel {
-  position: relative;
-  height: 100%;
-  perspective: 900px;
+.cx-stack[data-mode='stack'] .cx-stack__pane {
   overflow: hidden;
-}
-
-.cx-wheel__list {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  transform-style: preserve-3d;
-}
-
-.cx-wheel__list li {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-}
-
-.cx-wheel__o {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-family: var(--umm-font-display);
-  font-size: clamp(1.25rem, 2.2vw, 2.15rem);
-  font-weight: var(--umm-weight-medium);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  color: var(--umm-ink);
-  transform-origin: 0% 50%;
-  will-change: transform, opacity;
-}
-
-.cx-wheel__o::after {
-  content: '';
-  display: block;
-  width: 0;
-  height: 4px;
-  margin-top: 0.34em;
-  border-radius: 4px;
-  background: var(--umm-tone);
-  transition: width 0.46s var(--cx-ease-row);
-}
-
-.cx-wheel__o.is-on::after {
-  width: 2.4em;
-}
-
-.cx-panes {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
+  max-width: none;
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  padding-bottom: clamp(7rem, 30vw, 10rem);
   border-radius: var(--cx-r-card);
-  border: 1px solid var(--umm-line);
-  background: #fafafb;
-  /* a box behind the box, from the artifact */
-  box-shadow: 0 0 0 clamp(7px, 0.78vw, 13px) var(--umm-ink);
+  background: linear-gradient(180deg, var(--g0) 0%, var(--g1) 38%, var(--g2) 78%, var(--g3) 100%);
 }
 
-.cx-pane {
+.cx-stack[data-mode='stack'] .cx-stack__label {
+  font-size: clamp(1.75rem, 7vw, 2.75rem);
+}
+
+.cx-stack__pane .cx-stack__mark {
   position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: 0.4rem;
-  padding: clamp(18px, 1.9vw, 30px) clamp(18px, 2vw, 32px);
-}
-
-.cx-pane[hidden] {
-  display: none;
-}
-
-.cx-pane__mark {
-  position: absolute;
-  right: -10%;
+  right: -6%;
   bottom: -14%;
-  width: 60%;
-  height: auto;
+  width: min(220px, 52%);
   aspect-ratio: 1;
-  color: var(--umm-tone);
-  opacity: 0.16;
-  pointer-events: none;
+  transform: rotate(-12deg);
 }
 
-.cx-pane__role {
+.cx-stack[data-mode='stack'] .cx-stack__pane > :not(.cx-stack__mark) {
   position: relative;
-  margin: 0;
-  font-family: var(--umm-font-mono);
-  font-size: var(--umm-text-label);
-  letter-spacing: var(--umm-tracking-label);
-  text-transform: uppercase;
-  color: var(--umm-ink-quiet);
+  z-index: 1;
 }
 
-.cx-pane__claim {
-  position: relative;
-  margin: 0 0 0.5rem;
-  max-width: 40ch;
-  font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
-  line-height: 1.45;
-  color: var(--umm-ink-soft);
-}
-
-.cx-pane__rows {
-  position: relative;
-  display: grid;
-  grid-auto-rows: 1fr;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cx-pane__rows li {
-  display: flex;
-  align-items: center;
-  padding: 0 clamp(10px, 1.1vw, 16px);
-  border-bottom: 1px solid var(--umm-line);
-  border-radius: 10px;
-  font-family: var(--umm-font-display);
-  font-size: clamp(1rem, 1.6vw, 1.6rem);
-  font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.025em;
-  transition: background-color 0.34s var(--cx-ease-row), padding 0.34s var(--cx-ease-row);
-}
-
-.cx-pane__rows li:last-child {
-  border-bottom: 0;
-}
-
-.cx-pane__rows li:hover {
-  background: var(--umm-tone);
-  padding-left: clamp(16px, 1.5vw, 22px);
-}
-
-.cx-tools__note {
-  margin: clamp(1.75rem, 3vw, 2.5rem) 0 0;
-  max-width: 70ch;
-  font-size: 0.8125rem;
-  line-height: 1.55;
-  color: var(--umm-ink-quiet);
-}
-
-@media (max-width: 899px) {
-  .cx-tools__body {
-    grid-template-columns: minmax(0, 1fr);
-    height: auto;
+/* Short laptop screens: the headline gives way so the group fits. */
+@media (min-width: 900px) and (max-height: 820px) {
+  .cx-stack .cx-h {
+    font-size: clamp(1.75rem, 2.9vw, 2.5rem);
   }
-  .cx-wheel {
-    height: 240px;
+  .cx-stack .cx-lead {
+    font-size: 0.9375rem;
   }
-  .cx-panes {
-    height: 360px;
+  .cx-stack__label {
+    font-size: clamp(2rem, 3.8vw, 3.25rem);
   }
 }
 

@@ -36,7 +36,7 @@ reviewer; no screenshot review was done on my side).
 | Page | `src/pages/CxUiDesignPage.tsx` |
 | All copy | `src/content/cxUiDesign.ts` (mirrors the copy deck word for word) |
 | Film | `src/components/v2/ProofFilm.tsx` (timeline + scenes), `/film` page, `scripts/render-film.mjs` (MP4 export) |
-| Sections | `src/components/v2/` (HeroV2, RibbonCurtain, WhyBand, WorkShowcase, ScreenLoop, ServicesV2, StagesV2, StageLight, Principles, ToolsWheel, ProcessClose, NavV2) |
+| Sections | `src/components/v2/` (HeroV2, RibbonCurtain, WhyBand, WorkShowcase, ScreenLoop, ServicesV2, StagesV2, StageLight, Principles, ToolsStack, ProcessClose, NavV2) |
 | Chip headline | `src/components/v2/ChipHead.tsx` (6 line recipes × 4 chip recipes) |
 | Shape icons | `src/components/v2/Shape.tsx` + `shapes.data.ts` (36 Cool Shapes, MIT) |
 | Glass cube (CSS stand-in) | `src/components/v2/GlassCube.tsx` |
@@ -89,6 +89,28 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, section 6b: six groups, six colours, glass shapes
+- Krish: make the tools section image-worthy and on brand; each group its own
+  colour, deepening from light to dark within the group; use the Cool
+  Shapes; magnetic scroll like section 6a.
+- The wheel is replaced by `ToolsStack`. The section pins; each of the six
+  groups is a full screen whose colour runs from a light tint at the top to
+  a deep shade at the bottom (hand-picked four-stop ramps per tone, with a
+  touch of grain). Each new group's colour wipes up over the last; going back
+  wipes it down. The group's Cool Shape stands low on the right as frosted
+  glass (shape-masked backdrop blur, rim of light, soft shadow), with two
+  solid shapes drifting behind it. The words rise in after the wipe; tools
+  are frosted tiles. The rail on the left reads out the group and glides to
+  it when clicked.
+- The magnet is now a shared hook, `lib/useMagneticStops`, used by 6a and 6b.
+- Phones and reduced motion: no pin; six rounded bands, each with its own
+  ramp and glass shape.
+- Words unchanged (Santosh-approved). Open: there are five brand colours for
+  six groups, so Research & analytics repeats sun (Experience & content's);
+  they are first and last, never side by side.
+- Checks: build passes; all six groups at 1440×900, 1366×768; magnet settle
+  and free exit; 390 bands; reduced motion; no console errors.
 
 ### 6 Oct 2026, section 6: a real phone, compact, and magnetic stops
 - Krish: the phone felt cartoonish and took the whole screen height; the

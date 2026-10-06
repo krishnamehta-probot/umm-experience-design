@@ -6,7 +6,7 @@ import { ProofFilm } from '@/components/v2/ProofFilm'
 import { ServicesV2 } from '@/components/v2/ServicesV2'
 import { StagesV2 } from '@/components/v2/StagesV2'
 import { Principles } from '@/components/v2/Principles'
-import { ToolsWheel } from '@/components/v2/ToolsWheel'
+import { ToolsStack } from '@/components/v2/ToolsStack'
 import { ProcessClose } from '@/components/v2/ProcessClose'
 import { ScrollTrigger } from '@/lib/gsap'
 import { meta } from '@/content/cxUiDesign'
@@ -57,7 +57,7 @@ export function CxUiDesignPage() {
         <ServicesV2 />
         <StagesV2 />
         <Principles />
-        <ToolsWheel />
+        <ToolsStack />
         <ProcessClose />
       </main>
     </>

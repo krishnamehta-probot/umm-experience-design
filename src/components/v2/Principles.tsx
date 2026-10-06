@@ -3,6 +3,7 @@ import { ChipHead, withAccent } from './ChipHead'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
+import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { principles } from '@/content/cxUiDesign'
 
 /* ============================================================================
@@ -21,11 +22,10 @@ import { principles } from '@/content/cxUiDesign'
      4 Same look, everywhere    four button styles settle into one
      5 Tested before it's built a usability-test result comes in on Pay
 
-   The stops are magnetic. The scroll only chooses which stop is showing; the
-   change itself plays as a full animation (--k1 … --k5, registered so CSS
-   eases them), so a fast flick never skims past it. And when the reader stops
-   scrolling, the page settles on the nearest stop, so every rule is seen at
-   rest. Entering and leaving the section stay free: nothing is pulled back.
+   The stops are magnetic (lib/useMagneticStops). The scroll only chooses
+   which stop is showing; the change itself plays as a full animation (--k1 …
+   --k5, registered so CSS eases them), so a fast flick never skims past it,
+   and when the reader stops scrolling the page settles on the nearest stop.
 
    The rules list on the left is the readout: each one ticks as it lands, and
    clicking one goes to its stop.
@@ -48,13 +48,6 @@ const RIG_W = 570
 /** The phone never takes more than this share of the slot's height. */
 const MAX_FILL = 0.8
 
-/** Scroll position (share of the section's travel) at which a stop rests. */
-const anchor = (stop: number) => (stop + 0.5) / STOPS
-
-function easeInOut(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-}
-
 export function Principles() {
   const { ref, progress } = usePinProgress<HTMLElement>()
   const wide = usePinned()
@@ -69,88 +62,12 @@ export function Principles() {
     if (reduced) setPicked(N)
   }, [reduced])
 
-  const stop = pinMode ? Math.min(STOPS - 1, Math.max(0, Math.floor(progress * STOPS))) : picked
+  const stop = pinMode ? stopAt(progress, STOPS) : picked
   const k = items.map((_, i) => (i < stop ? 1 : 0))
   const active = stop - 1
 
-  /* --- the magnet: settle on the nearest stop once the scroll goes quiet --- */
-  const glide = useRef<(stop: number) => void>(() => {})
-  useEffect(() => {
-    const el = ref.current
-    if (!pinMode || !el) return
-    let idle = 0
-    let tween = 0
-    let gliding = false
-
-    const geometry = () => ({
-      top: el.getBoundingClientRect().top + window.scrollY,
-      travel: el.offsetHeight - window.innerHeight,
-    })
-
-    const cancel = () => {
-      if (tween) cancelAnimationFrame(tween)
-      tween = 0
-      gliding = false
-    }
-
-    const glideTo = (to: number) => {
-      cancel()
-      const from = window.scrollY
-      const d = to - from
-      if (Math.abs(d) < 2) return
-      const dur = Math.min(1000, 420 + Math.abs(d) * 0.5)
-      const t0 = performance.now()
-      gliding = true
-      const step = (now: number) => {
-        const t = Math.min(1, (now - t0) / dur)
-        window.scrollTo({ top: from + d * easeInOut(t), behavior: 'instant' })
-        if (t < 1) tween = requestAnimationFrame(step)
-        else {
-          tween = 0
-          gliding = false
-        }
-      }
-      tween = requestAnimationFrame(step)
-    }
-
-    glide.current = (s: number) => {
-      const { top, travel } = geometry()
-      glideTo(top + travel * anchor(s))
-    }
-
-    const settle = () => {
-      const { top, travel } = geometry()
-      if (travel <= 0) return
-      const p = (window.scrollY - top) / travel
-      // Free on the way in and out: only between the first and last stop.
-      if (p <= anchor(0) || p >= anchor(STOPS - 1)) return
-      glideTo(top + travel * anchor(Math.round(p * STOPS - 0.5)))
-    }
-
-    const onScroll = () => {
-      if (gliding) return
-      window.clearTimeout(idle)
-      idle = window.setTimeout(settle, 160)
-    }
-    // Any hand on the controls wins over the glide.
-    const interrupt = () => {
-      if (gliding) cancel()
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('wheel', interrupt, { passive: true })
-    window.addEventListener('touchstart', interrupt, { passive: true })
-    window.addEventListener('keydown', interrupt)
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('wheel', interrupt)
-      window.removeEventListener('touchstart', interrupt)
-      window.removeEventListener('keydown', interrupt)
-      window.clearTimeout(idle)
-      cancel()
-      glide.current = () => {}
-    }
-  }, [pinMode, ref])
+  /* The magnet: settles on the nearest stop once the scroll goes quiet. */
+  const glideTo = useMagneticStops(ref, STOPS, pinMode)
 
   /* Phones: play it through once, the first time it is seen. */
   const rigSlot = useRef<HTMLDivElement>(null)
@@ -199,7 +116,7 @@ export function Principles() {
 
   const choose = (i: number) => {
     if (pinMode) {
-      glide.current(i + 1)
+      glideTo(i + 1)
       return
     }
     touched.current = true
