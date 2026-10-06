@@ -19,6 +19,13 @@ import { useEffect, useRef, type RefObject } from 'react'
    sticky: top to bottom-minus-a-screen). A section that holds over a
    different stretch passes `geometry`, giving the page scroll where its
    travel starts and how long it is.
+
+   `step: true` makes the section step rather than drift: while it holds,
+   each scroll gesture (a wheel turn or trackpad swipe, a touch swipe, an
+   arrow / page key) moves exactly one stop, gliding the page there, and
+   the gesture's leftover momentum is swallowed so a hard flick can never
+   skip a stop. At the first stop going up and the last going down the
+   section lets go and the page scrolls on as normal.
    ========================================================================== */
 
 /** Scroll position (share of the section's travel) at which a stop rests. */
@@ -40,6 +47,7 @@ export function useMagneticStops(
   stops: number,
   enabled: boolean,
   geometryOf: Geometry = ownTravel,
+  { step = false }: { step?: boolean } = {},
 ) {
   const glide = useRef<(stop: number) => void>(() => {})
   const geo = useRef(geometryOf)
@@ -103,20 +111,137 @@ export function useMagneticStops(
       if (gliding) cancel()
     }
 
+    /* --- stepping ------------------------------------------------------ */
+
+    const EPS = 0.004
+    let lockUntil = 0
+    let lastWheel = 0
+    let acc = 0
+    let touchY: number | null = null
+
+    /** Where the page is, as a share of the travel, and the nearest stop. */
+    const where = () => {
+      const { top, travel } = geometry()
+      const p = travel > 0 ? (window.scrollY - top) / travel : 0
+      const near = Math.min(stops - 1, Math.max(0, Math.round(p * stops - 0.5)))
+      return { p, near }
+    }
+
+    /** Whether a move in `dir` belongs to the section (true) or to the page. */
+    const owns = (dir: number) => {
+      const { p } = where()
+      const first = stopAnchor(0, stops)
+      const last = stopAnchor(stops - 1, stops)
+      if (dir > 0) return p >= -EPS && p < last - EPS
+      return p > first + EPS && p <= last + EPS
+    }
+
+    /** One stop in `dir` from where the page is. */
+    const stepBy = (dir: number) => {
+      const { p, near } = where()
+      // resting on a stop: move one; caught between stops (arriving from
+      // outside, or after a scrollbar drag): settle on the nearest
+      const resting = Math.abs(p - stopAnchor(near, stops)) < 0.02
+      const to = Math.min(stops - 1, Math.max(0, resting ? near + dir : near))
+      const { top, travel } = geometry()
+      glideTo(top + travel * stopAnchor(to, stops))
+      // hold the section while the stop's change plays
+      lockUntil = performance.now() + 1300
+      acc = 0
+    }
+
+    /* Held while the stop's change plays; after that the next stop needs a
+       fresh gesture. */
+    const locked = (now: number) => now < lockUntil
+
+    /* A wheel gesture is one run of events with no gap over 160ms (a
+       trackpad's momentum runs on for a second or two). Whoever the
+       gesture starts with keeps it: once the section has taken a step on
+       it, the rest of it (its momentum) is swallowed; a gesture the page
+       has, the page keeps, unless it carries the page into the section,
+       which then catches it at the nearest stop. */
+    let mine = false
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) return
+      const now = performance.now()
+      const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY
+      const dir = Math.sign(dy)
+      if (!dir) return
+      if (now - lastWheel > 160) {
+        mine = false
+        acc = 0
+      }
+      lastWheel = now
+      if (mine || locked(now)) {
+        e.preventDefault()
+        return
+      }
+      if (!owns(dir)) {
+        if (gliding) cancel()
+        return
+      }
+      e.preventDefault()
+      acc += dy
+      if (Math.abs(acc) < 24) return
+      mine = true
+      stepBy(Math.sign(acc))
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0]?.clientY ?? null
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchY === null) return
+      const dy = touchY - (e.touches[0]?.clientY ?? touchY)
+      const dir = Math.sign(dy)
+      if (dir && (owns(dir) || locked(performance.now()))) e.preventDefault()
+    }
+    const onTouchEnd = (e: TouchEvent) => {
+      if (touchY === null) return
+      const dy = touchY - (e.changedTouches[0]?.clientY ?? touchY)
+      touchY = null
+      const dir = Math.sign(dy)
+      if (Math.abs(dy) < 36 || locked(performance.now()) || !owns(dir)) return
+      stepBy(dir)
+    }
+
+    const KEYS: Record<string, number> = { ArrowDown: 1, PageDown: 1, ' ': 1, ArrowUp: -1, PageUp: -1 }
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return
+      const dir = (e.key === ' ' && e.shiftKey ? -1 : KEYS[e.key]) ?? 0
+      if (!dir || e.altKey || e.ctrlKey || e.metaKey || !owns(dir)) return interrupt()
+      e.preventDefault()
+      if (!locked(performance.now())) stepBy(dir)
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('wheel', interrupt, { passive: true })
-    window.addEventListener('touchstart', interrupt, { passive: true })
-    window.addEventListener('keydown', interrupt)
+    if (step) {
+      window.addEventListener('wheel', onWheel, { passive: false })
+      window.addEventListener('touchstart', onTouchStart, { passive: true })
+      window.addEventListener('touchmove', onTouchMove, { passive: false })
+      window.addEventListener('touchend', onTouchEnd, { passive: true })
+      window.addEventListener('keydown', onKey)
+    } else {
+      window.addEventListener('wheel', interrupt, { passive: true })
+      window.addEventListener('touchstart', interrupt, { passive: true })
+      window.addEventListener('keydown', interrupt)
+    }
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('wheel', interrupt)
       window.removeEventListener('touchstart', interrupt)
       window.removeEventListener('keydown', interrupt)
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
+      window.removeEventListener('keydown', onKey)
       window.clearTimeout(idle)
       cancel()
       glide.current = () => {}
     }
-  }, [ref, stops, enabled])
+  }, [ref, stops, enabled, step])
 
   return (stop: number) => glide.current(stop)
 }

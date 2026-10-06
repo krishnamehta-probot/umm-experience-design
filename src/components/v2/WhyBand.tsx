@@ -24,7 +24,8 @@ import { ribbon, why } from '@/content/cxUiDesign'
    down: the scroll picks the beat and the beat plays through as a whole
    animation at its own pace, however fast the wheel turns, and the page
    settles on the nearest beat when the reader stops. Scrolling up plays
-   the beats back in reverse. The light fades out over the last stretch,
+   the beats back in reverse. The section steps: each wheel turn, swipe or
+   arrow key moves exactly one beat, so a hard flick never skips one. The light fades out over the last stretch,
    so the section hands over to the film's black without a seam.
 
    Phones, short windows: the same story stacked, each beat playing once as
@@ -86,7 +87,7 @@ export function WhyBand() {
   const ref = useRef<HTMLElement>(null)
   const [before, after] = why.line1.split(why.one)
   const pinned = usePinMedia()
-  useMagneticStops(ref, STOPS, pinned, holdOf)
+  useMagneticStops(ref, STOPS, pinned, holdOf, { step: true })
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -208,8 +209,8 @@ export function WhyBand() {
           }
         })
         /* The scroll picks the beat; the timeline plays to it at its own
-           pace (about 0.8s per unit of the timeline, so a whole beat takes
-           a second and a half to two). */
+           pace (0.6s per unit of the timeline, so a whole beat takes about
+           a second and a half). */
         let beat = -2
         let play: gsap.core.Tween | null = null
         const goTo = (b: number) => {
@@ -218,7 +219,7 @@ export function WhyBand() {
           const to = rest[b + 1]
           play?.kill()
           const d = Math.abs(to - tl.time())
-          play = tl.tweenTo(to, { duration: Math.min(3.2, Math.max(0.5, d * 0.8)), ease: 'power1.inOut' })
+          play = tl.tweenTo(to, { duration: Math.min(2.6, Math.max(0.5, d * 0.6)), ease: 'power1.inOut' })
         }
         const st = ScrollTrigger.create({
           trigger: el,

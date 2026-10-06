@@ -90,6 +90,19 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 6 Oct 2026, section 2 steps one beat per gesture
+- Krish: section 2 still not perfectly scrollable. A single trackpad swipe
+  or a quick wheel spin could carry the page across two or three beats.
+- `useMagneticStops` gains `step: true` (used only by section 2): while
+  the section holds, each gesture (one wheel / trackpad run with no gap
+  over 160ms, a touch swipe, an arrow / page / space key) moves exactly
+  one beat. The page glides there, the beat plays (about 1.5s), and the
+  rest of that gesture's momentum is swallowed. Arriving from above or
+  below catches on the nearest beat; at the first beat going up and the
+  last going down the section lets go and the page scrolls normally.
+- Checked with real wheel input: hard flicks down and up move one beat
+  each; exits are free both ways; no console errors.
+
 ### 6 Oct 2026, tools as the wheel; section 2 on magnetic beats
 - Krish, on the tools: no shapes; make it like the AI & Automation page's
   tools section (his screenshot): the groups on a wheel on the left, the
