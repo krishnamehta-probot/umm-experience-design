@@ -20,7 +20,7 @@ of the **Log**. Tick boxes as things land.
 | 3 | Our work → a 30-second film | 🔁 replaced (Krish), awaiting review | Krish: "After Effects-style, hook them, our numbers, real work" |
 | 4 | What we do: 6 two-sided service cards | 🔁 rebuilt (corner-peel turn, Lottie on the back), awaiting review | Notched-card reference; Truus stickers |
 | 5 | Built for where you are: size tabs | 🔄 revised (light picture behind the number), awaiting review | v1 filter (Santosh liked), Pitch, Stripe |
-| 6 | How we design: 5 rules + tools wheel | ✅ built, awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
+| 6 | How we design: 5 rules + tools wheel | 🔄 rules revised (one checkout fixed rule by rule), awaiting review | Laws of UX, Rive toggles, Rauno, artifact wheel |
 | 7 | How we work + FAQ + closing band | ✅ built, awaiting review | Designjoy steps, Cal.com FAQ + CTA |
 | 8 | Phones, reduced motion, build check | ✅ build passes; runtime smoke test clean | — |
 
@@ -89,6 +89,30 @@ clicks a tab, then that project loops.
 ---
 
 ## Log
+
+### 6 Oct 2026, section 6: one checkout, fixed rule by rule
+- Krish picked option A of three: replace the five rule cards (a second grid
+  of pastel cards straight after the services cards, two of them with weak
+  demos) with one scene the rules act on.
+- The section pins. A phone holds a checkout with every rule broken, and the
+  scroll applies the rules one at a time, each with a callout:
+  colour (Pay goes from 1.4:1 contrast to 19:1, the page's text darkens),
+  thumbs (Pay moves from the top corner to a bar in the thumb's reach),
+  steps (ten steps fold into three; three of five fields fold away),
+  same look (four button styles settle into one outline pill),
+  tested (taps land on Pay, the "Tested ✓" stamp goes on).
+  The rules list on the left ticks as each lands, opens the active rule's
+  text, and scrolls to a rule when clicked. Scrolling up undoes it all.
+- Every change is a number (--k1 … --k5) set by the scroll and turned into
+  colour, position and size in CSS. They are registered with @property so on
+  phones a tap eases them.
+- Phones: unpinned; the phone sits between the headline and the rules, plays
+  through once on its own when it comes into view, then the rules are taps.
+  Reduced motion: unpinned, starts on the finished screen, taps still work.
+- New content: `principles.hint` and a `fix` callout per rule.
+- Checks: `npm run build` passes; screenshots at 1440×900 (before, each rule,
+  after), 1366×768, 390 (autoplay and tap) and reduced motion; no console
+  errors; no horizontal scroll at 390.
 
 ### 6 Oct 2026, section 5: a picture of light behind each stage's number
 - Krish: make it image-worthy, in the same aesthetic as section 2's light,

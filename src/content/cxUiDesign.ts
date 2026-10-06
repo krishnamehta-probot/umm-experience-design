@@ -403,33 +403,41 @@ export const principles = {
   line2: "It's rules we never skip.",
   accent: 'never skip.',
   lead: "Every screen we make follows a few simple rules. That's why it looks good and works.",
+  /** under the lead: how to drive the demo, pinned (scroll) or not (tap) */
+  hint: { scroll: 'Scroll to watch them fix a checkout, one rule at a time.', tap: 'Tap a rule to apply it to the checkout.' },
   items: [
     {
       id: 'colour',
+      /** what the rule changes on the demo checkout, as its callout says */
+      fix: 'Contrast 1.4 : 1 → 19 : 1',
       title: 'Colour with a reason',
       body: 'Colours that guide the eye, show what to tap, and stay readable for everyone, including people with low vision.',
       tone: 'blossom' as Tone,
     },
     {
       id: 'thumbs',
+      fix: 'Pay moved into thumb reach',
       title: 'Made for thumbs',
       body: 'Buttons where your thumb naturally lands, and text big enough to read on the go.',
       tone: 'sky' as Tone,
     },
     {
       id: 'steps',
+      fix: '10 steps → 3',
       title: 'Fewer steps, every time',
       body: 'If it takes ten taps, we find a way to do it in three.',
       tone: 'citrus' as Tone,
     },
     {
       id: 'same',
+      fix: '4 button styles → 1',
       title: 'Same look, everywhere',
       body: 'One set of buttons, colours and patterns across web and app, so nothing ever feels unfamiliar.',
       tone: 'sun' as Tone,
     },
     {
       id: 'tested',
+      fix: 'Checked with real users',
       title: "Tested before it's built",
       body: 'We check designs with real users and your developers during design, not after. Quality is checked as we build, and we agree how success is measured after launch.',
       tone: 'coral' as Tone,
