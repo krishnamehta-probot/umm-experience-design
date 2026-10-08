@@ -896,29 +896,47 @@
   overflow: hidden;
 }
 
-/* Two arrows in one cell. The first leaves up-right, the second takes its
-   place from down-left, both on the same curve. */
-.umm-split__arrow {
-  display: grid;
+/* --- FLY ARROW (FlyArrow.tsx) ----------------------------------------------
+   Every CTA arrow, the hero's hover: hovering (or focusing) the link or
+   button that holds it sends the arrow out one side and brings a fresh one
+   in from the other. The cell clips, so they appear from and vanish into
+   its edge. */
+.umm-fly {
+  display: inline-grid;
+  flex: none;
+  overflow: hidden;
+  vertical-align: middle;
 }
 
-.umm-split__arrow > * {
+.umm-fly > * {
   grid-area: 1 / 1;
-  transition: transform var(--umm-dur) var(--umm-ease-out);
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.umm-split__arrow > :nth-child(2) {
+.umm-fly--up-right > :nth-child(2) {
   transform: translate(-130%, 130%);
 }
 
-.umm-split:hover .umm-split__arrow > :nth-child(1),
-.umm-split:focus-visible .umm-split__arrow > :nth-child(1) {
+.umm-fly--down > :nth-child(2) {
+  transform: translateY(-130%);
+}
+
+:is(a, button, .cx-signpost):is(:hover, :focus-visible) .umm-fly--up-right > :nth-child(1) {
   transform: translate(130%, -130%);
 }
 
-.umm-split:hover .umm-split__arrow > :nth-child(2),
-.umm-split:focus-visible .umm-split__arrow > :nth-child(2) {
-  transform: translate(0, 0);
+:is(a, button, .cx-signpost):is(:hover, :focus-visible) .umm-fly--down > :nth-child(1) {
+  transform: translateY(130%);
+}
+
+:is(a, button, .cx-signpost):is(:hover, :focus-visible) .umm-fly > :nth-child(2) {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .umm-fly > * {
+    transition: none;
+  }
 }
 
 /* Hollow variant: black stroke only. */
@@ -934,11 +952,6 @@
 .umm-split--outline:focus-visible {
   --split-bg: var(--umm-ink);
   --split-fg: #ffffff;
-}
-
-.umm-split--solid:hover,
-.umm-split--solid:focus-visible {
-  --split-bg: color-mix(in srgb, var(--umm-ink) 82%, var(--umm-ink-paper));
 }
 
 /* On ink the two halves swap: a black pill on a black ground is a hole, so
@@ -1079,13 +1092,5 @@
     --split-gap: 6px;
   }
 
-  .umm-split:hover .umm-split__arrow > :nth-child(1),
-  .umm-split:focus-visible .umm-split__arrow > :nth-child(1) {
-    transform: none;
-  }
 
-  .umm-split:hover .umm-split__arrow > :nth-child(2),
-  .umm-split:focus-visible .umm-split__arrow > :nth-child(2) {
-    transform: translate(-130%, 130%);
-  }
 }

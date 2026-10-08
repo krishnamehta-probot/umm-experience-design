@@ -31,39 +31,33 @@ export const nav = [
 /* ── 1 · Hero ─────────────────────────────────────────────────────────────── */
 
 export const hero = {
-  /* three fixed lines; the third opens on the accent word, which carries the
-     chip treatment */
-  lines: ['Websites and apps', 'your customers actually'],
-  accent: 'enjoy',
-  tail: 'using.',
-  lead: "UMM designs websites, apps and the customer journeys behind them, so buying, booking or getting help just works. Whether you're a startup with an idea or an enterprise with a hundred moving parts.",
-  primaryCta: "Let's talk",
+  eyebrow: 'Customer experience & UI design',
+  /* three fixed lines; the third is the accent, which carries the chip
+     treatment (tail is anything after the chip on that line) */
+  lines: ['Make your next', 'digital experience'],
+  accent: 'a business advantage.',
+  tail: '',
+  lead: 'Give your customers a clearer path from interest to action. We bring customer insight, UI/UX design and digital branding together to create websites and apps that are easier to use, distinctly yours and built around your business goals.',
+  primaryCta: 'Discuss your project',
   secondaryCta: 'See our work',
 }
 
 export const ribbon = [
-  'Customer research',
   'Customer journeys',
-  'UI design',
-  'UX strategy',
+  'Website & app design',
+  'MVP prototyping',
   'Digital branding',
-  'Service design',
-  'Usability testing',
-  'Personalisation',
-  'Customer feedback',
-  'Ongoing improvement',
 ]
 
 /* ── 2 · Why it matters ───────────────────────────────────────────────────── */
 
 export const why = {
-  chip: 'Why it matters',
-  line1: 'Your customers see one company,',
-  line2: 'not the ten teams behind it.',
-  accent: 'ten teams',
-  /** the words in line1 the ten teams merge into */
-  one: 'one company',
-  /** The ten teams, as stickers that fly together into "one company".
+  chip: 'Why design matters',
+  line1: 'When everything is digital,',
+  line2: 'experience sets you apart.',
+  /** the word in the headline the ten teams merge into */
+  one: 'experience',
+  /** The ten teams, as stickers that fly together into "experience".
    *  x/y place each on the stage (%), r is its tilt. */
   teams: [
     { name: 'Sales', x: 12, y: 18, r: -8, tone: 'citrus' as Tone },
@@ -77,27 +71,25 @@ export const why = {
     { name: 'Call centre', x: 60, y: 84, r: 8, tone: 'blossom' as Tone },
     { name: 'Delivery', x: 88, y: 78, r: -10, tone: 'coral' as Tone },
   ],
-  lead: "AI and the apps on their phones have taught people to expect answers in seconds. When your website, app and support don't line up, customers don't complain. They just leave.",
+  lead: 'AI is changing how quickly digital products are made. Your advantage comes from how well they serve your customers and express your brand.',
+  /** numbered 01–03 on the page */
   pairs: [
     {
-      pain: 'They get stuck.',
-      fix: 'We find out where.',
-      body: 'We talk to your customers and watch them use your website and app. So we know exactly where they struggle, and which fixes matter most.',
-      shape: 'rectangle-8' as ShapeName,
+      title: 'Understand what people need.',
+      body: 'Research the questions, expectations and obstacles behind each interaction before deciding what to design.',
+      shape: 'cross-1' as ShapeName,
       tone: 'citrus' as Tone,
     },
     {
-      pain: 'They get passed around.',
-      fix: 'We join it into one path.',
-      body: 'Website, app, store, support. We redesign the whole journey, and the work behind it, so it feels like one smooth trip, not five separate ones.',
-      shape: 'moon-12' as ShapeName,
+      title: 'Make the next step obvious.',
+      body: 'Give content and actions a clear order, so people can find, choose, buy or get help without unnecessary effort.',
+      shape: 'flower-13' as ShapeName,
       tone: 'blossom' as Tone,
     },
     {
-      pain: 'They give up halfway.',
-      fix: 'We keep it getting better.',
-      body: 'We test with real people, launch, and keep improving against goals we agree on day one, like more people finishing sign-up.',
-      shape: 'moon-14' as ShapeName,
+      title: 'Give the experience your identity.',
+      body: 'Use a distinctive visual language and consistent interactions to make your brand recognisable across web and mobile.',
+      shape: 'clover-1' as ShapeName,
       tone: 'sky' as Tone,
     },
   ],
@@ -109,24 +101,52 @@ export const why = {
  *  projects and numbers come from work.projects below, so a number is only
  *  ever written once. */
 export const film = {
-  label: 'Our work in 30 seconds',
-  hook: { line1: "You've got", chip: '0.05 seconds', after: '.' },
-  judge: "That's how fast people judge a website.",
-  /** Lindgaard et al. (2006), "Attention web designers: you have 50
-   *  milliseconds to make a good first impression!" */
-  source: 'Lindgaard et al., 2006',
-  board: 'Coco & Coir — Home',
-  blank: 'Blank frame.',
-  real: 'Real product.',
-  /** which project, and which of its numbers, each hit shows */
-  hits: [
-    { screens: 'cocoandcoir', stat: 0 },
-    { screens: 'fintuit', stat: 0 },
-    { screens: 'healthx', stat: 0 },
-    { screens: 'aladdin', stat: 0 },
-    { screens: 'habari', stat: 2 },
+  /** the chip under the opening window */
+  label: 'Selected work',
+  eyebrow: 'Selected work',
+  /** the opening line; `chip` is the word that turns into a chip */
+  title: 'The work makes the case.',
+  chip: 'case.',
+  explore: { label: 'Explore all projects', href: 'https://umm.digital/case-studies/' },
+  view: 'View the project',
+  /** Three projects, about seven seconds each, then the last frame: the
+   *  three as cards, each a link to its case study. Images live in
+   *  /public/work/<id>/ (card, bg, board, logo). */
+  projects: [
+    {
+      id: 'biocon',
+      client: 'Biocon Group',
+      type: 'Web experience',
+      title: 'One brand. Clear routes for different audiences.',
+      chip: 'Clear routes',
+      body: 'Website journeys and content architecture for investors, healthcare professionals and academic audiences.',
+      short: 'For investors, healthcare professionals and academics.',
+      href: 'https://umm.digital/casestudies/biocon-group/',
+      tone: 'sky' as Tone,
+    },
+    {
+      id: 'qcare',
+      client: 'QCare',
+      type: 'Web & mobile',
+      title: 'Everyday resident services, brought together.',
+      chip: 'brought together.',
+      body: 'A connected web and mobile platform for resident requests, bookings and accommodation operations.',
+      short: 'Requests, bookings and operations, on web and mobile.',
+      href: 'https://umm.digital/casestudies/qcare/',
+      tone: 'sun' as Tone,
+    },
+    {
+      id: 'mohawk',
+      client: 'Mohawk Pricefx',
+      type: 'Business application',
+      title: 'Pricing tools built around real workflows.',
+      chip: 'real workflows.',
+      body: 'Interfaces that bring pricing search, product information and approval tasks into a focused workflow.',
+      short: 'Pricing search, product data and approvals in one flow.',
+      href: 'https://umm.digital/casestudies/mohawk-pricefx/',
+      tone: 'coral' as Tone,
+    },
   ],
-  wall: ['Real work.', 'Real numbers.'],
   site: 'umm.digital',
 }
 
@@ -259,187 +279,201 @@ export const work = {
 export type ServiceMark = 'research' | 'journey' | 'interface' | 'brand' | 'data' | 'testing'
 
 export const services = {
-  chip: '6 ways we help',
-  line1: 'What we',
-  line2: 'actually do.',
-  accent: 'actually',
-  lead: 'Six services. Each one tells you when you need it, what we do, and what you walk away with.',
+  chip: 'What we can help you do',
+  line1: 'From the first question',
+  line2: 'to the final interface.',
+  accent: 'final interface.',
+  lead: 'Research, design and development support. A clear scope for the challenge you bring.',
+  /** Under the list on every card's back. */
+  scope: 'We agree the deliverables around your goals, team and technology.',
+  includesLabel: 'What the work can include',
+  hint: "See what's included",
+  cta: { label: 'Discuss this service', href: '#contact' },
   items: [
     {
-      title: 'CX strategy & research',
-      when: "You know something's off, but not what to fix first.",
-      what: "Talk to your customers, look at every step they take today, and rank what to fix by value and effort.",
-      get: 'A ranked plan of what to fix first, and a research report.',
-      seeIt: { label: 'Fintuit', href: 'https://umm.digital/casestudies/fintuit/' },
+      step: 'Understand',
+      title: 'CX strategy & customer research',
+      body: 'Find out what your customers need, where they struggle and which improvements deserve attention first.',
+      tags: ['Research', 'UX audits', 'Priorities'],
+      more: 'Start with a shared understanding of the people you serve and the business problem you need to solve. We turn research and experience reviews into a practical direction for the design work.',
+      includes: [
+        'Stakeholder and customer interviews',
+        'UX and customer experience assessment',
+        'Audience needs and task priorities',
+        'A prioritised roadmap for design improvements',
+      ],
       mark: 'research' as ServiceMark,
       tone: 'sun' as Tone,
     },
     {
-      title: 'Customer journey design',
-      when: 'Customers bounce between your website, app and support, and get a different answer each time.',
-      what: 'Map the whole journey from first click to final step, find where it breaks, and redesign the path.',
-      get: 'A journey map, and a service blueprint: the plan for what happens behind each screen.',
-      seeIt: { label: 'QCare', href: 'https://umm.digital/casestudies/qcare/' },
+      step: 'Connect',
+      title: 'Customer journeys & interaction design',
+      body: 'Connect the steps between discovering your business, using your product and getting support. Make each handover and action clear.',
+      tags: ['Journey maps', 'Flows', 'Prototypes'],
+      more: 'See how the experience fits together across your website, app and service touchpoints. We map the current journey, define a clearer future flow and test the key interactions.',
+      includes: [
+        'Current and proposed customer journey maps',
+        'User flows and content structure',
+        'Service handovers and interaction patterns',
+        'Wireframes and clickable prototypes',
+      ],
       mark: 'journey' as ServiceMark,
-      tone: 'sky' as Tone,
-    },
-    {
-      title: 'Website & app design (UI/UX)',
-      when: 'Your website or app is confusing, slow to use, or looks dated.',
-      what: 'Design clear, good-looking screens, and test them with real users before anything gets built.',
-      get: 'A clickable, tested prototype and design files your developers can build from.',
-      seeIt: { label: 'Aladdin Commercial', href: 'https://umm.digital/casestudies/aladdin-commercial/' },
-      mark: 'interface' as ServiceMark,
       tone: 'blossom' as Tone,
     },
     {
-      title: 'Digital branding',
-      when: 'Your brand looks and sounds different on every screen.',
-      what: 'Shape how your brand looks, sounds and moves online (colours, type, icons, tone of voice) and turn it into a kit your teams can use.',
-      get: 'A digital brand kit and a design system for web and app.',
-      /* open item: Krish to pick the branding project */
-      seeIt: null as { label: string; href: string } | null,
+      step: 'Create',
+      title: 'Website & app UI/UX design',
+      body: 'Turn a new idea or an existing product into intuitive screens, responsive layouts and a front end ready for real use.',
+      tags: ['Websites', 'Mobile apps', 'Front end'],
+      more: 'Create a website or app that gives your business the right digital presence and helps people complete the tasks that matter. We support new products and redesigns, from structure and screens to implementation.',
+      includes: [
+        'Website and mobile app UI/UX design',
+        'Responsive layouts and interactive prototypes',
+        'Reusable interface components and development specifications',
+        'Website or front-end development within the agreed scope',
+      ],
+      mark: 'interface' as ServiceMark,
+      tone: 'sky' as Tone,
+    },
+    {
+      step: 'Define',
+      title: 'Digital branding & design systems',
+      body: 'Give your business a recognisable digital identity, with colours, typography and reusable components that work together across every screen.',
+      tags: ['Visual identity', 'UI kits', 'Guidelines'],
+      more: 'Translate your brand into a digital identity people can recognise and your team can apply consistently. We connect visual direction with the practical components used in your websites and apps.',
+      includes: [
+        'Digital visual direction and brand expression',
+        'Colour, typography, iconography and imagery guidelines',
+        'UI components, states and reusable patterns',
+        'A documented design system for your team',
+      ],
       mark: 'brand' as ServiceMark,
       tone: 'citrus' as Tone,
     },
     {
-      title: 'Personalisation & customer data',
-      when: 'Your customer data sits in five places, so everyone gets the same generic message.',
-      what: 'Pull your data into one view of each customer, and design where personal touches and AI genuinely help.',
-      get: 'One view of each customer, and a personalisation plan.',
-      seeIt: { label: 'Zceppa', href: 'https://umm.digital/casestudies/zceppa/' },
+      step: 'Make it relevant',
+      title: 'Customer insight & personalisation',
+      body: 'Use customer feedback and behaviour to shape more relevant content, recommendations and journeys, with clear reasons for each decision.',
+      tags: ['Segments', 'Content rules', 'Journeys'],
+      more: 'Use the signals you have to make the experience more relevant. We identify useful audience differences and design content and interactions that respond to them.',
+      includes: [
+        'Customer feedback and behaviour review',
+        'Audience segments and needs',
+        'Personalisation opportunities and content rules',
+        'Designs for relevant content, recommendations and next steps',
+      ],
       mark: 'data' as ServiceMark,
-      tone: 'coral' as Tone,
+      tone: 'lilac' as Tone,
     },
     {
-      title: 'Testing & ongoing improvement',
-      when: "You've launched, but don't know if it's working, or who owns keeping it good.",
-      what: 'Agree what success looks like, track it, keep testing improvements, and set your team up to run it after we leave.',
-      get: 'A simple scorecard, a regular testing rhythm, and design standards your team can own.',
-      seeIt: { label: 'Coco & Coir', href: 'https://umm.digital/casestudies/coco-coir/' },
+      step: 'Keep improving',
+      title: 'Testing & experience optimisation',
+      body: 'Test with people, review how the experience performs and turn what you learn into improvements your team can keep delivering.',
+      tags: ['Usability tests', 'Measurement', 'Updates'],
+      more: 'Make improvement part of how the experience is run. We combine usability testing, feedback and agreed measures with a clear plan for updates and ownership.',
+      includes: [
+        'Usability testing and prioritised findings',
+        'A measurement plan linked to business goals',
+        'An organised backlog of design improvements',
+        'Component updates, review cadence and ownership guidance',
+      ],
       mark: 'testing' as ServiceMark,
-      tone: 'sun' as Tone,
+      tone: 'coral' as Tone,
     },
   ],
-  signpost: {
-    question: 'Looking for online shops, checkout or storefront builds?',
-    before: 'That lives on our',
-    page: 'UX & Digital Commerce',
-    after: 'page. This page is about research, strategy, journeys and design.',
-    href: null as string | null,
+  closing: {
+    question: 'Wondering what this looks like in practice?',
+    link: 'Take a closer look at our work',
+    href: 'https://umm.digital/case-studies/',
   },
 }
 
 /* ── 5 · Built for where you are ──────────────────────────────────────────── */
 
 export const stages = {
-  chip: 'Startups to enterprise',
-  line1: 'Wherever you are,',
-  line2: 'we start there.',
-  accent: 'we start there.',
-  lead: "Pick your stage to see what we'd do, what you'd get, and how we'd work together.",
+  chip: 'Where your business is now',
+  line1: 'Different stages.',
+  line2: 'Different design priorities.',
+  accent: 'design priorities.',
+  lead: 'Start with the challenge that matters to your business today.',
   items: [
     {
       tab: 'Startups',
-      title: 'Prove it fast',
-      stat: '2–5×',
-      statCaption: 'productivity boost within the first 90 days',
-      challenge: 'You have an idea and need to prove it, without building too much too soon.',
-      approach:
-        'Turn your idea into wireframes, then a clickable prototype, then a finished design (and front-end) your developers can build. We focus on the one journey that matters most.',
-      outcome: 'A tested product you can launch, learn from, and show to investors.',
-      model: {
-        name: 'One-journey redesign',
-        body: 'We map, design and test one journey from start to finish. Joint design sessions and regular reviews. Scoped up front, per journey.',
-      },
-      seeIt: { label: 'Penny', href: 'https://umm.digital/casestudies/penny-co/' },
-      shape: 'flower-6' as ShapeName,
+      flow: ['Idea', 'Prototype', 'Product'],
+      title: 'Give your idea something people can try.',
+      body: 'You have the idea. We help you define the essential features, map the user flow and create a clickable MVP prototype. Then we develop the visual design and front end for your first release.',
+      services: ['MVP prototyping', 'Website & app UI/UX', 'Front-end development'],
+      cta: { label: 'Discuss your product idea', href: 'https://umm.digital/contact/' },
       tone: 'sun' as Tone,
     },
     {
-      tab: 'Growing companies',
-      title: 'Revamp it for who you are now',
-      stat: '30–50%',
-      statCaption: 'lower running costs, and a path to keep growing',
-      challenge:
-        "You've grown fast. Your website and app haven't kept up, and your channels and data have drifted apart.",
-      approach:
-        "Revamp your website and app UI/UX to match the company you've become, and join your key journeys and data into one view.",
-      outcome: 'A refreshed product, and journeys that feel like one relationship, not lots of hand-offs.',
-      model: {
-        name: 'CX check-up, then an improvement squad',
-        body: 'A few weeks of research and workshops with your team (light time commitment) gets you a ranked plan and research findings. Then a designer, a researcher and an analyst keep testing and improving, in ongoing cycles, against a backlog and goals we agree.',
-      },
-      seeIt: { label: 'Coco & Coir', href: 'https://umm.digital/casestudies/coco-coir/' },
-      shape: 'flower-1' as ShapeName,
+      tab: 'Scale-ups',
+      flow: ['Reassess', 'Redesign', 'Relaunch'],
+      title: 'Your business has moved on. Has your website?',
+      body: 'If your digital experience still reflects an earlier version of your business, it is time for a rethink. We redesign website structure, content flow and mobile UI/UX around today\u2019s offer, audience and goals.',
+      services: ['Website revamps', 'Mobile UX improvements', 'Brand consistency'],
+      cta: { label: 'Discuss your redesign', href: 'https://umm.digital/contact/' },
       tone: 'blossom' as Tone,
     },
     {
       tab: 'Enterprises',
-      title: 'Join it all up',
-      stat: '$1M+',
-      statCaption: 'saved every year through smarter, automated operations',
-      challenge: 'Many teams, markets and systems, and customers feel every gap between them.',
-      approach:
-        'Join broken channels into one journey, set one design standard for every team, and help shape new digital products from the first idea.',
-      outcome: 'A consistent experience your whole organisation can deliver, and keep delivering.',
-      model: {
-        name: 'Embedded team',
-        body: 'UMM designers, researchers and a lead work inside your organisation, in your meetings and your tools, across a programme of journeys. Ongoing, reviewed regularly.',
-      },
-      seeIt: { label: 'Mohawk Recover', href: 'https://umm.digital/casestudies/mohawk-recover/' },
-      shape: 'wheel-1' as ShapeName,
+      flow: ['Map', 'Connect', 'Standardise'],
+      title: 'Make every touchpoint feel like the same business.',
+      body: 'Connect websites, apps and service touchpoints that have evolved in different directions. We map broken handovers, simplify complex tasks and establish shared design patterns across your teams and products.',
+      services: ['Connected customer journeys', 'Enterprise UI/UX', 'Shared design systems'],
+      cta: { label: 'Discuss your customer experience', href: 'https://umm.digital/contact/' },
       tone: 'sky' as Tone,
     },
   ],
-  footnote: 'Not sure which fits? Every project can start with a CX check-up.',
 }
 
 /* ── 6 · How we design ────────────────────────────────────────────────────── */
 
 export const principles = {
-  chip: 'Our rules',
-  line1: "Good design isn't luck.",
-  line2: "It's rules we never skip.",
-  accent: 'never skip.',
-  lead: "Every screen we make follows a few simple rules. That's why it looks good and works.",
+  chip: 'The thinking behind the interface',
+  line1: 'Every design choice',
+  line2: 'should earn its place.',
+  accent: 'its place.',
+  lead: 'Colour, hierarchy and interaction shape how people understand and use a product. Here is how we put those fundamentals to work.',
   /** under the lead: how to drive the demo, pinned (scroll) or not (tap) */
-  hint: { scroll: 'Scroll to watch them fix a checkout, one rule at a time.', tap: 'Tap a rule to apply it to the checkout.' },
+  hint: { scroll: 'Scroll to watch each one fix a checkout.', tap: 'Tap one to apply it to the checkout.' },
+  /** the pill over the phone: before any rule, and once all five are in */
+  demo: { label: 'Design in practice / Illustrative example', done: 'One clear accent. One obvious next step.' },
   items: [
     {
       id: 'colour',
-      /** what the rule changes on the demo checkout, as its callout says */
+      /** what it changes on the demo checkout, as its callout says */
       fix: 'Contrast 1.4 : 1 → 19 : 1',
-      title: 'Colour with a reason',
-      body: 'Colours that guide the eye, show what to tap, and stay readable for everyone, including people with low vision.',
+      title: 'Colour that guides.',
+      body: 'Use contrast and colour deliberately to direct attention, show status and express the brand.',
       tone: 'blossom' as Tone,
     },
     {
       id: 'thumbs',
-      fix: 'Pay moved into thumb reach',
-      title: 'Made for thumbs',
-      body: 'Buttons where your thumb naturally lands, and text big enough to read on the go.',
+      fix: 'Clear order: total, then Pay',
+      title: 'Hierarchy that makes sense.',
+      body: 'Give information a clear order so people know what matters and what they can do next.',
       tone: 'sky' as Tone,
     },
     {
       id: 'steps',
       fix: '10 steps → 3',
-      title: 'Fewer steps, every time',
-      body: 'If it takes ten taps, we find a way to do it in three.',
+      title: 'Less to work through.',
+      body: 'Use minimalism to remove unnecessary choices and steps while keeping the information people need.',
       tone: 'citrus' as Tone,
     },
     {
       id: 'same',
       fix: '4 button styles → 1',
-      title: 'Same look, everywhere',
-      body: 'One set of buttons, colours and patterns across web and app, so nothing ever feels unfamiliar.',
+      title: 'Consistency people can learn.',
+      body: 'Reuse familiar components and behaviours across screens, so each new task feels easier to understand.',
       tone: 'sun' as Tone,
     },
     {
       id: 'tested',
-      fix: 'Checked with real users',
-      title: "Tested before it's built",
-      body: 'We check designs with real users and your developers during design, not after. Quality is checked as we build, and we agree how success is measured after launch.',
+      fix: 'Refined after testing with users',
+      title: 'Usability checked with people.',
+      body: 'Test prototypes with representative users, observe where they hesitate and refine the design before release.',
       tone: 'coral' as Tone,
     },
   ],
@@ -447,59 +481,53 @@ export const principles = {
 
 /* Santosh-approved; keep word for word. */
 export const tools = {
-  chip: '25 tools',
-  line1: 'We work within the systems',
+  chip: 'Designed to fit your technology',
+  line1: 'Built to work within the systems',
   line2: 'you already have.',
-  accent: 'have.',
-  lead: 'We design and deliver inside your existing platforms rather than adding another silo. The tools below are grouped by how we use them.',
+  accent: 'already have.',
+  lead: 'Technology should connect the enterprise around the journey, not create another silo. We keep what works, modernise what does not, and connect everything that matters across the experience stack.',
+  /** under the wheel: moves it on to the next group */
+  explore: 'Explore the platforms',
   groups: [
     {
-      label: 'Experience & content',
-      role: 'We build inside it',
-      claim: 'Your content platform already works. We design the journeys that run through it.',
+      label: 'Experience and Content Platforms',
       tone: 'sun' as Tone,
-      shape: 'polygon-6' as ShapeName,
-      items: ['Adobe Experience Manager', 'Sitecore', 'Contentful', 'WordPress VIP'],
+      items: ['Adobe Experience Manager', 'Sitecore', 'Contentful', 'Optimizely', 'WordPress VIP'],
     },
     {
-      label: 'CRM & service',
-      role: 'We build inside it',
-      claim: 'Sales, service and support on one record, so the customer only has to say it once.',
+      label: 'Commerce and Portals',
       tone: 'sky' as Tone,
-      shape: 'ellipse-3' as ShapeName,
+      items: ['Salesforce Commerce', 'Adobe Commerce', 'SAP Commerce', 'Shopify Plus'],
+    },
+    {
+      label: 'Customer Data Platforms',
+      tone: 'blossom' as Tone,
+      items: ['Segment', 'Tealium', 'Salesforce Data Cloud', 'Adobe Real-Time CDP'],
+    },
+    {
+      label: 'CRM and Service',
+      tone: 'citrus' as Tone,
       items: ['Salesforce', 'Microsoft Dynamics 365', 'ServiceNow', 'Zendesk'],
     },
     {
-      label: 'Customer data',
-      role: 'We connect to it',
-      claim: 'One profile per customer, assembled from the sources you already collect.',
-      tone: 'blossom' as Tone,
-      shape: 'ellipse-6' as ShapeName,
-      items: ['Segment', 'Tealium', 'Salesforce Data 360', 'Adobe Real-Time CDP'],
-    },
-    {
-      label: 'Journey & personalisation',
-      role: 'We connect to it',
-      claim: 'The right message at the right moment, triggered by what someone actually did.',
-      tone: 'citrus' as Tone,
-      shape: 'moon-12' as ShapeName,
-      items: ['Adobe Journey Optimizer', 'Braze', 'Dynamic Yield', 'Optimizely'],
-    },
-    {
-      label: 'Design & prototyping',
-      role: 'We design with it',
-      claim: 'Journeys drawn, prototyped and reviewed with your team before anything gets built.',
+      label: 'Journey Orchestration and Automation',
       tone: 'coral' as Tone,
-      shape: 'star-7' as ShapeName,
-      items: ['Figma', 'Miro'],
+      items: ['Adobe Journey Optimizer', 'Salesforce Marketing Cloud', 'Braze', 'Twilio'],
     },
     {
-      label: 'Research & analytics',
-      role: 'We design with it',
-      claim: 'What people say, what people do, and the distance between the two.',
+      label: 'Analytics and Voice of Customer',
+      tone: 'lilac' as Tone,
+      items: ['Qualtrics', 'Medallia', 'Adobe Analytics', 'Google Analytics 4', 'Hotjar'],
+    },
+    {
+      label: 'Personalisation and AI',
       tone: 'sun' as Tone,
-      shape: 'ellipse-2' as ShapeName,
-      items: ['Maze', 'UserTesting', 'Qualtrics', 'Medallia', 'Adobe Analytics', 'Google Analytics 4', 'Hotjar'],
+      items: ['Einstein', 'Adobe Sensei', 'Dynamic Yield', 'Amplitude'],
+    },
+    {
+      label: 'Design and Research',
+      tone: 'sky' as Tone,
+      items: ['Figma', 'Miro', 'Maze', 'UserTesting'],
     },
   ],
   note: 'These groupings reflect how we work. They do not imply a partnership, reseller status or certification unless stated separately.',
@@ -508,62 +536,72 @@ export const tools = {
 /* ── 7 · How we work + let's talk ─────────────────────────────────────────── */
 
 export const process = {
-  chip: 'How it works',
-  line1: 'From first call to launch,',
-  line2: 'in five steps.',
-  accent: 'five steps.',
-  lead: "Each step ends with something you can see and sign off. Nothing moves on until you're happy.",
+  chip: 'How the work takes shape',
+  line1: 'A clear path.',
+  line2: 'A considered result.',
+  accent: 'considered result.',
+  lead: 'Four stages, with clear decisions and deliverables along the way.',
+  /** the axis mark where Design or redesign ends */
+  ready: 'Ready to build',
   steps: [
-    { title: 'Discover', body: "We talk to your customers and find what's not working today." },
-    { title: 'Map', body: 'We map the whole journey and pick the fixes that matter most.' },
-    { title: 'Design', body: 'We design the screens, and the service behind them.' },
-    { title: 'Deliver', body: "We build it or hand it to your team, checked that it's easy to use and can actually be built." },
-    { title: 'Improve', body: 'We measure against the goals we agreed, and keep making it better.' },
+    {
+      title: 'Assessment',
+      body: 'Understand your business goals, users and current experience. Agree the problem, priorities and measures of success.',
+      get: 'A focused design brief',
+    },
+    {
+      title: 'Ideation',
+      body: 'Explore possible approaches through flows, wireframes and early prototypes. Choose a direction before committing to detailed design.',
+      get: 'An agreed concept',
+    },
+    {
+      title: 'Design or redesign',
+      body: 'Create the interface, content structure and reusable components. Prepare the design for development, or build the agreed front end.',
+      get: 'Designs ready to build',
+    },
+    {
+      title: 'Optimisation',
+      body: 'Use testing, feedback and performance data to refine the experience. Give your team a practical plan for what to improve next.',
+      get: 'An informed improvement plan',
+    },
   ],
 }
 
 export const faq = [
   {
-    question: 'What happens in a CX check-up?',
+    question: 'Can you help if we only have an idea?',
     answer:
-      'We study a few of your most important customer journeys, look at how they work today, and agree what success looks like. You get a ranked plan of what to fix first, and a research report. Before we start, we confirm the scope, what we need from your team, and the time and cost.',
+      'Yes. We can help you define the core features, map the user flow and create a clickable MVP prototype. It gives you something tangible to test before investing in a full build.',
   },
   {
-    question: 'Can we start with just one journey?',
+    question: 'Can you redesign our current website or app?',
     answer:
-      "Yes, and lots of clients do. We map, design and test one journey from start to finish. It's the quickest way to see results before doing more.",
+      'Yes. We assess the current experience, identify what is worth keeping and redesign the structure, interface and content flow around your current business needs.',
   },
   {
-    question: 'Do you only design, or build too?',
+    question: 'Do you also handle development?',
     answer:
-      'Both. We can design and hand over to your team, design and build it ourselves, or work alongside your developers. We agree which at the start, so everyone knows who does what.',
+      'We offer website and front-end development alongside design. We agree the build, integration and launch responsibilities at the start, including where your existing team or technology partners will be involved.',
   },
   {
-    question: 'Can you work with our in-house team?',
+    question: 'Can you work with our existing team and systems?',
     answer:
-      'Yes. We often work inside client teams, using your tools and ways of working. When we leave, your team can run it themselves.',
+      'Yes. We can collaborate with your product, marketing, design and engineering teams, work within your technology environment and create shared components your team can continue using.',
   },
   {
-    question: 'What access or data do you need?',
+    question: 'How do we decide the scope and timeline?',
     answer:
-      "Usually a small group of customers to talk to, and access to the data for the journeys we're working on. We agree exactly what's needed, including privacy rules, before we start.",
-  },
-  {
-    question: "How will we know it's working?",
-    answer:
-      'We agree the numbers up front, like sales, repeat customers, support calls or how much effort things take. Then we record where they are today, so we can show you the change.',
-  },
-  {
-    question: 'Will this disrupt our business?',
-    answer:
-      'No. We roll changes out in stages, not all at once, and plan around anything that has to keep running.',
+      'We start with your goals, existing materials and technical requirements. Together we define the deliverables, responsibilities, review points, timeline and fees before the work begins.',
   },
 ]
 
 export const closing = {
-  line1: 'Tell us where your customers get stuck.',
-  line2: "We'll show you the way out.",
-  lead: "Start with a CX check-up. We'll show you where customers are struggling, and a clear plan to fix it.",
-  primaryCta: 'Talk to us about your project',
-  secondaryCta: 'See our work',
+  eyebrow: 'Your next design challenge',
+  lines: ['An idea to launch.', 'An experience to rethink.'],
+  /** the last line, set in the chip, as the hero's is */
+  accent: 'Let\u2019s work on it.',
+  lead: 'Tell us what you are building, what needs to change and where you want the business to go. We will help define the right starting point.',
+  primaryCta: { label: 'Start a project conversation', href: 'https://umm.digital/contact/' },
+  secondaryCta: { label: 'ping@umm.digital', href: 'mailto:ping@umm.digital' },
+  faqLabel: 'A few things you may want to know',
 }

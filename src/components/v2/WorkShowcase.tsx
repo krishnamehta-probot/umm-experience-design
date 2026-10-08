@@ -92,10 +92,7 @@ export function WorkShowcase() {
             line2={withAccent(work.line2, work.accent)}
             chip={work.chip}
             tone="citrus"
-            chipAt="45%"
-            tilt={-7}
             lineRecipe={3}
-            chipRecipe={2}
           />
           <p className="cx-lead">{work.lead}</p>
         </div>

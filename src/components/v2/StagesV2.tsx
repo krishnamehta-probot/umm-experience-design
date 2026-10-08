@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { IconArrowUpRight } from '../icons'
+import { FlyArrow } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { StageLight } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
@@ -15,6 +15,13 @@ import { stages } from '@/content/cxUiDesign'
    engagement model folded in as "how we'd work together", and a picture of
    light behind the number that grows with the company (StageLight: a spark,
    a rising curve, a lit skyline).
+
+   8 Oct, final copy: there is no number any more. The card draws the
+   stage's flow instead (Idea → Prototype → Product) as a path of light:
+   three points on a line that light up one after another as the scroll
+   moves through the stage, the line filling between them, and the last
+   point pulsing once it is reached. Each stage's path is carried in and
+   out like the panels beside it.
 
    v1's notes on the mechanics follow.
 
@@ -39,6 +46,8 @@ const EXIT_END = 0.5
 const ENTER_START = 0.5
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v))
+/* How much of a stage's hold it takes to light its whole path. */
+const LIGHT_SPAN = PARK_IN
 const smooth = (t: number) => {
   const c = clamp(t)
   return c * c * (3 - 2 * c)
@@ -46,12 +55,6 @@ const smooth = (t: number) => {
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 const items = stages.items
-/* The reels are as wide as the longest figure; shorter ones ride on blanks. */
-const REEL_W = Math.max(...items.map((i) => [...i.stat].length))
-const REELS = Array.from({ length: REEL_W }, (_, col) =>
-  items.map((i) => [...i.stat][col] ?? ' '),
-)
-
 /** How far a stage has travelled from its seat, and which way it is going. */
 function place(rel: number, first: boolean, last: boolean) {
   const held = (first && rel < 0) || (last && rel > 0)
@@ -67,13 +70,7 @@ function place(rel: number, first: boolean, last: boolean) {
 export function StagesV2() {
   const { ref, progress } = usePinProgress<HTMLElement>()
   const tabsRef = useRef<HTMLDivElement>(null)
-  const odoRef = useRef<HTMLDivElement>(null)
   const [marks, setMarks] = useState<{ x: number; w: number }[]>([])
-  /* Advance width of every glyph in every reel, in em. */
-  const [reelW, setReelW] = useState<number[][]>([])
-  /* Cell height, in em, taken from real ink extents rather than the em box. */
-  const [cellH, setCellH] = useState(1.5)
-
   const pinned = usePinned()
   /* Unpinned, the scroll cannot select anything, so the tabs do. */
   const [picked, setPicked] = useState(0)
@@ -104,66 +101,6 @@ export function StagesV2() {
     ro.observe(host)
     document.fonts?.ready.then(read)
     return () => ro.disconnect()
-  }, [])
-
-  /* A column as wide as its widest glyph would park the en-dash of "30-50%"
-     in a box sized for the "M" of "$1M+". Measuring each glyph lets the column
-     width be wound by the same scroll value as the reel, so the figure keeps
-     proper spacing at every frame of the roll — including the ones between
-     two stages. */
-  useLayoutEffect(() => {
-    const el = odoRef.current
-    if (!el) return
-    const read = () => {
-      const cs = getComputedStyle(el)
-      const size = parseFloat(cs.fontSize)
-      const ctx = document.createElement('canvas').getContext('2d')
-      if (!ctx || !size) return
-      ctx.font = `${cs.fontWeight} ${size}px ${cs.fontFamily}`
-      const track = parseFloat(cs.letterSpacing) || 0
-
-      /* The clip box has to clear the tallest ascent and the deepest descent
-         of any glyph that will ever ride these reels — the dollar sign's stem
-         runs well past the em box, which is what was slicing it. */
-      let up = 0
-      let down = 0
-      for (const glyphs of REELS) {
-        for (const g of glyphs) {
-          if (!g.trim()) continue
-          const m = ctx.measureText(g)
-          up = Math.max(up, m.actualBoundingBoxAscent)
-          down = Math.max(down, m.actualBoundingBoxDescent)
-        }
-      }
-      if (up + down > 0) setCellH((up + down) / size + 0.26)
-
-      setReelW(
-        REELS.map((glyphs) =>
-          glyphs.map((g) => {
-            /* Blank pad collapses to nothing, so a short figure carries no
-               trailing air and the rule beneath it ends with the glyphs. */
-            if (g.trim() === '') return 0
-            const m = ctx.measureText(g)
-            /* The column clips on both axes, so its width has to clear the
-               glyph's INK, not its advance. Those are not the same number
-               here: the tracking is negative, so it pulls the advance in by
-               about 4px at full size while leaving the drawn shape exactly
-               where it was. Sizing to the advance alone shaves the right-hand
-               edge off anything that fills its own box -- which is why the
-               per-cent sign of "30-50%" came out sliced, and the dollar and
-               the en-dash with it. Take whichever is wider, plus a pixel for
-               the antialiased edge. */
-            const advance = m.width + track
-            const ink = m.actualBoundingBoxRight + 1
-            return Math.max(advance, ink) / size
-          }),
-        ),
-      )
-    }
-    read()
-    document.fonts?.ready.then(read)
-    window.addEventListener('resize', read)
-    return () => window.removeEventListener('resize', read)
   }, [])
 
   const seat = Math.floor(u)
@@ -209,10 +146,7 @@ export function StagesV2() {
               line2={withAccent(stages.line2, stages.accent)}
               chip={stages.chip}
               tone="sky"
-              chipAt="58%"
-              tilt={-6}
               lineRecipe={4}
-              chipRecipe={3}
             />
             <p className="cx-lead">{stages.lead}</p>
           </div>
@@ -230,9 +164,7 @@ export function StagesV2() {
                   /* Full ink at its own seat, fading with distance from it. */
                   style={{ ['--near' as string]: 1 - clamp(Math.abs(u - i)) }}
                 >
-                  <span className="umm-stage__num">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
+                  <span className="umm-stage__num">{String(i + 1).padStart(2, '0')}</span>
                   <span className="umm-stage__name">{item.tab}</span>
                 </button>
               ))}
@@ -260,76 +192,53 @@ export function StagesV2() {
                   ['--frac' as string]: frac,
                 }}
               >
-                <div
-                  className="umm-odo"
-                  ref={odoRef}
-                  style={{ ['--u' as string]: u, ['--odo-h' as string]: `${cellH}em` }}
-                >
-                  <span className="umm-sr-only">{items[Math.round(u)].stat}</span>
-                  {REELS.map((glyphs, col) => (
-                    <span
-                      className="umm-odo__col"
-                      key={col}
-                      aria-hidden="true"
-                      style={
-                        reelW[col]
-                          ? {
-                              width: `${lerp(
-                                reelW[col][seat],
-                                reelW[col][Math.min(items.length - 1, seat + 1)],
-                                frac,
-                              ).toFixed(4)}em`,
-                            }
-                          : undefined
-                      }
-                    >
-                      <span className="umm-odo__reel">
-                        {glyphs.map((g, i) => (
-                          <span className="umm-odo__cell" key={i}>
-                            {g}
-                          </span>
-                        ))}
-                      </span>
-                    </span>
-                  ))}
-                </div>
-
-                {/* the picture behind the number grows with the company: a
-                    spark, a rising curve, a lit skyline, morphing on the same
-                    scroll value as the reels */}
-                <StageLight u={u} />
-
-                <div className="umm-stage__captions">
+                <div className="umm-stage__captions cx-path__stack">
                   {items.map((item, i) => {
-                    const { t, leaving } = place(
-                      lane - i,
-                      i === 0,
-                      i === items.length - 1,
-                    )
+                    const rel = lane - i
+                    const { t, leaving } = place(rel, i === 0, i === items.length - 1)
+                    /* 0 → 1 across the start of the stage's hold; tapped
+                       (unpinned), the chosen stage is simply fully lit */
+                    const q = pinned ? clamp((rel + PARK_IN) / LIGHT_SPAN) : i === picked ? 1 : 0
                     return (
-                      <p
-                        className="umm-stage__caption"
+                      <ol
+                        className="umm-stage__caption cx-path"
                         key={item.tab}
                         aria-hidden={t > 0.5}
+                        aria-label={item.flow.join(', then ')}
                         style={{
                           ['--lift' as string]: `${((leaving ? -1 : 1) * t * 40).toFixed(1)}px`,
                           ['--op' as string]: 1 - t,
+                          ['--tone' as string]: `var(--umm-${item.tone})`,
+                          ['--q' as string]: q.toFixed(3),
                         }}
                       >
-                        {item.statCaption}
-                      </p>
+                        {/* the rail the light runs down, first point to last */}
+                        <span className="cx-path__rail" aria-hidden="true" />
+                        {item.flow.map((step, k) => (
+                          <li
+                            key={step}
+                            className="cx-path__step"
+                            data-lit={q >= (k / (item.flow.length - 1)) * 0.96 + 0.02 || undefined}
+                            data-end={k === item.flow.length - 1 || undefined}
+                            style={{ ['--n' as string]: k }}
+                          >
+                            <span className="cx-path__dot" aria-hidden="true" />
+                            <span className="cx-path__name">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
                     )
                   })}
                 </div>
+                {/* the picture behind the flow grows with the company: a
+                    spark, a rising curve, a lit skyline, morphing on the same
+                    scroll value as the reels */}
+                <StageLight u={u} />
               </div>
 
               <div className="umm-stage__panels">
                 {items.map((item, i) => {
-                  const { t, leaving } = place(
-                    lane - i,
-                    i === 0,
-                    i === items.length - 1,
-                  )
+                  const { t, leaving } = place(lane - i, i === 0, i === items.length - 1)
                   return (
                     <div
                       className="umm-stage__detail cx-stage__detail"
@@ -344,28 +253,24 @@ export function StagesV2() {
                       }}
                     >
                       <h3 className="cx-stage__title">{item.title}</h3>
-                      <dl className="cx-stage__qa">
-                        <div>
-                          <dt>Your challenge</dt>
-                          <dd>{item.challenge}</dd>
-                        </div>
-                        <div>
-                          <dt>What we do</dt>
-                          <dd>{item.approach}</dd>
-                        </div>
-                        <div className="cx-stage__get">
-                          <dt>What you get</dt>
-                          <dd>{item.outcome}</dd>
-                        </div>
-                      </dl>
+                      <p className="cx-stage__text">{item.body}</p>
                       <div className="cx-stage__model">
-                        <p className="cx-stage__model-name">
-                          <span>How we&rsquo;d work together:</span> {item.model.name}
-                        </p>
-                        <p>{item.model.body}</p>
-                        <a href={item.seeIt.href} target="_blank" rel="noreferrer" tabIndex={t > 0.5 ? -1 : undefined}>
-                          See it in: {item.seeIt.label}
-                          <IconArrowUpRight size={14} strokeWidth={2.2} />
+                        <ul className="cx-stage__services">
+                          {item.services.map((sv) => (
+                            <li key={sv}>{sv}</li>
+                          ))}
+                        </ul>
+                        <a
+                          className="cx-stage__cta"
+                          href={item.cta.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          tabIndex={t > 0.5 ? -1 : undefined}
+                        >
+                          <span>{item.cta.label}</span>
+                          <span className="cx-stage__cta-orb" aria-hidden="true">
+                            <FlyArrow size={16} strokeWidth={2} />
+                          </span>
                         </a>
                       </div>
                     </div>
@@ -374,8 +279,6 @@ export function StagesV2() {
               </div>
             </div>
           </div>
-
-          <p className="cx-stages-foot">{stages.footnote}</p>
         </div>
       </div>
     </section>

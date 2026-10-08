@@ -9,7 +9,9 @@
  */
 export const TONES = ['sun', 'sky', 'blossom', 'citrus', 'coral'] as const
 
-export type Tone = (typeof TONES)[number]
+/* lilac is a sixth, outside the cycle above: used where six things must
+   all differ (the service cards), so toneAt() lists are unchanged. */
+export type Tone = (typeof TONES)[number] | 'lilac'
 
 /**
  * Walks the tone sequence so a list of any length stays evenly distributed

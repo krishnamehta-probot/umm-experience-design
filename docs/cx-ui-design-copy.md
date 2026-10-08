@@ -214,6 +214,10 @@ Toubro, Mohawk, Lyca, Akamai, Biocon
 
 **Tabs:** Startups · Growing companies · Enterprises
 
+**Visual treatment:** An abstract ribbon sculpture evolves from one clear
+path, to woven currents, to a connected network around a shared core. Its
+density follows the selected stage and the rolling number.
+
 ### Startups: Prove it fast
 - **Stat:** `2–5×` productivity boost within the first 90 days
 - **Your challenge:** You have an idea and need to prove it, without

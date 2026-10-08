@@ -6,6 +6,7 @@
 export { Chapter, AccentWord, SectionHead } from './Chapter'
 export { Button, ButtonLink, TextLink } from './Button'
 export { SplitButton } from './SplitButton'
+export { FlyArrow } from './FlyArrow'
 export { LottieMark } from './LottieMark'
 export { Card, NotchCard } from './Card'
 export { Accordion, type AccordionEntry } from './Accordion'

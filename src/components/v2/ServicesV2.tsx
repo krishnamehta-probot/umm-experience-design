@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import { IconArrowUpRight } from '../icons'
-import { LottieMark } from '../primitives'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { FlyArrow, LottieMark } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
 import { measurePeel, peelFrame, sheetPath, type PeelGeometry } from '@/lib/cornerPeel'
@@ -14,11 +13,15 @@ import data from '@/lottie/services/data.json'
 import testing from '@/lottie/services/testing.json'
 
 /* ============================================================================
-   4 · WHAT WE DO — six services, all at once, each a card with two sides
+   4 · WHAT WE CAN HELP YOU DO — six services, all at once, each a card with
+   two sides
 
-   The front says when you need the service and what we do; the back says
-   what you walk away with, with a live scene of it (an 8-second Lottie loop,
-   built by scripts/build_service_marks.py) and the case study. All six are on screen together and all
+   The front names the step (Understand, Connect…), the service, a line on
+   it and its tags, over a live scene of it (an 8-second Lottie loop, built
+   by scripts/build_service_marks.py) that holds still until the card is
+   hovered. The back is the detail: what the work is, what it can include,
+   and a way to talk about it. As the back is uncovered, its list ticks
+   itself off one line at a time. All six are on screen together and all
    the same size, because the question a reader brings here is about the
    whole set.
 
@@ -28,9 +31,9 @@ import testing from '@/lottie/services/testing.json'
    Pressing again lays the sheet back down. The geometry is in
    lib/cornerPeel.ts; this file measures, and writes each frame into style.
 
-   The marks only run while their card is showing its back and the grid is
-   near the screen; otherwise the player is destroyed, so the rest of the
-   page pays nothing for them.
+   The marks only exist while the grid is near the screen and their card
+   shows its front; otherwise the player is destroyed, so the rest of the
+   page pays nothing for them. On screens without hover they simply play.
    ========================================================================== */
 
 const MARKS: Record<ServiceMark, unknown> = {
@@ -49,6 +52,7 @@ export function ServicesV2() {
   const ref = useRef<HTMLElement>(null)
   const grid = useRef<HTMLUListElement>(null)
   const [live, setLive] = useState(false)
+  const [touch] = useState(() => typeof window !== 'undefined' && !window.matchMedia('(hover: hover)').matches)
 
   useEffect(() => {
     const node = grid.current
@@ -79,6 +83,16 @@ export function ServicesV2() {
         ease: 'back.out(1.3)',
         scrollTrigger: { trigger: '.cx-svc__grid', start: 'top 80%', once: true },
       })
+      gsap.from('.cx-svc__tags li', {
+        opacity: 0,
+        y: 10,
+        scale: 0.8,
+        duration: 0.45,
+        stagger: 0.04,
+        ease: 'back.out(2)',
+        delay: 0.6,
+        scrollTrigger: { trigger: '.cx-svc__grid', start: 'top 80%', once: true },
+      })
       gsap.from('.cx-svc__flip', {
         scale: 0,
         rotate: -90,
@@ -103,33 +117,34 @@ export function ServicesV2() {
             line2={withAccent(services.line2, services.accent)}
             chip={services.chip}
             tone="sun"
-            chipAt="74%"
-            tilt={8}
             lineRecipe={1}
-            chipRecipe={1}
           />
           <p className="cx-lead">{services.lead}</p>
         </div>
 
         <ul className="cx-svc__grid" ref={grid}>
           {services.items.map((s, i) => (
-            <ServiceCard key={s.title} service={s} index={i} total={services.items.length} live={live} />
+            <ServiceCard key={s.title} service={s} index={i} live={live} touch={touch} />
           ))}
         </ul>
 
         <aside className="cx-signpost">
-          <span className="cx-signpost__mark" aria-hidden="true">
-            <IconArrowUpRight size={18} strokeWidth={1.9} />
-          </span>
           <p>
-            <strong>{services.signpost.question}</strong> {services.signpost.before}{' '}
-            {services.signpost.href ? (
-              <a href={services.signpost.href}>{services.signpost.page}</a>
-            ) : (
-              <em>{services.signpost.page}</em>
-            )}{' '}
-            {services.signpost.after}
+            <strong>{services.closing.question}</strong>{' '}
+            <a href={services.closing.href} target="_blank" rel="noreferrer">
+              {services.closing.link}
+            </a>
           </p>
+          <a
+            className="cx-signpost__mark"
+            href={services.closing.href}
+            target="_blank"
+            rel="noreferrer"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <FlyArrow size={18} strokeWidth={1.9} />
+          </a>
         </aside>
       </div>
     </section>
@@ -143,17 +158,18 @@ const lift = (p: number) => 44 * Math.sin(Math.PI * p)
 function ServiceCard({
   service: s,
   index,
-  total,
   live,
+  touch,
 }: {
   service: Service
   index: number
-  total: number
   live: boolean
+  touch: boolean
 }) {
   const backId = useId()
   const [side, setSide] = useState<Side>('front')
   const [busy, setBusy] = useState(false)
+  const [hover, setHover] = useState(false)
 
   const card = useRef<HTMLLIElement>(null)
   const bite = useRef<HTMLSpanElement>(null)
@@ -264,7 +280,7 @@ function ServiceCard({
     else tween.current.reverse()
   }, [paint, clear])
 
-  const number = `${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`
+  const number = String(index + 1).padStart(2, '0')
   const showsBack = side === 'back'
 
   return (
@@ -274,44 +290,62 @@ function ServiceCard({
       data-side={side}
       data-busy={busy || undefined}
       ref={card}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(true)}
+      onPointerLeave={(e) => e.pointerType === 'mouse' && setHover(false)}
     >
-      {/* Underneath: what you get */}
+      {/* Underneath: the detail */}
       <div className="cx-svc__sheet cx-svc__sheet--back" id={backId} ref={sheet(0)} inert={!showsBack}>
         <span className="cx-svc__shade" ref={shade} aria-hidden="true" />
         <div className="cx-svc__top">
-          <span className="cx-svc__index">{number}</span>
+          <span className="cx-svc__index">
+            {number} / {s.step}
+          </span>
           <span className="cx-svc__name">{s.title}</span>
         </div>
-        <LottieMark data={MARKS[s.mark]} playing={live && (showsBack || busy)} still={150} className="cx-svc__mark" />
-        <dl className="cx-svc__get">
-          <dt>What you get</dt>
-          <dd>{s.get}</dd>
-        </dl>
-        {s.seeIt ? (
-          <a className="cx-svc__foot cx-svc__case" href={s.seeIt.href} target="_blank" rel="noreferrer">
-            See it in <strong>{s.seeIt.label}</strong>
-            <IconArrowUpRight size={14} strokeWidth={2.2} />
-          </a>
-        ) : null}
+        <p className="cx-svc__more">{s.more}</p>
+        <div className="cx-svc__inc">
+          <p className="cx-svc__label">{services.includesLabel}</p>
+          <ul>
+            {s.includes.map((item, i) => (
+              <li key={item} style={{ '--i': i } as CSSProperties}>
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="10" cy="10" r="8.5" />
+                  <path d="M6 10.4l2.7 2.6L14.2 7.4" />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="cx-svc__scope">{services.scope}</p>
+        <a className="cx-svc__foot cx-svc__cta" href={services.cta.href}>
+          <strong>{services.cta.label}</strong>
+          <FlyArrow size={14} strokeWidth={2.2} />
+        </a>
       </div>
 
-      {/* On top: when you need it, what we do */}
+      {/* On top: the step, the service, its scene */}
       <div className="cx-svc__rest" ref={front} inert={showsBack}>
         <div className="cx-svc__sheet cx-svc__sheet--front" ref={sheet(1)}>
-          <span className="cx-svc__index">{number}</span>
+          <span className="cx-svc__index">
+            {number} / {s.step}
+          </span>
           <h3 className="cx-svc__title">{s.title}</h3>
-          <dl className="cx-svc__lines">
-            <div>
-              <dt>You need this when</dt>
-              <dd>{s.when}</dd>
-            </div>
-            <div>
-              <dt>What we do</dt>
-              <dd>{s.what}</dd>
-            </div>
-          </dl>
+          <p className="cx-svc__body">{s.body}</p>
+          <LottieMark
+            data={MARKS[s.mark]}
+            playing={live && (!showsBack || busy)}
+            hold={!touch && !hover}
+            still={150}
+            className="cx-svc__mark"
+          />
+          <ul className="cx-svc__tags">
+            {s.tags.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
           <span className="cx-svc__foot cx-svc__hint" aria-hidden="true" onClick={turn}>
-            See what you get
+            {services.hint}
           </span>
         </div>
       </div>
@@ -334,9 +368,9 @@ function ServiceCard({
           onClick={turn}
           aria-expanded={showsBack}
           aria-controls={backId}
-          aria-label={showsBack ? `Back to ${s.title}` : `See what you get: ${s.title}`}
+          aria-label={showsBack ? `Back to ${s.title}` : `${services.hint}: ${s.title}`}
         >
-          <IconArrowUpRight size={20} strokeWidth={2.2} />
+          <FlyArrow size={20} strokeWidth={2.2} />
         </button>
       </span>
     </li>

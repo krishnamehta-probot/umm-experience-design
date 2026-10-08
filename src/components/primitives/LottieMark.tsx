@@ -17,6 +17,7 @@ export function LottieMark({
   data,
   playing,
   still = 30,
+  hold = false,
   className = '',
 }: {
   data: unknown
@@ -24,17 +25,21 @@ export function LottieMark({
   playing: boolean
   /** The frame held for reduced motion. */
   still?: number
+  /** Mounted but paused where it is (e.g. until hovered). */
+  hold?: boolean
   className?: string
 }) {
   const host = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
+  const anim = useRef<ReturnType<LottiePlayer['loadAnimation']> | null>(null)
+  const held = useRef(hold)
+  held.current = hold
 
   useEffect(() => {
     const node = host.current
     if (!playing || !node) return
 
     let cancelled = false
-    let anim: ReturnType<LottiePlayer['loadAnimation']> | null = null
 
     import('lottie-web/build/player/lottie_light').then(({ default: lottie }) => {
       if (cancelled || !node) return
@@ -42,20 +47,28 @@ export function LottieMark({
         container: node,
         renderer: 'svg',
         loop: !reduced,
-        autoplay: !reduced,
+        autoplay: !reduced && !held.current,
         animationData: data as object,
       })
       /* Reduced motion still gets the mark, just held on a legible frame. */
       if (reduced) instance.goToAndStop(still, true)
-      anim = instance
+      anim.current = instance
     })
 
     return () => {
       cancelled = true
-      anim?.destroy()
+      anim.current?.destroy()
+      anim.current = null
       node.replaceChildren()
     }
   }, [playing, data, reduced, still])
+
+  useEffect(() => {
+    const a = anim.current
+    if (!a || reduced) return
+    if (hold) a.pause()
+    else a.play()
+  }, [hold, reduced])
 
   return <div className={`umm-lottie ${className}`.trim()} ref={host} aria-hidden="true" />
 }

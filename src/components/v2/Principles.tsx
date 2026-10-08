@@ -15,12 +15,19 @@ import { principles } from '@/content/cxUiDesign'
    styles that have never met. The section pins, and each rule is a stop on
    the scroll:
 
-     0 Before                   every rule broken
-     1 Colour with a reason     Pay goes from 1.4:1 contrast to 19:1
-     2 Made for thumbs          Pay moves down into the thumb's reach
-     3 Fewer steps, every time  ten steps fold into three; the form shrinks
-     4 Same look, everywhere    four button styles settle into one
-     5 Tested before it's built a usability-test result comes in on Pay
+     0 Before                          every rule broken
+     1 Colour that guides              Pay goes from 1.4:1 contrast to 19:1,
+                                       and the found address shows its status
+     2 Hierarchy that makes sense      the title, the sections and the total
+                                       take their weight, and Pay moves down to
+                                       the bottom, where the next step belongs
+     3 Less to work through            ten steps fold into three; the form shrinks
+     4 Consistency people can learn    four button styles settle into one
+     5 Usability checked with people   testers' hesitations show on Pay, then
+                                       the refined result comes in
+
+   (8 Oct: final copy. Rule 2 was "Made for thumbs"; its CSS id stays
+   `thumbs`.)
 
    The stops are magnetic (lib/useMagneticStops). The scroll only chooses
    which stop is showing; the change itself plays as a full animation (--k1 …
@@ -127,7 +134,7 @@ export function Principles() {
   const vars = Object.fromEntries(k.map((v, i) => [`--k${i + 1}`, v])) as CSSProperties
   const tone = active >= 0 ? items[active].tone : 'coral'
   const status =
-    stop === 0 ? 'Before: every rule broken' : stop === N ? 'After: all five rules' : `${stop} of ${N} rules applied`
+    stop === 0 ? principles.demo.label : stop === N ? principles.demo.done : `${stop} of ${N} applied`
 
   return (
     <section
@@ -146,10 +153,7 @@ export function Principles() {
                 line2={withAccent(principles.line2, principles.accent)}
                 chip={principles.chip}
                 tone="coral"
-                chipAt="66%"
-                tilt={-10}
                 lineRecipe={2}
-                chipRecipe={0}
               />
               <p className="cx-lead">{principles.lead}</p>
             </div>
@@ -351,7 +355,7 @@ function Phone() {
           </span>
           <span className="cx-app__note-text">
             <b>Usability test</b>
-            Checkout task passed with real users
+            Hesitation found, design refined
           </span>
         </span>
 

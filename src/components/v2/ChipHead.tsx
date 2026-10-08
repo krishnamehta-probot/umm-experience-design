@@ -1,8 +1,17 @@
-import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
 import type { Tone } from '@/components/primitives'
 
 /* ============================================================================
+   CHIP HEAD — the section headline, in the hero's format
+
+   8 Oct, final revision: every section heading now reads like the hero's.
+   The eyebrow (an asterisk and a short line in small capitals) sits above,
+   the headline is two plain lines, and the one or two words that carry it
+   sit in a short straight chip, as "a business advantage." does in the
+   hero. The big tilted chip lying across the two lines is gone.
+
+   Earlier notes:
    CHIP HEAD — the section headline, from the AI & Automation artifact
 
    Two lines with a tilted pill lying across the seam between them. Three
@@ -63,23 +72,6 @@ const LINES = [
     }),
 ] as const
 
-/* How the chip lands. Relative to the chip's resting tilt, so a recipe works
-   whatever angle a section sets. */
-const PILLS = [
-  /* 0 drop */
-  (tl: gsap.core.Timeline, t: Element) =>
-    tl.from(t, { opacity: 0, scale: 0.7, rotate: '-=17', y: -22, duration: 0.66, ease: 'back.out(1.9)' }, '-=.55'),
-  /* 1 swing */
-  (tl: gsap.core.Timeline, t: Element) =>
-    tl.from(t, { opacity: 0, x: -46, rotate: '+=22', duration: 0.62, ease: 'back.out(1.7)' }, '-=.55'),
-  /* 2 pop */
-  (tl: gsap.core.Timeline, t: Element) =>
-    tl.from(t, { opacity: 0, scale: 0.45, rotate: '+=18', duration: 0.7, ease: 'back.out(2.2)' }, '-=.55'),
-  /* 3 lift */
-  (tl: gsap.core.Timeline, t: Element) =>
-    tl.from(t, { opacity: 0, y: 32, rotate: '-=9', duration: 0.66, ease: 'back.out(1.8)' }, '-=.55'),
-] as const
-
 /** Sets the one phrase in a line that carries the argument. The phrase is
  *  matched in the copy rather than marked up in it, so the content file stays
  *  plain text a copywriter can edit. */
@@ -90,9 +82,21 @@ export function withAccent(text: string, accent?: string): ReactNode {
   return (
     <>
       {text.slice(0, at)}
-      <em>{accent}</em>
+      <span className="cx-h__chip">{accent}</span>
       {text.slice(at + accent.length)}
     </>
+  )
+}
+
+/** The hero's eyebrow: an asterisk and a short line in small capitals. */
+export function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <p className={`cx-eyebrow ${className}`.trim()}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1" />
+      </svg>
+      {children}
+    </p>
   )
 }
 
@@ -101,10 +105,7 @@ export function ChipHead({
   line2,
   chip,
   tone,
-  chipAt = '30%',
-  tilt = -9,
   lineRecipe = 0,
-  chipRecipe = 0,
   start = 'top 82%',
   as: Tag = 'h2',
   id,
@@ -112,21 +113,19 @@ export function ChipHead({
 }: {
   line1: ReactNode
   line2: ReactNode
+  /** The eyebrow over the headline. */
   chip: string
+  /** The colour of the short chip on the headline's key words. */
   tone: Tone
-  /** Horizontal position of the chip's centre along the headline. */
-  chipAt?: string
-  /** Resting tilt of the chip, in degrees. */
-  tilt?: number
   lineRecipe?: number
-  chipRecipe?: number
   /** ScrollTrigger start for the reveal. */
   start?: string
-  as?: 'h1' | 'h2'
+  as?: 'h2' | 'h1'
   id?: string
   className?: string
 }) {
   const ref = useRef<HTMLHeadingElement>(null)
+  const brow = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -135,32 +134,32 @@ export function ChipHead({
       const tl = gsap.timeline({
         scrollTrigger: { trigger: el, start, once: true },
       })
+      if (brow.current) tl.from(brow.current, { opacity: 0, y: 12, duration: 0.6, ease: 'power3.out' })
       LINES[lineRecipe % LINES.length](tl, gsap.utils.toArray<Element>('.cx-h__i', el))
-      PILLS[chipRecipe % PILLS.length](tl, el.querySelector('.cx-chip__i')!)
+      const pill = el.querySelector('.cx-h__chip')
+      if (pill)
+        tl.from(
+          pill,
+          { scale: 0.6, opacity: 0, transformOrigin: '0% 60%', duration: 0.6, ease: 'back.out(2.2)' },
+          '-=.5',
+        )
     }, el)
     return () => ctx.revert()
-  }, [lineRecipe, chipRecipe, start])
+  }, [lineRecipe, start])
 
   return (
-    <Tag className={`cx-h ${className}`.trim()} ref={ref} id={id}>
-      <span className="cx-h__l">
-        <span className="cx-h__i">{line1}</span>
-      </span>
-      {/* The outer span only centres; the inner one tilts and is the thing
-          GSAP animates, so the centring transform is never re-parsed into
-          pixels and doubled. */}
-      <span
-        className="cx-chip"
-        aria-hidden="true"
-        style={{ left: chipAt, '--tilt': `${tilt}deg` } as CSSProperties}
-      >
-        <span className="cx-chip__i" data-umm-tone={tone}>
-          {chip}
+    <>
+      <div ref={brow}>
+        <Eyebrow>{chip}</Eyebrow>
+      </div>
+      <Tag className={`cx-h ${className}`.trim()} ref={ref} id={id} data-umm-tone={tone}>
+        <span className="cx-h__l">
+          <span className="cx-h__i">{line1}</span>
         </span>
-      </span>
-      <span className="cx-h__l cx-h__l--2">
-        <span className="cx-h__i">{line2}</span>
-      </span>
-    </Tag>
+        <span className="cx-h__l">
+          <span className="cx-h__i">{line2}</span>
+        </span>
+      </Tag>
+    </>
   )
 }

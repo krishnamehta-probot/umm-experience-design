@@ -85,6 +85,8 @@
   --umm-sky: #d1e7ff; /* light blue  */
   --umm-sun: #ffe58f; /* yellow      */
   --umm-coral: #ffc3c4; /* salmon      */
+  /* a sixth, added 8 Oct for the six service cards only, so no two share */
+  --umm-lilac: #dccfff; /* pastel violet */
 
   /* Tinted washes — derived from the five, never an independent colour.
      Ratios are chosen so each wash resolves to the value it had when it was
@@ -95,6 +97,7 @@
   --umm-sky-wash: color-mix(in srgb, var(--umm-sky) 28%, var(--umm-paper));
   --umm-sun-wash: color-mix(in srgb, var(--umm-sun) 18%, var(--umm-paper));
   --umm-coral-wash: color-mix(in srgb, var(--umm-coral) 18%, var(--umm-paper));
+  --umm-lilac-wash: color-mix(in srgb, var(--umm-lilac) 22%, var(--umm-paper));
 
   /* -------------------------------------------------------------------------
      4. COLOR — SIGNAL
@@ -321,5 +324,10 @@
 [data-umm-tone='coral'] {
   --umm-tone: var(--umm-coral);
   --umm-tone-wash: var(--umm-coral-wash);
+  --umm-tone-signal: var(--umm-ink);
+}
+[data-umm-tone='lilac'] {
+  --umm-tone: var(--umm-lilac);
+  --umm-tone-wash: var(--umm-lilac-wash);
   --umm-tone-signal: var(--umm-ink);
 }

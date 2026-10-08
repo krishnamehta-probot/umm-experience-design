@@ -1,77 +1,84 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
-import { film, hero, work, type Project } from '@/content/cxUiDesign'
+import { film } from '@/content/cxUiDesign'
 import { SHAPES, type ShapeName, type ShapePart } from './shapes.data'
 import { Shape } from './Shape'
+import { FlyArrow } from '../primitives'
 
 /* ============================================================================
-   3 · OUR WORK — a 30-second film
+   3 · SELECTED WORK — a 30-second film of three real projects
 
-   Replaces the tabbed "Proof, not promises" section (Krish, 2 Oct). It plays
-   like a cut film, not a web section: one GSAP timeline, exactly 30 seconds,
-   on a fixed 1920 x 1080 frame that is scaled to the screen, so every cut
+   Plays like a cut film, not a web section: one GSAP timeline, exactly 30
+   seconds, on a fixed 1920 x 1080 frame scaled to the screen, so every cut
    lands on the same frame on a laptop, a monitor and in the MP4 export.
 
-     0:00  hook        "You've got 0.05 seconds." typed, then the research
-                       line slams in word by word
-     0:04  blank→built a cursor drags out an empty frame that snaps into
-                       Coco & Coir's real homepage; our screens fly past
-     0:08  five hits   one real project and its number every 3 seconds,
-                       each cut differently (whip, shape wipe, punch-in)
-     0:23  the wall    every screen on a tilted wall, the five industries
-                       flash past, "Real work. Real numbers."
-     0:26  end card    the hero line, then umm and Let's talk
+     0:00  intro     "The work makes the case." slams in word by word, the
+                     three shapes from section 2 spin through, the three
+                     client names flash
+     0:03  Biocon    the real work, playing like a screen recording in a
+     0:10  QCare     browser beside the project's line: Biocon Biologics'
+     0:17  Pricefx   live homepage scrolling through, QCare's resident
+                     platform (visitor list → invite → details → notice
+                     board → buildings, from the XD prototype), Mohawk's
+                     pricing app (sign in → pricing table → offline → stale
+                     data alert, from the Figma prototype)
+     0:25  the cards the last frame: the three projects as cards, the way
+                     the approved design shows them (the case-study
+                     images live only here). Every card is a real link to
+                     its case study, with "Explore all projects".
 
-   Editing kit (all on the one timeline, so seeking and the export are exact):
-   Cool Shape wipes (the next scene grows out of a brand shape), whip pans
-   with motion blur, flash frames, camera shake on every number slam, slow
-   push-ins, and 12 fps film grain.
+   Cuts: Cool Shape wipes led by a ring of brand colour, whip pans with
+   motion blur, flash frames, camera shake on the slams, slow push-ins,
+   12 fps film grain.
 
-   It plays when most of it is on screen and pauses when it isn't. Reduced
-   motion: it waits on its end card with a play button. Screen readers get
-   the projects and numbers as text.
+   On big screens the film arrives inside a sky clover (the shape of
+   section 2's last point) that grows with the scroll until it fills the
+   screen; it starts the instant it is full. Phones get a 16:9 band that
+   plays on screen. Reduced motion: it waits on the cards. Screen readers
+   get the projects as a list of links.
    ========================================================================== */
 
 const W = 1920
 const H = 1080
 export const FILM_SECONDS = 30
 
-/** Big, landscape screens with motion allowed get the opening window. */
+/** Big, landscape screens with motion allowed get the clover entrance. */
 const OPEN =
   '(min-width: 721px) and (min-height: 540px) and (min-aspect-ratio: 5/4) and (prefers-reduced-motion: no-preference)'
-/** Scroll, in screen heights, over which the window opens. */
-const GROW = 0.9
+/** Scroll, in screen heights, over which the clover opens. */
+const GROW = 1
 
 const INK = '#100e14'
 const PAPER = '#ffffff'
 const CITRUS = '#f0ff70'
-const BLOSSOM = '#ffc4f2'
+const CORAL = '#ffc3c4'
+const SKY = '#d1e7ff'
 
-type Hit = Project & { value: number; suffix: string; label: string }
+const P = film.projects
+/** where each project's seven seconds start */
+const AT = [3.2, 10.4, 17.6]
+const LEN = 7.2
+const END = 24.8
 
-const HITS: Hit[] = film.hits.map(({ screens, stat }) => {
-  const p = work.projects.find((x) => x.screens === screens)!
-  const n = p.numbers[stat]
-  const [, value, suffix] = /^(\d+)(.*)$/.exec(n.value)!
-  return { ...p, value: Number(value), suffix, label: n.label }
-})
+/** Each project's real screens, in the order they play. Biocon is its live
+ *  homepage as one long capture that scrolls; the others are screen flows,
+ *  with where the cursor clicks to get to the next one (share of the view). */
+type Flow = { src: string; click?: [number, number] }[]
+const BIOCON_STOPS = [-21, -37, -50, -67]
+const FLOWS: Record<string, Flow> = {
+  qcare: [
+    { src: 's1' },
+    { src: 's4', click: [0.9, 0.2] },
+    { src: 's5' },
+    { src: 's6' },
+    { src: 's7' },
+    { src: 's8' },
+  ],
+  mohawk: [{ src: 's0', click: [0.5, 0.63] }, { src: 's2', click: [0.87, 0.06] }, { src: 's3' }, { src: 's4' }],
+}
 
-/* the screens that fly past the camera, and where each one flies */
-const TUNNEL = ['fintuit', 'healthx', 'aladdin', 'habari'].flatMap((p) =>
-  ['s1', 's2', 's3'].map((s) => `/work/${p}/${s}.webp`),
-)
-const TUNNEL_AT: [number, number][] = [
-  [-620, -300], [560, -260], [-240, 320], [700, 280], [-760, 140], [180, -380],
-  [-420, -40], [460, 40], [-60, -260], [820, -60], [-820, -320], [300, 360],
-]
-
-/* the wall: a row of homepages, then a row of each inner page */
-const WALL = ['home', 's1', 's2', 's3'].flatMap((s) =>
-  work.projects.filter((p) => p.screens).map((p) => `/work/${p.screens}/${s}.webp`),
-)
-
-/** A Cool Shape as a CSS mask, for the shape wipes. Only solid shapes:
- *  one with a hole would leave a window of the old scene in the new one. */
+/** A Cool Shape as a CSS mask. Only solid shapes: one with a hole would
+ *  leave a window of the old scene in the new one. */
 const maskOf = (name: ShapeName) => {
   const paths = (SHAPES[name] as readonly ShapePart[])
     .map((p) => `<path d='${p.d}'${p.evenodd ? " fill-rule='evenodd'" : ''}/>`)
@@ -80,35 +87,31 @@ const maskOf = (name: ShapeName) => {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
 }
 
-const chars = (s: string) =>
-  [...s].map((c, i) => (
-    <span className="cx-f-ch" key={i}>
-      {c}
-    </span>
-  ))
+/** A line split into words, with `chip` (if it ends the line) as one chip. */
+function Words({ text, chip, className = 'cx-f-w' }: { text: string; chip?: string; className?: string }) {
+  const at = chip ? text.lastIndexOf(chip) : -1
+  const head = at >= 0 ? text.slice(0, at).trim() : text
+  return (
+    <>
+      {head.split(' ').filter(Boolean).map((w, i) => (
+        <span className={className} key={i}>
+          {w}{' '}
+        </span>
+      ))}
+      {at >= 0 && <span className={`${className} cx-f-chip`}>{chip}</span>}
+    </>
+  )
+}
 
 const fmt = (t: number) => `0:${String(Math.floor(t)).padStart(2, '0')}`
 
-function Browser({ src, className = '' }: { src: string; className?: string }) {
-  return (
-    <div className={`cx-f-browser ${className}`}>
-      <div className="cx-f-browser__bar">
-        <i />
-        <i />
-        <i />
-        <span />
-      </div>
-      <div className="cx-f-browser__view">
-        <img className="cx-f-browser__page" src={src} alt="" decoding="async" />
-      </div>
-    </div>
-  )
-}
+const Arrow = () => <FlyArrow size={18} strokeWidth={2} />
 
 export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
   const sectionRef = useRef<HTMLElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
   const windowRef = useRef<HTMLDivElement>(null)
+  const haloRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
   const tagRef = useRef<HTMLSpanElement>(null)
   const controlsRef = useRef<HTMLDivElement>(null)
@@ -127,8 +130,8 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
     if (!frame) return
 
     const ctx = gsap.context(() => {
-      const q = gsap.utils.selector(frame)
-      const one = (s: string) => q(s)[0] as HTMLElement
+      const one = (s: string, root: Element = frame) => root.querySelector(s) as HTMLElement
+      const many = (s: string, root: Element = frame) => [...root.querySelectorAll<HTMLElement>(s)]
 
       const tl = gsap.timeline({
         paused: true,
@@ -147,36 +150,29 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
 
       const cam = one('.cx-f-cam')
       const flashEl = one('.cx-f-flash')
+      const veil = one('.cx-f-veil')
 
       /* ── the editing kit ── */
 
-      /** The next scene grows out of a Cool Shape in the middle of the frame.
-       *  With a colour, a brand-colour shape opens first and the scene opens
-       *  inside it a beat later, so a ring of colour leads the cut. */
-      const veil = one('.cx-f-veil')
-      const wipe = (from: Element, to: Element, t: number, shape: ShapeName, color?: string, dur = 0.5) => {
+      /** The next scene grows out of a Cool Shape in the middle of the frame,
+       *  a ring of brand colour leading it. */
+      const wipe = (from: Element, to: Element, t: number, shape: ShapeName, color: string, dur = 0.5) => {
         const mask = maskOf(shape)
-        let at = t
-        if (color) {
-          tl.set(veil, { autoAlpha: 1, backgroundColor: color, '--wipe': mask, '--m': '0px' }, t)
-          tl.to(veil, { '--m': '4600px', duration: 0.42, ease: 'power3.in' }, t)
-          at = t + 0.16
-        }
+        tl.set(veil, { autoAlpha: 1, backgroundColor: color, '--wipe': mask, '--m': '0px' }, t)
+        tl.to(veil, { '--m': '4600px', duration: 0.42, ease: 'power3.in' }, t)
+        const at = t + 0.16
         tl.set(to, { autoAlpha: 1, zIndex: 30, '--wipe': mask, '--m': '0px' }, at)
         tl.to(to, { '--m': '4600px', duration: dur, ease: 'power3.in' }, at)
         tl.set(to, { '--wipe': 'none', zIndex: 'auto' }, at + dur)
         tl.set(from, { autoAlpha: 0 }, at + dur)
-        if (color) tl.set(veil, { autoAlpha: 0 }, at + dur)
+        tl.set(veil, { autoAlpha: 0 }, at + dur)
       }
 
-      /** Whip pan: both scenes travel together, like the camera swinging
-       *  between them, smeared at the fastest point. */
-      const whip = (from: Element, to: Element, t: number, axis: 'x' | 'y' = 'x') => {
+      /** Whip pan: both scenes travel together, smeared at the fastest point. */
+      const whip = (from: Element, to: Element, t: number) => {
         const D = 0.44
-        const out = axis === 'x' ? { x: -W } : { y: -H }
-        const inn = axis === 'x' ? { x: W } : { y: H }
-        tl.to(from, { ...out, duration: D, ease: 'power3.inOut' }, t)
-        tl.fromTo(to, { ...inn, autoAlpha: 1 }, { x: 0, y: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
+        tl.to(from, { x: -W, duration: D, ease: 'power3.inOut' }, t)
+        tl.fromTo(to, { x: W, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
         tl.to([from, to], { filter: 'blur(30px)', duration: D / 2, ease: 'power2.in' }, t)
         tl.to([from, to], { filter: 'blur(0px)', duration: D / 2, ease: 'power2.out' }, t + D / 2)
         tl.set(from, { autoAlpha: 0 }, t + D)
@@ -187,280 +183,124 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
         tl.set(flashEl, { autoAlpha: 0 }, t + dur)
       }
 
-      /** a short, decaying camera shake */
-      const shake = (t: number, amp = 14) => {
+      const shake = (t: number, amp = 12) => {
         const path = [[1, -0.6], [-0.8, 0.9], [0.6, -0.4], [-0.4, 0.5], [0.2, -0.2]]
         path.forEach(([x, y], i) => tl.to(cam, { x: x * amp, y: y * amp, duration: 0.035, ease: 'none' }, t + i * 0.035))
         tl.to(cam, { x: 0, y: 0, duration: 0.05, ease: 'none' }, t + path.length * 0.035)
       }
 
-      /** a number counting up, fast then settling */
-      const count = (el: Element, to: number, t: number, dur: number, also?: (v: number) => void) => {
-        const o = { v: 0 }
-        tl.fromTo(
-          o,
-          { v: 0 },
-          {
-            v: to,
-            duration: dur,
-            ease: 'expo.out',
-            immediateRender: false,
-            onUpdate: () => {
-              const v = Math.round(o.v)
-              el.textContent = String(v)
-              also?.(v)
-            },
-          },
-          t,
+      /** words slamming in one by one, out of a blur */
+      const slam = (words: Element[], t: number, step = 0.11) =>
+        words.forEach((w, i) =>
+          tl.from(w, { autoAlpha: 0, scale: 1.6, filter: 'blur(12px)', duration: 0.22, ease: 'power4.out' }, t + i * step),
         )
-      }
 
       /** a word turning into a tilted chip */
-      const chipPop = (el: Element, t: number, bg: string, fg: string, tilt: number, fromFg: string) => {
+      const chipPop = (el: Element, t: number, bg: string, tilt: number, fromFg: string) => {
         tl.fromTo(
           el,
           { backgroundColor: 'rgba(255,255,255,0)', color: fromFg, rotation: 0, scale: 1 },
-          { backgroundColor: bg, color: fg, rotation: tilt, scale: 1.1, duration: 0.14, ease: 'power4.out', immediateRender: false },
+          { backgroundColor: bg, color: INK, rotation: tilt, scale: 1.08, duration: 0.14, ease: 'power4.out', immediateRender: false },
           t,
         )
         tl.to(el, { scale: 1, duration: 0.32, ease: 'back.out(3)' }, t + 0.14)
       }
 
-      /* ── 0:00 hook ── */
-      const hook = one('.cx-f-hook')
-      const typed = q('.cx-f-hook .cx-f-ch')
-      const caret = one('.cx-f-caret')
-      gsap.set(typed, { display: 'none' })
-      tl.set(caret, { opacity: 0 }, 0.16)
-      tl.set(caret, { opacity: 1 }, 0.3)
-      const TYPE = 0.38
-      const STEP = 0.045
-      typed.forEach((c, i) => tl.set(c, { display: 'inline' }, TYPE + i * STEP))
-      const typedEnd = TYPE + typed.length * STEP
-      for (let b = 0; b < 2; b++) {
-        tl.set(caret, { opacity: 0 }, typedEnd + 0.22 + b * 0.3)
-        tl.set(caret, { opacity: 1 }, typedEnd + 0.37 + b * 0.3)
-      }
-      chipPop(one('.cx-f-type__chip'), typedEnd + 0.06, CITRUS, INK, -3, PAPER)
-      shake(typedEnd + 0.06, 10)
-      tl.fromTo(one('.cx-f-type'), { scale: 1 }, { scale: 1.07, duration: 2.3, ease: 'none', immediateRender: false }, 0)
-
-      /* ── 0:02 the research line, word by word ── */
-      const judge = one('.cx-f-judge')
-      tl.set(hook, { autoAlpha: 0 }, 2.2)
-      tl.set(judge, { autoAlpha: 1 }, 2.2)
-      const words = q('.cx-f-judge .cx-f-word')
-      words.forEach((w, i) => {
-        tl.from(w, { autoAlpha: 0, scale: 1.7, filter: 'blur(12px)', duration: 0.2, ease: 'power4.out' }, 2.24 + i * 0.12)
+      /* ── 0:00 intro ── */
+      const intro = one('.cx-f-intro')
+      const titleWords = many('.cx-f-intro__title .cx-f-w')
+      slam(titleWords, 0.3, 0.12)
+      chipPop(one('.cx-f-intro__title .cx-f-chip'), 0.3 + titleWords.length * 0.12 + 0.05, CITRUS, -3, PAPER)
+      shake(0.3 + titleWords.length * 0.12 + 0.05, 10)
+      tl.fromTo(one('.cx-f-intro__title'), { scale: 1 }, { scale: 1.06, duration: 3, ease: 'none', immediateRender: false }, 0)
+      many('.cx-f-intro__shape').forEach((s, k) => {
+        const from = [{ x: -700, y: -260 }, { x: 760, y: -300 }, { x: 40, y: 520 }][k]
+        tl.fromTo(s, { ...from, scale: 0.3, rotation: -90, autoAlpha: 0 }, { x: 0, y: 0, scale: 1, rotation: 0, autoAlpha: 1, duration: 0.9, ease: 'back.out(1.3)' }, 0.2 + k * 0.1)
+        tl.to(s, { rotation: k === 1 ? -60 : 60, duration: 2.2, ease: 'none' }, 1.1)
       })
-      chipPop(words[words.length - 1], 3.16, BLOSSOM, INK, -2.5, INK)
-      shake(3.16, 8)
-      tl.from(one('.cx-f-source'), { autoAlpha: 0, y: 14, duration: 0.4 }, 3.0)
-      tl.fromTo(one('.cx-f-judge__line'), { scale: 1 }, { scale: 1.04, duration: 1.9, ease: 'none', immediateRender: false }, 2.2)
-
-      /* ── 0:04 blank frame → real product ── */
-      const build = one('.cx-f-build')
-      wipe(judge, build, 3.6, 'flower-6', BLOSSOM)
-      const cursor = one('.cx-f-cursor')
-      const sel = one('.cx-f-select')
-      const dim = one('.cx-f-select__dim')
-      const board = one('.cx-f-board')
-      const blank = one('.cx-f-build__blank')
-      const real = one('.cx-f-build__real')
-      const BX = 640
-      const BY = 210
-      const BW = 1120
-      const BH = 700
-      gsap.set(cursor, { x: 1780, y: 1020 })
-      gsap.set(sel, { autoAlpha: 0 })
-      tl.from(blank, { autoAlpha: 0, y: 30, duration: 0.5 }, 3.95)
-      tl.to(cursor, { x: BX - 6, y: BY - 4, duration: 0.55, ease: 'power2.inOut' }, 3.75)
-      const DRAG = 4.32
-      const DRAGD = 0.7
-      tl.set(sel, { autoAlpha: 1 }, DRAG)
-      tl.to(cursor, { x: BX + BW - 6, y: BY + BH - 4, duration: DRAGD, ease: 'power2.inOut' }, DRAG)
-      const box = { w: 0, h: 0 }
-      tl.fromTo(
-        box,
-        { w: 0, h: 0 },
-        {
-          w: BW,
-          h: BH,
-          duration: DRAGD,
-          ease: 'power2.inOut',
-          immediateRender: false,
-          onUpdate: () => {
-            sel.style.width = `${box.w}px`
-            sel.style.height = `${box.h}px`
-            dim.textContent = `${Math.round((box.w * 1440) / BW)} × ${Math.round((box.h * 900) / BH)}`
-          },
-        },
-        DRAG,
-      )
-      const SNAP = DRAG + DRAGD + 0.06
-      flash(SNAP, PAPER, 0.05)
-      tl.fromTo(
-        one('.cx-f-board__shot'),
-        { clipPath: 'inset(0% 100% 0% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.32, ease: 'power4.out', immediateRender: false },
-        SNAP,
-      )
-      tl.fromTo(board, { scale: 1 }, { scale: 1.035, duration: 0.12, ease: 'power2.out', immediateRender: false }, SNAP)
-      tl.to(board, { scale: 1, duration: 0.42, ease: 'back.out(3)' }, SNAP + 0.12)
-      tl.to(sel, { autoAlpha: 0, duration: 0.2 }, SNAP + 0.1)
-      shake(SNAP, 8)
-      tl.to(blank, { opacity: 0.32, duration: 0.3 }, SNAP)
-      tl.from(real, { autoAlpha: 0, y: 30, duration: 0.45 }, SNAP + 0.15)
-      tl.to(cursor, { x: 1960, y: 1140, duration: 0.5, ease: 'power2.in' }, SNAP + 0.3)
-
-      /* ── 0:06 our screens fly past ── */
-      const TUN = 5.95
-      tl.to([blank, real, one('.cx-f-board__name')], { autoAlpha: 0, x: -60, duration: 0.3, ease: 'power2.in' }, TUN - 0.1)
-      tl.to(one('.cx-f-build__dark'), { opacity: 1, duration: 0.45, ease: 'power2.inOut' }, TUN)
-      tl.to(board, { scale: 2.6, autoAlpha: 0, filter: 'blur(10px)', duration: 0.65, ease: 'power3.in' }, TUN)
-      q('.cx-f-tunnel__card').forEach((c, i) => {
-        const [x, y] = TUNNEL_AT[i]
-        const at = TUN + 0.25 + i * 0.06
-        tl.set(c, { autoAlpha: 1 }, at)
-        tl.fromTo(
-          c,
-          { x: x * 1.3, y: y * 1.3, z: -2600, rotationY: x > 0 ? -18 : 18 },
-          { z: 1050, duration: 1.0, ease: 'power1.in', immediateRender: false },
-          at,
-        )
-        tl.set(c, { autoAlpha: 0 }, at + 1.0)
+      many('.cx-f-intro__name').forEach((n, k) => {
+        tl.from(n, { autoAlpha: 0, y: 40, duration: 0.35, ease: 'back.out(2)' }, 1.6 + k * 0.16)
       })
 
-      /* ── 0:08 five hits, three seconds each ── */
-      const hits = q('.cx-f-hit')
-      const HIT0 = 8
-      const LEN = 3
-      wipe(build, hits[0], HIT0 - 0.6, HITS[0].shape, CITRUS)
+      /* ── 0:03 the three projects: the real work, playing ── */
+      const scenes = many('.cx-f-proj')
+      scenes.forEach((sc, i) => {
+        const T = AT[i]
+        const id = P[i].id
+        tl.fromTo(one('.cx-f-proj__glow', sc), { scale: 1.25, opacity: 0.4 }, { scale: 1, opacity: 1, duration: LEN, ease: 'none' }, T - 0.4)
+        tl.from(one('.cx-f-proj__index', sc), { autoAlpha: 0, y: 30, duration: 0.4 }, T + 0.3)
+        tl.from(many('.cx-f-proj__meta > *', sc), { autoAlpha: 0, x: -30, duration: 0.45, stagger: 0.08 }, T + 0.45)
 
-      HITS.forEach((h, i) => {
-        const el = hits[i]
-        const T = HIT0 + i * LEN
-        const numBox = el.querySelector('.cx-f-hit__num')!
-        const cells = el.querySelectorAll<HTMLElement>('.cx-f-days i')
+        const words = many('.cx-f-proj__title .cx-f-w', sc)
+        words.forEach((w, k) => tl.from(w, { autoAlpha: 0, yPercent: 70, duration: 0.5, ease: 'power4.out' }, T + 0.65 + k * 0.06))
+        const tw = T + 0.65 + words.length * 0.06
+        chipPop(one('.cx-f-proj__title .cx-f-chip', sc), tw + 0.15, [SKY, CITRUS, CORAL][i], -2.5, PAPER)
+        shake(tw + 0.15, 9)
+        tl.from(one('.cx-f-proj__body', sc), { autoAlpha: 0, y: 30, duration: 0.6 }, tw + 0.45)
 
-        gsap.set(numBox, { autoAlpha: 0 })
-        tl.from(el.querySelector('.cx-f-hit__index'), { autoAlpha: 0, x: -30, duration: 0.4 }, T + 0.05)
-        tl.fromTo(
-          numBox,
-          { scale: 1.3, filter: 'blur(14px)', autoAlpha: 0 },
-          { scale: 1, filter: 'blur(0px)', autoAlpha: 1, duration: 0.45, immediateRender: false },
-          T + 0.1,
-        )
-        count(el.querySelector('.cx-f-hit__n')!, h.value, T + 0.1, 1.0, (v) =>
-          cells.forEach((c, k) => {
-            c.style.background = k < v ? INK : ''
-          }),
-        )
-        /* the slam */
-        tl.to(numBox, { scale: 1.07, duration: 0.06, ease: 'power2.out' }, T + 1.12)
-        tl.to(numBox, { scale: 1, duration: 0.35, ease: 'back.out(4)' }, T + 1.18)
-        shake(T + 1.12, 14)
-        tl.from(el.querySelector('.cx-f-hit__label'), { autoAlpha: 0, y: 40, duration: 0.45 }, T + 1.2)
-        el.querySelectorAll('.cx-f-chip').forEach((c, k) => {
-          tl.from(c, { autoAlpha: 0, scale: 0.5, rotation: k ? 14 : -14, duration: 0.45, ease: 'back.out(2.4)' }, T + 1.5 + k * 0.1)
-        })
-        const shape = el.querySelector('.cx-f-hit__shape')
-        tl.fromTo(shape, { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(2)' }, T + 0.2)
-        tl.fromTo(shape, { rotation: -30 }, { rotation: 70, duration: 3.2, ease: 'none' }, T - 0.2)
+        /* the browser swings in, then drifts */
+        const stage = one('.cx-f-proj__stage', sc)
+        gsap.set(stage, { transformPerspective: 2200 })
+        tl.fromTo(stage, { x: 620, rotationY: -42, rotationX: 6, autoAlpha: 0 }, { x: 0, rotationY: -12, rotationX: 3, autoAlpha: 1, duration: 0.9, ease: 'power4.out' }, T + 0.1)
+        tl.to(stage, { rotationY: -5, rotationX: 1, y: -12, duration: LEN - 1.1, ease: 'none' }, T + 1.0)
 
-        /* each hit's own picture. These fromTo()s render their start state up
-           front (no immediateRender: false), so nothing shows in its final
-           spot while the cut into this hit is still playing. */
-        const browser = el.querySelector('.cx-f-browser')
-        const page = el.querySelector('.cx-f-browser__page')
-        if (i === 0) {
-          gsap.set(browser, { transformPerspective: 1800, rotationX: 5 })
-          tl.fromTo(browser, { x: 520, rotationY: -40, autoAlpha: 0 }, { x: 0, rotationY: -16, autoAlpha: 1, duration: 0.7, ease: 'power4.out' }, T - 0.05)
-          tl.fromTo(page, { yPercent: 0 }, { yPercent: -42, duration: 2.3, ease: 'power1.inOut' }, T + 0.5)
-        } else if (i === 1) {
-          gsap.set(browser, { transformPerspective: 1800, rotationX: 5 })
-          tl.fromTo(browser, { y: -760, rotation: -14, rotationY: 16, autoAlpha: 0 }, { y: 0, rotation: 0, rotationY: 16, autoAlpha: 1, duration: 0.75, ease: 'back.out(1.4)' }, T - 0.1)
-          tl.fromTo(page, { yPercent: 0 }, { yPercent: -36, duration: 2.3, ease: 'power1.inOut' }, T + 0.5)
-        } else if (i === 2) {
-          el.querySelectorAll('.cx-f-card').forEach((c, k) => {
-            const fan = [-1, 0, 1][k]
-            tl.fromTo(
-              c,
-              { x: 0, y: 300, rotation: 0, autoAlpha: 0 },
-              { x: fan * 230, y: fan === 0 ? -30 : 40, rotation: fan * 9, autoAlpha: 1, duration: 0.7, ease: 'back.out(1.6)' },
-              T - 0.05 + k * 0.08,
-            )
+        if (id === 'biocon') {
+          /* the live homepage scrolls through, resting on each section */
+          const page = one('.cx-f-proj__page', sc)
+          BIOCON_STOPS.forEach((y, k) => {
+            tl.to(page, { yPercent: y, duration: 0.85, ease: 'power2.inOut' }, T + 1.9 + k * 1.2)
           })
-        } else if (i === 3) {
-          /* the screen pans inside the numerals */
-          tl.fromTo(
-            numBox,
-            { backgroundPosition: '0% 10%' },
-            { backgroundPosition: '100% 70%', duration: 3.2, ease: 'none' },
-            T - 0.2,
-          )
-        } else {
-          gsap.set(browser, { transformPerspective: 1800 })
-          tl.fromTo(browser, { y: 520, rotationX: 30, rotation: 6, autoAlpha: 0 }, { y: 0, rotationX: 8, rotation: -4, autoAlpha: 1, duration: 0.75, ease: 'power4.out' }, T)
-          tl.fromTo(page, { yPercent: 0 }, { yPercent: -30, duration: 2.2, ease: 'power1.inOut' }, T + 0.5)
+          return
         }
+
+        /* a screen flow: the cursor clicks, the next screen comes up */
+        const shots = many('.cx-f-proj__shot', sc)
+        const cursor = one('.cx-f-cursor', sc)
+        const ring = one('.cx-f-ring', sc)
+        const VW = 940
+        const VH = 580
+        gsap.set(shots.slice(1), { autoAlpha: 0 })
+        gsap.set(cursor, { x: VW + 60, y: VH + 60 })
+        const flow = FLOWS[id]
+        const step = (LEN - 2.2) / (flow.length - 1)
+        flow.forEach((_, k) => {
+          if (k === 0) return
+          const at = T + 1.6 + (k - 1) * step
+          const prev = flow[k - 1]
+          if (prev.click) {
+            const [cx, cy] = prev.click
+            tl.to(cursor, { x: cx * VW, y: cy * VH, duration: 0.55, ease: 'power2.inOut' }, at - 0.75)
+            tl.to(cursor, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut' }, at - 0.18)
+            tl.fromTo(ring, { x: cx * VW, y: cy * VH, scale: 0.3, autoAlpha: 1 }, { scale: 2.2, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, at - 0.15)
+          }
+          tl.fromTo(shots[k], { autoAlpha: 0, scale: 1.03, y: 16 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.35, ease: 'power2.out', immediateRender: false }, at)
+          tl.set(shots[k - 1], { autoAlpha: 0 }, at + 0.35)
+        })
+        tl.to(cursor, { x: VW + 60, y: VH + 60, duration: 0.6, ease: 'power2.in' }, T + LEN - 1.2)
       })
 
-      /* the cuts between hits, each a different move */
-      whip(hits[0], hits[1], HIT0 + LEN - 0.45, 'x')
-      wipe(hits[1], hits[2], HIT0 + 2 * LEN - 0.6, HITS[2].shape, BLOSSOM)
-      /* punch-in: push into hit 3, white frame, land on hit 4 from wide */
-      const PUNCH = HIT0 + 3 * LEN - 0.4
-      tl.to(hits[2], { scale: 1.25, filter: 'blur(8px)', duration: 0.26, ease: 'power3.in' }, PUNCH)
-      flash(PUNCH + 0.26, PAPER, 3 / 30)
-      tl.set(hits[2], { autoAlpha: 0 }, PUNCH + 0.3)
-      tl.set(hits[3], { autoAlpha: 1 }, PUNCH + 0.3)
-      tl.fromTo(hits[3], { scale: 0.86 }, { scale: 1, duration: 0.5, ease: 'power3.out', immediateRender: false }, PUNCH + 0.3)
-      whip(hits[3], hits[4], HIT0 + 4 * LEN - 0.45, 'y')
+      wipe(intro, scenes[0], AT[0] - 0.55, 'cross-1', SKY)
+      whip(scenes[0], scenes[1], AT[1] - 0.44)
+      wipe(scenes[1], scenes[2], AT[2] - 0.55, 'flower-13', CORAL)
 
-      /* ── 0:23 the wall ── */
-      const wall = one('.cx-f-wall')
-      const WALL_AT = HIT0 + 5 * LEN - 0.6
-      wipe(hits[4], wall, WALL_AT, 'star-3', CITRUS, 0.45)
-      tl.fromTo(one('.cx-f-wall__zoom'), { scale: 1.9 }, { scale: 1, duration: 4, ease: 'power2.out', immediateRender: false }, WALL_AT)
-      tl.fromTo(one('.cx-f-wall__grid'), { y: 340 }, { y: -300, duration: 4, ease: 'none', immediateRender: false }, WALL_AT)
-      q('.cx-f-wall__tile').forEach((t, i) => {
-        const ring = Math.abs((i % 5) - 2) + Math.abs(Math.floor(i / 5) - 1.5)
-        tl.from(t, { autoAlpha: 0, rotationX: -80, duration: 0.5 }, WALL_AT + 0.05 + ring * 0.07)
-      })
-      const sectors = q('.cx-f-wall__word')
-      sectors.forEach((w, k) => {
-        const at = 23.25 + k * 0.32
-        tl.set(w, { autoAlpha: 1 }, at)
-        tl.fromTo(w, { scale: 1.25 }, { scale: 1, duration: 0.3, ease: 'power3.out', immediateRender: false }, at)
-        tl.set(w, { autoAlpha: 0 }, at + 0.3)
-      })
-      tl.to(one('.cx-f-wall__shade'), { opacity: 1, duration: 0.4 }, 24.8)
-      const wallLines = q('.cx-f-wall__line > span')
-      tl.from(wallLines[0], { autoAlpha: 0, y: 60, duration: 0.45, ease: 'power4.out' }, 24.95)
-      tl.from(wallLines[1], { autoAlpha: 0, y: 60, duration: 0.45, ease: 'power4.out' }, 25.25)
-      chipPop(one('.cx-f-wall__chip'), 25.6, CITRUS, INK, -3, PAPER)
-      shake(25.6, 12)
-
-      /* ── 0:26 end card ── */
+      /* ── 0:25 the cards: the last frame, and every card a link ── */
       const end = one('.cx-f-end')
-      flash(26.35, PAPER, 0.1)
-      tl.set(wall, { autoAlpha: 0 }, 26.45)
-      tl.set(end, { autoAlpha: 1 }, 26.45)
-      q('.cx-f-end__line').forEach((l, k) => {
-        tl.from(l, { autoAlpha: 0, yPercent: 60, duration: 0.55, ease: 'power4.out' }, 26.5 + k * 0.12)
+      tl.to(scenes[2], { scale: 1.2, filter: 'blur(8px)', duration: 0.3, ease: 'power3.in' }, END - 0.3)
+      flash(END, PAPER, 3 / 30)
+      tl.set(scenes[2], { autoAlpha: 0 }, END + 0.05)
+      tl.set(end, { autoAlpha: 1 }, END + 0.05)
+      tl.to(one('.cx-f-grain'), { opacity: 0, duration: 0.4 }, END)
+      tl.from(many('.cx-f-end__head > *'), { autoAlpha: 0, y: 50, duration: 0.6, stagger: 0.1, ease: 'power4.out' }, END + 0.15)
+      many('.cx-f-end__card').forEach((c, k) => {
+        const t = END + 0.35 + k * 0.16
+        tl.from(c, { autoAlpha: 0, y: 160, rotation: [-4, 2, 4][k], duration: 0.85, ease: 'back.out(1.2)' }, t)
+        tl.fromTo(one('.cx-f-end__img img', c), { scale: 1.3 }, { scale: 1, duration: 1.4, ease: 'power3.out', immediateRender: false }, t)
+        tl.from(many('.cx-f-end__meta, .cx-f-end__title, .cx-f-end__body, .cx-f-end__view', c), { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.08 }, t + 0.45)
+        tl.from(one('.cx-f-end__go', c), { autoAlpha: 0, scale: 0, rotation: -90, duration: 0.5, ease: 'back.out(2.4)' }, t + 0.7)
       })
-      tl.from(one('.cx-f-end__chip'), { autoAlpha: 0, scale: 0.4, rotation: 20, duration: 0.5, ease: 'back.out(2.2)' }, 26.95)
-      q('.cx-f-end__shape').forEach((s, k) => {
-        tl.from(s, { autoAlpha: 0, scale: 0, duration: 0.5, ease: 'back.out(2)' }, 27.1 + k * 0.1)
-        tl.fromTo(s, { rotation: 0 }, { rotation: k ? -50 : 50, duration: 2.9, ease: 'none', immediateRender: false }, 27.1)
-      })
-      tl.to(one('.cx-f-end__title'), { autoAlpha: 0, y: -60, duration: 0.35, ease: 'power2.in' }, 28.25)
-      tl.from(one('.cx-f-end__logo'), { autoAlpha: 0, scale: 0.6, filter: 'blur(16px)', duration: 0.55, ease: 'back.out(1.8)' }, 28.45)
-      tl.from(one('.cx-f-end__cta'), { autoAlpha: 0, y: 30, duration: 0.45 }, 28.75)
-      tl.from(one('.cx-f-end__url'), { autoAlpha: 0, duration: 0.4 }, 28.95)
+      tl.from(one('.cx-f-end__explore'), { autoAlpha: 0, scale: 0.6, duration: 0.55, ease: 'back.out(2)' }, END + 1.6)
 
-      /* ── film grain, 12 fps, for the whole 30 seconds ── */
+      /* ── film grain, 12 fps ── */
       const grain = one('.cx-f-grain')
       const g = { t: 0 }
       tl.fromTo(
@@ -562,7 +402,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       (ctx) => {
         const { open, reduce } = ctx.conditions as { open: boolean; reduce: boolean }
 
-        /* reduced motion: wait on the end card, play on request */
+        /* reduced motion: wait on the cards, play on request */
         if (reduce) {
           tl.progress(1)
           setEnded(true)
@@ -579,36 +419,37 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
           return () => io.disconnect()
         }
 
-        /* Big screens: section 2 hands over black to black, a small window
-           holding the film's first frame rises into the centre, and the
-           scroll opens it until its corners meet the screen. The film
-           starts the instant it is full; the page then holds a while so it
-           never plays half scrolled. */
+        /* Big screens: section 2 hands over black to black, and the film
+           arrives inside a sky clover, the shape of section 2's last point.
+           The scroll grows the clover (exponentially, so it feels like one
+           steady push) until it covers the screen; the film starts the
+           instant it is full, and the page then holds a while. */
         section.dataset.mode = 'open'
         const pin = pinRef.current!
         const win = windowRef.current!
+        const halo = haloRef.current!
         const tag = tagRef.current!
         const controls = controlsRef.current!
-        const ease = gsap.parseEase('power2.inOut')
+        const ease = gsap.parseEase('power1.inOut')
         const state = { p: 0 }
         let inZone = false
+        win.style.setProperty('--clover', maskOf('clover-1'))
 
         const apply = () => {
           const vw = pin.clientWidth
           const vh = pin.clientHeight
-          const w0 = Math.min(vw * 0.5, (vh * 0.56 * 16) / 9)
-          const h0 = (w0 * 9) / 16
+          const s0 = Math.min(vw, vh) * 0.5
+          const s1 = Math.max(vw, vh) * 2.6
           const e = ease(state.p)
-          const h = h0 + (vh - h0) * e
-          win.style.width = `${w0 + (vw - w0) * e}px`
-          win.style.height = `${h}px`
-          win.style.borderRadius = `${26 * (1 - e)}px`
-          win.style.setProperty('--edge', String(1 - e))
-          tag.style.top = `${vh / 2 + h / 2 + 26}px`
-          tag.style.opacity = String(Math.max(0, 1 - state.p * 2.5))
+          const s = s0 * Math.pow(s1 / s0, e)
           const full = state.p > 0.995
-          controls.style.opacity = full ? '1' : '0'
-          controls.style.visibility = full ? 'visible' : 'hidden'
+          win.style.setProperty('--ms', `${s}px`)
+          win.dataset.full = full ? 'true' : 'false'
+          halo.style.width = `${s * 1.07}px`
+          halo.style.opacity = String(Math.max(0, 1 - e * 1.6))
+          tag.style.top = `${vh / 2 + s / 2 + 30}px`
+          tag.style.opacity = String(Math.max(0, 1 - state.p * 3))
+          controls.dataset.shown = full ? 'true' : 'false'
           fitRef.current()
           if (full && inZone) start()
         }
@@ -622,7 +463,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
             trigger: section,
             start: 'top top',
             end: () => `+=${window.innerHeight * GROW}`,
-            scrub: 0.5,
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         })
@@ -643,7 +484,9 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
         return () => {
           window.removeEventListener('resize', apply)
           delete section.dataset.mode
-          ;[win, tag, controls].forEach((el) => el.removeAttribute('style'))
+          ;[win, halo, tag, controls].forEach((el) => el.removeAttribute('style'))
+          delete controls.dataset.shown
+          delete win.dataset.full
           fitRef.current()
         }
       },
@@ -655,6 +498,35 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       near.disconnect()
     }
   }, [mode])
+
+  /* While the film plays, the bar steps out of the way: it hides after two
+     seconds without the mouse moving, and any movement (or a tap) brings it
+     back. Paused or finished, it stays. */
+  const [idle, setIdle] = useState(false)
+  useLayoutEffect(() => {
+    const pin = pinRef.current
+    if (!pin || mode !== 'page') return
+    if (!playing) {
+      setIdle(false)
+      return
+    }
+    let timer = 0
+    const wake = () => {
+      setIdle(false)
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => setIdle(true), 2000)
+    }
+    wake()
+    pin.addEventListener('pointermove', wake)
+    pin.addEventListener('pointerdown', wake)
+    pin.addEventListener('focusin', wake)
+    return () => {
+      window.clearTimeout(timer)
+      pin.removeEventListener('pointermove', wake)
+      pin.removeEventListener('pointerdown', wake)
+      pin.removeEventListener('focusin', wake)
+    }
+  }, [playing, mode])
 
   const toggle = () => {
     const tl = tlRef.current
@@ -685,7 +557,9 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
     setEnded(p >= 1)
   }
 
-  const [l1, l2] = hero.lines
+  /* the cards in the last frame are real links for the mouse; keyboard and
+     screen-reader users get the same links in the list above the film */
+  const live = mode === 'page'
 
   return (
     <section
@@ -693,161 +567,149 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       id="work"
       ref={sectionRef}
       data-state="waiting"
+      data-idle={idle && playing && !ended ? 'true' : undefined}
       data-umm-theme="ink"
       aria-labelledby="cx-film-title"
     >
       <h2 className="umm-sr-only" id="cx-film-title">
-        {film.label}
+        {film.title}
       </h2>
       <ul className="umm-sr-only">
-        {HITS.map((h) => (
-          <li key={h.client}>
-            {h.client}, {h.sector}: {h.value}
-            {h.suffix} {h.label}.
+        {P.map((p) => (
+          <li key={p.id}>
+            <a href={p.href}>
+              {p.client}, {p.type}: {p.title}
+            </a>
           </li>
         ))}
+        <li>
+          <a href={film.explore.href}>{film.explore.label}</a>
+        </li>
       </ul>
 
       <div className="cx-film__pin" ref={pinRef}>
+        {mode === 'page' && (
+          <div className="cx-film__halo" ref={haloRef} aria-hidden="true">
+            <Shape name="clover-1" tone="sky" />
+          </div>
+        )}
+
         <div className="cx-film__window" ref={windowRef}>
           <div className="cx-film__screen" ref={screenRef}>
             <div className="cx-film__frame" ref={frameRef} aria-hidden="true">
               <div className="cx-f-cam">
                 {/* 0:00 */}
-                <div className="cx-f-scene cx-f-hook">
-                  <p className="cx-f-type">
-                    {chars(film.hook.line1)}
-                    <br />
-                    <span className="cx-f-type__chip">{chars(film.hook.chip)}</span>
-                    {chars(film.hook.after)}
-                    <span className="cx-f-caret" />
+                <div className="cx-f-scene cx-f-intro">
+                  {(['cross-1', 'flower-13', 'clover-1'] as ShapeName[]).map((s, k) => (
+                    <Shape key={s} name={s} tone={(['citrus', 'blossom', 'sky'] as const)[k]} className={`cx-f-intro__shape cx-f-intro__shape--${k}`} />
+                  ))}
+                  <p className="cx-f-eyebrow">
+                    <span className="cx-f-eyebrow__mark" />
+                    {film.eyebrow}
                   </p>
-                </div>
-
-                <div className="cx-f-scene cx-f-judge">
-                  <p className="cx-f-judge__line">
-                    {film.judge.split(' ').map((w, i, all) => (
-                      <span className={`cx-f-word${i === all.length - 1 ? ' cx-f-word--chip' : ''}`} key={i}>
-                        {w}
+                  <p className="cx-f-intro__title">
+                    <Words text={film.title} chip={film.chip} />
+                  </p>
+                  <p className="cx-f-intro__names">
+                    {P.map((p) => (
+                      <span className="cx-f-intro__name" key={p.id}>
+                        {p.client}
                       </span>
                     ))}
                   </p>
-                  <p className="cx-f-source">{film.source}</p>
                 </div>
 
-                {/* 0:04 */}
-                <div className="cx-f-scene cx-f-build">
-                  <p className="cx-f-build__label cx-f-build__blank">{film.blank}</p>
-                  <p className="cx-f-build__label cx-f-build__real">{film.real}</p>
-                  <div className="cx-f-board">
-                    <span className="cx-f-board__name">{film.board}</span>
-                    <img className="cx-f-board__shot" src="/work/cocoandcoir/home.webp" alt="" decoding="async" />
-                    <div className="cx-f-select">
-                      <span className="cx-f-select__dim">0 × 0</span>
-                    </div>
-                  </div>
-                  <svg className="cx-f-cursor" viewBox="0 0 32 36" aria-hidden="true">
-                    <path d="M3 2 3 30 10.5 23 15.5 34 21 31.5 16 20.5 26.5 20.5Z" />
-                  </svg>
-                  <div className="cx-f-build__dark" />
-                  <div className="cx-f-tunnel">
-                    {TUNNEL.map((src) => (
-                      <div className="cx-f-tunnel__card" key={src}>
-                        <img src={src} alt="" decoding="async" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 0:08 */}
-                {HITS.map((h, i) => (
-                  <div className={`cx-f-scene cx-f-hit cx-f-hit--${'abcde'[i]}`} data-umm-tone={h.tone} key={h.client}>
-                    <span className="cx-f-hit__index">
-                      {String(i + 1).padStart(2, '0')} / 05 · {h.sector}
+                {/* 0:03 – 0:25: the real work */}
+                {P.map((p, i) => (
+                  <div className={`cx-f-scene cx-f-proj cx-f-proj--${p.id}`} key={p.id}>
+                    <div className="cx-f-proj__glow" />
+                    <span className="cx-f-proj__index">
+                      {String(i + 1).padStart(2, '0')} / {String(P.length).padStart(2, '0')}
                     </span>
-                    <Shape name={h.shape} className="cx-f-hit__shape" />
-                    <div
-                      className="cx-f-hit__num"
-                      style={i === 3 ? { backgroundImage: `url(/work/${h.screens}/home.webp)` } : undefined}
-                    >
-                      <span className="cx-f-hit__n">0</span>
-                      <span className="cx-f-hit__suffix">{h.suffix}</span>
+                    <div className="cx-f-proj__copy">
+                      <p className="cx-f-proj__meta">
+                        <span>{p.client}</span>
+                        <span className="cx-f-proj__type">{p.type}</span>
+                      </p>
+                      <p className="cx-f-proj__title">
+                        <Words text={p.title} chip={p.chip} />
+                      </p>
+                      <p className="cx-f-proj__body">{p.body}</p>
                     </div>
-                    <p className="cx-f-hit__label">{h.label}</p>
-                    {i === 4 && (
-                      <div className="cx-f-days">
-                        {Array.from({ length: h.value }, (_, k) => (
-                          <i key={k} />
-                        ))}
+                    <div className="cx-f-proj__stage">
+                      <div className="cx-f-proj__bar">
+                        <i />
+                        <i />
+                        <i />
+                        <span />
                       </div>
-                    )}
-                    <div className="cx-f-hit__chips">
-                      <span className="cx-f-chip cx-f-chip--ink">{h.client}</span>
-                      <span className="cx-f-chip">{h.sector}</span>
+                      <div className="cx-f-proj__view">
+                        {p.id === 'biocon' ? (
+                          <img className="cx-f-proj__page" src="/work/biocon/site.webp" alt="" decoding="async" />
+                        ) : (
+                          FLOWS[p.id].map((f) => (
+                            <img className="cx-f-proj__shot" key={f.src} src={`/work/${p.id}/${f.src}.webp`} alt="" decoding="async" />
+                          ))
+                        )}
+                        {p.id !== 'biocon' && (
+                          <>
+                            <span className="cx-f-ring" />
+                            <svg className="cx-f-cursor" viewBox="0 0 32 36" aria-hidden="true">
+                              <path d="M3 2 3 30 10.5 23 15.5 34 21 31.5 16 20.5 26.5 20.5Z" />
+                            </svg>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    {i === 2 ? (
-                      <div className="cx-f-cards">
-                        {['s1', 's2', 's3'].map((s) => (
-                          <div className="cx-f-card" key={s}>
-                            <img src={`/work/${h.screens}/${s}.webp`} alt="" decoding="async" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : i !== 3 ? (
-                      <Browser src={`/work/${h.screens}/strip.webp`} />
-                    ) : null}
                   </div>
                 ))}
 
-                {/* 0:23 */}
-                <div className="cx-f-scene cx-f-wall">
-                  <div className="cx-f-wall__zoom">
-                    <div className="cx-f-wall__plane">
-                      <div className="cx-f-wall__grid">
-                        {WALL.map((src) => (
-                          <div className="cx-f-wall__tile" key={src}>
-                            <img src={src} alt="" decoding="async" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="cx-f-wall__shade" />
-                  {work.projects.map((p) => (
-                    <p className="cx-f-wall__word" key={p.tab}>
-                      {p.tab.split(' &')[0]}.
-                    </p>
-                  ))}
-                  <p className="cx-f-wall__line">
-                    <span>{film.wall[0]}</span>
-                    <span>
-                      <span className="cx-f-wall__chip">{film.wall[1]}</span>
-                    </span>
-                  </p>
-                </div>
-
-                {/* 0:26 */}
+                {/* 0:25 — the last frame */}
                 <div className="cx-f-scene cx-f-end">
-                  <Shape name="flower-6" tone="blossom" className="cx-f-end__shape cx-f-end__shape--a" />
-                  <Shape name="star-3" tone="sky" className="cx-f-end__shape cx-f-end__shape--b" />
-                  <p className="cx-f-end__title">
-                    <span className="cx-f-end__line">{l1}</span>
-                    <span className="cx-f-end__line">{l2}</span>
-                    <span className="cx-f-end__line">
-                      <span className="cx-f-end__chip">{hero.accent}</span> {hero.tail}
-                    </span>
-                  </p>
-                  <div className="cx-f-end__brand">
-                    <span className="cx-f-end__logo">umm</span>
-                    <span className="cx-f-end__cta">
-                      {hero.primaryCta}
-                      <span className="cx-f-end__dot">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M7 17 17 7M9 7h8v8" />
-                        </svg>
+                  <div className="cx-f-end__head">
+                    <p className="cx-f-end__eyebrow">{film.eyebrow}</p>
+                    <p className="cx-f-end__h">{film.title}</p>
+                    <a
+                      className="cx-f-end__explore"
+                      href={film.explore.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      tabIndex={-1}
+                    >
+                      <span className="cx-f-end__pill">{film.explore.label}</span>
+                      <span className="cx-f-end__orb">
+                        <Arrow />
                       </span>
-                    </span>
-                    <span className="cx-f-end__url">{film.site}</span>
+                    </a>
+                  </div>
+                  <div className="cx-f-end__cards">
+                    {P.map((p) => (
+                      <a
+                        className="cx-f-end__card"
+                        key={p.id}
+                        href={live ? p.href : undefined}
+                        target="_blank"
+                        rel="noreferrer"
+                        tabIndex={-1}
+                      >
+                        <span className="cx-f-end__img">
+                          <img src={`/work/${p.id}/card.webp`} alt="" decoding="async" />
+                          <span className="cx-f-end__go">
+                            <Arrow />
+                          </span>
+                        </span>
+                        <span className="cx-f-end__meta">
+                          <span>{p.client}</span>
+                          <span>{p.type}</span>
+                        </span>
+                        <span className="cx-f-end__title">{p.title}</span>
+                        <span className="cx-f-end__body">{p.short}</span>
+                        <span className="cx-f-end__view">
+                          {film.view}
+                          <Arrow />
+                        </span>
+                      </a>
+                    ))}
                   </div>
                 </div>
 
@@ -895,7 +757,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
         )}
       </div>
 
-      {/* the scroll the window opens over, and the hold after it */}
+      {/* the scroll the clover opens over, and the hold after it */}
       {mode === 'page' && <div className="cx-film__runway" aria-hidden="true" />}
     </section>
   )

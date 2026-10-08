@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { FlyArrow } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
@@ -68,10 +69,7 @@ export function ToolsStack() {
               line2={withAccent(tools.line2, tools.accent)}
               chip={tools.chip}
               tone="citrus"
-              chipAt="48%"
-              tilt={-8}
               lineRecipe={5}
-              chipRecipe={2}
             />
             <p className="cx-lead">{tools.lead}</p>
           </div>
@@ -93,15 +91,22 @@ export function ToolsStack() {
                     </li>
                   ))}
                 </ol>
-                <div className="cx-kit__claims" aria-live="polite">
-                  {groups.map((g, i) => (
-                    <p key={g.label} className="cx-kit__claim" data-on={i === stop} hidden={i !== stop}>
-                      <span className="cx-kit__role" data-umm-tone={g.tone}>
-                        {g.role}
-                      </span>
-                      {g.claim}
-                    </p>
-                  ))}
+                <div className="cx-kit__claims">
+                  {/* moves the wheel on a group; from the last, back to the first */}
+                  <button
+                    type="button"
+                    className="cx-kit__explore"
+                    data-umm-tone={groups[stop].tone}
+                    onClick={() => glideTo(stop + 1 < STOPS ? stop + 1 : 0)}
+                  >
+                    <span>{tools.explore}</span>
+                    <span className="cx-kit__count">
+                      {String(stop + 1).padStart(2, '0')} / {String(STOPS).padStart(2, '0')}
+                    </span>
+                    <span className="cx-kit__explore-orb" aria-hidden="true">
+                      <FlyArrow dir="down" size={16} strokeWidth={2} />
+                    </span>
+                  </button>
                 </div>
               </div>
 
@@ -116,12 +121,6 @@ export function ToolsStack() {
               {groups.map((g) => (
                 <li key={g.label} className="cx-kit__card">
                   <h3 className="cx-kit__label">{g.label}</h3>
-                  <p className="cx-kit__claim">
-                    <span className="cx-kit__role" data-umm-tone={g.tone}>
-                      {g.role}
-                    </span>
-                    {g.claim}
-                  </p>
                   <div className="cx-kit__frame">
                     <Tiles group={g} on />
                   </div>

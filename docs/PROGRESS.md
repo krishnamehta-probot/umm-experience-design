@@ -90,6 +90,49 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 8 Oct 2026, final revision: new content and motion on the approved design
+- **Krish:** the approved design is the artifact (identical to main
+  `23b57b0`); keep the design, change content and animation, section by
+  section. Published for review:
+  https://claude.ai/artifact/KHVPqHfst3HBAcDqQkhwBP (private until shared).
+- **Headings, all sections:** the hero's format. An eyebrow (asterisk, small
+  capitals) above, two plain lines, and a short straight chip on the one or
+  two words that carry it (full stop inside, as in the hero). The big tilted
+  chip across the lines is gone (`ChipHead.tsx`).
+- **CTAs, all:** one hover, the hero's: the arrow flies out one side and a
+  fresh one comes in from the other (`primitives/FlyArrow.tsx`). Solid black
+  buttons no longer wash to grey.
+- **1 Hero:** approved copy; chip straight; caption gone; the two pills
+  hidden (`SHOW_ACTIONS`); ribbon cut to four items, slower.
+- **2 Why:** new copy and three points (cross, flower, clover shapes, each
+  underline in its shape's colour); a live WebGL fluted light
+  (`FlutedLight.tsx`) instead of the image; pills pop in one by one as they
+  reach the screen; fully scroll-driven with a slow magnet (`pace`).
+- **3 Film:** real website and app screens of Biocon, QCare and Mohawk
+  Pricefx (`public/work/{biocon,qcare,mohawk}`); clover-mask entrance; last
+  frame is the clickable "Selected work" cards; the play bar hides after 2s
+  without mouse movement while playing.
+- **4 Services:** new copy (step, title, line, tags on the front; detail,
+  what the work can include, CTA on the back). The scene moved to the front
+  and plays on hover; the back's list ticks itself off as it is uncovered.
+  Six colours, none repeated: a sixth pastel, `--umm-lilac` #DCCFFF, added
+  for this (kept out of the `TONES` cycle).
+- **5 Stages:** new copy (Startups, Scale-ups, Enterprises). The number made
+  way for each stage's flow as a path of light (three big words on a rail,
+  lit by the scroll); the right side is the headline, the paragraph, and a
+  box of three services over a tinted CTA strip.
+- **6 Principles:** new copy for the five fundamentals; rule 2 is now
+  hierarchy (title, labels and total take their weight, Pay moves to the
+  bottom). The pill reads "Design in practice / Illustrative example" and,
+  at the end, "One clear accent. One obvious next step."
+- **6b Tools:** new copy, eight groups; "Explore the platforms" turns the
+  wheel; the long names fit.
+- **7 Process + close:** four stages, each stamped with its deliverable;
+  the axis marks "Ready to build". Closing band and five FAQs from the new
+  copy; CTAs to umm.digital/contact and ping@umm.digital.
+- **Open:** the partnership disclaimer under the tools was kept although
+  the new copy omits it; "Explore the platforms" has no destination page.
+
 ### 6 Oct 2026, section 2 steps one beat per gesture
 - Krish: section 2 still not perfectly scrollable. A single trackpad swipe
   or a quick wheel spin could carry the page across two or three beats.

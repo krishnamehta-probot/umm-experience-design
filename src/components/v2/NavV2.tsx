@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { IconArrowUpRight, IconClose, IconMenu } from '../icons'
+import { IconClose, IconMenu } from '../icons'
+import { FlyArrow } from '../primitives'
 import { nav } from '@/content/cxUiDesign'
 
 /* ============================================================================
@@ -61,7 +62,7 @@ export function NavV2() {
         <a className="cx-nav__cta" href="#contact">
           Let&rsquo;s talk
           <span className="cx-nav__dot" aria-hidden="true">
-            <IconArrowUpRight size={14} strokeWidth={2} />
+            <FlyArrow size={14} strokeWidth={2} />
           </span>
         </a>
 

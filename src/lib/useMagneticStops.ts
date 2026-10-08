@@ -26,6 +26,9 @@ import { useEffect, useRef, type RefObject } from 'react'
    the gesture's leftover momentum is swallowed so a hard flick can never
    skip a stop. At the first stop going up and the last going down the
    section lets go and the page scrolls on as normal.
+
+   `pace` stretches the settle: above 1 the page waits a little longer
+   before it settles and glides there more slowly, for a gentler pull.
    ========================================================================== */
 
 /** Scroll position (share of the section's travel) at which a stop rests. */
@@ -47,7 +50,7 @@ export function useMagneticStops(
   stops: number,
   enabled: boolean,
   geometryOf: Geometry = ownTravel,
-  { step = false }: { step?: boolean } = {},
+  { step = false, pace = 1 }: { step?: boolean; pace?: number } = {},
 ) {
   const glide = useRef<(stop: number) => void>(() => {})
   const geo = useRef(geometryOf)
@@ -73,7 +76,7 @@ export function useMagneticStops(
       const from = window.scrollY
       const d = to - from
       if (Math.abs(d) < 2) return
-      const dur = Math.min(1000, 420 + Math.abs(d) * 0.5)
+      const dur = Math.min(1000, 420 + Math.abs(d) * 0.5) * pace
       const t0 = performance.now()
       gliding = true
       const step = (now: number) => {
@@ -105,7 +108,7 @@ export function useMagneticStops(
     const onScroll = () => {
       if (gliding) return
       window.clearTimeout(idle)
-      idle = window.setTimeout(settle, 160)
+      idle = window.setTimeout(settle, 160 * pace)
     }
     const interrupt = () => {
       if (gliding) cancel()
@@ -241,7 +244,7 @@ export function useMagneticStops(
       cancel()
       glide.current = () => {}
     }
-  }, [ref, stops, enabled, step])
+  }, [ref, stops, enabled, step, pace])
 
   return (stop: number) => glide.current(stop)
 }

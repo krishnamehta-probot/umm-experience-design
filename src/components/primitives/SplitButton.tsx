@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
-import { IconArrowUpRight } from '../icons'
+import { FlyArrow } from './FlyArrow'
 
 /* ============================================================================
    SPLIT BUTTON
@@ -31,10 +31,7 @@ export function SplitButton({
     >
       <span className="umm-split__pill">{children}</span>
       <span className="umm-split__orb" aria-hidden="true">
-        <span className="umm-split__arrow">
-          <IconArrowUpRight size={20} strokeWidth={1.75} />
-          <IconArrowUpRight size={20} strokeWidth={1.75} />
-        </span>
+        <FlyArrow size={20} strokeWidth={1.75} />
       </span>
     </a>
   )

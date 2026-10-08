@@ -90,7 +90,7 @@ const clamp = (v: number) => Math.min(1, Math.max(0, v))
 export function RibbonCurtain({
   items,
   separator = '✦',
-  speed = 1.1,
+  speed = 0.75,
   clearOf,
 }: {
   items: readonly string[]
@@ -235,7 +235,7 @@ export function RibbonCurtain({
         lastP = p
       }
       /* scroll speed feeds the run, then bleeds off so it settles */
-      boost = Math.max(boost * 0.9, Math.min(9, Math.abs(y - lastY) * 0.22))
+      boost = Math.max(boost * 0.9, Math.min(6, Math.abs(y - lastY) * 0.15))
       lastY = y
       offset = wrap(offset - (speed + boost))
       text.setAttribute('startOffset', `${offset}px`)

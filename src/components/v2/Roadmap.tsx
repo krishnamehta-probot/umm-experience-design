@@ -11,6 +11,11 @@ import { process } from '@/content/cxUiDesign'
 /* ============================================================================
    7a · HOW WE WORK — the roadmap
 
+   8 Oct, final copy: four stages (Assessment, Ideation, Design or redesign,
+   Optimisation), each ending in a deliverable. The deliverable is the
+   sticker stamped on as the stage's bar fills (it was "Signed off"), and the
+   axis mark is where the design is ready to build.
+
    "From first call to launch, in five steps", drawn the way a product team
    draws a roadmap: a white board, the steps down the left (hairline rows,
    as in the rules and the tools), and a timeline on the right where each
@@ -30,21 +35,25 @@ import { process } from '@/content/cxUiDesign'
    already done).
    ========================================================================== */
 
-const NUMERALS: ShapeName[] = ['number-1', 'number-2', 'number-3', 'number-4', 'number-5']
-const TONES = ['sun', 'sky', 'blossom', 'citrus', 'coral'] as const
+const NUMERALS: ShapeName[] = ['number-1', 'number-2', 'number-3', 'number-4']
+const TONES = ['sun', 'sky', 'blossom', 'citrus'] as const
 const STEPS = process.steps.length
 
-/** Each step's bar on a 12-column timeline: [start, end]. Improve runs on
- *  off the end of the board. */
+/** Each stage's bar on a 12-column timeline: [start, end]. Optimisation
+ *  runs on off the end of the board. */
 const SPAN: [number, number][] = [
-  [0, 2.6],
-  [2.1, 4.7],
-  [4.1, 7.9],
-  [7.3, 10],
-  [9.5, 12],
+  [0, 2.9],
+  [2.4, 5.5],
+  [4.9, 8.6],
+  [8.1, 12],
 ]
 const COLS = 12
-const LAUNCH = SPAN[3][1]
+/** The axis mark: where Design or redesign hands over a build-ready design. */
+const LAUNCH = SPAN[2][1]
+/** Where each stage's deliverable is stamped: just past the end of its bar,
+ *  in the empty part of the row. The last bar runs off the board, so its
+ *  sticker sits just before the bar starts instead. */
+const STAMP = SPAN.map(([a, b], i) => (i === SPAN.length - 1 ? a : b))
 
 export function Roadmap() {
   const { ref, progress } = usePinProgress<HTMLElement>()
@@ -90,10 +99,7 @@ export function Roadmap() {
               line2={withAccent(process.line2, process.accent)}
               chip={process.chip}
               tone="blossom"
-              chipAt="40%"
-              tilt={7}
               lineRecipe={0}
-              chipRecipe={1}
             />
             <p className="cx-lead">{process.lead}</p>
           </div>
@@ -109,8 +115,11 @@ export function Roadmap() {
                 <span className="cx-plan__mark" style={{ ['--at' as string]: 0 } as CSSProperties}>
                   First call
                 </span>
-                <span className="cx-plan__mark cx-plan__mark--launch" style={{ ['--at' as string]: LAUNCH } as CSSProperties}>
-                  Launch
+                <span
+                  className="cx-plan__mark cx-plan__mark--launch"
+                  style={{ ['--at' as string]: LAUNCH } as CSSProperties}
+                >
+                  {process.ready}
                   <i />
                 </span>
                 <span className="cx-plan__mark cx-plan__mark--end">Ongoing →</span>
@@ -142,7 +151,10 @@ export function Roadmap() {
                       <span className="cx-plan__title">{step.title}</span>
                     </button>
                     <div className="cx-plan__body" data-open={open}>
-                      <p>{step.body}</p>
+                      <p>
+                        {step.body}
+                        <strong className="cx-plan__get">{step.get}</strong>
+                      </p>
                     </div>
 
                     <div className="cx-plan__track" aria-hidden="true">
@@ -158,18 +170,18 @@ export function Roadmap() {
                         </span>
                         <span className="cx-plan__name">{step.title}</span>
                       </span>
-                      {i < STEPS - 1 ? (
-                        <span
-                          className="cx-plan__signed"
-                          data-on={done}
-                          style={{ ['--b' as string]: b } as CSSProperties}
-                        >
-                          <svg viewBox="0 0 20 20">
-                            <path d="M5 10.5 8.5 14 15 6.5" />
-                          </svg>
-                          Signed off
-                        </span>
-                      ) : null}
+                      {/* the stage's deliverable, stamped on as it is reached */}
+                      <span
+                        className="cx-plan__signed"
+                        data-on={done}
+                        data-before={i === STEPS - 1 || undefined}
+                        style={{ ['--b' as string]: STAMP[i] } as CSSProperties}
+                      >
+                        <svg viewBox="0 0 20 20">
+                          <path d="M5 10.5 8.5 14 15 6.5" />
+                        </svg>
+                        <span className="cx-plan__stamp">{step.get}</span>
+                      </span>
                     </div>
                   </li>
                 )

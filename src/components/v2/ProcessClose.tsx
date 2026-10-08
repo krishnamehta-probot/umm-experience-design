@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 import { Accordion, Marquee, SplitButton } from '../primitives'
+import { Eyebrow } from './ChipHead'
 import { GlassCube } from './GlassCube'
 import { Roadmap } from './Roadmap'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
@@ -8,7 +9,7 @@ import { closing, faq, meta, nav, ribbon } from '@/content/cxUiDesign'
 /* ============================================================================
    7 · HOW WE WORK + LET'S TALK
 
-   The five steps are a roadmap (Roadmap.tsx). Then the dark band rises over
+   The four stages are a roadmap (Roadmap.tsx). Then the dark band rises over
    the end of it with rounded shoulders, laid out like Cal.com's FAQ: the big
    ask, its line and the buttons on the left, the seven questions on the
    right. The footer closes on the ribbon and a full-width wordmark.
@@ -65,20 +66,30 @@ export function ProcessClose() {
         <GlassCube className="cx-close__cube" />
         <div className="umm-container cx-close__inner">
           <div className="cx-close__copy">
+            <Eyebrow className="cx-close__eyebrow">{closing.eyebrow}</Eyebrow>
             <h2 className="cx-close__title">
-              <span>{closing.line1}</span> <em>{closing.line2}</em>
+              {closing.lines.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+              <span>
+                <em className="cx-h__chip" data-umm-tone="citrus">
+                  {closing.accent}
+                </em>
+              </span>
             </h2>
             <p className="cx-close__lead">{closing.lead}</p>
             <div className="cx-close__actions">
-              <SplitButton href={`mailto:${meta.contactEmail}`}>{closing.primaryCta}</SplitButton>
-              <SplitButton href="#work" variant="outline">
-                {closing.secondaryCta}
+              <SplitButton href={closing.primaryCta.href} target="_blank" rel="noreferrer">
+                {closing.primaryCta.label}
+              </SplitButton>
+              <SplitButton href={closing.secondaryCta.href} variant="outline">
+                {closing.secondaryCta.label}
               </SplitButton>
             </div>
           </div>
 
           <div className="cx-close__faq">
-            <p className="cx-close__faq-label">Questions people ask first</p>
+            <p className="cx-close__faq-label">{closing.faqLabel}</p>
             <Accordion
               entries={faq.map((f) => ({ question: f.question, answer: <p>{f.answer}</p> }))}
               defaultOpen={0}
