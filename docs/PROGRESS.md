@@ -90,6 +90,20 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 12 Oct 2026, review fixes and new film projects
+- **Film:** the three projects are now Twins for Peace (live site, four
+  clicked screens), Fintuit (XD prototype, four screens) and Licuido (one
+  long page scrolled), with assets in `public/work/{tfp,fintuit,licuido}`.
+  Twins for Peace copy from Krish ("A distinctive brand. A simpler path to
+  purchase."). A dot now follows each project's name.
+- **Why band:** the merged pill is straight.
+- **Services:** "See what's included" is semibold.
+- **Roadmap copy:** "Agree on the problem…", "…committing to a detailed design."
+- **Closing:** the email tile and the footer are gone; the one CTA stays.
+- **Tools:** the "explore" button is gone.
+- **Hand-off:** a standalone copy of the page (only its code, styles and
+  assets) was zipped for another developer, outside the repo.
+
 ### 8 Oct 2026, final revision: new content and motion on the approved design
 - **Krish:** the approved design is the artifact (identical to main
   `23b57b0`); keep the design, change content and animation, section by

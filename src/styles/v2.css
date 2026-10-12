@@ -891,7 +891,6 @@ html.cx-v2 body {
   letter-spacing: -0.03em;
   line-height: 1.06;
   white-space: nowrap;
-  transform: rotate(-3deg);
 }
 
 .cx-why__merged {
@@ -1375,16 +1374,16 @@ html.cx-v2 body {
 }
 
 /* each project in its own brand colour, drawn here, not a picture */
-.cx-f-proj--biocon {
-  background: #06244d;
+.cx-f-proj--tfp {
+  background: #0f2150;
 }
 
-.cx-f-proj--qcare {
-  background: #3d0e3b;
+.cx-f-proj--fintuit {
+  background: #0b1206;
 }
 
-.cx-f-proj--mohawk {
-  background: #140708;
+.cx-f-proj--licuido {
+  background: #03161c;
 }
 
 .cx-f-proj__glow {
@@ -1392,22 +1391,25 @@ html.cx-v2 body {
   inset: -10%;
 }
 
-.cx-f-proj--biocon .cx-f-proj__glow {
+/* Twins for Peace: their royal blue, with the red of their buttons */
+.cx-f-proj--tfp .cx-f-proj__glow {
   background:
-    radial-gradient(50% 60% at 78% 55%, rgb(40 120 220 / 0.85), transparent 70%),
-    radial-gradient(40% 50% at 20% 90%, rgb(10 70 150 / 0.7), transparent 70%);
+    radial-gradient(50% 60% at 78% 55%, rgb(66 124 205 / 0.9), transparent 70%),
+    radial-gradient(35% 45% at 95% 12%, rgb(232 68 44 / 0.5), transparent 70%);
 }
 
-.cx-f-proj--qcare .cx-f-proj__glow {
+/* Fintuit: their lime on near-black */
+.cx-f-proj--fintuit .cx-f-proj__glow {
   background:
-    radial-gradient(50% 60% at 78% 55%, rgb(146 39 143 / 0.9), transparent 70%),
-    radial-gradient(35% 45% at 95% 15%, rgb(242 101 34 / 0.55), transparent 70%);
+    radial-gradient(50% 60% at 78% 55%, rgb(196 232 42 / 0.55), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(90 120 20 / 0.6), transparent 70%);
 }
 
-.cx-f-proj--mohawk .cx-f-proj__glow {
+/* Licuido: their teal-to-green */
+.cx-f-proj--licuido .cx-f-proj__glow {
   background:
-    radial-gradient(50% 60% at 78% 55%, rgb(200 16 46 / 0.75), transparent 70%),
-    radial-gradient(35% 45% at 10% 100%, rgb(120 8 20 / 0.6), transparent 70%);
+    radial-gradient(50% 60% at 78% 55%, rgb(31 198 201 / 0.75), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(46 194 126 / 0.55), transparent 70%);
 }
 
 .cx-f-proj__index {
@@ -1438,6 +1440,21 @@ html.cx-v2 body {
 
 .cx-f-proj__type {
   color: var(--umm-paper);
+}
+
+/* a dot after the project's name, between it and the kind of work */
+.cx-f-proj__meta > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.cx-f-proj__meta > span:first-child::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .cx-f-proj__title {
@@ -2347,7 +2364,7 @@ html.cx-v2 body {
 
 .cx-svc__hint {
   cursor: pointer;
-  font-weight: var(--umm-weight-medium);
+  font-weight: var(--umm-weight-semibold);
   color: var(--umm-ink);
 }
 

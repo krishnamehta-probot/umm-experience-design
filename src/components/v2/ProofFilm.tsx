@@ -15,13 +15,12 @@ import { FlyArrow } from '../primitives'
      0:00  intro     "The work makes the case." slams in word by word, the
                      three shapes from section 2 spin through, the three
                      client names flash
-     0:03  Biocon    the real work, playing like a screen recording in a
-     0:10  QCare     browser beside the project's line: Biocon Biologics'
-     0:17  Pricefx   live homepage scrolling through, QCare's resident
-                     platform (visitor list → invite → details → notice
-                     board → buildings, from the XD prototype), Mohawk's
-                     pricing app (sign in → pricing table → offline → stale
-                     data alert, from the Figma prototype)
+     0:03  TFP       the real work, playing like a screen recording in a
+     0:10  Fintuit   browser beside the project's line: Twins for Peace's
+     0:17  Licuido   live Shopify store (home → the Legacy collection →
+                     products → Luther), Fintuit's banking site (personal
+                     home → smart money → wealth → business, from the XD
+                     prototype), Licuido's live homepage scrolling through
      0:25  the cards the last frame: the three projects as cards, the way
                      the approved design shows them (the case-study
                      images live only here). Every card is a real link to
@@ -60,21 +59,23 @@ const AT = [3.2, 10.4, 17.6]
 const LEN = 7.2
 const END = 24.8
 
-/** Each project's real screens, in the order they play. Biocon is its live
- *  homepage as one long capture that scrolls; the others are screen flows,
- *  with where the cursor clicks to get to the next one (share of the view). */
+/** Each project's real screens, in the order they play. A project in PAGES
+ *  is its live homepage as one long capture (site.webp) that scrolls,
+ *  resting at each stop (yPercent of the capture); the others are screen
+ *  flows, with where the cursor clicks to get to the next one (share of the
+ *  view). */
 type Flow = { src: string; click?: [number, number] }[]
-const BIOCON_STOPS = [-21, -37, -50, -67]
+const PAGES: Record<string, number[]> = {
+  licuido: [-18.5, -37, -60.5, -74],
+}
 const FLOWS: Record<string, Flow> = {
-  qcare: [
-    { src: 's1' },
-    { src: 's4', click: [0.9, 0.2] },
-    { src: 's5' },
-    { src: 's6' },
-    { src: 's7' },
-    { src: 's8' },
+  tfp: [
+    { src: 's0', click: [0.164, 0.715] },
+    { src: 's1', click: [0.231, 0.542] },
+    { src: 's2', click: [0.5, 0.82] },
+    { src: 's3' },
   ],
-  mohawk: [{ src: 's0', click: [0.5, 0.63] }, { src: 's2', click: [0.87, 0.06] }, { src: 's3' }, { src: 's4' }],
+  fintuit: [{ src: 'p0', click: [0.5, 0.54] }, { src: 'p1', click: [0.235, 0.457] }, { src: 'p2' }, { src: 'p3' }],
 }
 
 /** A Cool Shape as a CSS mask. Only solid shapes: one with a hole would
@@ -244,10 +245,10 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
         tl.fromTo(stage, { x: 620, rotationY: -42, rotationX: 6, autoAlpha: 0 }, { x: 0, rotationY: -12, rotationX: 3, autoAlpha: 1, duration: 0.9, ease: 'power4.out' }, T + 0.1)
         tl.to(stage, { rotationY: -5, rotationX: 1, y: -12, duration: LEN - 1.1, ease: 'none' }, T + 1.0)
 
-        if (id === 'biocon') {
+        if (PAGES[id]) {
           /* the live homepage scrolls through, resting on each section */
           const page = one('.cx-f-proj__page', sc)
-          BIOCON_STOPS.forEach((y, k) => {
+          PAGES[id].forEach((y, k) => {
             tl.to(page, { yPercent: y, duration: 0.85, ease: 'power2.inOut' }, T + 1.9 + k * 1.2)
           })
           return
@@ -644,14 +645,14 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
                         <span />
                       </div>
                       <div className="cx-f-proj__view">
-                        {p.id === 'biocon' ? (
-                          <img className="cx-f-proj__page" src="/work/biocon/site.webp" alt="" decoding="async" />
+                        {PAGES[p.id] ? (
+                          <img className="cx-f-proj__page" src={`/work/${p.id}/site.webp`} alt="" decoding="async" />
                         ) : (
                           FLOWS[p.id].map((f) => (
                             <img className="cx-f-proj__shot" key={f.src} src={`/work/${p.id}/${f.src}.webp`} alt="" decoding="async" />
                           ))
                         )}
-                        {p.id !== 'biocon' && (
+                        {!PAGES[p.id] && (
                           <>
                             <span className="cx-f-ring" />
                             <svg className="cx-f-cursor" viewBox="0 0 32 36" aria-hidden="true">

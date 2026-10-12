@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef } from 'react'
-import { Accordion, Marquee, SplitButton } from '../primitives'
+import { Accordion, SplitButton } from '../primitives'
 import { Eyebrow } from './ChipHead'
 import { GlassCube } from './GlassCube'
 import { Roadmap } from './Roadmap'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
-import { closing, faq, meta, nav, ribbon } from '@/content/cxUiDesign'
+import { closing, faq } from '@/content/cxUiDesign'
 
 /* ============================================================================
    7 · HOW WE WORK + LET'S TALK
@@ -12,7 +12,8 @@ import { closing, faq, meta, nav, ribbon } from '@/content/cxUiDesign'
    The four stages are a roadmap (Roadmap.tsx). Then the dark band rises over
    the end of it with rounded shoulders, laid out like Cal.com's FAQ: the big
    ask, its line and the buttons on the left, the seven questions on the
-   right. The footer closes on the ribbon and a full-width wordmark.
+   right. The page ends there: the footer (ribbon, links, wordmark) was
+   removed on 8 Oct, as the site's own footer follows.
    ========================================================================== */
 
 export function ProcessClose() {
@@ -47,13 +48,6 @@ export function ProcessClose() {
         ease: 'power3.out',
         scrollTrigger: { trigger: '.cx-close__faq', start: 'top 78%', once: true },
       })
-      gsap.from('.cx-footer__word span', {
-        yPercent: 100,
-        duration: 1.2,
-        stagger: 0.08,
-        ease: 'power4.out',
-        scrollTrigger: { trigger: '.cx-footer__word', start: 'top 95%', once: true },
-      })
     }, el)
     return () => ctx.revert()
   }, [])
@@ -82,9 +76,6 @@ export function ProcessClose() {
               <SplitButton href={closing.primaryCta.href} target="_blank" rel="noreferrer">
                 {closing.primaryCta.label}
               </SplitButton>
-              <SplitButton href={closing.secondaryCta.href} variant="outline">
-                {closing.secondaryCta.label}
-              </SplitButton>
             </div>
           </div>
 
@@ -98,31 +89,6 @@ export function ProcessClose() {
         </div>
       </section>
 
-      <footer className="cx-footer" data-umm-theme="ink">
-        <div className="cx-footer__ribbon" aria-hidden="true">
-          <Marquee items={ribbon} />
-        </div>
-        <div className="umm-container cx-footer__inner">
-          <a className="cx-nav__logo cx-footer__logo" href="#top" aria-label="Unified Modern Minds, back to top">
-            umm
-          </a>
-          <nav className="cx-footer__links" aria-label="Footer">
-            {nav.map((item) => (
-              <a key={item.id} href={`#${item.id}`}>
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <p className="cx-footer__meta">
-            {meta.locations} · <a href={`mailto:${meta.contactEmail}`}>{meta.contactEmail}</a>
-          </p>
-        </div>
-        <p className="cx-footer__word" aria-hidden="true">
-          <span>u</span>
-          <span>m</span>
-          <span>m</span>
-        </p>
-      </footer>
     </div>
   )
 }

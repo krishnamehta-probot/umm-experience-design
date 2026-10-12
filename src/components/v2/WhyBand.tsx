@@ -159,7 +159,7 @@ export function WhyBand() {
         tl.to(t, { autoAlpha: 0, duration: 0.25 * pace }, go + 1.2 * pace)
       })
       const popAt = at + 1.45 * pace
-      tl.to(merged, { scale: 1, rotation: -3, duration: 0.6 * pace, ease: 'back.out(2)' }, popAt)
+      tl.to(merged, { scale: 1, rotation: 0, duration: 0.6 * pace, ease: 'back.out(2)' }, popAt)
 
       const flyAt = popAt + 0.9 * pace
       tl.to(merged, {

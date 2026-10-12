@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react'
-import { FlyArrow } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
@@ -91,23 +90,6 @@ export function ToolsStack() {
                     </li>
                   ))}
                 </ol>
-                <div className="cx-kit__claims">
-                  {/* moves the wheel on a group; from the last, back to the first */}
-                  <button
-                    type="button"
-                    className="cx-kit__explore"
-                    data-umm-tone={groups[stop].tone}
-                    onClick={() => glideTo(stop + 1 < STOPS ? stop + 1 : 0)}
-                  >
-                    <span>{tools.explore}</span>
-                    <span className="cx-kit__count">
-                      {String(stop + 1).padStart(2, '0')} / {String(STOPS).padStart(2, '0')}
-                    </span>
-                    <span className="cx-kit__explore-orb" aria-hidden="true">
-                      <FlyArrow dir="down" size={16} strokeWidth={2} />
-                    </span>
-                  </button>
-                </div>
               </div>
 
               <div className="cx-kit__frame">
