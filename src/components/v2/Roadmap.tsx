@@ -6,7 +6,9 @@ import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
-import { process } from '@/content/cxUiDesign'
+import { process as cxProcess } from '@/content/cxUiDesign'
+
+export type ProcessContent = typeof cxProcess
 
 /* ============================================================================
    7a · HOW WE WORK — the roadmap
@@ -35,27 +37,44 @@ import { process } from '@/content/cxUiDesign'
    already done).
    ========================================================================== */
 
-const NUMERALS: ShapeName[] = ['number-1', 'number-2', 'number-3', 'number-4']
-const TONES = ['sun', 'sky', 'blossom', 'citrus'] as const
-const STEPS = process.steps.length
-
-/** Each stage's bar on a 12-column timeline: [start, end]. Optimisation
- *  runs on off the end of the board. */
-const SPAN: [number, number][] = [
-  [0, 2.9],
-  [2.4, 5.5],
-  [4.9, 8.6],
-  [8.1, 12],
-]
+const NUMERALS: ShapeName[] = ['number-1', 'number-2', 'number-3', 'number-4', 'number-5']
+const TONES = ['sun', 'sky', 'blossom', 'citrus', 'coral'] as const
 const COLS = 12
-/** The axis mark: where Design or redesign hands over a build-ready design. */
-const LAUNCH = SPAN[2][1]
-/** Where each stage's deliverable is stamped: just past the end of its bar,
- *  in the empty part of the row. The last bar runs off the board, so its
- *  sticker sits just before the bar starts instead. */
-const STAMP = SPAN.map(([a, b], i) => (i === SPAN.length - 1 ? a : b))
 
-export function Roadmap() {
+/** Each stage's bar on a 12-column timeline: [start, end]. The last bar runs
+ *  off the end of the board. Four and five stages are laid out by hand; any
+ *  other count divides the columns evenly, each bar overlapping the next by
+ *  0.4 of a column. */
+const SPANS: Record<number, [number, number][]> = {
+  4: [
+    [0, 2.9],
+    [2.4, 5.5],
+    [4.9, 8.6],
+    [8.1, 12],
+  ],
+  5: [
+    [0, 2.5],
+    [2.1, 4.8],
+    [4.4, 7.2],
+    [6.8, 9.8],
+    [9.4, 12],
+  ],
+}
+function spanOf(n: number): [number, number][] {
+  if (SPANS[n]) return SPANS[n]
+  const w = (COLS + 0.4 * (n - 1)) / n
+  return Array.from({ length: n }, (_, i): [number, number] => [i * (w - 0.4), i * (w - 0.4) + w])
+}
+
+export function Roadmap({ content: process = cxProcess }: { content?: ProcessContent }) {
+  const STEPS = process.steps.length
+  const SPAN = spanOf(STEPS)
+  /** The axis mark: where Design or redesign hands over a build-ready design (the last stage on a short plan). */
+  const LAUNCH = SPAN[Math.min(2, STEPS - 1)][1]
+  /** Where each stage's deliverable is stamped: just past the end of its bar,
+   *  in the empty part of the row. The last bar runs off the board, so its
+   *  sticker sits just before the bar starts instead. */
+  const STAMP = SPAN.map(([a, b], i) => (i === SPAN.length - 1 ? a : b))
   const { ref, progress } = usePinProgress<HTMLElement>()
   const wide = usePinned()
   const reduced = useReducedMotion()
@@ -132,7 +151,7 @@ export function Roadmap() {
                 const done = i <= reached
                 const open = pinMode ? i === stop : true
                 return (
-                  <li key={step.title} className="cx-plan__row" data-umm-tone={TONES[i]}>
+                  <li key={step.title} className="cx-plan__row" data-umm-tone={TONES[i % TONES.length]}>
                     <button
                       type="button"
                       className="cx-plan__label"
@@ -166,7 +185,7 @@ export function Roadmap() {
                       >
                         <span className="cx-plan__fill" />
                         <span className="cx-plan__num">
-                          <Shape name={NUMERALS[i]} />
+                          <Shape name={NUMERALS[i % NUMERALS.length]} />
                         </span>
                         <span className="cx-plan__name">{step.title}</span>
                       </span>

@@ -20,6 +20,11 @@ import { prefersReducedMotion } from '@/lib/gsap'
    Motion: sways slowly on its own, leans toward the pointer, and the page
    scroll turns it. Renders only while on screen; one still frame
    for reduced motion. Loaded on its own (lazy), after the headline.
+
+   Sparkle variant (shape="sparkle", used by the AI page): the same glass,
+   studio and motion, cut as the four-point AI sparkle (✦), a thick slab with
+   rounded edges and softened tips. It rocks rather than spins, so it never
+   turns edge-on.
    ========================================================================== */
 
 /** Draws a mesh into render targets (environment, transmission) but never to
@@ -43,7 +48,12 @@ function studio(hidden: boolean) {
     g.add(mesh)
   }
 
-  add(new THREE.Mesh(new THREE.BoxGeometry(24, 24, 24), new THREE.MeshBasicMaterial({ color: 0x1c1e24, side: THREE.BackSide })))
+  add(
+    new THREE.Mesh(
+      new THREE.BoxGeometry(24, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0x1c1e24, side: THREE.BackSide }),
+    ),
+  )
 
   const strip = (w: number, h: number, hex: string, power: number, at: [number, number, number]) => {
     const m = new THREE.Mesh(
@@ -70,7 +80,64 @@ function studio(hidden: boolean) {
   return g
 }
 
-export default function GlassCube3D({ coveredBy }: { coveredBy?: string }) {
+/** The AI sparkle (✦), as a thick slab of glass with soft rounded edges, the
+ *  way the cube is built: its rounded edges catch the studio's strips, and
+ *  through the front you see its own far edges, which is what makes the cube
+ *  read as solid glass rather than a dark tile. */
+function sparkleGeometry() {
+  const R = 1.08 // tip reach
+  const C = 0.21 // the arms' curve control, near the centre: lower = slimmer arms
+  const E = 0.045 // how much of each arm's curve gives way to a rounded tip
+  const tips = [new THREE.Vector2(0, R), new THREE.Vector2(R, 0), new THREE.Vector2(0, -R), new THREE.Vector2(-R, 0)]
+  const controls = [
+    new THREE.Vector2(C, C),
+    new THREE.Vector2(C, -C),
+    new THREE.Vector2(-C, -C),
+    new THREE.Vector2(-C, C),
+  ]
+  /* a point on, and the control of a piece of, the curve from tip i to tip i + 1 */
+  const at = (i: number, t: number) => {
+    const [p0, p1, p2] = [tips[i], controls[i], tips[(i + 1) % 4]]
+    return p0
+      .clone()
+      .multiplyScalar((1 - t) ** 2)
+      .add(p1.clone().multiplyScalar(2 * (1 - t) * t))
+      .add(p2.clone().multiplyScalar(t * t))
+  }
+  const control = (i: number, t0: number, t1: number) => {
+    const [p0, p1, p2] = [tips[i], controls[i], tips[(i + 1) % 4]]
+    return p0
+      .clone()
+      .multiplyScalar((1 - t0) * (1 - t1))
+      .add(p1.clone().multiplyScalar((1 - t0) * t1 + t0 * (1 - t1)))
+      .add(p2.clone().multiplyScalar(t0 * t1))
+  }
+  /* each arm's curve stops just short of the tips; the tips themselves are
+     small curves round the point, so the rounded edge has room to follow */
+  const shape = new THREE.Shape()
+  const start = at(0, E)
+  shape.moveTo(start.x, start.y)
+  for (let i = 0; i < 4; i++) {
+    const c = control(i, E, 1 - E)
+    const end = at(i, 1 - E)
+    shape.quadraticCurveTo(c.x, c.y, end.x, end.y)
+    const next = at((i + 1) % 4, E)
+    const tip = tips[(i + 1) % 4]
+    shape.quadraticCurveTo(tip.x, tip.y, next.x, next.y)
+  }
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.5,
+    bevelEnabled: true,
+    bevelThickness: 0.22,
+    bevelSize: 0.12,
+    bevelSegments: 16,
+    curveSegments: 64,
+  })
+  geometry.center()
+  return geometry
+}
+
+export default function GlassCube3D({ coveredBy, shape = 'cube' }: { coveredBy?: string; shape?: 'cube' | 'sparkle' }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -109,7 +176,7 @@ export default function GlassCube3D({ coveredBy }: { coveredBy?: string }) {
     scene.add(studio(true))
 
     const cube = new THREE.Mesh(
-      new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
+      shape === 'sparkle' ? sparkleGeometry() : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
       new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         metalness: 0,
@@ -126,6 +193,7 @@ export default function GlassCube3D({ coveredBy }: { coveredBy?: string }) {
         side: THREE.DoubleSide, // the back faces show through, like solid glass
       }),
     )
+    if (shape === 'sparkle') cube.scale.setScalar(0.84) // the star's tips reach further than the cube's corners
     scene.add(cube)
 
     const resize = () => {
@@ -160,8 +228,17 @@ export default function GlassCube3D({ coveredBy }: { coveredBy?: string }) {
       turn += (window.scrollY * 0.004 - turn) * 0.08
       /* sways around the three-quarter view rather than spinning through
          it: face-on, the glass reads as a dark box */
-      cube.rotation.x = 0.42 + lean.x + Math.sin(t * 0.6) * 0.05
-      cube.rotation.y = -0.62 + Math.sin(t * 0.32) * 0.32 + lean.y + turn
+      if (shape === 'sparkle') {
+        /* held at a three-quarter view, like the cube, so its thickness and
+           rounded edges show; it rocks rather than spins, so the slab never
+           turns edge-on */
+        cube.rotation.x = 0.36 + lean.x * 0.6 + Math.sin(t * 0.6) * 0.05
+        cube.rotation.y = -0.5 + Math.sin(t * 0.32) * 0.3 + lean.y * 0.6 + Math.sin(turn) * 0.3
+        cube.rotation.z = 0.08 + Math.sin(t * 0.25) * 0.08
+      } else {
+        cube.rotation.x = 0.42 + lean.x + Math.sin(t * 0.6) * 0.05
+        cube.rotation.y = -0.62 + Math.sin(t * 0.32) * 0.32 + lean.y + turn
+      }
       cube.position.y = Math.sin(t * 0.9) * 0.07
       renderer.render(scene, camera)
     }
@@ -256,7 +333,7 @@ export default function GlassCube3D({ coveredBy }: { coveredBy?: string }) {
       renderer.forceContextLoss()
       renderer.domElement.remove()
     }
-  }, [coveredBy])
+  }, [coveredBy, shape])
 
   return <div className="cx-hero__cube-gl" ref={ref} />
 }

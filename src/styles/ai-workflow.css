@@ -1,0 +1,1055 @@
+/* ============================================================================
+   AI WORKFLOW — "Inside a working AI workflow" (InvoiceFlow)
+   ----------------------------------------------------------------------------
+   Own layout and motion, class prefix ai-flow__. Only tokens are read here:
+   no brand hex is written in this file. The heading is in normal flow; only the
+   control room pins. The track is measured in px by the component, so every
+   band and station sits where its geometry says.
+   ========================================================================== */
+
+.ai-flow {
+  color: var(--umm-ink);
+}
+
+/* --- heading (normal flow) ----------------------------------------------- */
+
+.ai-flow__head {
+  display: grid;
+  gap: 0.9rem;
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.ai-flow__head .cx-head {
+  margin-bottom: 0;
+}
+
+.ai-flow__lead {
+  margin: 0;
+  max-width: 58ch;
+}
+
+@media (min-width: 900px) {
+  .ai-flow__head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 40ch);
+    align-items: end;
+    column-gap: clamp(2rem, 4vw, 4rem);
+  }
+
+  .ai-flow__lead {
+    justify-self: end;
+    margin-bottom: 0.35rem;
+    max-width: 40ch;
+  }
+}
+
+/* --- the pin: tabs, track, caption, on the viewport below the nav -------- */
+
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .ai-flow__pin.umm-pin {
+    /* the same steady stretch per stop as the other magnetic sections */
+    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
+  }
+}
+
+@media (min-width: 900px) {
+  .ai-flow__pin .umm-pin__stage {
+    padding: 96px 0 14px;
+    box-sizing: border-box;
+  }
+
+  .ai-flow__inner {
+    display: grid;
+    grid-template-rows: auto minmax(60svh, 1fr) auto;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+.ai-flow__inner {
+  width: 100%;
+}
+
+/* --- tabs (the numbered tabs of StagesV2) -------------------------------- */
+
+.ai-flow__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.ai-flow__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.1rem, 2.8vw, 2.75rem);
+}
+
+.ai-flow__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55em;
+  padding: 0 0 8px;
+  margin: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--umm-ink-quiet);
+  cursor: pointer;
+  transition: color 0.3s var(--umm-ease-out);
+}
+
+.ai-flow__tab[aria-selected='true'] {
+  color: var(--umm-ink);
+}
+
+.ai-flow__tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--umm-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--umm-ease-out);
+}
+
+.ai-flow__tab[aria-selected='true']::after {
+  transform: scaleX(1);
+}
+
+.ai-flow__tab:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.ai-flow__num {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-label);
+  letter-spacing: var(--umm-tracking-label);
+}
+
+.ai-flow__name {
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ai-flow__tag {
+  padding-bottom: 8px;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-text-tertiary);
+}
+
+/* --- the track ------------------------------------------------------------ */
+
+.ai-flow__track {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  border: 1px solid var(--umm-line);
+  background: var(--umm-paper);
+  box-shadow: 0 30px 60px -40px rgb(16 14 20 / 0.35);
+}
+
+.ai-flow__wires {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ai-flow__wires polyline {
+  vector-effect: non-scaling-stroke;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-flow__ghost {
+  stroke: var(--umm-border-strong);
+  stroke-width: 2;
+}
+
+.ai-flow__ghost--branch {
+  stroke-dasharray: 4 6;
+}
+
+.ai-flow__trail {
+  stroke: var(--umm-ink);
+  stroke-width: 2.5;
+}
+
+.ai-flow__switch {
+  stroke: var(--umm-ink);
+  stroke-width: 3;
+}
+
+.ai-flow__pivot {
+  position: absolute;
+  z-index: 2;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  box-shadow: 0 0 0 3px var(--umm-paper);
+}
+
+/* --- stations ------------------------------------------------------------- */
+
+.ai-flow__station {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-paper);
+  color: var(--umm-ink);
+  cursor: pointer;
+  transition: background 0.5s var(--umm-ease-out);
+}
+
+.ai-flow__station svg {
+  width: 26px;
+  height: 26px;
+}
+
+.ai-flow__station[data-lit='true'] {
+  background: var(--umm-tone);
+}
+
+.ai-flow__station:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 4px;
+}
+
+.ai-flow__station[data-on='true']::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1.5px solid var(--umm-tone);
+  border-radius: 50%;
+  animation: ai-flow-ring 2.2s ease-out infinite;
+}
+
+.ai-flow__station-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--umm-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+@keyframes ai-flow-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* --- terminal bays: a tinted box sized to hold the docked card and status -- */
+
+.ai-flow__bay {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px dashed var(--umm-ink-quiet);
+  border-radius: 26px;
+  background: transparent;
+  transition:
+    background 0.5s var(--umm-ease-out),
+    border-color 0.5s var(--umm-ease-out);
+}
+
+/* a landing zone stays a dashed outline until the invoice is docked in it */
+.ai-flow__track[data-stop='2'] .ai-flow__bay[data-active='true'],
+.ai-flow__track[data-stop='3'] .ai-flow__bay[data-active='true'] {
+  border: 1px solid var(--umm-border);
+  background: var(--umm-tone-wash);
+}
+
+/* the status sits right of the docked card, 16px clear of it */
+.ai-flow__bay-status {
+  position: absolute;
+  left: 220px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--umm-font-mono);
+  font-size: 13px;
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--umm-ink);
+  opacity: 0;
+  transition: opacity 0.5s var(--umm-ease-out);
+}
+
+.ai-flow__track[data-stop='2'] .ai-flow__bay[data-active='true'] .ai-flow__bay-status,
+.ai-flow__track[data-stop='3'] .ai-flow__bay[data-active='true'] .ai-flow__bay-status {
+  opacity: 1;
+}
+
+/* --- the invoice ---------------------------------------------------------- */
+
+.ai-flow__invoice {
+  position: absolute;
+  z-index: 5;
+  width: 240px;
+  will-change: transform, left, top;
+}
+
+.ai-flow__card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--umm-line);
+  border-radius: 16px;
+  background: var(--umm-paper);
+  box-shadow: 0 18px 36px -22px rgb(16 14 20 / 0.45);
+}
+
+.ai-flow__card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ai-flow__card-top svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--umm-text-tertiary);
+}
+
+.ai-flow__card-supplier {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--umm-font-display);
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.ai-flow__card-no {
+  flex: none;
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  color: var(--umm-ink-soft);
+}
+
+.ai-flow__card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--umm-line);
+  font-size: 14px;
+  color: var(--umm-ink-soft);
+}
+
+.ai-flow__card-row b {
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-align: right;
+}
+
+/* the scan beam sweeps the paper once, when the invoice reaches station 1 */
+.ai-flow__beam {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 0;
+  height: 3px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--umm-sky), transparent);
+  box-shadow: 0 0 14px 4px var(--umm-sky);
+  pointer-events: none;
+}
+
+.ai-flow__track[data-stop='0'] .ai-flow__beam {
+  animation: ai-flow-scan 0.9s var(--umm-ease-in-out) 0.25s both;
+}
+
+@keyframes ai-flow-scan {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* the person's stamp, pressed onto the invoice's corner at the terminal */
+.ai-flow__stamp {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--umm-ink);
+  background: var(--umm-sky);
+  color: var(--umm-ink);
+  animation: ai-flow-stamp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.ai-flow__stamp svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ai-flow__stamp-badge {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--umm-ink);
+  background: var(--umm-citrus);
+}
+
+.ai-flow__stamp[data-state='hold'] .ai-flow__stamp-badge {
+  background: var(--umm-sun);
+}
+
+.ai-flow__stamp-badge svg {
+  width: 10px;
+  height: 10px;
+  stroke-width: 2.4;
+}
+
+@keyframes ai-flow-stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.8) rotate(-18deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the moving light on the rail */
+.ai-flow__light {
+  position: absolute;
+  z-index: 4;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--umm-sky) 70%, transparent),
+    0 0 22px 8px var(--umm-sky);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 0.4s var(--umm-ease-out);
+}
+
+/* --- the top band: the extracted fields, as chips ------------------------ */
+
+.ai-flow__chips {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--umm-ease-out);
+}
+
+.ai-flow__track[data-stop='0'] .ai-flow__chips,
+.ai-flow__track[data-stop='1'] .ai-flow__chips {
+  opacity: 1;
+}
+
+.ai-flow__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-flow__chip-in {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--umm-ink);
+  border-radius: 999px;
+  background: var(--umm-paper);
+  font-size: 14px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+}
+
+.ai-flow__chip--slot .ai-flow__chip-in {
+  width: 56px;
+  border: 1.5px dashed var(--umm-ink-quiet);
+  background: transparent;
+}
+
+.ai-flow__chip--slot .ai-flow__chip-in svg {
+  width: 14px;
+  height: 14px;
+  color: var(--umm-ink-soft);
+}
+
+/* the marks come on at stop 1, once the rules have checked each field */
+.ai-flow__chip .ai-flow__mark {
+  opacity: 0;
+  transition: opacity 0.4s var(--umm-ease-out);
+}
+
+.ai-flow__track[data-stop='1'] .ai-flow__chip .ai-flow__mark {
+  opacity: 1;
+}
+
+.ai-flow__track[data-stop='0'] .ai-flow__chip {
+  animation: ai-flow-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 250ms);
+}
+
+@keyframes ai-flow-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* a value that changes rolls up into place */
+.ai-flow__roll {
+  display: inline-block;
+  animation: ai-flow-roll 0.55s var(--umm-ease-out) both;
+}
+
+@keyframes ai-flow-roll {
+  from {
+    opacity: 0;
+    transform: translateY(70%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- the bottom band: records (stop 1) and rules (stop 3) ---------------- */
+
+.ai-flow__records {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  width: 300px;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--umm-line);
+  border-radius: 16px;
+  background: var(--umm-paper);
+  box-shadow: 0 18px 36px -26px rgb(16 14 20 / 0.4);
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition:
+    opacity 0.5s var(--umm-ease-out),
+    transform 0.6s var(--umm-ease-out);
+}
+
+/* only while the invoice is at station 2; once it leaves, only the routing */
+.ai-flow__track[data-stop='1'] .ai-flow__records {
+  opacity: 1;
+  transform: none;
+}
+
+.ai-flow__rec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.ai-flow__rec-label {
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--umm-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-flow__rec-value {
+  font-size: 14px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  white-space: nowrap;
+}
+
+.ai-flow__slot {
+  display: inline-block;
+  width: 64px;
+  height: 16px;
+  border: 1.5px dashed var(--umm-ink-quiet);
+  border-radius: 6px;
+}
+
+.ai-flow__mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--umm-ink);
+}
+
+.ai-flow__mark svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.4;
+}
+
+.ai-flow__mark--ok {
+  background: var(--umm-citrus);
+}
+
+.ai-flow__mark--flag {
+  background: var(--umm-coral);
+}
+
+/* the comparison: two bars on one baseline, the same left edge and scale */
+.ai-flow__cmp {
+  display: grid;
+  gap: 4px;
+}
+
+.ai-flow__cmp-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-flow__cmp-bar {
+  position: relative;
+  height: 8px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  background: var(--umm-canvas-deep);
+}
+
+/* room above the mismatch bar for its amount label */
+.ai-flow__cmp-bar--gap {
+  margin-top: 22px;
+}
+
+.ai-flow__cmp-bar i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 4px;
+  transform-origin: left;
+  animation: ai-flow-grow 0.7s var(--umm-ease-out) 0.15s both;
+}
+
+/* the PO value: ink at 30% */
+.ai-flow__cmp-po {
+  background: var(--umm-ink);
+  opacity: 0.3;
+}
+
+.ai-flow__cmp-inv {
+  background: var(--umm-ink);
+}
+
+/* the extra in the longer bar: coral, bracketed, its amount above */
+.ai-flow__cmp-gap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  border-radius: 0 4px 4px 0;
+  background: var(--umm-coral);
+  border: 1px solid var(--umm-ink);
+  border-left: 0;
+}
+
+.ai-flow__cmp-gap span {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--umm-ink);
+}
+
+.ai-flow__cmp-gap::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: 0;
+  top: -6px;
+  height: 4px;
+  border: 1px solid var(--umm-ink);
+  border-bottom: 0;
+}
+
+@keyframes ai-flow-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* the station rules, docked under the stations (stop 3) */
+.ai-flow__principle {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--umm-border);
+  background: var(--umm-tone-wash);
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition:
+    opacity 0.5s var(--umm-ease-out),
+    transform 0.6s var(--umm-ease-out);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+
+.ai-flow__track[data-stop='3'] .ai-flow__principle {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.ai-flow__principle-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ai-flow__principle-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--umm-paper);
+  color: var(--umm-ink);
+}
+
+.ai-flow__principle-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-flow__principle-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--umm-ink);
+}
+
+.ai-flow__principle-title span {
+  display: block;
+}
+
+.ai-flow__principle-body {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--umm-ink-soft);
+}
+
+/* --- caption strip under the track --------------------------------------- */
+
+.ai-flow__caption {
+  min-height: 0;
+}
+
+.ai-flow__cap {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px;
+  animation: ai-flow-cap 0.6s var(--umm-ease-out) both;
+}
+
+@keyframes ai-flow-cap {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ai-flow__state {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--umm-ink);
+  background: var(--umm-paper);
+  color: var(--umm-ink);
+}
+
+.ai-flow__state svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+
+.ai-flow__state[data-state='flag'] {
+  background: var(--umm-coral);
+}
+
+.ai-flow__state[data-state='hold'] {
+  background: var(--umm-sun);
+}
+
+.ai-flow__cap-text {
+  min-width: 0;
+}
+
+.ai-flow__cap-title {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--umm-ink);
+}
+
+.ai-flow__cap-body {
+  margin: 6px 0 0;
+  max-width: 64ch;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.5;
+  color: var(--umm-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ai-flow__note {
+  margin: 6px 0 0;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--umm-text-tertiary);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ai-flow__role {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 0.4em 0.8em;
+  border-radius: 999px;
+  background: var(--umm-tone);
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+  color: var(--umm-ink);
+  white-space: nowrap;
+}
+
+/* --- plain list: phones, narrow screens, reduced motion ------------------- */
+
+.ai-flow__plain {
+  display: grid;
+  gap: clamp(1rem, 3vw, 1.5rem);
+}
+
+.ai-flow__stack {
+  display: grid;
+  gap: clamp(1rem, 3vw, 1.5rem);
+  max-width: 46rem;
+}
+
+.ai-flow__stack .ai-flow__card {
+  max-width: 360px;
+}
+
+.ai-flow__steps,
+.ai-flow__principles-stack {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-flow__step {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--cx-r-tile, 18px);
+  background: var(--umm-paper);
+  border: 1px solid var(--umm-line);
+}
+
+.ai-flow__station-mini {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+}
+
+.ai-flow__station-mini svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ai-flow__step-text {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.ai-flow__step-text .ai-flow__cap-body {
+  -webkit-line-clamp: unset;
+  display: block;
+  overflow: visible;
+}
+
+.ai-flow__status-card {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border-radius: var(--cx-r-tile, 18px);
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+}
+
+.ai-flow__status-line {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: var(--umm-tracking-label);
+  text-transform: uppercase;
+}
+
+.ai-flow__note-plain {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ai-flow__principles-stack .ai-flow__principle {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: auto;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: none;
+  background: var(--umm-paper);
+  border: 1px solid var(--umm-line);
+  padding: 16px;
+}
+
+.ai-flow__principles-stack .ai-flow__principle-title {
+  font-size: 1.15rem;
+}
+
+.ai-flow__principles-stack .ai-flow__principle-body {
+  font-size: 1rem;
+}
+
+/* --- reduced motion: final states, no movement --------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-flow *,
+  .ai-flow *::before,
+  .ai-flow *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -9,6 +9,9 @@ const ExperienceDesignPage = lazy(() =>
 const StyleguidePage = lazy(() =>
   import('./pages/StyleguidePage').then((m) => ({ default: m.StyleguidePage })),
 )
+const AiAutomationPage = lazy(() =>
+  import('./pages/AiAutomationPage').then((m) => ({ default: m.AiAutomationPage })),
+)
 const FilmRenderPage = lazy(() =>
   import('./pages/FilmRenderPage').then((m) => ({ default: m.FilmRenderPage })),
 )
@@ -23,11 +26,19 @@ const FilmRenderPage = lazy(() =>
  *   /v1          the original 12-section Experience Design page, kept for
  *                side-by-side comparison
  *   /styleguide  the living component library
+ *   /ai-automation  the AI & Automation service page, on v2's design
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
  */
 export function App() {
   const path = window.location.pathname.replace(/\/$/, '')
+  if (path === '/ai-automation') {
+    return (
+      <Suspense fallback={null}>
+        <AiAutomationPage />
+      </Suspense>
+    )
+  }
   if (path === '/film') {
     return (
       <Suspense fallback={null}>

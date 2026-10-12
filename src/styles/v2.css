@@ -596,7 +596,7 @@ html.cx-v2 body {
 
 .cx-curtain__band {
   fill: none;
-  stroke: var(--umm-sky);
+  stroke: var(--curtain-tone, var(--umm-sky));
   stroke-width: 72;
   stroke-linecap: round;
 }
@@ -822,6 +822,12 @@ html.cx-v2 body {
   background:
     radial-gradient(60% 70% at 100% 100%, rgb(20 95 245 / 0.85), transparent 70%),
     radial-gradient(30% 45% at 92% 70%, rgb(150 205 255 / 0.5), transparent 70%);
+}
+
+.cx-why__light.is-fallback[data-tone='lilac'] {
+  background:
+    radial-gradient(60% 70% at 100% 100%, rgb(112 62 232 / 0.85), transparent 70%),
+    radial-gradient(30% 45% at 92% 70%, rgb(200 180 255 / 0.5), transparent 70%);
 }
 
 /* --- beat 1: the ten teams ----------------------------------------------- */
@@ -4845,8 +4851,7 @@ html.cx-v2 body {
     right: 0;
     margin-left: 0;
   }
-  .cx-plan__row:nth-child(3) .cx-plan__signed,
-  .cx-plan__row:nth-child(4) .cx-plan__signed {
+  .cx-plan__row:nth-child(n + 3) .cx-plan__signed {
     display: none;
   }
   .cx-plan__over {

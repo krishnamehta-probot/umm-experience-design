@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { IconClose, IconMenu } from '../icons'
 import { FlyArrow } from '../primitives'
-import { nav } from '@/content/cxUiDesign'
+import { nav as cxNav } from '@/content/cxUiDesign'
+
+export type NavContent = typeof cxNav
 
 /* ============================================================================
    NAV — a floating pill
@@ -12,7 +14,7 @@ import { nav } from '@/content/cxUiDesign'
    coming back the moment the reader scrolls up.
    ========================================================================== */
 
-export function NavV2() {
+export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [open, setOpen] = useState(false)
@@ -87,7 +89,7 @@ export function NavV2() {
             </a>
           ))}
           <a href="#contact" onClick={() => setOpen(false)}>
-            <span>06</span>
+            <span>{String(nav.length + 1).padStart(2, '0')}</span>
             Let&rsquo;s talk
           </a>
         </nav>

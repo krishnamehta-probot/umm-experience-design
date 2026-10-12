@@ -1,11 +1,15 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Shape } from './Shape'
 import { RibbonCurtain } from './RibbonCurtain'
-import { FlutedLight } from './FlutedLight'
+import { FlutedLight, type LightTone } from './FlutedLight'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { useMagneticStops } from '@/lib/useMagneticStops'
-import { ribbon, why } from '@/content/cxUiDesign'
+import { ribbon as cxRibbon, why as cxWhy } from '@/content/cxUiDesign'
 import { Eyebrow } from './ChipHead'
+import type { Tone } from '../primitives'
+
+export type WhyContent = typeof cxWhy
+export type RibbonContent = typeof cxRibbon
 
 /* ============================================================================
    2 · WHY DESIGN MATTERS — "ten teams → one experience", told by scroll
@@ -62,9 +66,6 @@ function within(n: HTMLElement, stage: HTMLElement) {
   return { x, y }
 }
 
-/** The beats the section rests on: the headline, then each point. */
-const STOPS = why.pairs.length + 1
-
 /** Where the hold starts and how long it lasts: from the strip reaching the
  *  top of the screen until the section's bottom meets the screen's. */
 const holdOf = (el: HTMLElement) => {
@@ -85,25 +86,39 @@ function usePinMedia() {
 }
 
 /** A headline line, with the merge word as the chip wherever it falls. */
-function Line({ text }: { text: string }) {
-  const at = text.indexOf(why.one)
+function Line({ text, one }: { text: string; one: string }) {
+  const at = text.indexOf(one)
   if (at < 0) return <span className="cx-why__line">{text}</span>
   return (
     <span className="cx-why__line">
       {text.slice(0, at)}
       <span className="cx-why__one cx-why__one--inline" data-umm-tone="blossom">
-        {why.one}
+        {one}
       </span>
-      {text.slice(at + why.one.length)}
+      {text.slice(at + one.length)}
     </span>
   )
 }
 
-export function WhyBand() {
+export function WhyBand({
+  content: why = cxWhy,
+  ribbon = cxRibbon,
+  ribbonTone,
+  lightTone,
+}: {
+  content?: WhyContent
+  ribbon?: RibbonContent
+  /** the strip's colour; the default is sky */
+  ribbonTone?: Tone
+  /** the light behind the three points; the default is blue */
+  lightTone?: LightTone
+}) {
   const ref = useRef<HTMLElement>(null)
   /** the hold's scroll progress, read by the light every frame */
   const light = useRef(0)
   const pinned = usePinMedia()
+  /** The beats the section rests on: the headline, then each point. */
+  const STOPS = why.pairs.length + 1
   useMagneticStops(ref, STOPS, pinned, holdOf, { pace: 1.6 })
 
   useLayoutEffect(() => {
@@ -148,27 +163,35 @@ export function WhyBand() {
       gsap.set(inline, { opacity: 0 })
       teams.forEach((t, i) => {
         const go = at + order[i] * 0.07 * pace
-        tl.to(t, {
-          x: () => toMerge(t).x,
-          y: () => toMerge(t).y,
-          rotation: 0,
-          scale: 0.45,
-          duration: 1.4 * pace,
-          ease: 'power2.in',
-        }, go)
+        tl.to(
+          t,
+          {
+            x: () => toMerge(t).x,
+            y: () => toMerge(t).y,
+            rotation: 0,
+            scale: 0.45,
+            duration: 1.4 * pace,
+            ease: 'power2.in',
+          },
+          go,
+        )
         tl.to(t, { autoAlpha: 0, duration: 0.25 * pace }, go + 1.2 * pace)
       })
       const popAt = at + 1.45 * pace
       tl.to(merged, { scale: 1, rotation: 0, duration: 0.6 * pace, ease: 'back.out(2)' }, popAt)
 
       const flyAt = popAt + 0.9 * pace
-      tl.to(merged, {
-        x: () => toInline().x,
-        y: () => toInline().y,
-        scale: () => toInline().scale,
-        duration: 1 * pace,
-        ease: 'power3.inOut',
-      }, flyAt)
+      tl.to(
+        merged,
+        {
+          x: () => toInline().x,
+          y: () => toInline().y,
+          scale: () => toInline().scale,
+          duration: 1 * pace,
+          ease: 'power3.inOut',
+        },
+        flyAt,
+      )
       tl.from('.cx-why__tag', { autoAlpha: 0, y: 12, duration: 0.6 * pace, ease: 'power3.out' }, flyAt - 0.1 * pace)
       /* one tween per line rather than a stagger: a staggered from() only
          sets its first target's start state up front, so line two showed
@@ -185,16 +208,41 @@ export function WhyBand() {
     /** One point coming in, added to tl at `at`: the shape spins up out of
      *  nothing with its number, then the point and its line. */
     const pairBeat = (tl: gsap.core.Timeline, pair: HTMLElement, at: number, pace: number) => {
-      tl.from(pair.querySelector('.cx-why__shape'), { autoAlpha: 0, scale: 0.2, rotation: -120, duration: 0.9 * pace, ease: 'back.out(1.4)' }, at)
-      tl.from(pair.querySelector('.cx-why__num'), { autoAlpha: 0, y: 40, duration: 0.6 * pace, ease: 'power3.out' }, at + 0.3 * pace)
-      tl.from(pair.querySelector('.cx-why__fix'), { autoAlpha: 0, y: 56, duration: 0.7 * pace, ease: 'power3.out' }, at + 0.2 * pace)
-      tl.fromTo(pair.querySelector('.cx-why__fix path'), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.5 * pace, ease: 'power2.inOut' }, at + 0.7 * pace)
-      tl.from(pair.querySelector('.cx-why__body'), { autoAlpha: 0, y: 28, duration: 0.6 * pace, ease: 'power3.out' }, at + 0.55 * pace)
+      tl.from(
+        pair.querySelector('.cx-why__shape'),
+        { autoAlpha: 0, scale: 0.2, rotation: -120, duration: 0.9 * pace, ease: 'back.out(1.4)' },
+        at,
+      )
+      tl.from(
+        pair.querySelector('.cx-why__num'),
+        { autoAlpha: 0, y: 40, duration: 0.6 * pace, ease: 'power3.out' },
+        at + 0.3 * pace,
+      )
+      tl.from(
+        pair.querySelector('.cx-why__fix'),
+        { autoAlpha: 0, y: 56, duration: 0.7 * pace, ease: 'power3.out' },
+        at + 0.2 * pace,
+      )
+      tl.fromTo(
+        pair.querySelector('.cx-why__fix path'),
+        { strokeDashoffset: 1 },
+        { strokeDashoffset: 0, duration: 0.5 * pace, ease: 'power2.inOut' },
+        at + 0.7 * pace,
+      )
+      tl.from(
+        pair.querySelector('.cx-why__body'),
+        { autoAlpha: 0, y: 28, duration: 0.6 * pace, ease: 'power3.out' },
+        at + 0.55 * pace,
+      )
     }
 
     /** One point leaving, so the next can take its place. */
     const pairOut = (tl: gsap.core.Timeline, pair: HTMLElement, at: number) => {
-      tl.to(pair.querySelector('.cx-why__mark'), { autoAlpha: 0, scale: 0.6, rotation: 70, duration: 0.6, ease: 'power2.in' }, at)
+      tl.to(
+        pair.querySelector('.cx-why__mark'),
+        { autoAlpha: 0, scale: 0.6, rotation: 70, duration: 0.6, ease: 'power2.in' },
+        at,
+      )
       tl.to(pair.querySelector('.cx-why__text'), { autoAlpha: 0, y: -60, duration: 0.5, ease: 'power2.in' }, at + 0.05)
     }
 
@@ -216,9 +264,12 @@ export function WhyBand() {
           const on = holding() || y < vh * 0.9
           if (on === shown[i]) return
           shown[i] = on
-          gsap.to(faces[i], on
-            ? { autoAlpha: 1, y: 0, scale: 1, duration: 0.75, ease: 'back.out(1.8)', overwrite: true }
-            : { autoAlpha: 0, y: 26, scale: 0.7, duration: 0.35, ease: 'power2.in', overwrite: true })
+          gsap.to(
+            faces[i],
+            on
+              ? { autoAlpha: 1, y: 0, scale: 1, duration: 0.75, ease: 'back.out(1.8)', overwrite: true }
+              : { autoAlpha: 0, y: 26, scale: 0.7, duration: 0.35, ease: 'power2.in', overwrite: true },
+          )
         })
       }
       ScrollTrigger.create({ trigger: el, start: 'top bottom', end: 'bottom top', onUpdate: update, onRefresh: update })
@@ -256,11 +307,7 @@ export function WhyBand() {
            (the middle of its lane), and the scroll between two lanes plays
            the change between them. The playhead follows the scroll with a
            short ease, so it glides rather than ticks. */
-        const marks = [
-          [0, 0],
-          ...rest.map((t, s) => [(s + 0.5) / STOPS, t]),
-          [1, rest[rest.length - 1]],
-        ]
+        const marks = [[0, 0], ...rest.map((t, s) => [(s + 0.5) / STOPS, t]), [1, rest[rest.length - 1]]]
         const timeAt = (p: number) => {
           for (let k = 1; k < marks.length; k++) {
             const [p1, t1] = marks[k]
@@ -348,20 +395,32 @@ export function WhyBand() {
       drift.scrollTrigger?.kill()
       drift.kill()
     }
-  }, [])
+  }, [why])
 
   return (
-    <section className="cx-why" id="why" ref={ref} data-umm-theme="ink" data-mode="stack" aria-labelledby="cx-why-title">
+    <section
+      className="cx-why"
+      id="why"
+      ref={ref}
+      data-umm-theme="ink"
+      data-mode="stack"
+      aria-labelledby="cx-why-title"
+    >
       <div className="cx-why__pin">
-        <RibbonCurtain items={ribbon} clearOf=".cx-hero__copy" />
+        <RibbonCurtain items={ribbon} clearOf=".cx-hero__copy" tone={ribbonTone} />
 
         <div className="cx-why__stage">
-          <FlutedLight progress={light} />
+          <FlutedLight progress={light} tone={lightTone} />
 
           {/* the ten teams, and the one pill they become */}
           <div className="cx-why__teams" aria-hidden="true">
             {why.teams.map((t) => (
-              <span className="cx-why__team" key={t.name} data-umm-tone={t.tone} style={{ left: `${t.x}%`, top: `${t.y}%` }}>
+              <span
+                className="cx-why__team"
+                key={t.name}
+                data-umm-tone={t.tone}
+                style={{ left: `${t.x}%`, top: `${t.y}%` }}
+              >
                 <span className="cx-why__pop">
                   <span>{t.name}</span>
                 </span>
@@ -376,7 +435,7 @@ export function WhyBand() {
             <div className="cx-why__beat cx-why__intro">
               <Eyebrow className="cx-why__tag">{why.chip}</Eyebrow>
               <h2 className="cx-why__title" id="cx-why-title">
-                <Line text={why.line1} /> <Line text={why.line2} />
+                <Line text={why.line1} one={why.one} /> <Line text={why.line2} one={why.one} />
               </h2>
               <p className="cx-lead cx-why__lead">{why.lead}</p>
             </div>

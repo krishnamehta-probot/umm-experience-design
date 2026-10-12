@@ -3,7 +3,7 @@ import { FlyArrow, LottieMark } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
 import { measurePeel, peelFrame, sheetPath, type PeelGeometry } from '@/lib/cornerPeel'
-import { services, type ServiceMark } from '@/content/cxUiDesign'
+import { services as cxServices, type ServiceMark } from '@/content/cxUiDesign'
 
 import research from '@/lottie/services/research.json'
 import journey from '@/lottie/services/journey.json'
@@ -11,6 +11,8 @@ import interfaces from '@/lottie/services/interface.json'
 import brand from '@/lottie/services/brand.json'
 import data from '@/lottie/services/data.json'
 import testing from '@/lottie/services/testing.json'
+
+export type ServicesContent = typeof cxServices
 
 /* ============================================================================
    4 · WHAT WE CAN HELP YOU DO — six services, all at once, each a card with
@@ -45,10 +47,27 @@ const MARKS: Record<ServiceMark, unknown> = {
   testing,
 }
 
-type Service = (typeof services.items)[number]
+/** Off-site links open in a new tab; in-page anchors stay where they are. */
+const offSite = (href: string) => (href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})
+
+type Service = ServicesContent['items'][number]
 type Side = 'front' | 'back'
 
-export function ServicesV2() {
+/** The Lottie scene each card plays, by its content's mark. Another page can
+ *  pass its own scenes (the AI page does); CX uses its six. */
+export type ServiceMarks = Record<ServiceMark, unknown>
+
+export function ServicesV2({
+  content: services = cxServices,
+  marks = MARKS,
+  still = 150,
+}: {
+  content?: ServicesContent
+  marks?: ServiceMarks
+  /** The frame the scenes hold for reduced motion (the AI scenes rest
+   *  finished on frame 0; CX's read best at 150). */
+  still?: number
+}) {
   const ref = useRef<HTMLElement>(null)
   const grid = useRef<HTMLUListElement>(null)
   const [live, setLive] = useState(false)
@@ -124,22 +143,30 @@ export function ServicesV2() {
 
         <ul className="cx-svc__grid" ref={grid}>
           {services.items.map((s, i) => (
-            <ServiceCard key={s.title} service={s} index={i} live={live} touch={touch} />
+            <ServiceCard
+              key={s.title}
+              service={s}
+              index={i}
+              live={live}
+              touch={touch}
+              copy={services}
+              mark={marks[s.mark]}
+              still={still}
+            />
           ))}
         </ul>
 
         <aside className="cx-signpost">
           <p>
             <strong>{services.closing.question}</strong>{' '}
-            <a href={services.closing.href} target="_blank" rel="noreferrer">
+            <a href={services.closing.href} {...offSite(services.closing.href)}>
               {services.closing.link}
             </a>
           </p>
           <a
             className="cx-signpost__mark"
             href={services.closing.href}
-            target="_blank"
-            rel="noreferrer"
+            {...offSite(services.closing.href)}
             tabIndex={-1}
             aria-hidden="true"
           >
@@ -160,11 +187,17 @@ function ServiceCard({
   index,
   live,
   touch,
+  copy,
+  mark,
+  still,
 }: {
   service: Service
   index: number
   live: boolean
   touch: boolean
+  copy: ServicesContent
+  mark: unknown
+  still: number
 }) {
   const backId = useId()
   const [side, setSide] = useState<Side>('front')
@@ -302,9 +335,9 @@ function ServiceCard({
           </span>
           <span className="cx-svc__name">{s.title}</span>
         </div>
-        <p className="cx-svc__more">{s.more}</p>
+        {s.more ? <p className="cx-svc__more">{s.more}</p> : null}
         <div className="cx-svc__inc">
-          <p className="cx-svc__label">{services.includesLabel}</p>
+          <p className="cx-svc__label">{copy.includesLabel}</p>
           <ul>
             {s.includes.map((item, i) => (
               <li key={item} style={{ '--i': i } as CSSProperties}>
@@ -317,9 +350,9 @@ function ServiceCard({
             ))}
           </ul>
         </div>
-        <p className="cx-svc__scope">{services.scope}</p>
-        <a className="cx-svc__foot cx-svc__cta" href={services.cta.href}>
-          <strong>{services.cta.label}</strong>
+        <p className="cx-svc__scope">{copy.scope}</p>
+        <a className="cx-svc__foot cx-svc__cta" href={copy.cta.href}>
+          <strong>{copy.cta.label}</strong>
           <FlyArrow size={14} strokeWidth={2.2} />
         </a>
       </div>
@@ -333,10 +366,10 @@ function ServiceCard({
           <h3 className="cx-svc__title">{s.title}</h3>
           <p className="cx-svc__body">{s.body}</p>
           <LottieMark
-            data={MARKS[s.mark]}
+            data={mark}
             playing={live && (!showsBack || busy)}
             hold={!touch && !hover}
-            still={150}
+            still={still}
             className="cx-svc__mark"
           />
           <ul className="cx-svc__tags">
@@ -345,7 +378,7 @@ function ServiceCard({
             ))}
           </ul>
           <span className="cx-svc__foot cx-svc__hint" aria-hidden="true" onClick={turn}>
-            {services.hint}
+            {copy.hint}
           </span>
         </div>
       </div>
@@ -368,7 +401,7 @@ function ServiceCard({
           onClick={turn}
           aria-expanded={showsBack}
           aria-controls={backId}
-          aria-label={showsBack ? `Back to ${s.title}` : `${services.hint}: ${s.title}`}
+          aria-label={showsBack ? `Back to ${s.title}` : `${copy.hint}: ${s.title}`}
         >
           <FlyArrow size={20} strokeWidth={2.2} />
         </button>

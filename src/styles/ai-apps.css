@@ -1,0 +1,518 @@
+/* ============================================================================
+   AI & AUTOMATION — applications and engagement
+   Every value reads a token. Stage tone comes from data-umm-tone on each card.
+   ========================================================================== */
+
+/* ---- section head: heading left, lead bottom-right on wide screens ------- */
+
+.ai-apps__head {
+  display: grid;
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+  margin-bottom: clamp(2.5rem, 4.4vw, 4.25rem);
+}
+
+.ai-apps__lead {
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--umm-text-body-l);
+  line-height: var(--umm-leading-body);
+  color: var(--umm-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .ai-apps__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: clamp(2rem, 5vw, 6rem);
+  }
+
+  .ai-apps__head > :first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .ai-apps__lead {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+    justify-self: end;
+    padding-bottom: 0.4rem;
+  }
+}
+
+/* ---- the card grid ------------------------------------------------------- */
+
+.ai-apps__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .ai-apps__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ai-app {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--umm-text);
+}
+
+.ai-app__stage {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 24px;
+  border-radius: var(--cx-r-card);
+  background: var(--umm-tone);
+}
+
+@media (max-width: 900px) {
+  .ai-app__stage {
+    height: 260px;
+  }
+}
+
+.ai-app__label {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.ai-app__vig {
+  position: absolute;
+  top: 56px;
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
+}
+
+/* screen-reader copy of the question; visually hidden */
+.ai-app__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---- vignette: shared surfaces ------------------------------------------ */
+
+.ai-app__vig :is(.ai-app__bubble, .ai-app__answer, .ai-app__panel, .ai-app__note) {
+  background: var(--umm-paper);
+  border-radius: 14px;
+  box-shadow: var(--umm-shadow-2);
+}
+
+/* ---- vignette: assistant ------------------------------------------------- */
+
+.ai-app__bubble {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 86%;
+  margin-left: auto;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--umm-ink);
+}
+
+.ai-app__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.ai-app__q {
+  display: grid;
+  min-width: 0;
+}
+
+.ai-app__ghost,
+.ai-app__typed {
+  grid-area: 1 / 1;
+  white-space: normal;
+}
+
+.ai-app__ghost {
+  visibility: hidden;
+}
+
+.ai-app__answer {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  width: 86%;
+  margin-top: 14px;
+  padding: 14px 14px 12px;
+}
+
+.ai-app__sk {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--umm-ink) 10%, var(--umm-paper));
+  transform-origin: 0 50%;
+}
+
+.ai-app__src {
+  margin-top: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--umm-tone-wash);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+/* ---- vignette: document -------------------------------------------------- */
+
+.ai-app__docrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 150px;
+}
+
+.ai-app__doc {
+  position: relative;
+  flex: none;
+  width: 64px;
+}
+
+.ai-app__page {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-app__scan {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--umm-tone-signal);
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--umm-tone-signal) 40%, transparent);
+}
+
+.ai-app__arrow {
+  display: grid;
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.ai-app__arrow svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-app__panel {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 14px;
+}
+
+.ai-app__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+.ai-app__row + .ai-app__row {
+  border-top: 1px solid var(--umm-line);
+}
+
+.ai-app__key {
+  color: color-mix(in srgb, var(--umm-ink) 70%, transparent);
+}
+
+.ai-app__val {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ai-app__tick {
+  width: 11px;
+  height: 11px;
+  flex: none;
+  fill: none;
+  stroke: var(--umm-tone-signal);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-app__tick path {
+  stroke-dasharray: 1;
+}
+
+.ai-app__note {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+/* ---- vignette: decision -------------------------------------------------- */
+
+.ai-app__chart {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  width: 58%;
+  height: 150px;
+}
+
+.ai-app__col {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  height: 100%;
+  padding: 0 3px;
+}
+
+.ai-app__bar {
+  display: block;
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--umm-ink) 28%, transparent);
+  transform-origin: 50% 100%;
+}
+
+.ai-app__bar--fc {
+  background: transparent;
+  border: 1.5px dashed color-mix(in srgb, var(--umm-ink) 55%, transparent);
+  border-bottom: 0;
+}
+
+.ai-app__mark {
+  position: absolute;
+  left: 50%;
+  bottom: calc(70% + 14px);
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-coral);
+}
+
+.ai-app__ring {
+  position: absolute;
+  inset: -1.5px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ai-app__lines {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 38%;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--umm-ink);
+}
+
+.ai-app__lines p {
+  margin: 0 0 0.35em;
+}
+
+/* ---- card text ----------------------------------------------------------- */
+
+.ai-app__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.ai-app__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.ai-app__title {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1.4rem, 1.7vw, 1.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--umm-text);
+}
+
+.ai-app__text {
+  margin: 0.7rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--umm-text-secondary);
+}
+
+.ai-app__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: 1rem;
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.ai-app__link:hover {
+  text-decoration-thickness: 2.5px;
+}
+
+.ai-app__link:focus-visible {
+  outline: 2px solid var(--umm-focus);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ============================================================================
+   ENGAGEMENT — "choose the right starting point"
+   ========================================================================== */
+
+.ai-engage {
+  position: relative;
+  padding-block: clamp(3.5rem, 6vw, 6rem);
+}
+
+.ai-engage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: var(--umm-gutter);
+  left: var(--umm-gutter);
+  height: 1px;
+  background: var(--umm-hairline);
+}
+
+.ai-engage__title {
+  margin: 0 0 clamp(1.5rem, 2.6vw, 2.5rem);
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--umm-text);
+}
+
+.ai-engage__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
+}
+
+@media (max-width: 1100px) {
+  .ai-engage__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-engage__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ai-engage__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 100%;
+  padding: clamp(1.25rem, 2vw, 1.6rem);
+  border-radius: var(--cx-r-card);
+  background: var(--umm-veil);
+  color: var(--umm-text);
+  text-decoration: none;
+  transition: background-color 0.35s ease;
+}
+
+.ai-engage__card:is(:hover, :focus-visible) {
+  background: var(--umm-tone);
+}
+
+.ai-engage__card:focus-visible {
+  outline: 2px solid var(--umm-focus);
+  outline-offset: 3px;
+}
+
+.ai-engage__name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--umm-text);
+}
+
+.ai-engage__body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--umm-text-secondary);
+}
+
+.ai-engage__arrow {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  color: var(--umm-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-engage__card {
+    transition: none;
+  }
+}

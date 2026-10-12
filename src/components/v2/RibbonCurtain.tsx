@@ -1,5 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useReducedMotion } from '@/lib/useReducedMotion'
+import type { Tone } from '../primitives'
 import { ScrollTrigger } from '@/lib/gsap'
 
 /* ============================================================================
@@ -92,6 +93,7 @@ export function RibbonCurtain({
   separator = '✦',
   speed = 0.75,
   clearOf,
+  tone,
 }: {
   items: readonly string[]
   separator?: string
@@ -99,6 +101,8 @@ export function RibbonCurtain({
   speed?: number
   /** selector of the text on the first screen the ribbon must not cover */
   clearOf?: string
+  /** the strip's colour, as a palette tone; the default is sky */
+  tone?: Tone
 }) {
   const reduced = useReducedMotion()
   const uid = useId().replace(/:/g, '')
@@ -115,13 +119,15 @@ export function RibbonCurtain({
   /** viewBox width: 1440, or the window's width once that is wider */
   const [vbW, setVbW] = useState(W)
 
-  const unit = useMemo(
-    () => `${items.join(`  ${separator}  `)}  ${separator}  `,
-    [items, separator],
-  )
+  const unit = useMemo(() => `${items.join(`  ${separator}  `)}  ${separator}  `, [items, separator])
   /* enough repetitions to overrun the longest the curve ever gets */
   const run = useMemo(
-    () => (spacing ? Array(Math.ceil((vbW + 960) / spacing) + 2).fill(unit).join('') : unit),
+    () =>
+      spacing
+        ? Array(Math.ceil((vbW + 960) / spacing) + 2)
+            .fill(unit)
+            .join('')
+        : unit,
     [unit, spacing, vbW],
   )
 
@@ -263,13 +269,12 @@ export function RibbonCurtain({
   }, [spacing, speed, reduced, vbW, clearOf])
 
   return (
-    <div className="cx-curtain" ref={rootRef}>
-      <svg
-        className="cx-curtain__svg"
-        viewBox={`0 0 ${vbW} ${H}`}
-        role="img"
-        aria-label={items.join(', ')}
-      >
+    <div
+      className="cx-curtain"
+      ref={rootRef}
+      style={tone ? ({ '--curtain-tone': `var(--umm-${tone})` } as CSSProperties) : undefined}
+    >
+      <svg className="cx-curtain__svg" viewBox={`0 0 ${vbW} ${H}`} role="img" aria-label={items.join(', ')}>
         <defs>
           <path id={pathId} ref={bandRef} d={curve(SWING, vbW)} fill="none" />
         </defs>

@@ -4,7 +4,9 @@ import { ChipHead, withAccent } from './ChipHead'
 import { StageLight } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
-import { stages } from '@/content/cxUiDesign'
+import { stages as cxStages } from '@/content/cxUiDesign'
+
+export type StagesContent = typeof cxStages
 
 /* ============================================================================
    5 · BUILT FOR WHERE YOU ARE — the v1 company-size filter, kept
@@ -54,7 +56,6 @@ const smooth = (t: number) => {
 }
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
-const items = stages.items
 /** How far a stage has travelled from its seat, and which way it is going. */
 function place(rel: number, first: boolean, last: boolean) {
   const held = (first && rel < 0) || (last && rel > 0)
@@ -67,7 +68,15 @@ function place(rel: number, first: boolean, last: boolean) {
   return { t: 0, leaving: false }
 }
 
-export function StagesV2() {
+export function StagesV2({
+  content: stages = cxStages,
+  light = 'glass',
+}: {
+  content?: StagesContent
+  /** the picture behind the flow: CX's fluted light, or the AI page's network */
+  light?: 'glass' | 'network'
+}) {
+  const items = stages.items
   const { ref, progress } = usePinProgress<HTMLElement>()
   const tabsRef = useRef<HTMLDivElement>(null)
   const [marks, setMarks] = useState<{ x: number; w: number }[]>([])
@@ -233,7 +242,7 @@ export function StagesV2() {
                 {/* the picture behind the flow grows with the company: a
                     spark, a rising curve, a lit skyline, morphing on the same
                     scroll value as the reels */}
-                <StageLight u={u} />
+                <StageLight u={u} variant={light} />
               </div>
 
               <div className="umm-stage__panels">
@@ -263,8 +272,7 @@ export function StagesV2() {
                         <a
                           className="cx-stage__cta"
                           href={item.cta.href}
-                          target="_blank"
-                          rel="noreferrer"
+                          {...(item.cta.href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
                           tabIndex={t > 0.5 ? -1 : undefined}
                         >
                           <span>{item.cta.label}</span>

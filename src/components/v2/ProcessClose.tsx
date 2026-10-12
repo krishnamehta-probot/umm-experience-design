@@ -1,10 +1,13 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { Accordion, SplitButton } from '../primitives'
 import { Eyebrow } from './ChipHead'
 import { GlassCube } from './GlassCube'
-import { Roadmap } from './Roadmap'
+import { Roadmap, type ProcessContent } from './Roadmap'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
-import { closing, faq } from '@/content/cxUiDesign'
+import { closing as cxClosing, faq as cxFaq } from '@/content/cxUiDesign'
+
+export type ClosingContent = typeof cxClosing
+export type FaqContent = typeof cxFaq
 
 /* ============================================================================
    7 · HOW WE WORK + LET'S TALK
@@ -16,7 +19,18 @@ import { closing, faq } from '@/content/cxUiDesign'
    removed on 8 Oct, as the site's own footer follows.
    ========================================================================== */
 
-export function ProcessClose() {
+export function ProcessClose({
+  process,
+  closing = cxClosing,
+  faq = cxFaq,
+  children,
+}: {
+  process?: ProcessContent
+  closing?: ClosingContent
+  faq?: FaqContent
+  /* rendered between the roadmap and the closing band */
+  children?: ReactNode
+}) {
   const ref = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -54,7 +68,8 @@ export function ProcessClose() {
 
   return (
     <div ref={ref}>
-      <Roadmap />
+      <Roadmap content={process} />
+      {children}
 
       <section className="cx-close" id="contact" data-umm-theme="ink">
         <GlassCube className="cx-close__cube" />
@@ -73,7 +88,10 @@ export function ProcessClose() {
             </h2>
             <p className="cx-close__lead">{closing.lead}</p>
             <div className="cx-close__actions">
-              <SplitButton href={closing.primaryCta.href} target="_blank" rel="noreferrer">
+              <SplitButton
+                href={closing.primaryCta.href}
+                {...(closing.primaryCta.href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
+              >
                 {closing.primaryCta.label}
               </SplitButton>
             </div>
@@ -88,7 +106,6 @@ export function ProcessClose() {
           </div>
         </div>
       </section>
-
     </div>
   )
 }

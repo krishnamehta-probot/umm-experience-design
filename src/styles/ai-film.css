@@ -1,0 +1,786 @@
+/* ============================================================================
+   AI IN PRACTICE — the film (AiFilm.tsx)
+
+   The shell, intro, cards, controls and grain are the CX film's (v2.css,
+   .cx-film and .cx-f-*). This file adds what the three use cases need: each
+   scene's ground and glow, and the UI inside each app window, drawn in px on
+   the same 940 x 580 view the CX projects use.
+   ========================================================================== */
+
+/* ---- scene grounds and glows ---------------------------------------------- */
+
+.ai-f-scene--assistant {
+  background: #2a0c28;
+}
+
+.ai-f-scene--document {
+  background: #07162e;
+}
+
+.ai-f-scene--decision {
+  background: #161a0b;
+}
+
+.ai-f-scene--assistant .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(255 196 242 / 0.6), transparent 70%),
+    radial-gradient(35% 45% at 8% 100%, rgb(150 40 130 / 0.5), transparent 70%);
+}
+
+.ai-f-scene--document .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(209 231 255 / 0.5), transparent 70%),
+    radial-gradient(35% 45% at 8% 100%, rgb(40 90 170 / 0.5), transparent 70%);
+}
+
+.ai-f-scene--decision .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(240 255 112 / 0.45), transparent 70%),
+    radial-gradient(35% 45% at 8% 100%, rgb(90 110 30 / 0.5), transparent 70%);
+}
+
+/* the area and the label may wrap onto two lines in the copy column */
+.ai-f-scene .cx-f-proj__meta {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+/* the app window's view: a light surface per scene */
+.ai-f-scene .cx-f-proj__view {
+  background: #f7f5fa;
+}
+
+.ai-f-scene--document .cx-f-proj__view {
+  background: #f1f5fb;
+}
+
+.ai-f-scene--decision .cx-f-proj__view {
+  background: #f5f6ef;
+}
+
+.ai-f-ui {
+  position: absolute;
+  inset: 0;
+}
+
+/* a grey skeleton line standing in for text */
+.ai-f-sk {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+  background: #e4e1eb;
+  transform-origin: 0 50%;
+}
+
+/* the citrus tick disc, shared by the chat, the checks and the callout */
+.ai-f-tickdisc {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+}
+
+.ai-f-tickdisc svg {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the tick draws itself: the timeline moves stroke-dashoffset from 1 to 0 */
+.ai-f-tick path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+/* ---- 0:03 assistant ------------------------------------------------------- */
+
+.ai-f-head {
+  position: absolute;
+  left: 36px;
+  top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ai-f-head__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--umm-blossom);
+}
+
+.ai-f-head .ai-f-sk {
+  height: 10px;
+}
+
+.ai-f-bubble {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 30px -14px rgb(16 14 20 / 0.35);
+  font-family: var(--umm-font-body);
+  font-size: 26px;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+.ai-f-bubble--me {
+  left: 168px;
+  top: 96px;
+  width: 400px;
+  padding: 20px 24px;
+  background: var(--umm-blossom-wash);
+}
+
+.ai-f-caret {
+  display: inline-block;
+  width: 3px;
+  height: 1.05em;
+  margin-left: 4px;
+  vertical-align: -0.16em;
+  background: var(--umm-ink);
+  opacity: 0;
+}
+
+.ai-f-think {
+  position: absolute;
+  left: 36px;
+  top: 196px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 124px;
+  height: 56px;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 12px 30px -14px rgb(16 14 20 / 0.35);
+}
+
+.ai-f-think span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.ai-f-answer {
+  position: absolute;
+  left: 36px;
+  top: 196px;
+  box-sizing: border-box;
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  width: 500px;
+  padding: 24px 26px 22px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 30px -14px rgb(16 14 20 / 0.35);
+}
+
+.ai-f-answer .ai-f-sk {
+  width: 100%;
+}
+
+.ai-f-src {
+  margin-top: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--umm-blossom-wash);
+  font-family: var(--umm-font-body);
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+/* the retrieved documents: a fan of three cards, the first marked */
+.ai-f-doc {
+  position: absolute;
+  box-sizing: border-box;
+  width: 250px;
+  height: 220px;
+  padding: 22px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 26px 44px -18px rgb(16 14 20 / 0.35);
+}
+
+.ai-f-doc--0 {
+  left: 618px;
+  top: 110px;
+}
+
+.ai-f-doc--1 {
+  left: 640px;
+  top: 140px;
+}
+
+.ai-f-doc--2 {
+  left: 662px;
+  top: 170px;
+}
+
+.ai-f-doc__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 26px;
+  border-radius: 14px;
+  background: var(--umm-sky);
+}
+
+.ai-f-doc__icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-f-doc .ai-f-sk {
+  margin-top: 14px;
+}
+
+.ai-f-doc .ai-f-tickdisc {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+/* a person the question is routed to */
+.ai-f-esc {
+  position: absolute;
+  left: 268px;
+  top: 392px;
+  width: 300px;
+  height: 60px;
+}
+
+.ai-f-esc .ai-f-bubble {
+  left: 0;
+  top: 0;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 0 24px;
+  border-radius: 30px;
+  background: var(--umm-blossom-wash);
+}
+
+.ai-f-esc .ai-f-sk {
+  height: 10px;
+}
+
+.ai-f-badge {
+  position: absolute;
+  left: -12px;
+  top: -14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: #fff;
+  font-family: var(--umm-font-body);
+  font-size: 20px;
+  font-weight: var(--umm-weight-semibold);
+  line-height: 36px;
+  text-align: center;
+}
+
+.ai-f-composer {
+  position: absolute;
+  left: 36px;
+  top: 496px;
+  box-sizing: border-box;
+  width: 532px;
+  height: 60px;
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 12px 30px -14px rgb(16 14 20 / 0.3);
+}
+
+.ai-f-composer .ai-f-sk.ai-f-composer__ph {
+  position: absolute;
+  left: 26px;
+  top: 25px;
+  width: 200px;
+  height: 10px;
+  background: #ecebf1;
+}
+
+.ai-f-send {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.ai-f-send svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-f-avatar {
+  position: absolute;
+  left: 780px;
+  top: 418px;
+  width: 116px;
+  height: 116px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--umm-blossom);
+}
+
+.ai-f-avatar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- 0:09 document -------------------------------------------------------- */
+
+.ai-f-sheet {
+  position: absolute;
+  left: 96px;
+  top: 84px;
+  box-sizing: border-box;
+  width: 260px;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 30px 50px -22px rgb(16 14 20 / 0.45);
+}
+
+.ai-f-sheet__head {
+  position: absolute;
+  left: 24px;
+  top: 22px;
+  width: 212px;
+  height: 30px;
+  border-radius: 8px;
+  background: #e6e3ee;
+}
+
+.ai-f-sheet .ai-f-sk {
+  position: absolute;
+  left: 24px;
+  height: 12px;
+}
+
+.ai-f-sheet__total {
+  position: absolute;
+  left: 130px;
+  top: 290px;
+  box-sizing: border-box;
+  width: 116px;
+  height: 64px;
+  border: 2px solid #e6e3ee;
+  border-radius: 10px;
+}
+
+.ai-f-region {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid var(--umm-ink);
+  border-radius: 10px;
+  background: rgb(209 231 255 / 0.45);
+  box-shadow: 0 0 0 4px rgb(209 231 255 / 0.6);
+}
+
+.ai-f-region--a {
+  left: 14px;
+  top: 80px;
+  width: 232px;
+  height: 56px;
+}
+
+.ai-f-region--b {
+  left: 14px;
+  top: 132px;
+  width: 232px;
+  height: 56px;
+}
+
+.ai-f-region--c {
+  left: 130px;
+  top: 290px;
+  width: 116px;
+  height: 64px;
+}
+
+/* the sky scan beam: a soft band with a brighter leading edge */
+.ai-f-scan {
+  position: absolute;
+  top: 0;
+  left: -10px;
+  right: -10px;
+  height: 56px;
+  background: linear-gradient(to bottom, rgb(209 231 255 / 0), rgb(209 231 255 / 0.85) 88%, rgb(209 231 255 / 1));
+}
+
+.ai-f-panel {
+  position: absolute;
+  left: 520px;
+  top: 110px;
+  box-sizing: border-box;
+  width: 360px;
+  height: 300px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 30px 50px -22px rgb(16 14 20 / 0.4);
+}
+
+.ai-f-panel .ai-f-sk.ai-f-panel__head {
+  position: absolute;
+  left: 24px;
+  top: 28px;
+  width: 150px;
+  height: 12px;
+}
+
+.ai-f-row {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 60px;
+  padding: 0 14px;
+  border-radius: 14px;
+  opacity: 0.45;
+  font-family: var(--umm-font-body);
+  color: var(--umm-ink);
+}
+
+.ai-f-row--0 {
+  top: 74px;
+}
+
+.ai-f-row--1 {
+  top: 148px;
+}
+
+.ai-f-row--2 {
+  top: 222px;
+}
+
+.ai-f-row__key {
+  font-size: 22px;
+  color: var(--umm-ink-soft);
+}
+
+.ai-f-row__val {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: var(--umm-weight-medium);
+}
+
+.ai-f-row .ai-f-tickdisc {
+  width: 30px;
+  height: 30px;
+}
+
+.ai-f-row .ai-f-tickdisc svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* a token: a glowing sky dot that leaves a region and is absorbed by its row */
+.ai-f-token {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--umm-sky);
+  box-shadow:
+    0 0 0 2px var(--umm-ink),
+    0 0 26px 10px rgb(209 231 255 / 0.9);
+}
+
+.ai-f-note {
+  position: absolute;
+  left: 500px;
+  top: 480px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 400px;
+  height: 62px;
+  padding: 0 26px 0 13px;
+  border-radius: 31px;
+  background: #fff;
+  box-shadow: 0 16px 34px -16px rgb(16 14 20 / 0.4);
+  font-family: var(--umm-font-body);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--umm-ink);
+}
+
+.ai-f-note__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--umm-sky);
+}
+
+.ai-f-note__icon svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--umm-ink);
+}
+
+.ai-f-arrow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 940px;
+  height: 580px;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-f-arrow__line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+/* ---- 0:16 decision -------------------------------------------------------- */
+
+.ai-f-card {
+  position: absolute;
+  left: 36px;
+  top: 36px;
+  box-sizing: border-box;
+  width: 868px;
+  height: 508px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 30px 60px -28px rgb(16 14 20 / 0.35);
+}
+
+.ai-f-card__title {
+  position: absolute;
+  left: 70px;
+  top: 68px;
+  width: 240px;
+  height: 16px;
+  border-radius: 999px;
+  background: #e6e3ee;
+}
+
+.ai-f-card__legend {
+  position: absolute;
+  top: 66px;
+  width: 92px;
+  height: 20px;
+  border-radius: 999px;
+  background: #eeecf3;
+}
+
+.ai-f-card__legend--a {
+  left: 664px;
+}
+
+.ai-f-card__legend--b {
+  left: 770px;
+}
+
+.ai-f-grid {
+  position: absolute;
+  left: 70px;
+  width: 800px;
+  height: 2px;
+  background: #ebe9f1;
+  transform-origin: 0 50%;
+}
+
+.ai-f-chart {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 940px;
+  height: 580px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ai-f-chart__band {
+  fill: rgb(209 231 255 / 0.9);
+}
+
+.ai-f-chart__fc {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 14 12;
+}
+
+.ai-f-chart__solid {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+}
+
+/* the anomaly: a coral point with rings that expand from it */
+.ai-f-mark__dot {
+  position: absolute;
+  left: 540px;
+  top: 146px;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 3px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-coral);
+}
+
+.ai-f-spike {
+  position: absolute;
+  left: 540px;
+  top: 146px;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border: 3px solid var(--umm-coral);
+  border-radius: 50%;
+  box-shadow: 0 0 18px rgb(255 195 196 / 0.9);
+}
+
+.ai-f-call {
+  position: absolute;
+  top: 392px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 96px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: var(--umm-citrus-wash);
+  box-shadow: 0 16px 34px -16px rgb(16 14 20 / 0.4);
+  font-family: var(--umm-font-body);
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--umm-ink);
+}
+
+.ai-f-call--a {
+  left: 110px;
+  width: 360px;
+}
+
+.ai-f-call--b {
+  left: 500px;
+  width: 380px;
+}
+
+.ai-f-call .ai-f-typed {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-f-call__dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 0 3px var(--umm-ink);
+}
+
+.ai-f-call__av {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+}
+
+.ai-f-call__av svg {
+  width: 30px;
+  height: 30px;
+  fill: var(--umm-ink);
+}
+
+/* ---- 0:22 the last frame: the use cases as cards -------------------------- */
+
+.ai-f-end .cx-f-end__h {
+  font-size: 72px;
+}
+
+.ai-f-end__lead {
+  grid-column: 1;
+  margin-top: 6px;
+  font-family: var(--umm-font-body);
+  font-size: 26px;
+  line-height: 1.4;
+  color: var(--umm-ink-soft);
+}
+
+.ai-f-end .cx-f-end__cards {
+  top: 330px;
+}
+
+/* the image area is the use case's tone, with its vignette in it */
+.cx-f-end__img.ai-f-end__tone {
+  background: var(--umm-tone);
+}
+
+.ai-f-end__art.ai-app__vig {
+  top: 26px;
+  right: 26px;
+  bottom: 26px;
+  left: 26px;
+}

@@ -1,13 +1,15 @@
 import { lazy, Suspense, useLayoutEffect, useRef } from 'react'
-import { SplitButton } from '../primitives'
+import { SplitButton, type Tone } from '../primitives'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
-import { hero } from '@/content/cxUiDesign'
+import { hero as cxHero } from '@/content/cxUiDesign'
 
 /* three.js is the heaviest thing on the page: it loads on its own, after the
    headline has painted */
 const GlassCube3D = lazy(() => import('./GlassCube3D'))
 
 const SHOW_ACTIONS = false
+
+export type HeroContent = typeof cxHero
 
 /* ============================================================================
    1 · HERO — the AI & Automation artifact's arrangement
@@ -22,7 +24,16 @@ const SHOW_ACTIONS = false
    back a little, so the wipe has depth rather than being a flat slide.
    ========================================================================== */
 
-export function HeroV2() {
+export function HeroV2({
+  content: hero = cxHero,
+  chipTone = 'blossom',
+  object = 'cube',
+}: {
+  content?: HeroContent
+  chipTone?: Tone
+  /** the glass object: the CX cube, or the AI sparkle */
+  object?: 'cube' | 'sparkle'
+}) {
   const ref = useRef<HTMLElement>(null)
 
   useLayoutEffect(() => {
@@ -86,7 +97,7 @@ export function HeroV2() {
       <div className="cx-hero__cube">
         <div className="cx-hero__cube-slot" aria-hidden="true">
           <Suspense fallback={null}>
-            <GlassCube3D coveredBy="#why" />
+            <GlassCube3D coveredBy="#why" shape={object} />
           </Suspense>
         </div>
       </div>
@@ -109,7 +120,7 @@ export function HeroV2() {
               ))}
               <span className="cx-hero__line">
                 <span>
-                  <span className="cx-hero__chip" data-umm-tone="blossom">
+                  <span className="cx-hero__chip" data-umm-tone={chipTone}>
                     {hero.accent}
                   </span>
                   {hero.tail ? ` ${hero.tail}` : null}

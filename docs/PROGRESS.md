@@ -90,6 +90,63 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 12 Oct 2026, AI & Automation page (`/ai-automation`) on the locked design
+- **Krish:** the CX design is locked; the AI page is a separate page on it.
+  (A first pass with fresh section designs was rejected and removed.)
+- **How:** the CX section components (NavV2, HeroV2, WhyBand, ServicesV2,
+  StagesV2, ToolsStack, Roadmap, ProcessClose) take their copy as optional
+  props, defaulting to CX, so the CX page is unchanged (screenshot-diffed
+  against a baseline). Roadmap handles 4 or 5 steps. The AI page feeds them
+  `src/content/aiAutomation.ts`.
+- **New, in the same design language** (no CX equivalent): AI in practice
+  (`components/ai/AiApplications.tsx`), the invoice workflow
+  (`InvoiceFlow.tsx`) and the four ways to start under the roadmap
+  (`Engagement.tsx`).
+- **AI in practice** is now a 24 s film (`components/ai/AiFilm.tsx`, the
+  ProofFilm player and cuts) ending on the three use-case cards.
+- **Service cards** play six AI scenes of their own
+  (`scripts/build_ai_service_marks.py` → `src/lottie/ai-services/`), passed
+  to ServicesV2 through its new `marks` prop (CX keeps its six).
+- **Inside a working AI workflow** is a pinned control room: the invoice
+  travels AI → Rules → People over four magnetic stops, the track forks to
+  ready / on hold, scenarios re-route it live, the principles dock under the
+  stations. Awaiting Krish's review.
+- **Setting it apart from CX, step by step** (Krish: small changes, design
+  stays locked). Step 1, the hero: the glass cube is a glass AI sparkle (✦)
+  on the AI page, built and lit like the cube: a thick slab with rounded
+  edges and softened tips, same studio (`GlassCube3D shape`, `HeroV2
+  object`; a flat lilac cut-out read as low quality). The strip under the
+  hero is lilac instead of sky
+  (`WhyBand ribbonTone` → `RibbonCurtain tone`). CX keeps the cube and the
+  sky strip.
+  Step 2, the Why band: the three points' shapes are other solid Cool
+  Shapes (star-11 burst / flower-1 / moon-11 leaf, in sun / lilac / coral,
+  set in `aiAutomation.ts`), and the fluted light behind them is violet to
+  lilac instead of blue (`WhyBand lightTone` → `FlutedLight tone`, a second
+  colour ramp; CX keeps the blue).
+  Step 3, the six service-card scenes, redone (Krish: "go out of the box"):
+  one big object and one story each, on a wide 360×180 canvas (the cards'
+  mark area is ~2.2 : 1, so 4 : 3 scenes only filled the middle). Strategy:
+  a maze solved after one dead end. Agents: a chat-bubble buddy that
+  listens, thinks, answers, acts and hands over to a person. Workflow:
+  messy documents scanned into neat cards on a conveyor, one held back.
+  Prototypes: a pencil sketch swept into a real app and clicked. Integration:
+  the AI piece clicked into a jigsaw of systems, the colour spreading out.
+  MLOps: a heartbeat that drifts, is tuned and recovers. Each rests finished
+  on frame 0 (the card's still) and plays 8 s on hover. Source:
+  `scripts/ai_marks/*.py`, built by `scripts/build_ai_service_marks.py`
+  (one scene: `python scripts/ai_marks/_preview.py <module> <out>`).
+  `ServicesV2 still` sets the reduced-motion frame (AI 0, CX 150).
+  Step 4, "Where your business is now": the picture behind the flow is an
+  ordered neural network instead of the fluted light (`StagesV2 light=
+  "network"` → `StageLight variant`, a second shader): layers of ringed
+  nodes, each linked to every node of the next, a forward pass sweeping
+  left to right, behind the same reeded-glass flute shading. It grows a
+  layer at a time on the same scroll value (2-3-2, then 2-3-4-3-2, then
+  seven layers), always on the card's right so the flow's words stay clear.
+  (A first, scattered "plexus" version read as random; Krish asked for it
+  to fit the site.) CX keeps the fluted light.
+
 ### 12 Oct 2026, review fixes and new film projects
 - **Film:** the three projects are now Twins for Peace (live site, four
   clicked screens), Fintuit (XD prototype, four screens) and Licuido (one

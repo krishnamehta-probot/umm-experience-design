@@ -23,6 +23,14 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
 
    Draws only while on screen. Reduced motion: no drift, and a stage change
    swaps straight to the new picture. No WebGL: the CSS ground shows instead.
+
+   variant="network" (the AI page) draws a different picture on the same
+   value and behind the same reeded glass: an ordered neural network, layers
+   of ringed nodes, every node linked to the next layer, with a forward pass
+   sweeping left to right through it. It grows a layer at a time. Startups:
+   three small layers on the right (2-3-2). Scale-ups: five (2-3-4-3-2).
+   Enterprises: seven across the card (4-5-6-5-6-5-4). Same stage colours,
+   same dark corner for the number.
    ========================================================================== */
 
 const VERT = `
@@ -123,6 +131,145 @@ void main() {
 }
 `
 
+/* The AI page's picture: an ordered neural network, layer by layer, behind
+   the same reeded glass as the fluted light (see above). */
+const NETWORK = `
+precision highp float;
+uniform vec2 res;
+uniform float t;
+uniform float u;
+
+float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+
+vec3 ramp(float l, vec3 deep, vec3 mid, vec3 hot) {
+  vec3 ink = vec3(16.0, 14.0, 20.0) / 255.0;
+  vec3 c = mix(ink, deep, smoothstep(0.0, 0.16, l));
+  c = mix(c, mid, smoothstep(0.12, 0.62, l));
+  c = mix(c, hot, smoothstep(0.55, 1.02, l));
+  return mix(c, vec3(1.0), smoothstep(1.0, 1.5, l) * 0.6);
+}
+
+// seven layers across the card; each holds nodes in fixed slots, on whole
+// (odd counts) or half steps (even counts), and shows the slots within its
+// reach at this stage: -1 hidden, 0 one node, 0.5 two, 1 three ... 2.5 six
+float half_(int k) { return (k == 0 || k == 2 || k == 4 || k == 6) ? 0.5 : 0.0; }
+float reachAt(int k, float s) {
+  //                 startups  scale-ups  enterprises
+  vec3 r = k == 0 ? vec3(-1.0, -1.0, 1.5)
+         : k == 1 ? vec3(-1.0, -1.0, 2.0)
+         : k == 2 ? vec3(-1.0,  0.5, 2.5)
+         : k == 3 ? vec3(-1.0,  1.0, 2.0)
+         : k == 4 ? vec3( 0.5,  1.5, 2.5)
+         : k == 5 ? vec3( 1.0,  1.0, 2.0)
+         :          vec3( 0.5,  0.5, 1.5);
+  return s < 1.0 ? mix(r.x, r.y, s) : mix(r.y, r.z, clamp(s - 1.0, 0.0, 1.0));
+}
+
+const float X0 = 0.475;     // first layer, as a share of the width: the
+const float DX = 0.079;     // words keep the left; the network the right
+const float Y0 = 0.45;      // the network's middle, card height (y up)
+const float DY = 0.135;     // between nodes in a layer
+const float R  = 0.022;     // node radius
+
+vec2 nodePos(int k, float slot, float a) { return vec2((X0 + DX * float(k)) * a, Y0 + DY * slot); }
+float nodeOn(float slot, float reach) { return smoothstep(-0.45, 0.0, reach - abs(slot)); }
+
+void main() {
+  vec2 q = gl_FragCoord.xy / res;
+  float a = res.x / res.y;
+
+  // the reeded glass: flutes crowd to the left, each looks a little aside
+  float N = 15.0;
+  float gx = pow(q.x, 0.8) * N;
+  float id = floor(gx);
+  float fu = fract(gx);
+  // the network is drawn crisp (bending it would slice the rings); the
+  // flutes shade it, as they shade the fluted light
+  float xs = q.x;
+  vec2 p = vec2(xs * a, q.y);
+
+  float w0 = clamp(1.0 - abs(u - 0.0), 0.0, 1.0);
+  float w1 = clamp(1.0 - abs(u - 1.0), 0.0, 1.0);
+  float w2 = clamp(1.0 - abs(u - 2.0), 0.0, 1.0);
+
+  // the forward pass: a wave that runs across the layers, left to right
+  float W = fract(t * 0.16) * 9.0 - 1.0;
+
+  float light = 0.0;
+  float kx = (xs - X0) / DX;                 // where this pixel is, in layers
+  for (int k = 0; k < 7; k++) {
+    float fk = float(k);
+    float reach = reachAt(k, u);
+    float h = half_(k);
+    float act = exp(-pow((W - fk) / 0.45, 2.0));
+
+    // the layer's nodes: a lit ring, a soft core that fills as the wave passes
+    for (int j = -3; j <= 3; j++) {
+      float slot = float(j) + h;
+      if (abs(slot) > 2.6) continue;
+      float on = nodeOn(slot, reach);
+      if (on < 0.001) continue;
+      float d = length(p - nodePos(k, slot, a));
+      float ring = exp(-pow((d - R) / 0.004, 2.0));
+      float core = smoothstep(R, R - 0.004, d);
+      float halo = exp(-max(d - R, 0.0) / 0.03);
+      light += on * (0.85 * ring + core * (0.16 + 0.95 * act) + halo * (0.06 + 0.32 * act));
+    }
+
+    // its links to the next layer: every node to every node
+    if (k < 6 && kx > fk - 0.05 && kx < fk + 1.05) {
+      float reachB = reachAt(k + 1, u);
+      float hb = half_(k + 1);
+      float sw = clamp(kx - fk, 0.0, 1.0);   // how far across this gap
+      float pulse = exp(-pow((W - fk - sw) / 0.12, 2.0));
+      for (int i = -3; i <= 3; i++) {
+        float sa = float(i) + h;
+        if (abs(sa) > 2.6) continue;
+        float onA = nodeOn(sa, reach);
+        if (onA < 0.001) continue;
+        vec2 A = nodePos(k, sa, a);
+        for (int j = -3; j <= 3; j++) {
+          float sb = float(j) + hb;
+          if (abs(sb) > 2.6) continue;
+          float onB = nodeOn(sb, reachB);
+          if (onB < 0.001) continue;
+          vec2 B = nodePos(k + 1, sb, a);
+          vec2 ab = B - A;
+          float s = clamp(dot(p - A, ab) / dot(ab, ab), 0.0, 1.0);
+          float de = length(p - A - ab * s);
+          // links stop at the rings rather than running into them
+          float trimmed = smoothstep(0.0, 0.08, s) * smoothstep(1.0, 0.92, s);
+          light += onA * onB * trimmed * (0.16 + 0.55 * pulse) * exp(-pow(de / 0.0026, 2.0));
+        }
+      }
+    }
+  }
+
+  // a soft glow behind the network, so the glass has light to bend
+  vec2 mid = vec2((X0 + DX * mix(5.0, 3.0, clamp(u * 0.5, 0.0, 1.0))) * a, Y0);
+  light += 0.22 * exp(-length((p - mid) * vec2(0.8, 1.0)) / mix(0.22, 0.6, clamp(u * 0.5, 0.0, 1.0)));
+  light += 0.04 + 0.04 * q.x;
+
+  // the flutes' own edges: a hairline of light on the left, shade to the right
+  float tint = 0.92 + 0.16 * hash(id + 3.0);
+  light *= tint;
+  light = light * (1.0 - 0.28 * exp(-(1.0 - fu) / 0.3)) + exp(-fu / 0.025) * light * 0.7;
+
+  // keep the corner where the number sits dark, and the words' side quieter
+  float corner = length((q - vec2(0.0, 1.0)) * vec2(1.0, 1.25));
+  light *= mix(0.22, 1.0, smoothstep(0.25, 0.85, corner));
+  light *= mix(0.55, 1.0, smoothstep(0.1, 0.45, q.x));
+
+  vec3 deep = w0 * vec3(0.20, 0.10, 0.0) + w1 * vec3(0.20, 0.02, 0.17) + w2 * vec3(0.03, 0.06, 0.30);
+  vec3 mid3 = w0 * vec3(1.0, 0.62, 0.06) + w1 * vec3(0.92, 0.26, 0.74) + w2 * vec3(0.08, 0.38, 0.96);
+  vec3 hot  = w0 * vec3(1.0, 0.90, 0.56) + w1 * vec3(1.0, 0.77, 0.95) + w2 * vec3(0.82, 0.91, 1.0);
+  vec3 col = ramp(light, deep, mid3, hot);
+
+  col += (hash(dot(gl_FragCoord.xy, vec2(1.0, 113.0)) + fract(t)) - 0.5) / 255.0 * 2.0;
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
 function compile(gl: WebGLRenderingContext, type: number, src: string) {
   const s = gl.createShader(type)
   if (!s) return null
@@ -131,7 +278,7 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null
 }
 
-export function StageLight({ u }: { u: number }) {
+export function StageLight({ u, variant = 'glass' }: { u: number; variant?: 'glass' | 'network' }) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const target = useRef(u)
   const wake = useRef<() => void>(() => {})
@@ -146,7 +293,7 @@ export function StageLight({ u }: { u: number }) {
     const gl = el.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' })
     if (!gl) return
     const vs = compile(gl, gl.VERTEX_SHADER, VERT)
-    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG)
+    const fs = compile(gl, gl.FRAGMENT_SHADER, variant === 'network' ? NETWORK : FRAG)
     const prog = gl.createProgram()
     if (!vs || !fs || !prog) return
     gl.attachShader(prog, vs)
@@ -227,7 +374,7 @@ export function StageLight({ u }: { u: number }) {
       ro.disconnect()
       delete el.dataset.ready
     }
-  }, [reduced])
+  }, [reduced, variant])
 
   return <canvas className="cx-stage__light" ref={canvas} aria-hidden="true" />
 }

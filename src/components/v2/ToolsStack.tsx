@@ -4,7 +4,10 @@ import { usePinProgress } from '@/lib/usePinProgress'
 import { usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
-import { tools } from '@/content/cxUiDesign'
+import { tools as cxTools } from '@/content/cxUiDesign'
+
+/* the note is optional: a plan can leave it out */
+export type ToolsContent = Omit<typeof cxTools, 'note'> & { note?: string }
 
 /* ============================================================================
    6b · THE SYSTEMS YOU ALREADY HAVE — the tools wheel
@@ -27,9 +30,7 @@ import { tools } from '@/content/cxUiDesign'
    frame of tiles.
    ========================================================================== */
 
-const groups = tools.groups
-const STOPS = groups.length
-type Group = (typeof groups)[number]
+type Group = ToolsContent['groups'][number]
 
 /** The wheel: where an option sits for d places off the line. */
 function spoke(d: number): CSSProperties {
@@ -44,7 +45,9 @@ function spoke(d: number): CSSProperties {
   }
 }
 
-export function ToolsStack() {
+export function ToolsStack({ content: tools = cxTools }: { content?: ToolsContent }) {
+  const groups = tools.groups
+  const STOPS = groups.length
   const { ref, progress } = usePinProgress<HTMLElement>()
   const wide = usePinned()
   const reduced = useReducedMotion()
@@ -111,7 +114,7 @@ export function ToolsStack() {
             </ol>
           )}
 
-          <p className="cx-kit__note">{tools.note}</p>
+          {tools.note ? <p className="cx-kit__note">{tools.note}</p> : null}
         </div>
       </div>
     </section>

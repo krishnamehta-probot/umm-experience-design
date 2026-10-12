@@ -14,7 +14,8 @@ import { useEffect, useRef } from 'react'
      2. the light: a bright core along the J, a broad glow inside it,
         stronger to the right
      3. colour: brightness mapped from the page's ink through deep and
-        bright blue to the palette's sky
+        bright blue to the palette's sky (or, with tone="lilac", through
+        violet to the palette's lilac: the AI page)
 
    `progress` (0–1, the section's scroll) sweeps the J: it rises and opens
    as the story moves on. A slow drift keeps it breathing at rest. Draws only
@@ -26,7 +27,35 @@ attribute vec2 p;
 void main() { gl_Position = vec4(p, 0.0, 1.0); }
 `
 
-const FRAG = `
+/** Brightness to colour, dark to bright: the page's ink, then six steps up
+ *  to the palette colour the light ends on (0–255 per channel). */
+const RAMPS = {
+  sky: [
+    [16, 14, 20],
+    [8, 14, 40],
+    [8, 40, 160],
+    [20, 95, 245],
+    [70, 158, 255],
+    [150, 205, 255],
+    [209, 231, 255],
+  ],
+  lilac: [
+    [16, 14, 20],
+    [20, 10, 42],
+    [58, 24, 150],
+    [112, 62, 232],
+    [158, 120, 255],
+    [200, 180, 255],
+    [220, 207, 255],
+  ],
+}
+export type LightTone = keyof typeof RAMPS
+
+const glslVec = ([r, g, b]: number[]) => `vec3(${r.toFixed(1)}, ${g.toFixed(1)}, ${b.toFixed(1)})`
+
+const frag = (tone: LightTone) => {
+  const [c0, c1, c2, c3, c4, c5, c6] = RAMPS[tone].map(glslVec)
+  return `
 precision highp float;
 uniform vec2 uRes;
 uniform float uT;
@@ -35,13 +64,13 @@ uniform float uP;
 float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
 
 vec3 ramp(float v) {
-  vec3 c0 = vec3(16.0, 14.0, 20.0);
-  vec3 c1 = vec3(8.0, 14.0, 40.0);
-  vec3 c2 = vec3(8.0, 40.0, 160.0);
-  vec3 c3 = vec3(20.0, 95.0, 245.0);
-  vec3 c4 = vec3(70.0, 158.0, 255.0);
-  vec3 c5 = vec3(150.0, 205.0, 255.0);
-  vec3 c6 = vec3(209.0, 231.0, 255.0);
+  vec3 c0 = ${c0};
+  vec3 c1 = ${c1};
+  vec3 c2 = ${c2};
+  vec3 c3 = ${c3};
+  vec3 c4 = ${c4};
+  vec3 c5 = ${c5};
+  vec3 c6 = ${c6};
   vec3 c = c0;
   c = mix(c, c1, smoothstep(0.0, 0.08, v));
   c = mix(c, c2, clamp((v - 0.08) / 0.22, 0.0, 1.0));
@@ -98,8 +127,9 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }
 `
+}
 
-export function FlutedLight({ progress }: { progress: { current: number } }) {
+export function FlutedLight({ progress, tone = 'sky' }: { progress: { current: number }; tone?: LightTone }) {
   const host = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -121,7 +151,7 @@ export function FlutedLight({ progress }: { progress: { current: number } }) {
     }
     const prog = gl.createProgram()!
     gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT))
-    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG))
+    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, frag(tone)))
     gl.linkProgram(prog)
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
       el.classList.add('is-fallback')
@@ -181,7 +211,7 @@ export function FlutedLight({ progress }: { progress: { current: number } }) {
       canvas.remove()
       gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
-  }, [progress])
+  }, [progress, tone])
 
-  return <div className="cx-why__light" ref={host} aria-hidden="true" />
+  return <div className="cx-why__light" ref={host} data-tone={tone} aria-hidden="true" />
 }
