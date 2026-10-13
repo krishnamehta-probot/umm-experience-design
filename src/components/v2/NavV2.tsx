@@ -14,7 +14,16 @@ export type NavContent = typeof cxNav
    coming back the moment the reader scrolls up.
    ========================================================================== */
 
+/* The two service pages link to each other from the pill, so either one is a
+   way into the other. */
+const PAGES = [
+  { href: '/', label: 'CX & UI Design' },
+  { href: '/ai-automation', label: 'AI & Automation' },
+]
+
 export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
+  const here = typeof window === 'undefined' ? '/' : window.location.pathname.replace(/\/$/, '') || '/'
+  const other = PAGES.find((p) => p.href !== here) ?? PAGES[1]
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [open, setOpen] = useState(false)
@@ -61,6 +70,10 @@ export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
           ))}
         </nav>
 
+        <a className="cx-nav__page" href={other.href}>
+          {other.label}
+        </a>
+
         <a className="cx-nav__cta" href="#contact">
           Let&rsquo;s talk
           <span className="cx-nav__dot" aria-hidden="true">
@@ -91,6 +104,10 @@ export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
           <a href="#contact" onClick={() => setOpen(false)}>
             <span>{String(nav.length + 1).padStart(2, '0')}</span>
             Let&rsquo;s talk
+          </a>
+          <a href={other.href} onClick={() => setOpen(false)}>
+            <span>{String(nav.length + 2).padStart(2, '0')}</span>
+            {other.label}
           </a>
         </nav>
       </div>

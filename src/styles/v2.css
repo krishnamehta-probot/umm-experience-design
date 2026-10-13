@@ -195,6 +195,26 @@ html.cx-v2 body {
   color: var(--umm-ink);
 }
 
+.cx-nav__page {
+  margin-left: auto;
+  padding: 0.5em 1em;
+  border: 1px solid var(--umm-line, rgba(16, 14, 20, 0.16));
+  border-radius: var(--umm-r-pill);
+  font-size: 0.875rem;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  white-space: nowrap;
+  transition: background var(--umm-dur-fast) ease;
+}
+
+.cx-nav__page:hover {
+  background: rgba(16, 14, 20, 0.06);
+}
+
+.cx-nav__page + .cx-nav__cta {
+  margin-left: 0.6rem;
+}
+
 .cx-nav__cta {
   display: inline-flex;
   align-items: center;
@@ -266,7 +286,8 @@ html.cx-v2 body {
 }
 
 @media (max-width: 899px) {
-  .cx-nav__links {
+  .cx-nav__links,
+  .cx-nav__page {
     display: none;
   }
   .cx-nav__toggle {
