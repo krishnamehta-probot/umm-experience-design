@@ -6,10 +6,12 @@ import { ServicesV2, type ServiceMarks } from '@/components/v2/ServicesV2'
 import { StagesV2 } from '@/components/v2/StagesV2'
 import { ToolsStack } from '@/components/v2/ToolsStack'
 import { ProcessClose } from '@/components/v2/ProcessClose'
+import { ToTop } from '@/components/v2/ToTop'
 import { AiFilm } from '@/components/ai/AiFilm'
 import { InvoiceFlow } from '@/components/ai/InvoiceFlow'
 import { Engagement } from '@/components/ai/Engagement'
 import { ScrollTrigger } from '@/lib/gsap'
+import '@/styles/v2-phone.css'
 import strategy from '@/lottie/ai-services/strategy.json'
 import agents from '@/lottie/ai-services/agents.json'
 import workflowMark from '@/lottie/ai-services/workflow.json'
@@ -52,7 +54,7 @@ const AI_MARKS: ServiceMarks = {
 export function AiAutomationPage() {
   useEffect(() => {
     document.title = meta.title
-    document.documentElement.classList.add('cx-v2')
+    document.documentElement.classList.add('cx-v2', 'ai-page')
 
     /* as on the CX page: measure the pins again once fonts and images land */
     const refresh = () => ScrollTrigger.refresh()
@@ -60,7 +62,7 @@ export function AiAutomationPage() {
     window.addEventListener('load', refresh)
     return () => {
       window.removeEventListener('load', refresh)
-      document.documentElement.classList.remove('cx-v2')
+      document.documentElement.classList.remove('cx-v2', 'ai-page')
     }
   }, [])
 
@@ -85,6 +87,7 @@ export function AiAutomationPage() {
           <Engagement />
         </ProcessClose>
       </main>
+      <ToTop />
     </>
   )
 }

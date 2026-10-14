@@ -146,6 +146,37 @@ clicks a tab, then that project loops.
   seven layers), always on the card's right so the flow's words stay clear.
   (A first, scattered "plexus" version read as random; Krish asked for it
   to fit the site.) CX keeps the fluted light.
+- **13 Oct, sections 2 and 3 on phones, round two (Krish: "still needs the
+  improvement"):** the Why band fills the held screen (bigger stickers and
+  headline, each point's shape at about half the screen's width, beats
+  centred) with the light in full along the bottom, under the words. Both
+  films get an upright cut: on upright phones the frame is 1080 wide and as
+  tall as the screen's proportions (useTall + data-tall; the timeline
+  rebuilds for it), the words pinned to the top, the browser (still 940 x
+  580 inside, so every click lands) to the bottom, the last frame's cards
+  stacked. The film's controls sit left of the "to the top" button. Also
+  fixed on every screen: the CX film's "Explore all projects" button never
+  appeared in the last frame (two from() tweens on it).
+- **13 Oct, phones keep the scroll effects (both pages, Krish: "perfect
+  scroll effects as well"):** below 900px every pinned section now pins on
+  any screen 560px tall or more (`PIN_V2` in lib/usePinned; WhyBand's PIN;
+  the films' OPEN), with phone layouts in `src/styles/v2-phone.css` that fit
+  one upright screen, checked at 390×844 and 390×664 (Safari with its bars):
+  the Why band holds and plays its beats (shape over words); the film opens
+  in the clover, then plays as a band across the held screen; Your stage
+  keeps the three flows and panels over each other, moved by the scroll;
+  the rules sit beside the phone; the tools wheel runs over its tiles; the
+  roadmap becomes a timeline band (a lane per stage, today sweeping) over
+  the step list; the AI workflow folds into three bands (PhoneRoom in
+  InvoiceFlow: the rail and bays, the invoice, the stop's piece). Short
+  phones drop a lead or two so nothing is cut. Landscape phones and reduced
+  motion keep the stacked fallback (which now shows only the chosen stage's
+  flow, on CX too). The scrollbar is hidden on both pages and a round
+  "to the top" button (ToTop.tsx) sits bottom right, its citrus ring
+  filling with the page. Desktop is unchanged apart from those two.
+- **13 Oct, phone fixes (AI page):** the Why band's words ran over the
+  bright light (light kept to the right edge on phones, now on CX too); the
+  workflow's long role pills ran off the card (they wrap now).
 
 ### 12 Oct 2026, review fixes and new film projects
 - **Film:** the three projects are now Twins for Peace (live site, four

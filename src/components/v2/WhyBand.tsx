@@ -45,9 +45,11 @@ export type RibbonContent = typeof cxRibbon
 
 const UNDERLINE = 'M1 12 C 22 7, 46 15, 70 9 S 92 10, 99 8'
 
-const PIN = '(min-width: 721px) and (min-height: 540px) and (prefers-reduced-motion: no-preference)'
+/* Phones held upright pin too (13 Oct): any screen 560px tall or more. */
+const PIN =
+  '(min-width: 721px) and (min-height: 540px) and (prefers-reduced-motion: no-preference), (min-height: 560px) and (prefers-reduced-motion: no-preference)'
 const STACK =
-  '(max-width: 720px) and (prefers-reduced-motion: no-preference), (max-height: 539px) and (prefers-reduced-motion: no-preference)'
+  '(max-height: 539px) and (prefers-reduced-motion: no-preference), (max-width: 720px) and (max-height: 559px) and (prefers-reduced-motion: no-preference)'
 
 /** How far the strip's top edge sits below the section's top: the section
  *  holds with the strip flush against the top of the screen. Mirrors the

@@ -3,7 +3,7 @@ import '@/styles/ai-workflow.css'
 import { AiHead } from './AiHead'
 import { gsap } from '@/lib/gsap'
 import { usePinProgress } from '@/lib/usePinProgress'
-import { usePinned } from '@/lib/usePinned'
+import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { workflow, type WorkflowScenario } from '@/content/aiAutomation'
@@ -31,8 +31,12 @@ import { workflow, type WorkflowScenario } from '@/content/aiAutomation'
    Changing the scenario tweens the fork (back.out 1.7, 0.5 s); the invoice and
    the light re-route with it if they are already past it.
 
-   Phones, narrow screens and reduced motion: nothing pins. The same content is
-   a plain list.
+   Phones pin too (13 Oct): the same room on the same four stops, folded
+   into three bands that fit an upright phone (PhoneRoom): the rail with its
+   stations and the two bays across the top, the invoice under it, and under
+   that whatever the stop brings (the fields, the records, the routing, the
+   station rules). Phones on their side and reduced motion: nothing pins; the
+   same content is a plain list.
    ========================================================================== */
 
 type Content = typeof workflow
@@ -256,13 +260,244 @@ function InvoiceCard({ demo, scen, stamped = false }: { demo: Content['demo']; s
   )
 }
 
+/* --- phones: the room folded into three bands ----------------------------- */
+
+/* the rail across the top band, at this height */
+const P_RAIL = 40
+/* stations, fork and bays as shares of the track's width */
+const P_ST: [number, number, number] = [0.11, 0.35, 0.59]
+const P_FORK = 0.73
+const P_BAY = 0.79
+/* the bays sit this far above (ready) and below (hold) the rail */
+const P_BAY_DY = 22
+/* the invoice's band */
+const P_CARD_TOP = 92
+
+function phoneRoute(w: number, m: number): Pt[] {
+  const y = P_RAIL + (m * 2 - 1) * P_BAY_DY
+  return [
+    [w * P_ST[0], P_RAIL],
+    [w * P_ST[1], P_RAIL],
+    [w * P_ST[2], P_RAIL],
+    [w * P_FORK, P_RAIL],
+    /* the light stops at the bay's door, not on its label */
+    [w * P_BAY - 8, y],
+    [w * P_BAY - 4, y],
+  ]
+}
+
+type RoomProps = {
+  w: number
+  h: number
+  u: number
+  m: number
+  stop: number
+  scen: Scenario
+  content: Content
+  glideTo: (stop: number) => void
+}
+
+/** The pinned control room on an upright phone: the same stops, three bands. */
+function PhoneRoom({ w, h, u, m, stop, scen, content, glideTo }: RoomProps) {
+  const { demo, principles } = content
+  const missing = scen.flag === 'po'
+  const mismatch = scen.flag === 'amount'
+  const pts = phoneRoute(w, m)
+  const { p: pos, trail } = locate(u, pts)
+  const fork = w * P_FORK
+  const switchEnd: Pt = [fork + (w * P_BAY - fork) * 0.45, P_RAIL + (m * 2 - 1) * P_BAY_DY * 0.45]
+  const cardW = Math.min(300, w - 32)
+  const cardLeft = (w - cardW) / 2
+  const below = P_CARD_TOP + 118
+  const chipVals = [demo.supplier, demo.invoiceNo, scen.po, scen.amount]
+  const chipMark = (i: number): 'ok' | 'flag' | null => {
+    if (i === 2) return missing ? 'flag' : 'ok'
+    if (i === 3) return mismatch ? 'flag' : missing ? null : 'ok'
+    return 'ok'
+  }
+  const poValue = amount(demo.poValue)
+  const invValue = amount(scen.amount)
+  const poShare = poValue / Math.max(poValue, invValue)
+  const gapText = dollars(Math.abs(invValue - poValue))
+  const docked = stop >= 2
+  const outState = scen.outcome === 'ready' ? 'done' : 'hold'
+
+  return (
+    <>
+      <svg className="ai-flow__wires" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+        <polyline className="ai-flow__ghost" points={`${pts[0][0]},${P_RAIL} ${fork},${P_RAIL}`} />
+        <polyline
+          className="ai-flow__ghost ai-flow__ghost--branch"
+          points={`${fork},${P_RAIL} ${w * P_BAY},${P_RAIL - P_BAY_DY}`}
+        />
+        <polyline
+          className="ai-flow__ghost ai-flow__ghost--branch"
+          points={`${fork},${P_RAIL} ${w * P_BAY},${P_RAIL + P_BAY_DY}`}
+        />
+        <polyline className="ai-flow__trail" points={trail.map((q) => q.join(',')).join(' ')} />
+        <polyline className="ai-flow__switch" points={`${fork},${P_RAIL} ${switchEnd[0]},${switchEnd[1]}`} />
+      </svg>
+      <span className="ai-flow__pivot" style={{ left: px(fork), top: px(P_RAIL) }} aria-hidden="true" />
+
+      {/* the two bays: ready above the rail, hold below */}
+      {(['ready', 'hold'] as const).map((o) => (
+        <span
+          key={o}
+          className="ai-flow__pbay"
+          data-umm-tone={o === 'ready' ? 'citrus' : 'coral'}
+          data-active={scen.outcome === o && docked}
+          style={{ left: px(w * P_BAY), top: px(P_RAIL + (o === 'ready' ? -P_BAY_DY : P_BAY_DY)) }}
+          aria-hidden="true"
+        >
+          {o === 'ready' ? 'Ready' : 'Hold'}
+        </span>
+      ))}
+
+      {P_ST.map((f, i) => {
+        const Icon = STATION_ICON[i]
+        return (
+          <button
+            key={i}
+            type="button"
+            className="ai-flow__station"
+            data-umm-tone={TONE[i]}
+            data-lit={stop >= i || undefined}
+            data-on={stop === i || undefined}
+            style={{ left: px(w * f), top: px(P_RAIL) }}
+            onClick={() => glideTo(i)}
+            aria-current={stop === i ? 'step' : undefined}
+          >
+            <Icon />
+            <span className="ai-flow__station-label">{['AI', 'Rules', 'People'][i]}</span>
+          </button>
+        )
+      })}
+      <span
+        className="ai-flow__light"
+        aria-hidden="true"
+        style={{ left: px(pos[0]), top: px(pos[1]), opacity: u >= 2 ? 0 : 1 }}
+      />
+
+      {/* the invoice, under the rail */}
+      <div className="ai-flow__invoice" style={{ left: px(cardLeft), top: px(P_CARD_TOP), width: px(cardW) }}>
+        <InvoiceCard demo={demo} scen={scen} stamped={docked} />
+      </div>
+
+      {/* stops 0 and 1: the fields the AI read, marked once the rules checked them */}
+      <div className="ai-flow__chips ai-flow__chips--fold" style={{ left: px(cardLeft), top: px(below), width: px(cardW) }}>
+        {chipVals.map((v, i) => {
+          const mk = chipMark(i)
+          const slot = i === 2 && missing
+          return (
+            <div
+              key={`${scen.id}-${i}`}
+              className={`ai-flow__chip${slot ? ' ai-flow__chip--slot' : ''}`}
+              style={{ ['--i' as string]: i } as CSSProperties}
+            >
+              <span className="ai-flow__chip-in">
+                {slot ? (
+                  <Bang />
+                ) : (
+                  <span className="ai-flow__roll" key={v}>
+                    {v}
+                  </span>
+                )}
+              </span>
+              {mk ? <Mark kind={mk} /> : null}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* stop 1: the records it is checked against */}
+      <div className="ai-flow__records" style={{ left: px(cardLeft), top: px(below), width: px(cardW) }}>
+        <div className="ai-flow__rec">
+          <span className="ai-flow__rec-label">{demo.fields.po}</span>
+          {missing ? (
+            <span className="ai-flow__slot" aria-hidden="true" />
+          ) : (
+            <span className="ai-flow__rec-value ai-flow__roll">{scen.po}</span>
+          )}
+          {missing ? <Mark kind="flag" /> : <Mark kind="ok" />}
+        </div>
+        <div className="ai-flow__cmp">
+          {!missing ? (
+            <>
+              <div className="ai-flow__cmp-line">
+                <span className="ai-flow__rec-label">{demo.fields.poValue}</span>
+                <span className="ai-flow__rec-value ai-flow__roll">{demo.poValue}</span>
+              </div>
+              <div className="ai-flow__cmp-bar">
+                <i className="ai-flow__cmp-po" style={{ width: `${Math.round(poShare * 100)}%` }} />
+              </div>
+            </>
+          ) : null}
+          <div className="ai-flow__cmp-line">
+            <span className="ai-flow__rec-label">{demo.fields.amount}</span>
+            <span className="ai-flow__rec-value ai-flow__roll">{scen.amount}</span>
+            {mismatch ? <Mark kind="flag" /> : !missing ? <Mark kind="ok" /> : null}
+          </div>
+          <div className={`ai-flow__cmp-bar${mismatch ? ' ai-flow__cmp-bar--gap' : ''}`}>
+            <i className="ai-flow__cmp-inv" style={{ width: '100%' }} />
+            {mismatch ? (
+              <b
+                className="ai-flow__cmp-gap"
+                style={{ left: `${Math.round(poShare * 100)}%`, width: `${Math.round((1 - poShare) * 100)}%` }}
+              >
+                <span>{gapText}</span>
+              </b>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* stop 2: where the person sent it */}
+      <div
+        className="ai-flow__routed"
+        data-umm-tone={scen.outcome === 'ready' ? 'citrus' : 'coral'}
+        style={{ left: px(cardLeft), top: px(below), width: px(cardW) }}
+      >
+        <span className="ai-flow__state" data-state={outState}>
+          <StateIcon state={outState} />
+        </span>
+        <span className="ai-flow__routed-text">{scen.status}</span>
+      </div>
+
+      {/* stop 3: the station rules */}
+      <div className="ai-flow__prules" style={{ left: px(cardLeft), top: px(below), width: px(cardW) }}>
+        {principles.map((pr, i) => {
+          const Icon = PRINCIPLE_ICON[pr.icon]
+          return (
+            <article
+              key={pr.icon}
+              className="ai-flow__principle"
+              data-umm-tone={TONE[i]}
+              style={{ ['--i' as string]: i } as CSSProperties}
+            >
+              <span className="ai-flow__principle-icon">
+                <Icon />
+              </span>
+              <div>
+                <h3 className="ai-flow__principle-title">
+                  {pr.title[0]} <span>{pr.title[1]}</span>
+                </h3>
+                <p className="ai-flow__principle-body">{pr.body}</p>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
 /* ============================================================================ */
 
 export function InvoiceFlow({ content = workflow }: { content?: Content }) {
   const { demo, scenarios, roles, principles } = content
   const { ref, progress } = usePinProgress<HTMLDivElement>()
   const trackRef = useRef<HTMLDivElement>(null)
-  const wide = usePinned()
+  const wide = usePinned(PIN_V2)
   const reduced = useReducedMotion()
   const pinMode = wide && !reduced
   const stop = pinMode ? stopAt(progress, STOPS) : 0
@@ -438,6 +673,9 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
   /* --- pinned control room --------------------------------------------- */
 
   const { w, h } = box
+  /* phones and upright tablets: the room folds into bands (PhoneRoom); the
+     wide room's bays need a desktop's width */
+  const phone = w > 0 && (w < 600 || window.innerWidth < 900)
   const pts = w && h ? route({ w, h }, m) : ([[0, 0]] as Pt[])
   const { p: pos, trail } = locate(u, pts)
   const k = Math.min(1, Math.max(0, u - 1))
@@ -485,8 +723,10 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
               <span className="ai-flow__tag">{demo.tag}</span>
             </div>
 
-            <div className="ai-flow__track" data-stop={stop} ref={trackRef}>
-              {w && h ? (
+            <div className="ai-flow__track" data-stop={stop} data-fold={phone || undefined} ref={trackRef}>
+              {w && h && phone ? (
+                <PhoneRoom w={w} h={h} u={u} m={m} stop={stop} scen={scen} content={content} glideTo={glideTo} />
+              ) : w && h ? (
                 <>
                   <svg className="ai-flow__wires" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
                     <polyline className="ai-flow__ghost" points={`0,${rail} ${fork},${rail}`} />

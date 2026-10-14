@@ -8,8 +8,10 @@ import { StagesV2 } from '@/components/v2/StagesV2'
 import { Principles } from '@/components/v2/Principles'
 import { ToolsStack } from '@/components/v2/ToolsStack'
 import { ProcessClose } from '@/components/v2/ProcessClose'
+import { ToTop } from '@/components/v2/ToTop'
 import { ScrollTrigger } from '@/lib/gsap'
 import { meta } from '@/content/cxUiDesign'
+import '@/styles/v2-phone.css'
 
 /**
  * CX and UI Design — v2, the second iteration after Santosh's 30 Sep review.
@@ -60,6 +62,7 @@ export function CxUiDesignPage() {
         <ToolsStack />
         <ProcessClose />
       </main>
+      <ToTop />
     </>
   )
 }

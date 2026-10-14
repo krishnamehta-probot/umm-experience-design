@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { ChipHead, withAccent } from './ChipHead'
 import { usePinProgress } from '@/lib/usePinProgress'
-import { usePinned } from '@/lib/usePinned'
+import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { principles } from '@/content/cxUiDesign'
@@ -57,7 +57,7 @@ const MAX_FILL = 0.8
 
 export function Principles() {
   const { ref, progress } = usePinProgress<HTMLElement>()
-  const wide = usePinned()
+  const wide = usePinned(PIN_V2)
   const reduced = useReducedMotion()
   const pinMode = wide && !reduced
   const mode = pinMode ? 'scroll' : reduced ? 'still' : 'tap'
@@ -111,7 +111,9 @@ export function Principles() {
     const el = rigSlot.current
     if (!el) return
     const fit = () => {
-      const w = wide ? RIG_W : PHONE_W + 24
+      /* the callouts sit beside the phone only on wide screens; phones pin
+         too now, so this asks the width, not whether the section pins */
+      const w = window.matchMedia('(min-width: 900px)').matches ? RIG_W : PHONE_W + 24
       const s = Math.min(el.clientWidth / w, (el.clientHeight * MAX_FILL) / PHONE_H, 1)
       setScale(Math.max(0.3, s))
     }

@@ -12,3 +12,6 @@ perf.tmp.cjs
 
 # rendered videos (npm run render:film); large binaries, shared outside git
 exports/
+
+# python bytecode from the Lottie build scripts
+__pycache__/

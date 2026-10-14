@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { ChipHead, withAccent } from './ChipHead'
 import { usePinProgress } from '@/lib/usePinProgress'
-import { usePinned } from '@/lib/usePinned'
+import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { tools as cxTools } from '@/content/cxUiDesign'
@@ -49,7 +49,7 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
   const groups = tools.groups
   const STOPS = groups.length
   const { ref, progress } = usePinProgress<HTMLElement>()
-  const wide = usePinned()
+  const wide = usePinned(PIN_V2)
   const reduced = useReducedMotion()
   const pinMode = wide && !reduced
   const stop = pinMode ? stopAt(progress, STOPS) : 0

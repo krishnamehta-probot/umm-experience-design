@@ -3,7 +3,7 @@ import { FlyArrow } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { StageLight } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
-import { usePinned } from '@/lib/usePinned'
+import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { stages as cxStages } from '@/content/cxUiDesign'
 
 export type StagesContent = typeof cxStages
@@ -80,7 +80,7 @@ export function StagesV2({
   const { ref, progress } = usePinProgress<HTMLElement>()
   const tabsRef = useRef<HTMLDivElement>(null)
   const [marks, setMarks] = useState<{ x: number; w: number }[]>([])
-  const pinned = usePinned()
+  const pinned = usePinned(PIN_V2)
   /* Unpinned, the scroll cannot select anything, so the tabs do. */
   const [picked, setPicked] = useState(0)
 
@@ -145,6 +145,7 @@ export function StagesV2({
       className="umm-section umm-pin cx-stages"
       id="stages"
       ref={ref}
+      data-mode={pinned ? 'scroll' : 'stack'}
       style={{ ['--umm-pin-steps' as string]: items.length }}
     >
       <div className="umm-pin__stage">

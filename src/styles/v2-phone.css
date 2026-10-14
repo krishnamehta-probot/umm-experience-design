@@ -1,0 +1,868 @@
+/* ============================================================================
+   v2 · PHONES — the pinned sections keep their scroll effects
+
+   Krish, 13 Oct: phones get the same scroll story as desktop, on both v2
+   pages (CX and AI). Below 900px wide, on any screen tall enough to hold a
+   stage (PIN_V2 in lib/usePinned), each pinned section holds a phone screen
+   and the scroll steps through it exactly as it does on desktop. Only the
+   layout inside the stage changes, so everything fits one upright phone.
+   Phones on their side and reduced motion keep the stacked fallback.
+   ========================================================================== */
+
+/* the scrollbar is gone on both pages; the "to the top" button replaces it */
+html.cx-v2 {
+  scrollbar-width: none;
+}
+
+html.cx-v2::-webkit-scrollbar {
+  display: none;
+}
+
+/* Stacked fallback (phones on their side, reduced motion): only the chosen
+   stage's flow. The shared `.cx-stages .cx-path { display: grid }` comes
+   later than the caption's `[aria-hidden='true'] { display: none }` at the
+   same weight, so all three flows stacked up and ran out of the card. */
+@media (max-width: 899px) {
+  html.cx-v2 .cx-stages[data-mode='stack'] .cx-path[aria-hidden='true'] {
+    display: none;
+  }
+}
+
+@media (max-width: 899px) and (min-height: 560px) {
+  /* the pin itself: a phone screen held, a shorter lane per step than
+     desktop's so a thumb flick moves one step, not three */
+  html.cx-v2 .umm-pin {
+    min-height: calc(100svh + var(--umm-pin-steps) * 62svh);
+  }
+
+  html.cx-v2 .umm-pin__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: stretch;
+    height: 100svh;
+    padding-block: 0;
+    overflow: hidden;
+  }
+
+  /* --- the tools wheel -------------------------------------------------- */
+
+  html.cx-v2 .cx-kit[data-mode='scroll'] .cx-kit__inner {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding-block: 84px 18px;
+    gap: 18px;
+  }
+
+  html.cx-v2 .cx-kit[data-mode='scroll'] .cx-h {
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+  }
+
+  html.cx-v2 .cx-kit[data-mode='scroll'] .cx-lead {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* the wheel on top, a short arc of three names; the tiles fill the rest */
+  html.cx-v2 .cx-kit__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 116px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  html.cx-v2 .cx-kit__wheel {
+    --step: 34px;
+    margin: 0;
+  }
+
+  html.cx-v2 .cx-kit__wheel li {
+    transform:
+      translateY(calc(-50% + var(--y) * var(--step)))
+      translateX(calc(var(--x) * 14px))
+      rotateX(var(--r))
+      scale(var(--s));
+  }
+
+  html.cx-v2 .cx-kit__wheel button {
+    font-size: 1.125rem;
+  }
+
+  html.cx-v2 .cx-kit__body .cx-kit__frame {
+    max-height: none;
+    padding: 8px;
+    border-radius: 24px;
+  }
+
+  html.cx-v2 .cx-kit__body .cx-kit__tiles {
+    inset: 8px;
+    border-radius: 17px;
+  }
+
+  html.cx-v2 .cx-kit__body .cx-kit__tiles li {
+    padding-inline: 18px;
+    font-size: 1.0625rem;
+  }
+
+  html.cx-v2 .cx-kit[data-mode='scroll'] .cx-kit__note {
+    font-size: 0.6875rem;
+  }
+
+  /* --- your stage --------------------------------------------------------
+     As on desktop: the three stages share one card and one panel, and the
+     scroll lifts one out as the next rises in. */
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-pin__inner--stack {
+    align-content: center;
+    gap: 14px;
+    padding-block: 74px 16px;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-head--tight {
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-h {
+    font-size: clamp(1.625rem, 7.4vw, 2rem);
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-lead {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage {
+    gap: 14px;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__tabs {
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 8px;
+    overflow: visible;
+    mask-image: none;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__tab {
+    padding-block: 2px;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__name {
+    font-size: 1.0625rem;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__body {
+    gap: 14px;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__figure {
+    min-height: 0;
+    height: clamp(118px, 19svh, 190px);
+    padding: clamp(16px, 2.4svh, 24px) 20px;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-path__stack {
+    min-height: 0;
+    font-size: clamp(1.3rem, 3.3svh, 1.9rem);
+  }
+
+  /* the flows and the panels back over each other, moved by the scroll */
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__captions,
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__panels {
+    display: grid;
+    min-height: 0;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__caption,
+  html.cx-v2 .cx-stages[data-mode='scroll'] .umm-stage__detail {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+    transform: translate3d(0, var(--lift, 0px), 0);
+    opacity: var(--op, 1);
+    pointer-events: auto;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-path__dot,
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-path__name {
+    transition-delay: 0s;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__detail {
+    gap: 0.5rem !important;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__title {
+    font-size: clamp(1.25rem, 5.6vw, 1.5rem);
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* the three services side by side again, so the box stays short */
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__model {
+    margin-top: 0.25rem;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__services {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__services li {
+    grid-template-columns: none;
+    align-items: start;
+    gap: 7px;
+    padding: 11px 12px 12px;
+    font-size: 0.75rem;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__services li + li {
+    border-top: 0;
+    border-left: 1px solid var(--umm-hairline);
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__cta {
+    padding: 6px 6px 6px 16px;
+    font-size: 0.875rem;
+  }
+
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-stage__cta-orb {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* --- how we design: one checkout, fixed rule by rule ---------------------
+   The rules down the left as the readout, the phone beside them, both under
+   the headline; the scroll applies one rule per stop, as on desktop. */
+@media (max-width: 899px) and (min-height: 560px) {
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__inner {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: 10px;
+    row-gap: 30px;
+    height: 100%;
+    padding-block: 74px 24px;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-head {
+    grid-column: 1 / -1;
+    gap: 0.5rem;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-h {
+    font-size: clamp(1.625rem, 7.4vw, 2rem);
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-lead {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__hint {
+    display: none;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__rules {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: center;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__rule {
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 9px;
+    padding: 9px 0;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__n {
+    display: none;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__tick {
+    width: 22px;
+    height: 22px;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__tick svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__title {
+    font-size: 0.9375rem;
+    line-height: 1.25;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__body p {
+    padding-left: 31px;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__rule[data-open='true'] + .cx-fix__body p {
+    padding-bottom: 10px;
+  }
+
+  /* the phone fills its column; the fix it just made under it */
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__slot {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: stretch;
+    height: auto;
+    min-height: clamp(300px, 46svh, 420px);
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__rig {
+    transform: translate(-50%, -55%) scale(var(--s, 1));
+  }
+
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-fix__caption {
+    bottom: -16px;
+    width: max-content;
+    max-width: 100%;
+    padding: 6px 9px 6px 8px;
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: normal;
+    text-align: left;
+  }
+}
+
+/* --- how we work: the roadmap --------------------------------------------
+   Desktop's two columns become two bands of one board: the timeline on top
+   (a lane per stage, the today line sweeping across it, each deliverable
+   stamped at the end of its bar) and the steps under it, the open one
+   showing what happens in it. The rows give up their own box
+   (display: contents) so their parts can sit in either band. */
+@media (max-width: 899px) and (min-height: 560px) {
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__inner {
+    align-content: center;
+    padding-block: 74px 16px;
+    gap: 16px;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-h {
+    font-size: clamp(1.625rem, 7.4vw, 2rem);
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-head {
+    gap: 0.5rem;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-lead {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__board {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto repeat(5, auto) 30px;
+    row-gap: 0;
+    padding: 14px 16px 6px;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__rows,
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row {
+    display: contents;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__axis {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* the timeline: a lane per stage */
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__track {
+    grid-column: 1;
+    height: 22px;
+    margin-bottom: 5px;
+    background: none;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(1) .cx-plan__track { grid-row: 2; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(2) .cx-plan__track { grid-row: 3; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(3) .cx-plan__track { grid-row: 4; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(4) .cx-plan__track { grid-row: 5; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(5) .cx-plan__track { grid-row: 6; }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__bar {
+    padding-inline: 6px;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__num {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* each finished stage's bar gets its tick; the deliverable itself is
+     named in the open step below, so the sticker drops its words here */
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__signed,
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(n + 3) .cx-plan__signed {
+    display: grid;
+    place-items: center;
+    left: calc(var(--b) / var(--cols) * 100%);
+    right: auto;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__stamp {
+    display: none;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__signed svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* the grid, the launch line and today, over the lanes only */
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__over {
+    display: block;
+    grid-column: 1;
+    grid-row: 2 / 7;
+    margin-bottom: 5px;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__today {
+    top: -4px;
+    bottom: -2px;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__today b {
+    font-size: 0.5625rem;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__mark--end {
+    display: flex;
+  }
+
+  /* the steps, under the timeline */
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__label {
+    grid-column: 1;
+    min-height: clamp(38px, 5.4svh, 46px);
+    border-top: 1px solid var(--umm-hairline);
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(1) .cx-plan__label { grid-row: 8; border-top: 0; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(1) .cx-plan__body { grid-row: 9; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(2) .cx-plan__label { grid-row: 10; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(2) .cx-plan__body { grid-row: 11; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(3) .cx-plan__label { grid-row: 12; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(3) .cx-plan__body { grid-row: 13; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(4) .cx-plan__label { grid-row: 14; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(4) .cx-plan__body { grid-row: 15; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(5) .cx-plan__label { grid-row: 16; }
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__row:nth-child(5) .cx-plan__body { grid-row: 17; }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__body {
+    grid-column: 1;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__body p {
+    padding-left: 38px;
+    padding-bottom: 0 !important;
+    font-size: 0.8125rem;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__body[data-open='true'] p {
+    padding-bottom: 12px !important;
+  }
+
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-plan__get {
+    margin-top: 6px;
+  }
+}
+
+/* shorter phone screens (Safari with its bars showing): the stage's lead
+   gives way so the card and its panel still fit */
+@media (max-width: 899px) and (min-height: 560px) and (max-height: 760px) {
+  html.cx-v2 .cx-stages[data-mode='scroll'] .cx-lead,
+  html.cx-v2 .cx-plan[data-mode='scroll'] .cx-lead,
+  html.cx-v2 .cx-fix[data-mode='scroll'] .cx-lead {
+    display: none;
+  }
+}
+
+/* --- why it matters: the dark band ----------------------------------------
+   Pins on phones too (WhyBand's PIN) and fills the held screen: bigger
+   stickers, a bigger headline, each point's shape at half the screen's
+   width over its words, every beat centred top to bottom. The light runs
+   in full along the bottom of the screen, under the words. */
+@media (max-width: 720px) {
+  /* stacked (phones on their side): the light kept to the right edge so
+     the words sit on the dark */
+  html.cx-v2 .cx-why[data-mode='stack'] .cx-why__light {
+    opacity: 0.75;
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 10%, #000 36%),
+      linear-gradient(to right, rgb(0 0 0 / 0.06) 62%, #000 100%),
+      linear-gradient(to top, rgb(0 0 0 / calc(1 - var(--exit, 0))), #000 calc(var(--exit, 0) * 70%));
+    mask-image:
+      linear-gradient(to bottom, transparent 10%, #000 36%),
+      linear-gradient(to right, rgb(0 0 0 / 0.06) 62%, #000 100%),
+      linear-gradient(to top, rgb(0 0 0 / calc(1 - var(--exit, 0))), #000 calc(var(--exit, 0) * 70%));
+  }
+
+  /* held: the light rises from the bottom edge, dark above where the words
+     sit, and still goes dark from below as the section leaves */
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__light {
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 62%, rgb(0 0 0 / 0.6) 82%, #000 100%),
+      linear-gradient(to top, rgb(0 0 0 / calc(1 - var(--exit, 0))), #000 calc(var(--exit, 0) * 70%));
+    mask-image:
+      linear-gradient(to bottom, transparent 62%, rgb(0 0 0 / 0.6) 82%, #000 100%),
+      linear-gradient(to top, rgb(0 0 0 / calc(1 - var(--exit, 0))), #000 calc(var(--exit, 0) * 70%));
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__inner {
+    padding-block: 40px 13svh;
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__pop > span {
+    font-size: 1.0625rem;
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__merged {
+    font-size: 2.25rem;
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__intro {
+    gap: 1.25rem;
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__title {
+    font-size: clamp(2.25rem, min(10.6vw, 6.2svh), 3rem);
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__lead {
+    font-size: 1.0625rem;
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__pair {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: clamp(1.25rem, 3.4svh, 2rem);
+    justify-items: start;
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__mark {
+    --mark: clamp(150px, min(52vw, 30svh), 230px);
+    width: var(--mark);
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__num {
+    font-size: calc(var(--mark) * 0.34);
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__fix {
+    max-width: 14ch;
+    font-size: clamp(2rem, min(9.6vw, 5.6svh), 2.75rem);
+  }
+
+  html.cx-v2 .cx-why[data-mode='pin'] .cx-why__body {
+    font-size: 1.0625rem;
+  }
+}
+
+/* --- the film: the clover opening on upright screens ----------------------
+   The section is a 16:9 band on portrait screens; opened (ProofFilm and
+   AiFilm's OPEN) it holds a whole screen instead, like desktop. */
+@media (max-aspect-ratio: 5/4) and (min-height: 560px) {
+  html.cx-v2 .cx-film[data-mode='open'] {
+    aspect-ratio: auto;
+  }
+}
+
+/* --- to the top (ToTop.tsx) ------------------------------------------------
+   The scrollbar's stand-in on every screen size: an ink button bottom right,
+   its citrus ring filling with the page. */
+.cx-top {
+  position: fixed;
+  right: clamp(16px, 2.2vw, 32px);
+  bottom: clamp(16px, 2.2vw, 32px);
+  z-index: calc(var(--umm-z-nav) - 1);
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+  /* a hairline of light keeps it findable over the dark bands */
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.14),
+    0 14px 30px -14px rgb(16 14 20 / 0.55);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(14px) scale(0.85);
+  pointer-events: none;
+  transition:
+    opacity 0.35s var(--umm-ease-out),
+    transform 0.45s var(--umm-ease-spring);
+}
+
+.cx-top[data-shown='true'] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.cx-top:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 3px;
+}
+
+.cx-top__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.cx-top__ring circle {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.16);
+  stroke-width: 2.5;
+}
+
+.cx-top__ring circle + circle {
+  stroke: var(--umm-citrus);
+  stroke-linecap: round;
+}
+
+.cx-top__arrow {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.35s var(--umm-ease-spring);
+}
+
+@media (hover: hover) {
+  .cx-top:hover .cx-top__arrow {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-top {
+    transition: opacity 0.2s linear;
+    transform: none;
+  }
+}
+
+/* --- the film, upright: a 1080 x 1920 frame (data-tall) ---------------------
+   ProofFilm and AiFilm switch to it on upright phones once the clover has
+   opened. The same scenes, restacked: the words above, the browser (still
+   940 x 580 inside, so every click and push-in lands where it did) below,
+   and the last frame's cards one under another. */
+.cx-film__frame[data-tall] {
+  width: 1080px;
+  height: 1920px;
+}
+
+/* intro: the title over three lines, the shapes round it */
+.cx-film__frame[data-tall] .cx-f-intro {
+  gap: 56px;
+}
+
+.cx-film__frame[data-tall] .cx-f-intro__title {
+  max-width: 940px;
+  font-size: 138px;
+}
+
+.cx-film__frame[data-tall] .cx-f-eyebrow {
+  font-size: 30px;
+}
+
+.cx-film__frame[data-tall] .cx-f-intro__names {
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 940px;
+}
+
+.cx-film__frame[data-tall] .cx-f-intro__name {
+  font-size: 34px;
+}
+
+.cx-film__frame[data-tall] .cx-f-intro__shape--0 {
+  left: 60px;
+  top: 250px;
+  width: 260px;
+  height: 260px;
+}
+
+.cx-film__frame[data-tall] .cx-f-intro__shape--1 {
+  right: 50px;
+  top: 330px;
+  width: 220px;
+  height: 220px;
+}
+
+.cx-film__frame[data-tall] .cx-f-intro__shape--2 {
+  right: 120px;
+  bottom: 260px;
+  width: 240px;
+  height: 240px;
+}
+
+/* the projects: the words up top, the browser under them */
+.cx-film__frame[data-tall] .cx-f-proj__glow {
+  inset: -6%;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj--tfp .cx-f-proj__glow,
+.cx-film__frame[data-tall] .ai-f-scene .cx-f-proj__glow {
+  background-position: center;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj__index {
+  left: 70px;
+  top: 190px;
+  font-size: 30px;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj__copy {
+  left: 70px;
+  top: 270px;
+  width: 940px;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj__meta {
+  font-size: 28px;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj__title {
+  font-size: 92px;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj__body {
+  font-size: 36px;
+}
+
+.cx-film__frame[data-tall] .cx-f-proj__stage {
+  left: 70px;
+  top: auto;
+  bottom: 250px;
+}
+
+/* the last frame: the head, then the cards one under another, the picture
+   left of the words */
+.cx-film__frame[data-tall] .cx-f-end__head {
+  left: 70px;
+  right: 70px;
+  top: 170px;
+  grid-template-columns: 1fr;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__eyebrow {
+  font-size: 28px;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__h {
+  font-size: 96px;
+  line-height: 1.02;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__explore {
+  grid-column: 1;
+  grid-row: auto;
+  justify-self: start;
+  margin-top: 22px;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__cards,
+.cx-film__frame[data-tall] .ai-f-end .cx-f-end__cards {
+  left: 70px;
+  right: 70px;
+  top: 650px;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__card {
+  grid-template-columns: 400px minmax(0, 1fr);
+  column-gap: 40px;
+  align-items: start;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__img {
+  grid-row: 1 / span 5;
+  height: 280px;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__meta {
+  justify-content: start;
+  gap: 4px 0;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+}
+
+/* the client and the kind of work on one line, a dot between */
+.cx-film__frame[data-tall] .cx-f-end__meta > span + span::before {
+  content: '·';
+  margin-inline: 12px;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__title {
+  font-size: 40px;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__body {
+  font-size: 24px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cx-film__frame[data-tall] .cx-f-end__view {
+  font-size: 24px;
+}
+
+/* the AI film's last frame: its title and lead are longer */
+.cx-film__frame[data-tall] .ai-f-end .cx-f-end__h {
+  font-size: 80px;
+}
+
+.cx-film__frame[data-tall] .ai-f-end__lead {
+  font-size: 30px;
+}
+
+.cx-film__frame[data-tall] .ai-f-end .cx-f-end__cards {
+  top: 640px;
+}
+
+/* every use case is "illustrative" (the lead says so): the area alone */
+.cx-film__frame[data-tall] .ai-f-end .cx-f-end__meta > span + span {
+  display: none;
+}
+
+.cx-film__frame[data-tall] .ai-f-end .cx-f-end__body {
+  -webkit-line-clamp: 2;
+}
+
+/* the film's controls on a phone: left of the "to the top" button */
+@media (max-width: 720px) {
+  html.cx-v2 .cx-film[data-mode='open'] .cx-film__controls {
+    left: 16px;
+    right: 84px;
+    bottom: 20px;
+    width: auto;
+    transform: none;
+  }
+}

@@ -38,7 +38,25 @@ export const FILM_SECONDS = 24
 
 /** Big, landscape screens with motion allowed get the clover entrance. */
 const OPEN =
-  '(min-width: 721px) and (min-height: 540px) and (min-aspect-ratio: 5/4) and (prefers-reduced-motion: no-preference)'
+  '(min-width: 721px) and (min-height: 540px) and (min-aspect-ratio: 5/4) and (prefers-reduced-motion: no-preference), ' +
+  /* upright phones too (13 Oct): the clover covers the screen, then the
+     whole frame plays as a band across it */
+  '(max-aspect-ratio: 5/4) and (min-height: 560px) and (prefers-reduced-motion: no-preference)'
+/** Upright phones (13 Oct): the film plays on a 1080 x 1920 frame of its own,
+ *  the same scenes restacked for a tall screen (data-tall in the CSS). */
+const TALL = '(max-aspect-ratio: 5/4) and (min-height: 560px) and (prefers-reduced-motion: no-preference)'
+function useTall(on = true) {
+  const [tall, setTall] = useState(() => on && typeof window !== 'undefined' && window.matchMedia(TALL).matches)
+  useLayoutEffect(() => {
+    if (!on) return
+    const mq = window.matchMedia(TALL)
+    const read = () => setTall(mq.matches)
+    read()
+    mq.addEventListener('change', read)
+    return () => mq.removeEventListener('change', read)
+  }, [on])
+  return tall
+}
 /** Scroll, in screen heights, over which the clover opens. */
 const GROW = 1
 
@@ -294,6 +312,10 @@ export function AiFilm() {
 
   const [playing, setPlaying] = useState(false)
   const [ended, setEnded] = useState(false)
+  const tall = useTall()
+  /** the frame's size: wide, or tall on an upright phone */
+  const FW = tall ? H : W
+  const FH = tall ? W : H
 
   /* ── the timeline ─────────────────────────────────────────────────────── */
   useLayoutEffect(() => {
@@ -350,8 +372,8 @@ export function AiFilm() {
       /** Whip pan: both scenes travel together, smeared at the fastest point. */
       const whip = (from: Element, to: Element, t: number) => {
         const D = 0.44
-        tl.to(from, { x: -W, duration: D, ease: 'power3.inOut' }, t)
-        tl.fromTo(to, { x: W, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
+        tl.to(from, { x: -FW, duration: D, ease: 'power3.inOut' }, t)
+        tl.fromTo(to, { x: FW, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
         tl.to([from, to], { filter: 'blur(30px)', duration: D / 2, ease: 'power2.in' }, t)
         tl.to([from, to], { filter: 'blur(0px)', duration: D / 2, ease: 'power2.out' }, t + D / 2)
         tl.set(from, { autoAlpha: 0 }, t + D)
@@ -805,7 +827,7 @@ export function AiFilm() {
       tlRef.current = null
       ctx.revert()
     }
-  }, [])
+  }, [tall, FW])
 
   /* ── fit the 1920 x 1080 frame to its window ──────────────────────────── */
   const fitRef = useRef<() => void>(() => {})
@@ -819,7 +841,17 @@ export function AiFilm() {
       if (!w || !h) return
       /* landscape fills the window (the frame keeps a safe area for the
          crop); portrait shows the whole frame */
-      const s = w / h >= 1.25 ? Math.max(w / W, h / H) : Math.min(w / W, h / H)
+      if (tall) {
+        /* upright: the tall frame takes the screen's own proportions (the
+           words are pinned to its top, the browser to its bottom), so it
+           fills the screen edge to edge without cropping either */
+        const fh = Math.round(Math.min(2600, Math.max(1500, (FW * h) / w)))
+        frame.style.height = `${fh}px`
+        frame.style.setProperty('--film-scale', String(Math.min(w / FW, h / fh)))
+        return
+      }
+      frame.style.removeProperty('height')
+      const s = w / h >= 1.25 ? Math.max(w / FW, h / FH) : Math.min(w / FW, h / FH)
       frame.style.setProperty('--film-scale', String(s))
     }
     fitRef.current = fit
@@ -827,7 +859,7 @@ export function AiFilm() {
     const ro = new ResizeObserver(fit)
     ro.observe(screen)
     return () => ro.disconnect()
-  }, [])
+  }, [FW, FH, tall])
 
   /* ── how it arrives, and when it plays ─────────────────────────────────── */
   useLayoutEffect(() => {
@@ -963,7 +995,7 @@ export function AiFilm() {
       mm.revert()
       near.disconnect()
     }
-  }, [])
+  }, [tall])
 
   /* While the film plays, the bar steps out of the way: it hides after two
      seconds without the mouse moving, and any movement (or a tap) brings it
@@ -1052,7 +1084,7 @@ export function AiFilm() {
 
         <div className="cx-film__window" ref={windowRef}>
           <div className="cx-film__screen" ref={screenRef}>
-            <div className="cx-film__frame" ref={frameRef} aria-hidden="true">
+            <div className="cx-film__frame" ref={frameRef} data-tall={tall || undefined} aria-hidden="true">
               <div className="cx-f-cam">
                 {/* 0:00 */}
                 <div className="cx-f-scene cx-f-intro">

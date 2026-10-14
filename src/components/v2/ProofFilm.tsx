@@ -43,7 +43,25 @@ export const FILM_SECONDS = 30
 
 /** Big, landscape screens with motion allowed get the clover entrance. */
 const OPEN =
-  '(min-width: 721px) and (min-height: 540px) and (min-aspect-ratio: 5/4) and (prefers-reduced-motion: no-preference)'
+  '(min-width: 721px) and (min-height: 540px) and (min-aspect-ratio: 5/4) and (prefers-reduced-motion: no-preference), ' +
+  /* upright phones too (13 Oct): the clover covers the screen, then the
+     whole frame plays as a band across it */
+  '(max-aspect-ratio: 5/4) and (min-height: 560px) and (prefers-reduced-motion: no-preference)'
+/** Upright phones (13 Oct): the film plays on a 1080 x 1920 frame of its own,
+ *  the same scenes restacked for a tall screen (data-tall in the CSS). */
+const TALL = '(max-aspect-ratio: 5/4) and (min-height: 560px) and (prefers-reduced-motion: no-preference)'
+function useTall(on = true) {
+  const [tall, setTall] = useState(() => on && typeof window !== 'undefined' && window.matchMedia(TALL).matches)
+  useLayoutEffect(() => {
+    if (!on) return
+    const mq = window.matchMedia(TALL)
+    const read = () => setTall(mq.matches)
+    read()
+    mq.addEventListener('change', read)
+    return () => mq.removeEventListener('change', read)
+  }, [on])
+  return tall
+}
 /** Scroll, in screen heights, over which the clover opens. */
 const GROW = 1
 
@@ -54,6 +72,9 @@ const CORAL = '#ffc3c4'
 const SKY = '#d1e7ff'
 
 const P = film.projects
+/** The project screens (public/work), from wherever the page is served:
+ *  the site's root, or a relative base when the page is bundled elsewhere. */
+const WORK = `${import.meta.env.BASE_URL}work/`
 /** where each project's seven seconds start */
 const AT = [3.2, 10.4, 17.6]
 const LEN = 7.2
@@ -124,6 +145,10 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
 
   const [playing, setPlaying] = useState(false)
   const [ended, setEnded] = useState(false)
+  const tall = useTall(mode === 'page')
+  /** the frame's size: wide, or tall on an upright phone */
+  const FW = tall ? H : W
+  const FH = tall ? W : H
 
   /* ── the timeline ─────────────────────────────────────────────────────── */
   useLayoutEffect(() => {
@@ -172,8 +197,8 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       /** Whip pan: both scenes travel together, smeared at the fastest point. */
       const whip = (from: Element, to: Element, t: number) => {
         const D = 0.44
-        tl.to(from, { x: -W, duration: D, ease: 'power3.inOut' }, t)
-        tl.fromTo(to, { x: W, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
+        tl.to(from, { x: -FW, duration: D, ease: 'power3.inOut' }, t)
+        tl.fromTo(to, { x: FW, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
         tl.to([from, to], { filter: 'blur(30px)', duration: D / 2, ease: 'power2.in' }, t)
         tl.to([from, to], { filter: 'blur(0px)', duration: D / 2, ease: 'power2.out' }, t + D / 2)
         tl.set(from, { autoAlpha: 0 }, t + D)
@@ -291,7 +316,9 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       tl.set(scenes[2], { autoAlpha: 0 }, END + 0.05)
       tl.set(end, { autoAlpha: 1 }, END + 0.05)
       tl.to(one('.cx-f-grain'), { opacity: 0, duration: 0.4 }, END)
-      tl.from(many('.cx-f-end__head > *'), { autoAlpha: 0, y: 50, duration: 0.6, stagger: 0.1, ease: 'power4.out' }, END + 0.15)
+      /* the head's words; the explore button has its own pop below (two
+         from() tweens on one element left it hidden at the end) */
+      tl.from(many('.cx-f-end__head > :not(.cx-f-end__explore)'), { autoAlpha: 0, y: 50, duration: 0.6, stagger: 0.1, ease: 'power4.out' }, END + 0.15)
       many('.cx-f-end__card').forEach((c, k) => {
         const t = END + 0.35 + k * 0.16
         tl.from(c, { autoAlpha: 0, y: 160, rotation: [-4, 2, 4][k], duration: 0.85, ease: 'back.out(1.2)' }, t)
@@ -325,7 +352,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       tlRef.current = null
       ctx.revert()
     }
-  }, [])
+  }, [tall, FW])
 
   /* ── fit the 1920 x 1080 frame to its window ──────────────────────────── */
   const fitRef = useRef<() => void>(() => {})
@@ -340,7 +367,17 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       if (!w || !h) return
       /* landscape fills the window (the frame keeps a safe area for the
          crop); portrait shows the whole frame */
-      const s = w / h >= 1.25 ? Math.max(w / W, h / H) : Math.min(w / W, h / H)
+      if (tall) {
+        /* upright: the tall frame takes the screen's own proportions (the
+           words are pinned to its top, the browser to its bottom), so it
+           fills the screen edge to edge without cropping either */
+        const fh = Math.round(Math.min(2600, Math.max(1500, (FW * h) / w)))
+        frame.style.height = `${fh}px`
+        frame.style.setProperty('--film-scale', String(Math.min(w / FW, h / fh)))
+        return
+      }
+      frame.style.removeProperty('height')
+      const s = w / h >= 1.25 ? Math.max(w / FW, h / FH) : Math.min(w / FW, h / FH)
       frame.style.setProperty('--film-scale', String(s))
     }
     fitRef.current = fit
@@ -348,7 +385,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
     const ro = new ResizeObserver(fit)
     ro.observe(screen)
     return () => ro.disconnect()
-  }, [mode])
+  }, [mode, FW, FH, tall])
 
   /* ── how it arrives, and when it plays ─────────────────────────────────── */
   useLayoutEffect(() => {
@@ -498,7 +535,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       mm.revert()
       near.disconnect()
     }
-  }, [mode])
+  }, [mode, tall])
 
   /* While the film plays, the bar steps out of the way: it hides after two
      seconds without the mouse moving, and any movement (or a tap) brings it
@@ -597,7 +634,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
 
         <div className="cx-film__window" ref={windowRef}>
           <div className="cx-film__screen" ref={screenRef}>
-            <div className="cx-film__frame" ref={frameRef} aria-hidden="true">
+            <div className="cx-film__frame" ref={frameRef} data-tall={tall || undefined} aria-hidden="true">
               <div className="cx-f-cam">
                 {/* 0:00 */}
                 <div className="cx-f-scene cx-f-intro">
@@ -646,10 +683,10 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
                       </div>
                       <div className="cx-f-proj__view">
                         {PAGES[p.id] ? (
-                          <img className="cx-f-proj__page" src={`/work/${p.id}/site.webp`} alt="" decoding="async" />
+                          <img className="cx-f-proj__page" src={`${WORK}${p.id}/site.webp`} alt="" decoding="async" />
                         ) : (
                           FLOWS[p.id].map((f) => (
-                            <img className="cx-f-proj__shot" key={f.src} src={`/work/${p.id}/${f.src}.webp`} alt="" decoding="async" />
+                            <img className="cx-f-proj__shot" key={f.src} src={`${WORK}${p.id}/${f.src}.webp`} alt="" decoding="async" />
                           ))
                         )}
                         {!PAGES[p.id] && (
@@ -694,7 +731,7 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
                         tabIndex={-1}
                       >
                         <span className="cx-f-end__img">
-                          <img src={`/work/${p.id}/card.webp`} alt="" decoding="async" />
+                          <img src={`${WORK}${p.id}/card.webp`} alt="" decoding="async" />
                           <span className="cx-f-end__go">
                             <Arrow />
                           </span>

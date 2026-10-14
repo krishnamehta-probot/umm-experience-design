@@ -3,7 +3,7 @@ import { ChipHead, withAccent } from './ChipHead'
 import { Shape } from './Shape'
 import type { ShapeName } from './shapes.data'
 import { usePinProgress } from '@/lib/usePinProgress'
-import { usePinned } from '@/lib/usePinned'
+import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { process as cxProcess } from '@/content/cxUiDesign'
@@ -76,7 +76,7 @@ export function Roadmap({ content: process = cxProcess }: { content?: ProcessCon
    *  sticker sits just before the bar starts instead. */
   const STAMP = SPAN.map(([a, b], i) => (i === SPAN.length - 1 ? a : b))
   const { ref, progress } = usePinProgress<HTMLElement>()
-  const wide = usePinned()
+  const wide = usePinned(PIN_V2)
   const reduced = useReducedMotion()
   const pinMode = wide && !reduced
   const stop = stopAt(progress, STEPS)
