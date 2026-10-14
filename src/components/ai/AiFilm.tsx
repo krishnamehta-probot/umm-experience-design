@@ -787,11 +787,6 @@ export function AiFilm() {
           { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.08 },
           t + 0.45,
         )
-        tl.from(
-          one('.cx-f-end__go', c),
-          { autoAlpha: 0, scale: 0, rotation: -90, duration: 0.5, ease: 'back.out(2.4)' },
-          t + 0.7,
-        )
       })
       tl.from(one('.ai-f-end__lead'), { autoAlpha: 0, y: 24, duration: 0.5 }, END + 1.2)
 
@@ -1107,9 +1102,6 @@ export function AiFilm() {
                         <span className="cx-f-end__img ai-f-end__tone" data-umm-tone={item.tone}>
                           <span className="ai-f-end__art ai-app__vig">
                             <Vignette item={item} />
-                          </span>
-                          <span className="cx-f-end__go">
-                            <Arrow />
                           </span>
                         </span>
                         <span className="cx-f-end__meta">

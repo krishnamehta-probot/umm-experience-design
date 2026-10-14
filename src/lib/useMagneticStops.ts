@@ -119,6 +119,32 @@ export function useMagneticStops(
       if (gliding) cancel()
     }
 
+    /* A touchpad sends a stream of fine steps plus a second or two of
+       momentum, so one swipe ran past several stops (Krish, 14 Oct: "on
+       touchpad it feels too fast, on a normal mouse it feels perfect").
+       While the section holds, a touchpad moves the page at TOUCHPAD of
+       its own speed; a mouse wheel, and the rest of the page, are left to
+       the browser. Nothing is held or swallowed. */
+    const TOUCHPAD = 0.5
+    const isTouchpad = (e: WheelEvent) => {
+      if (e.deltaMode !== 0) return false
+      // Chrome, Edge and Safari: a wheel notch is 120 here, a touchpad
+      // reports three times its pixel delta
+      const legacy = (e as WheelEvent & { wheelDeltaY?: number }).wheelDeltaY
+      if (legacy) return Math.abs(legacy + 3 * e.deltaY) < 1
+      return Math.abs(e.deltaY) < 40
+    }
+    const onWheelFree = (e: WheelEvent) => {
+      interrupt()
+      if (e.ctrlKey || !isTouchpad(e)) return
+      const { top, travel } = geometry()
+      if (travel <= 0) return
+      const p = (window.scrollY - top) / travel
+      if (p < 0 || p > 1) return
+      e.preventDefault()
+      window.scrollBy({ top: e.deltaY * TOUCHPAD, behavior: 'instant' })
+    }
+
     /* --- stepping ------------------------------------------------------ */
 
     const EPS = 0.004
@@ -245,13 +271,13 @@ export function useMagneticStops(
       window.addEventListener('touchend', onTouchEnd, { passive: true })
       window.addEventListener('keydown', onKey)
     } else {
-      window.addEventListener('wheel', interrupt, { passive: true })
+      window.addEventListener('wheel', onWheelFree, { passive: false })
       window.addEventListener('touchstart', interrupt, { passive: true })
       window.addEventListener('keydown', interrupt)
     }
     return () => {
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('wheel', interrupt)
+      window.removeEventListener('wheel', onWheelFree)
       window.removeEventListener('touchstart', interrupt)
       window.removeEventListener('keydown', interrupt)
       window.removeEventListener('wheel', onWheel)

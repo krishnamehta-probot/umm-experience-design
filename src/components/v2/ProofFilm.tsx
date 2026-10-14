@@ -319,7 +319,6 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
         tl.from(c, { autoAlpha: 0, y: 160, rotation: [-4, 2, 4][k], duration: 0.85, ease: 'back.out(1.2)' }, t)
         tl.fromTo(one('.cx-f-end__img img', c), { scale: 1.3 }, { scale: 1, duration: 1.4, ease: 'power3.out', immediateRender: false }, t)
         tl.from(many('.cx-f-end__meta, .cx-f-end__title, .cx-f-end__body, .cx-f-end__view', c), { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.08 }, t + 0.45)
-        tl.from(one('.cx-f-end__go', c), { autoAlpha: 0, scale: 0, rotation: -90, duration: 0.5, ease: 'back.out(2.4)' }, t + 0.7)
       })
       tl.from(one('.cx-f-end__explore'), { autoAlpha: 0, scale: 0.6, duration: 0.55, ease: 'back.out(2)' }, END + 1.6)
 
@@ -676,9 +675,6 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
                       >
                         <span className="cx-f-end__img">
                           <img src={`${WORK}${p.id}/card.webp`} alt="" decoding="async" />
-                          <span className="cx-f-end__go">
-                            <Arrow />
-                          </span>
                         </span>
                         <span className="cx-f-end__meta">
                           <span>{p.client}</span>

@@ -1618,25 +1618,25 @@ html.cx-v2 body {
   grid-row: 1 / span 2;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   color: var(--umm-paper);
   text-decoration: none;
 }
 
 .cx-f-end__pill {
-  padding: 8px 15px;
+  padding: 12px 22px;
   border-radius: 999px;
   background: var(--umm-ink);
   font-family: var(--umm-font-body);
-  font-size: 14px;
+  font-size: 18px;
   font-weight: var(--umm-weight-medium);
 }
 
 .cx-f-end__orb {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--umm-citrus);
   color: var(--umm-ink);
@@ -1644,8 +1644,8 @@ html.cx-v2 body {
 }
 
 .cx-f-end__orb svg {
-  width: 13px;
-  height: 13px;
+  width: 18px;
+  height: 18px;
 }
 
 
@@ -1685,26 +1685,6 @@ html.cx-v2 body {
 .cx-f-end__card:hover .cx-f-end__img img {
   transform: scale(1.04);
 }
-
-.cx-f-end__go {
-  position: absolute;
-  right: 22px;
-  bottom: 22px;
-  display: grid;
-  place-items: center;
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  background: var(--umm-paper);
-  color: var(--umm-ink);
-  transition: transform 0.35s var(--umm-ease-spring);
-}
-
-.cx-f-end__go svg {
-  width: 30px;
-  height: 30px;
-}
-
 
 .cx-f-end__meta {
   display: flex;
