@@ -518,6 +518,12 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
 
   const [scenIdx, setScenIdx] = useState(0)
   const scen = scenarios[scenIdx]
+  /* what each landing bay is for, shown quietly until the invoice docks:
+     the empty one used to read as a blank box */
+  const bayName = {
+    ready: scenarios.find((s) => s.outcome === 'ready')?.status ?? '',
+    hold: (scenarios.find((s) => s.outcome === 'hold')?.status ?? '').split('·')[0].trim(),
+  }
   const missing = scen.flag === 'po'
   const mismatch = scen.flag === 'amount'
 
@@ -571,6 +577,9 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
 
   const tabs = (
     <div className="ai-flow__tabs" role="tablist" aria-label={demo.scenariosLabel} onKeyDown={onTabKey}>
+      <span className="ai-flow__tabs-label" aria-hidden="true">
+        {demo.scenariosLabel}
+      </span>
       {scenarios.map((s, i) => (
         <button
           key={s.id}
@@ -581,6 +590,7 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
           role="tab"
           id={`ai-flow-tab-${s.id}`}
           className="ai-flow__tab"
+          data-outcome={s.outcome}
           aria-selected={i === scenIdx}
           tabIndex={i === scenIdx ? 0 : -1}
           onClick={() => setScenIdx(i)}
@@ -750,6 +760,7 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
                     data-active={scen.outcome === 'ready'}
                     style={{ left: px(bl), top: px(BAY_TOP), width: px(BAY_W), height: px(BAY_H) }}
                   >
+                    <span className="ai-flow__bay-name">{bayName.ready}</span>
                     <span className="ai-flow__bay-status">{scen.outcome === 'ready' ? scen.status : ''}</span>
                   </div>
                   <div
@@ -758,6 +769,7 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
                     data-active={scen.outcome === 'hold'}
                     style={{ left: px(bl), top: px(h - BAY_TOP - BAY_H), width: px(BAY_W), height: px(BAY_H) }}
                   >
+                    <span className="ai-flow__bay-name">{bayName.hold}</span>
                     <span className="ai-flow__bay-status">{scen.outcome === 'hold' ? scen.status : ''}</span>
                   </div>
 
@@ -871,28 +883,42 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
                     style={{ left: px(pos[0]), top: px(pos[1]), opacity: u >= 2 ? 0 : 1 }}
                   />
 
-                  {/* the station rules, docked under the stations */}
-                  {principles.map((p, i) => {
-                    const Icon = PRINCIPLE_ICON[p.icon]
-                    return (
-                      <article
-                        key={p.icon}
-                        className="ai-flow__principle"
-                        data-umm-tone={TONE[i]}
-                        style={{ left: px(sx[i] - PRIN_W / 2), top: px(rail + PRIN_TOP), width: px(PRIN_W) }}
-                      >
-                        <div className="ai-flow__principle-head">
-                          <span className="ai-flow__principle-icon">
-                            <Icon />
+                  {/* The station rules (Krish, 14 Oct: one consistent set, easy to
+                      read): one row of equal cards, each hanging from its
+                      station by a pointer, led by that station's own icon
+                      and name, then its two-part rule and its line. */}
+                  <div
+                    className="ai-flow__rules"
+                    style={{
+                      left: px(sx[0] - PRIN_W / 2),
+                      top: px(rail + PRIN_TOP),
+                      gridTemplateColumns: `${PRIN_W}px ${sx[1] - sx[0] - PRIN_W}px ${PRIN_W}px ${sx[2] - sx[1] - PRIN_W}px ${PRIN_W}px`,
+                    }}
+                  >
+                    {principles.map((p, i) => {
+                      const Icon = STATION_ICON[i]
+                      return (
+                        <article
+                          key={p.icon}
+                          className="ai-flow__rule"
+                          data-umm-tone={TONE[i]}
+                          style={{ gridColumn: i * 2 + 1, ['--i' as string]: i } as CSSProperties}
+                        >
+                          <span className="ai-flow__rule-tag">
+                            <span className="ai-flow__rule-icon">
+                              <Icon />
+                            </span>
+                            {['AI', 'Rules', 'People'][i]}
                           </span>
-                          <h3 className="ai-flow__principle-title">
-                            {p.title[0]} <span>{p.title[1]}</span>
+                          <h3 className="ai-flow__rule-title">
+                            <span>{p.title[0]}</span>
+                            <span>{p.title[1]}</span>
                           </h3>
-                        </div>
-                        <p className="ai-flow__principle-body">{p.body}</p>
-                      </article>
-                    )
-                  })}
+                          <p className="ai-flow__rule-body">{p.body}</p>
+                        </article>
+                      )
+                    })}
+                  </div>
                 </>
               ) : null}
             </div>

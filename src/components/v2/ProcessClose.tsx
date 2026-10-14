@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { Accordion, SplitButton } from '../primitives'
 import { Eyebrow } from './ChipHead'
-import { GlassCube } from './GlassCube'
 import { Roadmap, type ProcessContent } from './Roadmap'
 import { gsap, prefersReducedMotion } from '@/lib/gsap'
 import { closing as cxClosing, faq as cxFaq } from '@/content/cxUiDesign'
@@ -12,8 +11,10 @@ export type FaqContent = typeof cxFaq
 /* ============================================================================
    7 · HOW WE WORK + LET'S TALK
 
-   The four stages are a roadmap (Roadmap.tsx). Then the dark band rises over
-   the end of it with rounded shoulders, laid out like Cal.com's FAQ: the big
+   The four stages are a roadmap (Roadmap.tsx), on white, as is whatever a
+   page sets under it. Then the dark band follows with rounded shoulders
+   (Krish, 14 Oct: it no longer rises over the roadmap, and the glass cube
+   is gone), laid out like Cal.com's FAQ: the big
    ask, its line and the buttons on the left, the seven questions on the
    right. The page ends there: the footer (ribbon, links, wordmark) was
    removed on 8 Oct, as the site's own footer follows.
@@ -67,12 +68,11 @@ export function ProcessClose({
   }, [])
 
   return (
-    <div ref={ref}>
+    <div className="cx-finale" ref={ref}>
       <Roadmap content={process} />
       {children}
 
       <section className="cx-close" id="contact" data-umm-theme="ink">
-        <GlassCube className="cx-close__cube" />
         <div className="umm-container cx-close__inner">
           <div className="cx-close__copy">
             <Eyebrow className="cx-close__eyebrow">{closing.eyebrow}</Eyebrow>

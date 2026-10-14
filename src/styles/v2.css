@@ -4346,6 +4346,12 @@ html.cx-v2 body {
 
 .cx-plan {
   color: var(--umm-ink);
+  /* on white (Krish, 14 Oct), as is everything up to the closing band */
+  background: var(--umm-paper);
+}
+
+.cx-finale {
+  background: var(--umm-paper);
 }
 
 .cx-plan__inner {
@@ -4379,8 +4385,10 @@ html.cx-v2 body {
   align-self: start;
   padding: clamp(18px, 2.2vw, 30px) clamp(20px, 2.4vw, 34px) clamp(26px, 2.6vw, 36px);
   border-radius: clamp(20px, 2.2vw, 32px);
+  /* white on white: a fine edge and a soft lift hold it */
+  border: 1px solid var(--umm-canvas-deep);
   background: var(--umm-paper);
-  box-shadow: var(--umm-shadow-2);
+  box-shadow: 0 30px 70px -48px rgb(16 14 20 / 0.28);
   transition: --today 1.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
@@ -4853,8 +4861,8 @@ html.cx-v2 body {
   position: relative;
   z-index: 1;
   overflow: hidden;
-  /* rises over the end of the roadmap with rounded shoulders */
-  margin-top: calc(-1 * clamp(28px, 4vw, 56px));
+  /* rounded shoulders, on the white above it; it no longer rises over the
+     roadmap */
   border-radius: clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px) 0 0;
   padding-block: clamp(5rem, 9vw, 8.5rem);
   background: var(--umm-ink);
@@ -4870,15 +4878,6 @@ html.cx-v2 body {
   z-index: -1;
   background: radial-gradient(ellipse at 60% 70%, rgb(209 231 255 / 0.18), transparent 62%);
   pointer-events: none;
-}
-
-.cx-close__cube {
-  position: absolute;
-  top: clamp(2rem, 5vw, 4.5rem);
-  /* in the gutter, clear of the questions' label */
-  left: 44%;
-  --cube: clamp(54px, 5.4vw, 86px);
-  opacity: 0.9;
 }
 
 .cx-close__inner {
@@ -4972,10 +4971,6 @@ html.cx-v2 body {
   }
   .cx-close__copy {
     position: static;
-  }
-  .cx-close__cube {
-    left: auto;
-    right: 8vw;
   }
 }
 

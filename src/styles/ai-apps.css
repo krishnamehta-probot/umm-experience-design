@@ -452,6 +452,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(14px, 1.6vw, 22px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 @media (max-width: 1100px) {
@@ -466,53 +469,85 @@
   }
 }
 
-.ai-engage__card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  min-height: 100%;
-  padding: clamp(1.25rem, 2vw, 1.6rem);
-  border-radius: var(--cx-r-card);
-  background: var(--umm-veil);
-  color: var(--umm-text);
-  text-decoration: none;
-  transition: background-color 0.35s ease;
+/* the service cards' face (v2.css, .cx-svc): pastel sheet, mono number,
+   title and line, and the bitten corner with the black round arrow */
+.ai-door {
+  --notch: clamp(64px, 5.6vw, 80px);
+  --pad: clamp(1.25rem, 2vw, 1.85rem);
+  display: grid;
 }
 
-.ai-engage__card:is(:hover, :focus-visible) {
+.ai-door__link {
+  position: relative;
+  display: grid;
+  color: var(--umm-ink);
+  text-decoration: none;
+}
+
+.ai-door__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: clamp(220px, 19vw, 260px);
+  padding: var(--pad) var(--pad) calc(var(--notch) + 0.6rem);
+  border-radius: var(--cx-r-card);
   background: var(--umm-tone);
 }
 
-.ai-engage__card:focus-visible {
+.ai-door__index {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--umm-ink) 62%, transparent);
+}
+
+.ai-door__title {
+  margin-top: 0.15rem;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.3rem, 1.8vw, 1.65rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.ai-door__body {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.ai-door__bite {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: var(--notch);
+  height: var(--notch);
+}
+
+.ai-door__go {
+  display: grid;
+  place-items: center;
+  width: calc(var(--notch) - 16px);
+  height: calc(var(--notch) - 16px);
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: var(--umm-tone);
+  transition: transform 0.45s var(--umm-ease-spring);
+}
+
+.ai-door__link:hover .ai-door__go {
+  transform: scale(1.06);
+}
+
+.ai-door__link:focus-visible {
   outline: 2px solid var(--umm-focus);
   outline-offset: 3px;
-}
-
-.ai-engage__name {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: var(--umm-weight-medium);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--umm-text);
-}
-
-.ai-engage__body {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--umm-text-secondary);
-}
-
-.ai-engage__arrow {
-  margin-top: auto;
-  padding-top: 1.25rem;
-  color: var(--umm-ink);
+  border-radius: var(--cx-r-card);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ai-engage__card {
+  .ai-door__go {
     transition: none;
   }
 }

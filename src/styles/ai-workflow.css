@@ -52,7 +52,9 @@
 
   .ai-flow__inner {
     display: grid;
-    grid-template-rows: auto minmax(60svh, 1fr) auto;
+    /* the track takes what the caption leaves, never under the 440px its
+       geometry is drawn for; the caption always shows all of its text */
+    grid-template-rows: auto minmax(440px, 1fr) auto;
     gap: 12px;
     width: 100%;
     height: 100%;
@@ -77,60 +79,79 @@
 .ai-flow__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(1.1rem, 2.8vw, 2.75rem);
+  align-items: center;
+  gap: 8px;
+}
+
+/* Krish, 14 Oct: the other two cases were easy to miss. The scenarios are
+   now plainly buttons: labelled, each a pill marked with the colour of where
+   it ends up (citrus: ready, coral: on hold), the chosen one filled in ink. */
+.ai-flow__tabs-label {
+  margin-right: 6px;
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
 }
 
 .ai-flow__tab {
   position: relative;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.55em;
-  padding: 0 0 8px;
+  padding: 9px 18px 9px 12px;
   margin: 0;
-  border: 0;
-  background: none;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  background: var(--umm-paper);
   font: inherit;
-  color: var(--umm-ink-quiet);
+  color: var(--umm-ink);
   cursor: pointer;
-  transition: color 0.3s var(--umm-ease-out);
+  transition:
+    background-color 0.3s var(--umm-ease-out),
+    color 0.3s var(--umm-ease-out);
+}
+
+/* where the case ends up */
+.ai-flow__tab::before {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--umm-ink) 25%, transparent);
+}
+
+.ai-flow__tab[data-outcome='hold']::before {
+  background: var(--umm-coral);
+}
+
+.ai-flow__tab:hover {
+  background: var(--umm-veil);
 }
 
 .ai-flow__tab[aria-selected='true'] {
-  color: var(--umm-ink);
-}
-
-.ai-flow__tab::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
   background: var(--umm-ink);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.5s var(--umm-ease-out);
-}
-
-.ai-flow__tab[aria-selected='true']::after {
-  transform: scaleX(1);
+  color: var(--umm-paper);
 }
 
 .ai-flow__tab:focus-visible {
   outline: 2px solid var(--umm-ink);
-  outline-offset: 4px;
-  border-radius: 6px;
+  outline-offset: 3px;
 }
 
 .ai-flow__num {
   font-family: var(--umm-font-mono);
   font-size: var(--umm-text-label);
   letter-spacing: var(--umm-tracking-label);
+  opacity: 0.6;
 }
 
 .ai-flow__name {
   font-family: var(--umm-font-display);
-  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
   font-weight: var(--umm-weight-medium);
   letter-spacing: -0.025em;
   line-height: 1.1;
@@ -257,6 +278,13 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--umm-ink-soft);
+  transition: opacity 0.4s var(--umm-ease-out);
+}
+
+/* with the rules docked, each card's tag carries its station's name, and
+   its pointer runs up where the name was */
+.ai-flow__track[data-stop='3']:not([data-fold]) .ai-flow__station-label {
+  opacity: 0;
 }
 
 @keyframes ai-flow-ring {
@@ -288,6 +316,28 @@
 .ai-flow__track[data-stop='3'] .ai-flow__bay[data-active='true'] {
   border: 1px solid var(--umm-border);
   background: var(--umm-tone-wash);
+}
+
+/* what the bay is for, quiet, until the invoice docks in it: where the
+   status will show, clear of the route coming in on the left */
+.ai-flow__bay-name {
+  position: absolute;
+  left: 220px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--umm-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+  transition: opacity 0.4s var(--umm-ease-out);
+}
+
+.ai-flow__track[data-stop='2'] .ai-flow__bay[data-active='true'] .ai-flow__bay-name,
+.ai-flow__track[data-stop='3'] .ai-flow__bay[data-active='true'] .ai-flow__bay-name {
+  opacity: 0;
 }
 
 /* the status sits right of the docked card, 16px clear of it */
@@ -444,11 +494,8 @@
   height: 18px;
   border-radius: 50%;
   border: 1.5px solid var(--umm-ink);
-  background: var(--umm-citrus);
-}
-
-.ai-flow__stamp[data-state='hold'] .ai-flow__stamp-badge {
-  background: var(--umm-sun);
+  /* white in every state, as the caption's state circle */
+  background: var(--umm-paper);
 }
 
 .ai-flow__stamp-badge svg {
@@ -821,6 +868,114 @@
   color: var(--umm-ink-soft);
 }
 
+/* --- the station rules, docked in one row (desktop) ----------------------
+   Krish, 14 Oct: the three were uneven (one ran to three lines and stood
+   taller) and hard to place. Now one row of equal cards, each hanging from
+   its station by a pointer and led by that station's own icon and name,
+   so it reads as "what this station keeps to". */
+
+.ai-flow__rules {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.ai-flow__rule {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 12px 14px 14px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 18px;
+  background: var(--umm-paper);
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.5s var(--umm-ease-out),
+    transform 0.6s var(--umm-ease-out);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+
+/* the pointer up to its station */
+.ai-flow__rule::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-top: 1.5px solid var(--umm-ink);
+  border-left: 1.5px solid var(--umm-ink);
+  border-top-left-radius: 3px;
+  background: var(--umm-paper);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.ai-flow__track[data-stop='3'] .ai-flow__rule {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.ai-flow__rule-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  background: var(--umm-tone);
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.ai-flow__rule-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--umm-paper);
+}
+
+.ai-flow__rule-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ai-flow__rule-title {
+  margin: 2px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--umm-ink);
+}
+
+.ai-flow__rule-title span {
+  display: block;
+}
+
+/* the second half of the rule, quieter, so the pair reads as cause and limit */
+.ai-flow__rule-title span + span {
+  color: var(--umm-ink-soft);
+}
+
+.ai-flow__rule-body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
 /* --- caption strip under the track --------------------------------------- */
 
 .ai-flow__caption {
@@ -864,13 +1019,7 @@
   stroke-width: 2.2;
 }
 
-.ai-flow__state[data-state='flag'] {
-  background: var(--umm-coral);
-}
-
-.ai-flow__state[data-state='hold'] {
-  background: var(--umm-sun);
-}
+/* every state is white, its icon says which (Krish, 14 Oct: consistency) */
 
 .ai-flow__cap-text {
   min-width: 0;
@@ -878,9 +1027,6 @@
 
 .ai-flow__cap-title {
   margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-family: var(--umm-font-display);
   font-size: clamp(1.25rem, 1.8vw, 1.6rem);
   font-weight: var(--umm-weight-medium);
@@ -895,22 +1041,15 @@
   font-size: clamp(0.95rem, 1.1vw, 1.05rem);
   line-height: 1.5;
   color: var(--umm-text-secondary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
+/* the caption is never cut short (Krish, 14 Oct): every line in full */
 .ai-flow__note {
   margin: 6px 0 0;
   max-width: 64ch;
   font-size: 14px;
   line-height: 1.45;
   color: var(--umm-text-tertiary);
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .ai-flow__role {
@@ -1085,7 +1224,7 @@
 
   .ai-flow__pin .ai-flow__tab {
     flex: none;
-    padding-bottom: 6px;
+    padding: 6px 12px 6px 9px;
   }
 
   .ai-flow__pin .ai-flow__name {
