@@ -11,6 +11,7 @@ import { AiFilm } from '@/components/ai/AiFilm'
 import { InvoiceFlow } from '@/components/ai/InvoiceFlow'
 import { Engagement } from '@/components/ai/Engagement'
 import { ScrollTrigger } from '@/lib/gsap'
+import { useSmoothWheel } from '@/lib/smoothWheel'
 import '@/styles/v2-phone.css'
 import '@/styles/v2-scroll.css'
 import strategy from '@/lottie/ai-services/strategy.json'
@@ -53,6 +54,7 @@ const AI_MARKS: ServiceMarks = {
 }
 
 export function AiAutomationPage() {
+  useSmoothWheel()
   useEffect(() => {
     document.title = meta.title
     document.documentElement.classList.add('cx-v2', 'ai-page')

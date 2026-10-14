@@ -1,4 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { addFence } from './smoothWheel'
 
 /* ============================================================================
    MAGNETIC STOPS — a pinned section that rests on one step at a time
@@ -30,6 +31,12 @@ import { useEffect, useRef, type RefObject } from 'react'
    skip a stop. At the first stop going up and the last going down the
    section lets go and the page scrolls on as normal.
 
+   14 Oct, later ("too direct and speedy … not a jerk change in anything"):
+   the glide is longer and eases in and out on a sine, so its top speed is
+   about half what it was; a page gliding in under the smooth wheel
+   (lib/smoothWheel) is stopped at the first stop and comes to rest there
+   rather than being stepped straight on past it.
+
    `pace` stretches the settle: above 1 the page waits a little longer
    before it settles and glides there more slowly, for a gentler pull.
    ========================================================================== */
@@ -37,9 +44,13 @@ import { useEffect, useRef, type RefObject } from 'react'
 /** Scroll position (share of the section's travel) at which a stop rests. */
 export const stopAnchor = (stop: number, stops: number) => (stop + 0.5) / stops
 
+/* A sine in-out: no sudden start or stop, and a gentle top speed. */
 function easeInOut(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  return -(Math.cos(Math.PI * t) - 1) / 2
 }
+
+/** How long a glide over `d` pixels takes. */
+const glideMs = (d: number, pace: number) => Math.min(1500, 800 + Math.abs(d) * 0.55) * pace
 
 type Geometry = (el: HTMLElement) => { top: number; travel: number }
 
@@ -79,7 +90,7 @@ export function useMagneticStops(
       const from = window.scrollY
       const d = to - from
       if (Math.abs(d) < 2) return
-      const dur = Math.min(1000, 420 + Math.abs(d) * 0.5) * pace
+      const dur = glideMs(d, pace)
       const t0 = performance.now()
       gliding = true
       const step = (now: number) => {
@@ -154,10 +165,15 @@ export function useMagneticStops(
       // outside, or after a scrollbar drag): settle on the nearest
       const resting = Math.abs(p - stopAnchor(near, stops)) < 0.02
       const to = Math.min(stops - 1, Math.max(0, resting ? near + dir : near))
+      settleOn(to)
+    }
+
+    /** Glide to `to` and hold the section while its change plays. */
+    const settleOn = (to: number) => {
       const { top, travel } = geometry()
-      glideTo(top + travel * stopAnchor(to, stops))
-      // hold the section while the stop's change plays
-      lockUntil = performance.now() + 1300
+      const y = top + travel * stopAnchor(to, stops)
+      glideTo(y)
+      lockUntil = performance.now() + Math.max(1300, glideMs(y - window.scrollY, pace) + 250)
       acc = 0
     }
 
@@ -172,6 +188,9 @@ export function useMagneticStops(
        has, the page keeps, unless it carries the page into the section,
        which then catches it at the nearest stop. */
     let mine = false
+    /* whether the gesture began with the page; one that then carries the
+       page into the section comes to rest on the nearest stop */
+    let fromPage: boolean | null = null
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey) return
       const now = performance.now()
@@ -187,6 +206,7 @@ export function useMagneticStops(
       const dying = gap < 700 && dir === lastDir && mag <= lastMag && mag < 60
       if (gap > 160 && !dying) {
         mine = false
+        fromPage = null
         acc = 0
       }
       lastWheel = now
@@ -196,11 +216,18 @@ export function useMagneticStops(
         e.preventDefault()
         return
       }
-      if (!owns(dir)) {
+      const own = owns(dir)
+      if (fromPage === null) fromPage = !own
+      if (!own) {
         if (gliding) cancel()
         return
       }
       e.preventDefault()
+      if (fromPage) {
+        mine = true
+        settleOn(where().near)
+        return
+      }
       acc += dy
       if (Math.abs(acc) < 24) return
       mine = true
@@ -235,9 +262,24 @@ export function useMagneticStops(
       if (!locked(performance.now())) stepBy(dir)
     }
 
+    /* a page gliding in under the smooth wheel stops on the first stop
+       going down, or the last going up */
+    const fence = (from: number, to: number) => {
+      const { top, travel } = geometry()
+      if (travel <= 0) return to
+      const a = top + travel * stopAnchor(0, stops)
+      const b = top + travel * stopAnchor(stops - 1, stops)
+      if (to > from && from < a - 1 && to > a) return a
+      if (to < from && from > b + 1 && to < b) return b
+      return to
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true })
+    let unfence = () => {}
     if (step) {
-      window.addEventListener('wheel', onWheel, { passive: false })
+      unfence = addFence(fence)
+      // on the document while it captures: ahead of the smooth wheel
+      document.addEventListener('wheel', onWheel, { passive: false, capture: true })
       window.addEventListener('touchstart', onTouchStart, { passive: true })
       window.addEventListener('touchmove', onTouchMove, { passive: false })
       window.addEventListener('touchend', onTouchEnd, { passive: true })
@@ -252,7 +294,8 @@ export function useMagneticStops(
       window.removeEventListener('wheel', interrupt)
       window.removeEventListener('touchstart', interrupt)
       window.removeEventListener('keydown', interrupt)
-      window.removeEventListener('wheel', onWheel)
+      document.removeEventListener('wheel', onWheel, { capture: true })
+      unfence()
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchmove', onTouchMove)
       window.removeEventListener('touchend', onTouchEnd)
