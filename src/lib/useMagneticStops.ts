@@ -20,10 +20,12 @@ import { useEffect, useRef, type RefObject } from 'react'
    different stretch passes `geometry`, giving the page scroll where its
    travel starts and how long it is.
 
-   Stepping is the default (Krish, 14 Oct: "the sections are too fast
-   scrolled"; every pinned section on the v2 pages steps, on the same lane,
-   styles/v2-scroll.css). `step: false` leaves the old drift-and-settle.
-   Stepping: while it holds,
+   Drift-and-settle is the default (Krish, 14 Oct, end of day: "keep it
+   scroll friendly, keep magnetic over pinned, remove the freeze"): the
+   wheel is never taken, the page scrolls natively, and only once the
+   scroll goes quiet inside a pinned section does it glide onto the nearest
+   stop. `step: true` turns on the old stepping, which held the scroll for
+   1.3s per stop and read as a freeze. Stepping: while it holds,
    each scroll gesture (a wheel turn or trackpad swipe, a touch swipe, an
    arrow / page key) moves exactly one stop, gliding the page there, and
    the gesture's leftover momentum is swallowed so a hard flick can never
@@ -53,7 +55,7 @@ export function useMagneticStops(
   stops: number,
   enabled: boolean,
   geometryOf: Geometry = ownTravel,
-  { step = true, pace = 1 }: { step?: boolean; pace?: number } = {},
+  { step = false, pace = 1 }: { step?: boolean; pace?: number } = {},
 ) {
   const glide = useRef<(stop: number) => void>(() => {})
   const geo = useRef(geometryOf)

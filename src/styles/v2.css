@@ -1618,25 +1618,25 @@ html.cx-v2 body {
   grid-row: 1 / span 2;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   color: var(--umm-paper);
   text-decoration: none;
 }
 
 .cx-f-end__pill {
-  padding: 26px 40px;
+  padding: 8px 15px;
   border-radius: 999px;
   background: var(--umm-ink);
   font-family: var(--umm-font-body);
-  font-size: 28px;
+  font-size: 14px;
   font-weight: var(--umm-weight-medium);
 }
 
 .cx-f-end__orb {
   display: grid;
   place-items: center;
-  width: 82px;
-  height: 82px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--umm-citrus);
   color: var(--umm-ink);
@@ -1644,8 +1644,8 @@ html.cx-v2 body {
 }
 
 .cx-f-end__orb svg {
-  width: 32px;
-  height: 32px;
+  width: 13px;
+  height: 13px;
 }
 
 

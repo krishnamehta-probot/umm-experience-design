@@ -170,9 +170,9 @@ export function openFilm({ section, pin, win, halo, tag, controls, fit, start, s
       trigger: section,
       start: 'top top',
       end: () => `+=${lanePx()}`,
-      /* the opening trails the scroll by about a second, so it follows
-         the scroll closely but never jumps */
-      scrub: 1,
+      /* the opening trails the scroll's glide by about two seconds, so
+         one gesture plays it through at an unhurried pace */
+      scrub: 2.2,
       invalidateOnRefresh: true,
     },
   })
