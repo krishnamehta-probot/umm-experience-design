@@ -373,7 +373,10 @@ export function AiFilm() {
       const whip = (from: Element, to: Element, t: number) => {
         const D = 0.44
         tl.to(from, { x: -FW, duration: D, ease: 'power3.inOut' }, t)
-        tl.fromTo(to, { x: FW, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
+        /* the reveal is its own set (see ProofFilm's whip: from-only, a pause
+           or rewind could skip it and leave the cut black) */
+        tl.set(to, { autoAlpha: 1 }, t)
+        tl.fromTo(to, { x: FW }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
         tl.to([from, to], { filter: 'blur(30px)', duration: D / 2, ease: 'power2.in' }, t)
         tl.to([from, to], { filter: 'blur(0px)', duration: D / 2, ease: 'power2.out' }, t + D / 2)
         tl.set(from, { autoAlpha: 0 }, t + D)

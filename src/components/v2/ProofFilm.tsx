@@ -198,7 +198,11 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
       const whip = (from: Element, to: Element, t: number) => {
         const D = 0.44
         tl.to(from, { x: -FW, duration: D, ease: 'power3.inOut' }, t)
-        tl.fromTo(to, { x: FW, autoAlpha: 1 }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
+        /* the reveal is its own set: carried as a from-only value in the
+           fromTo, a pause or rewind across the cut could skip it, and the
+           next scene slid in invisible (a black frame until the next cut) */
+        tl.set(to, { autoAlpha: 1 }, t)
+        tl.fromTo(to, { x: FW }, { x: 0, duration: D, ease: 'power3.inOut', immediateRender: false }, t)
         tl.to([from, to], { filter: 'blur(30px)', duration: D / 2, ease: 'power2.in' }, t)
         tl.to([from, to], { filter: 'blur(0px)', duration: D / 2, ease: 'power2.out' }, t + D / 2)
         tl.set(from, { autoAlpha: 0 }, t + D)
@@ -297,7 +301,8 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
             const [cx, cy] = prev.click
             tl.to(cursor, { x: cx * VW, y: cy * VH, duration: 0.55, ease: 'power2.inOut' }, at - 0.75)
             tl.to(cursor, { scale: 0.82, duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut' }, at - 0.18)
-            tl.fromTo(ring, { x: cx * VW, y: cy * VH, scale: 0.3, autoAlpha: 1 }, { scale: 2.2, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, at - 0.15)
+            tl.set(ring, { x: cx * VW, y: cy * VH }, at - 0.15)
+            tl.fromTo(ring, { scale: 0.3, autoAlpha: 1 }, { scale: 2.2, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, at - 0.15)
           }
           tl.fromTo(shots[k], { autoAlpha: 0, scale: 1.03, y: 16 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.35, ease: 'power2.out', immediateRender: false }, at)
           tl.set(shots[k - 1], { autoAlpha: 0 }, at + 0.35)

@@ -146,6 +146,15 @@ clicks a tab, then that project loops.
   seven layers), always on the card's right so the flow's words stay clear.
   (A first, scattered "plexus" version read as random; Krish asked for it
   to fit the site.) CX keeps the fluted light.
+- **14 Oct, the film went black mid-way (Krish: "getting black out in
+  middle sometimes"):** after a pause or rewind across the whip pan (0:10,
+  TFP to Fintuit, e.g. scrolling up a little and back), Fintuit slid in
+  invisible and the frame stayed ink until Licuido at 0:17, on every play
+  after that too. The whip carried the reveal as a from-only autoAlpha in a
+  fromTo; it is now its own tl.set (both films; the click ring's position
+  too). Checked with a harness that plays, seeks, pauses and scrolls (fixed
+  sequence plus 40 random steps, desktop and phone): no frame without a
+  scene.
 - **13 Oct, sections 2 and 3 on phones, round two (Krish: "still needs the
   improvement"):** the Why band fills the held screen (bigger stickers and
   headline, each point's shape at about half the screen's width, beats
