@@ -9,6 +9,7 @@ const ExperienceDesignPage = lazy(() =>
 const StyleguidePage = lazy(() =>
   import('./pages/StyleguidePage').then((m) => ({ default: m.StyleguidePage })),
 )
+const HomeShowcase = lazy(() => import('./pages/HomeShowcase').then((m) => ({ default: m.HomeShowcase })))
 const AiAutomationPage = lazy(() =>
   import('./pages/AiAutomationPage').then((m) => ({ default: m.AiAutomationPage })),
 )
@@ -27,11 +28,23 @@ const FilmRenderPage = lazy(() =>
  *                side-by-side comparison
  *   /styleguide  the living component library
  *   /ai-automation  the AI & Automation service page, on v2's design
+ *   /home        the umm.digital homepage hero, with an options dock that
+ *                switches between its three versions (ASCII, print,
+ *                particles) and every option of each; /home-ascii, -print
+ *                and -particles open it on that version
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
  */
 export function App() {
   const path = window.location.pathname.replace(/\/$/, '')
+  const homes = { '/home': 'ascii', '/home-ascii': 'ascii', '/home-print': 'print', '/home-particles': 'particles' } as const
+  if (path in homes) {
+    return (
+      <Suspense fallback={null}>
+        <HomeShowcase initial={homes[path as keyof typeof homes]} />
+      </Suspense>
+    )
+  }
   if (path === '/ai-automation') {
     return (
       <Suspense fallback={null}>
