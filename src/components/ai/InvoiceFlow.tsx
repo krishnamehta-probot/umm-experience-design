@@ -63,6 +63,8 @@ const BAY_H = 140
 const BAY_TOP = 14
 const PRIN_W = 200
 const PRIN_TOP = 62
+/* the highest the docked rules may sit: just clear of the station circles */
+const RULES_MIN = 44
 const REC_W = 300
 /* the chip row is one line, 500px wide, kept 16px inside the track */
 const CHIPS_W = 500
@@ -516,6 +518,19 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
     return () => ro.disconnect()
   }, [pinMode])
 
+  /* the rules row's height, so it can be lifted to stay inside the track */
+  const rulesRef = useRef<HTMLDivElement>(null)
+  const [rulesH, setRulesH] = useState(0)
+  useLayoutEffect(() => {
+    const el = rulesRef.current
+    if (!el) return
+    const read = () => setRulesH(el.offsetHeight)
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [pinMode, box.w > 0, box.h > 0])
+
   const [scenIdx, setScenIdx] = useState(0)
   const scen = scenarios[scenIdx]
   /* what each landing bay is for, shown quietly until the invoice docks:
@@ -889,9 +904,13 @@ export function InvoiceFlow({ content = workflow }: { content?: Content }) {
                       and name, then its two-part rule and its line. */}
                   <div
                     className="ai-flow__rules"
+                    ref={rulesRef}
                     style={{
                       left: px(sx[0] - PRIN_W / 2),
-                      top: px(rail + PRIN_TOP),
+                      /* under the stations, but never closer than 24px to the
+                         track's bottom (shorter screens lift it, up to just
+                         under the stations) */
+                      top: px(Math.max(rail + RULES_MIN, Math.min(rail + PRIN_TOP, h - 24 - rulesH))),
                       gridTemplateColumns: `${PRIN_W}px ${sx[1] - sx[0] - PRIN_W}px ${PRIN_W}px ${sx[2] - sx[1] - PRIN_W}px ${PRIN_W}px`,
                     }}
                   >
