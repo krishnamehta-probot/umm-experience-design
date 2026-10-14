@@ -18,7 +18,7 @@ import { SHAPES, type ShapeName, type ShapePart } from './shapes.data'
                    size, a ring of its colour leading it; the point's words
                    lift away and section 2's light goes out behind it
      0.36 – 0.6   its colour clears to show the film inside
-     0.45         the film starts, inside the shape
+     0.36         the film starts rolling, under the clearing colour
      0.45 – 1     the shape grows until it covers the screen
 
    The film section is pulled up under section 2 (v2-scroll.css), so it is
@@ -42,8 +42,13 @@ export const maskOf = (name: ShapeName) => {
 /** Where section 2's number has gone and the window lifts off the shape. */
 const LIFT = 0.05
 
-/** Where the window has glided to the middle: the film starts here. */
+/** Where the window has glided to the middle. */
 export const OPEN_PLAY = 0.45
+
+/** Where the window's colour starts to clear. The film starts rolling here,
+ *  so the window never shows its first frame standing still: that frame is
+ *  the empty ink before the intro's shapes fly in, and read as a blackout. */
+const REVEAL = 0.36
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v))
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -88,6 +93,9 @@ export function openFilm({ section, pin, win, halo, tag, controls, fit, start, s
   const state = { p: 0 }
   let inZone = false
   let wasFull = false
+  /* without a shape to clear, the window is open from the start: roll as
+     soon as it is past the rewind point */
+  const playAt = from ? REVEAL : 0.2
 
   const apply = () => {
     const box = pin.getBoundingClientRect()
@@ -120,7 +128,7 @@ export function openFilm({ section, pin, win, halo, tag, controls, fit, start, s
     /* on the shape, the window shows only the shape's colour, so it takes
        over in one frame once the number has gone (LIFT) */
     win.style.setProperty('--win', String(from ? (p > LIFT ? 1 : 0) : 1))
-    win.style.setProperty('--cover', String(from ? 1 - clamp((p - 0.36) / 0.24) : 0))
+    win.style.setProperty('--cover', String(from ? 1 - clamp((p - REVEAL) / 0.24) : 0))
     win.dataset.full = full ? 'true' : 'false'
     pin.dataset.full = full ? 'true' : 'false'
 
@@ -142,7 +150,7 @@ export function openFilm({ section, pin, win, halo, tag, controls, fit, start, s
       fit()
     }
 
-    if (p >= OPEN_PLAY && inZone) start()
+    if (p >= playAt && inZone) start()
     if (p < 0.2) {
       stop()
       rewind()
@@ -162,23 +170,22 @@ export function openFilm({ section, pin, win, halo, tag, controls, fit, start, s
       trigger: section,
       start: 'top top',
       end: () => `+=${lanePx()}`,
-      /* the opening trails the scroll's glide by about two seconds, so
-         one gesture plays it through at an unhurried pace */
-      scrub: 2.2,
+      /* the opening trails the scroll by about a second, so it follows
+         the scroll closely but never jumps */
+      scrub: 1,
       invalidateOnRefresh: true,
     },
   })
-  /* from the window reaching the middle until most of the film has
-     scrolled away */
+  /* from the film starting until most of it has scrolled away */
   const zone = ScrollTrigger.create({
     trigger: section,
-    start: () => `top+=${lanePx() * OPEN_PLAY} top`,
+    start: () => `top+=${lanePx() * playAt} top`,
     end: 'bottom 55%',
     invalidateOnRefresh: true,
     onToggle: (self) => {
       inZone = self.isActive
       if (!inZone) stop()
-      else if (state.p >= OPEN_PLAY) start()
+      else if (state.p >= playAt) start()
     },
   })
   window.addEventListener('resize', apply)

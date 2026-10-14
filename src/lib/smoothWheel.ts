@@ -10,11 +10,9 @@ import { useEffect } from 'react'
    instead, and the page eases toward it, so a notch becomes a short slide
    and a run of notches one continuous glide.
 
-   Pinned sections that step (lib/useMagneticStops) listen first, on the
-   document while it captures, and take their gestures with preventDefault;
-   whatever they take is left alone here. They also put up fences: a glide
-   arriving at a section stops on its first stop (or its last, coming up),
-   so a hard flick can never carry the page past one.
+   The page always goes exactly as far as the wheel says, fast or slow,
+   pinned section or not (Krish, 14 Oct: "whatever I scroll … smooth scroll
+   as per what we scroll"); only the arrival is eased.
 
    Anything else that scrolls the page (a stop's glide, an anchor jump, the
    scrollbar, a keyboard) wins: the glide sees the page is not where it left
@@ -23,22 +21,9 @@ import { useEffect } from 'react'
    Touch and trackpad pinch-zoom (ctrl + wheel) stay native.
    ========================================================================== */
 
-/** Clamps a glide that would run from `from` to `to`. */
-type Fence = (from: number, to: number) => number
-
-const fences = new Set<Fence>()
-
-/** Registers a fence on every glide; returns the remover. */
-export function addFence(fence: Fence) {
-  fences.add(fence)
-  return () => {
-    fences.delete(fence)
-  }
-}
-
 /* How quickly the page closes on the target, per second. Lower is softer
-   and slower to settle; about 5 settles a notch in roughly half a second. */
-const RATE = 5.2
+   and laggier; about 7 settles a notch in roughly a third of a second. */
+const RATE = 7
 
 export function useSmoothWheel() {
   useEffect(() => {
@@ -73,11 +58,7 @@ export function useSmoothWheel() {
 
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
-      // a pinned section took this one
-      if (e.defaultPrevented) {
-        stop()
-        return
-      }
+      if (e.defaultPrevented) return
       // something inside scrolls on its own: leave it be
       for (let n = e.target as HTMLElement | null; n && n !== document.body; n = n.parentElement) {
         if (n.scrollHeight > n.clientHeight && /(auto|scroll)/.test(getComputedStyle(n).overflowY)) return
@@ -88,9 +69,7 @@ export function useSmoothWheel() {
         pos = target = window.scrollY
         last = performance.now()
       }
-      let to = Math.max(0, Math.min(max(), target + dy))
-      for (const fence of fences) to = fence(window.scrollY, to)
-      target = to
+      target = Math.max(0, Math.min(max(), target + dy))
       if (!raf) raf = requestAnimationFrame(frame)
     }
 

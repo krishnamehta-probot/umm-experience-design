@@ -21,16 +21,19 @@ export type ToolsContent = Omit<typeof cxTools, 'note'> & { note?: string }
    are the group's pastel, each a little deeper than the one above, with a
    soft sheen across it.
 
-   The section pins and each group is a magnetic stop (lib/useMagneticStops),
-   on the same rhythm as the rules: the scroll turns the wheel one place, the
-   old tiles slip away and the new ones wipe in one after another. Clicking
-   a group glides to it.
+   The section pins and the scroll drives it directly (Krish, 14 Oct: "not
+   at all smooth"): the wheel turns with the scroll, not in timed jumps,
+   and between two groups the new tiles wipe in row by row over the old
+   ones as far as the scroll has gone, so a fast scroll and a slow one look
+   the same, only quicker. Clicking a group glides to it.
 
    Phones and reduced motion: nothing pins; each group is its label over its
    frame of tiles.
    ========================================================================== */
 
 type Group = ToolsContent['groups'][number]
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 
 /** The wheel: where an option sits for d places off the line. */
 function spoke(d: number): CSSProperties {
@@ -53,6 +56,9 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
   const reduced = useReducedMotion()
   const pinMode = wide && !reduced
   const stop = pinMode ? stopAt(progress, STOPS) : 0
+  /* where the wheel is, between groups: 0 resting on the first, 1 on the
+     second, and so on (each rests mid-lane, as glideTo lands) */
+  const pos = pinMode ? Math.min(STOPS - 1, Math.max(0, progress * STOPS - 0.5)) : 0
   const glideTo = useMagneticStops(ref, STOPS, pinMode)
 
   return (
@@ -81,7 +87,7 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
               <div className="cx-kit__side">
                 <ol className="cx-kit__wheel">
                   {groups.map((g, i) => (
-                    <li key={g.label} style={spoke(i - stop)} data-on={i === stop} data-umm-tone={g.tone}>
+                    <li key={g.label} style={spoke(i - pos)} data-on={i === stop} data-umm-tone={g.tone}>
                       <button
                         type="button"
                         onClick={() => glideTo(i)}
@@ -97,7 +103,7 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
 
               <div className="cx-kit__frame">
                 {groups.map((g, i) => (
-                  <Tiles key={g.label} group={g} on={i === stop} />
+                  <Tiles key={g.label} group={g} on={i === stop} d={i - pos} z={i} />
                 ))}
               </div>
             </div>
@@ -121,19 +127,59 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
   )
 }
 
-/** One group's tools as tiles: its pastel, deepening a little row by row. */
-function Tiles({ group, on }: { group: Group; on: boolean }) {
+/* Between two groups (the scroll a lane apart), the next group's rows wipe
+   in over this stretch of it, each row a little after the one above; the
+   group underneath is let go only once it is covered. */
+const IN_FROM = 0.68
+const IN_TO = 0.32
+const ROW_LAG = 0.22
+/** how far past a group the wheel is when its covered tiles are let go */
+const GONE = 0.72
+
+/** One group's tools as tiles: its pastel, deepening a little row by row.
+ *  `d` (pinned only) is how many places the wheel is from this group. */
+function Tiles({ group, on, d, z }: { group: Group; on: boolean; d?: number; z?: number }) {
   const n = group.items.length
+  /* coming (d > 0): how far its rows have wiped in. Going (d < 0) it stays
+     whole under the next group's wipe, and is let go once covered */
+  const wipe = d === undefined || d <= 0 ? 1 : clamp01((IN_FROM - d) / (IN_FROM - IN_TO))
+  const shown = d === undefined || d > -GONE
+  const live = d !== undefined
   return (
-    <ul className="cx-kit__tiles" data-ramp={group.tone} data-on={on} aria-hidden={!on} inert={!on}>
-      {group.items.map((t, j) => (
-        <li
-          key={t}
-          style={{ ['--i' as string]: j, ['--t' as string]: `${n > 1 ? (j / (n - 1)) * 100 : 0}%` } as CSSProperties}
-        >
-          <span>{t}</span>
-        </li>
-      ))}
+    <ul
+      className="cx-kit__tiles"
+      data-ramp={group.tone}
+      data-on={on}
+      aria-hidden={!on}
+      inert={!on}
+      style={
+        live
+          ? {
+              visibility: wipe > 0 && shown ? 'visible' : 'hidden',
+              zIndex: z,
+              /* the tint between rows only once the rows are all in, or it
+                 would cover the group underneath at the wipe's first frame */
+              background: wipe < 1 ? 'transparent' : undefined,
+            }
+          : undefined
+      }
+    >
+      {group.items.map((t, j) => {
+        const r = clamp01(wipe * (1 + ROW_LAG * (n - 1)) - ROW_LAG * j)
+        return (
+          <li
+            key={t}
+            style={
+              {
+                ['--t' as string]: `${n > 1 ? (j / (n - 1)) * 100 : 0}%`,
+                ...(live && { clipPath: `inset(0 ${(1 - r) * 100}% 0 0)` }),
+              } as CSSProperties
+            }
+          >
+            <span style={live ? { opacity: r, transform: `translateY(${(1 - r) * 50}%)` } : undefined}>{t}</span>
+          </li>
+        )
+      })}
     </ul>
   )
 }
