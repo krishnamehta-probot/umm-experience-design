@@ -1624,19 +1624,19 @@ html.cx-v2 body {
 }
 
 .cx-f-end__pill {
-  padding: 11px 20px;
+  padding: 26px 40px;
   border-radius: 999px;
   background: var(--umm-ink);
   font-family: var(--umm-font-body);
-  font-size: 16px;
+  font-size: 28px;
   font-weight: var(--umm-weight-medium);
 }
 
 .cx-f-end__orb {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 82px;
+  height: 82px;
   border-radius: 50%;
   background: var(--umm-citrus);
   color: var(--umm-ink);
@@ -1644,8 +1644,8 @@ html.cx-v2 body {
 }
 
 .cx-f-end__orb svg {
-  width: 16px;
-  height: 16px;
+  width: 32px;
+  height: 32px;
 }
 
 
@@ -4080,7 +4080,9 @@ html.cx-v2 body {
     rotateX(var(--r))
     scale(var(--s));
   opacity: var(--o);
-  /* no transition: the wheel turns with the scroll itself */
+  transition:
+    transform 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.7s var(--umm-ease-out);
 }
 
 .cx-kit__wheel button {
@@ -4257,8 +4259,49 @@ html.cx-v2 body {
   letter-spacing: -0.02em;
 }
 
-/* pinned, the scroll draws the rows in and out (ToolsStack sets each
-   row's wipe, its name's rise and the register's fade every frame) */
+.cx-kit__body .cx-kit__tiles li {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.3s var(--umm-ease-out);
+}
+
+.cx-kit__body .cx-kit__tiles li span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(70%);
+  transition:
+    transform 0.3s var(--umm-ease-out),
+    opacity 0.2s var(--umm-ease-out);
+}
+
+/* coming in: each row wipes across, top to bottom, and its name rises */
+.cx-kit__body .cx-kit__tiles[data-on='true'] li {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.75s cubic-bezier(0.7, 0, 0.2, 1) calc(0.25s + var(--i) * 0.07s);
+}
+
+.cx-kit__body .cx-kit__tiles[data-on='true'] li span {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    transform 0.7s var(--umm-ease-out) calc(0.6s + var(--i) * 0.07s),
+    opacity 0.5s var(--umm-ease-out) calc(0.6s + var(--i) * 0.07s);
+}
+
+/* going out: the whole register lifts and fades, quickly */
+.cx-kit__body .cx-kit__tiles[data-on='false'] {
+  opacity: 0;
+  transform: translateY(-14px);
+  transition:
+    opacity 0.35s var(--umm-ease-out),
+    transform 0.35s var(--umm-ease-out),
+    visibility 0s linear 0.35s;
+  visibility: hidden;
+}
+
+.cx-kit__body .cx-kit__tiles[data-on='false'] li {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0s linear 0.35s;
+}
 
 .cx-kit__note {
   margin: 0;

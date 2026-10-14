@@ -14,10 +14,8 @@
    ========================================================================== */
 
 html.cx-v2 {
-  /** one step of scroll, in every pinned section, on every screen. Was 80svh
-      while each gesture stepped; with free scroll (14 Oct, later: "sections
-      fly by") each point gets about a screen and a half */
-  --umm-lane: 140svh;
+  /** one step of scroll, in every pinned section, on every screen */
+  --umm-lane: 80svh;
 }
 
 /* every pinned section: one screen to hold it, plus a lane per step

@@ -10,7 +10,6 @@ import { ToolsStack } from '@/components/v2/ToolsStack'
 import { ProcessClose } from '@/components/v2/ProcessClose'
 import { ToTop } from '@/components/v2/ToTop'
 import { ScrollTrigger } from '@/lib/gsap'
-import { useSmoothWheel } from '@/lib/smoothWheel'
 import { meta } from '@/content/cxUiDesign'
 import '@/styles/v2-phone.css'
 import '@/styles/v2-scroll.css'
@@ -25,7 +24,6 @@ import '@/styles/v2-scroll.css'
  * Progress: docs/PROGRESS.md. The v1 page lives on at /v1.
  */
 export function CxUiDesignPage() {
-  useSmoothWheel()
   useEffect(() => {
     document.title = meta.title
     document.documentElement.classList.add('cx-v2')
