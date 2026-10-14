@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { gsap } from '@/lib/gsap'
 import { applications, type AppDemo } from '@/content/aiAutomation'
-import { SHAPES, type ShapeName, type ShapePart } from '@/components/v2/shapes.data'
+import type { ShapeName } from '@/components/v2/shapes.data'
 import { Shape } from '@/components/v2/Shape'
+import { maskOf, openFilm } from '@/components/v2/filmOpen'
 import { FlyArrow, type Tone } from '@/components/primitives'
 import { Vignette } from './AiApplications'
 import '@/styles/ai-apps.css'
@@ -14,8 +15,8 @@ import '@/styles/ai-film.css'
    The same player, frame and editing language as the CX page's film
    (ProofFilm.tsx): one GSAP timeline on a fixed 1920 x 1080 frame, scaled to
    the screen; the same kit of cuts (Cool Shape wipes, whip pans, flashes,
-   shakes, slams, chip pops), 12 fps grain, the clover entrance on big
-   screens, the 16:9 band on phones, reduced motion waiting on the cards.
+   shakes, slams, chip pops), 12 fps grain, the opening out of section 2's
+   last shape (here the coral moon; filmOpen.ts), the 16:9 band on phones, reduced motion waiting on the cards.
 
      0:00  intro     the question as a title, slams word by word; "improve."
                      pops as a chip; three Cool Shapes spin through; the
@@ -57,8 +58,6 @@ function useTall(on = true) {
   }, [on])
   return tall
 }
-/** Scroll, in screen heights, over which the clover opens. */
-const GROW = 1
 
 const INK = '#100e14'
 const PAPER = '#ffffff'
@@ -81,16 +80,6 @@ const VH = 580
 /** seconds per character: the chat types, the callouts type a little quicker */
 const CHAT_STEP = 0.04
 const CALL_STEP = 0.035
-
-/** A Cool Shape as a CSS mask. Only solid shapes: one with a hole would
- *  leave a window of the old scene in the new one. */
-const maskOf = (name: ShapeName) => {
-  const paths = (SHAPES[name] as readonly ShapePart[])
-    .map((p) => `<path d='${p.d}'${p.evenodd ? " fill-rule='evenodd'" : ''}/>`)
-    .join('')
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>${paths}</svg>`
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
-}
 
 /** A line split into words, with `chip` (if it ends the line) as one chip. */
 function Words({ text, chip, className = 'cx-f-w' }: { text: string; chip?: string; className?: string }) {
@@ -920,76 +909,23 @@ export function AiFilm() {
           return () => io.disconnect()
         }
 
-        /* Big screens: section 2 hands over black to black, and the film
-           arrives inside a sky clover, the shape of section 2's last point.
-           The scroll grows the clover (exponentially, so it feels like one
-           steady push) until it covers the screen; the film starts the
-           instant it is full, and the page then holds a while. */
-        section.dataset.mode = 'open'
-        const pin = pinRef.current!
-        const win = windowRef.current!
-        const halo = haloRef.current!
-        const tag = tagRef.current!
-        const controls = controlsRef.current!
-        const ease = gsap.parseEase('power1.inOut')
-        const state = { p: 0 }
-        let inZone = false
-        win.style.setProperty('--clover', maskOf('clover-1'))
-
-        const apply = () => {
-          const vw = pin.clientWidth
-          const vh = pin.clientHeight
-          const s0 = Math.min(vw, vh) * 0.5
-          const s1 = Math.max(vw, vh) * 2.6
-          const e = ease(state.p)
-          const s = s0 * Math.pow(s1 / s0, e)
-          const full = state.p > 0.995
-          win.style.setProperty('--ms', `${s}px`)
-          win.dataset.full = full ? 'true' : 'false'
-          halo.style.width = `${s * 1.07}px`
-          halo.style.opacity = String(Math.max(0, 1 - e * 1.6))
-          tag.style.top = `${vh / 2 + s / 2 + 30}px`
-          tag.style.opacity = String(Math.max(0, 1 - state.p * 3))
-          controls.dataset.shown = full ? 'true' : 'false'
-          fitRef.current()
-          if (full && inZone) start()
-        }
-        apply()
-
-        gsap.to(state, {
-          p: 1,
-          ease: 'none',
-          onUpdate: apply,
-          scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: () => `+=${window.innerHeight * GROW}`,
-            scrub: 0.8,
-            invalidateOnRefresh: true,
+        /* Big screens and upright phones: section 2's last shape lifts off
+           as the film's window, glides to the middle with the film starting
+           inside it, and grows until it covers the screen (filmOpen). */
+        return openFilm({
+          section,
+          pin: pinRef.current!,
+          win: windowRef.current!,
+          halo: haloRef.current!,
+          tag: tagRef.current!,
+          controls: controlsRef.current!,
+          fit: () => fitRef.current(),
+          start,
+          stop,
+          rewind: () => {
+            if (tl.time() > 0 && tl.time() < 3) tl.pause(0)
           },
         })
-        /* from fully open until most of it has scrolled away */
-        ScrollTrigger.create({
-          trigger: section,
-          start: () => `top+=${window.innerHeight * GROW} top`,
-          end: 'bottom 55%',
-          invalidateOnRefresh: true,
-          onToggle: (self) => {
-            inZone = self.isActive
-            if (!inZone) stop()
-            else if (state.p > 0.995) start()
-          },
-        })
-        window.addEventListener('resize', apply)
-
-        return () => {
-          window.removeEventListener('resize', apply)
-          delete section.dataset.mode
-          ;[win, halo, tag, controls].forEach((el) => el.removeAttribute('style'))
-          delete controls.dataset.shown
-          delete win.dataset.full
-          fitRef.current()
-        }
       },
       section,
     )
@@ -1081,11 +1017,13 @@ export function AiFilm() {
       </ul>
 
       <div className="cx-film__pin" ref={pinRef}>
-        <div className="cx-film__halo" ref={haloRef} aria-hidden="true">
-          <Shape name="clover-1" tone="sky" />
-        </div>
+        <div className="cx-film__halo" ref={haloRef} aria-hidden="true" />
 
         <div className="cx-film__window" ref={windowRef}>
+
+          {/* the last point's colour, clearing as the window glides (filmOpen) */}
+
+          <div className="cx-film__cover" aria-hidden="true" />
           <div className="cx-film__screen" ref={screenRef}>
             <div className="cx-film__frame" ref={frameRef} data-tall={tall || undefined} aria-hidden="true">
               <div className="cx-f-cam">

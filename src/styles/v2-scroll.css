@@ -1,0 +1,114 @@
+/* ============================================================================
+   v2 · SCROLL — one rhythm for every pinned section, and section 2 handing
+   over to the film
+
+   Krish, 14 Oct (a review: "the sections are too fast scrolled"): every
+   pinned section on both v2 pages, on every screen, moves on the same
+   rhythm. Each step is one lane of scroll (--umm-lane), and each scroll
+   gesture moves exactly one step (lib/useMagneticStops, step mode), so a
+   hard flick can never skip one. Before this the lanes ran 55 to 68% of a
+   screen and differed by section and by screen.
+
+   And section 2 no longer goes dark before the film: the shape of its last
+   point becomes the film's window (components/v2/filmOpen.ts).
+   ========================================================================== */
+
+html.cx-v2 {
+  /** one step of scroll, in every pinned section, on every screen */
+  --umm-lane: 80svh;
+}
+
+/* every pinned section: one screen to hold it, plus a lane per step
+   (PIN_V2 in lib/usePinned decides where they pin) */
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference),
+  (min-height: 560px) and (prefers-reduced-motion: no-preference) {
+  html.cx-v2 .umm-pin {
+    min-height: calc(100svh + var(--umm-pin-steps) * var(--umm-lane));
+  }
+}
+
+/* --- section 2 → the film --------------------------------------------------
+   Section 2 holds one lane longer than its beats (--why-stops counts the
+   headline, the three points and that extra step). The film is pulled up
+   under it by one screen and a half lane, so the film's opening lane runs
+   while section 2 is still held on its last point:
+
+     section 2's hold:  0.5   1.5   2.5   3.5 | 4.5 lanes
+                        head  01    02    03  | film full
+     the film:                                ^ its top reaches the top of
+                                                the screen here, and its
+                                                window opens over one lane
+
+   ProofFilm and AiFilm set data-handoff when section 2 is held (filmOpen).
+   ------------------------------------------------------------------------- */
+
+.cx-why[data-mode='pin'] .cx-why__runway {
+  height: calc(var(--why-stops, 5) * var(--umm-lane));
+}
+
+html.cx-v2 .cx-film[data-handoff='true'] {
+  z-index: 3;
+  margin-top: calc(-100svh - 1.5 * var(--umm-lane));
+  background: transparent;
+}
+
+/* until the window is full the film lets section 2 underneath keep the
+   pointer */
+html.cx-v2 .cx-film[data-handoff='true'] .cx-film__pin:not([data-full='true']) {
+  pointer-events: none;
+}
+
+/* the film's window, moved and sized by filmOpen */
+html.cx-v2 .cx-film[data-mode='open'] .cx-film__window {
+  -webkit-mask-position: var(--mpos, center);
+  mask-position: var(--mpos, center);
+  opacity: var(--win, 1);
+}
+
+/* the last point's colour over the film, so the shape lifting off section
+   2 is the same shape until it clears */
+html.cx-v2 .cx-film__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--hand-tone, var(--umm-sky));
+  opacity: var(--cover, 0);
+  pointer-events: none;
+}
+
+/* the ring that leads the window: its shape and colour, a touch bigger */
+html.cx-v2 .cx-film[data-mode='open'] .cx-film__halo {
+  background: var(--hand-tone, var(--umm-sky));
+  -webkit-mask: var(--clover) center / 100% 100% no-repeat;
+  mask: var(--clover) center / 100% 100% no-repeat;
+}
+
+/* section 2 while the film takes over (--hand runs 0 → 1 across the
+   film's opening lane): the last point's number fades and its shape is
+   handed to the window, its words lift away, and the light goes out behind the
+   window as it travels to the middle */
+.cx-why[data-mode='pin'] .cx-why__pair:last-child .cx-why__num {
+  /* filter, not opacity: the beat's own tween owns the number's opacity */
+  filter: opacity(clamp(0, 1 - var(--hand, 0) * 22, 1));
+}
+
+/* the window takes the shape's place at 0.05 (LIFT in filmOpen) */
+.cx-why[data-mode='pin'] .cx-why__pair:last-child .cx-why__mark {
+  opacity: clamp(0, (0.05 - var(--hand, 0)) * 1000, 1);
+}
+
+.cx-why[data-mode='pin'] .cx-why__pair:last-child .cx-why__text {
+  opacity: clamp(0, 1 - var(--hand, 0) * 3.2, 1);
+  translate: 0 calc(var(--hand, 0) * -90px);
+}
+
+/* (the strip stays: under it is the hero, not dark; the window grows over
+   it) */
+.cx-why[data-mode='pin'] .cx-why__light {
+  opacity: clamp(0, 1 - (var(--hand, 0) - 0.06) * 2.6, 1);
+}
+
+/* the label under the window takes the last point's colour too */
+html.cx-v2 .cx-film[data-handoff='true'] .cx-film__tag {
+  background: var(--hand-tone);
+}

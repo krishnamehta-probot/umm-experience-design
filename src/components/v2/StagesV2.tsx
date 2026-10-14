@@ -3,6 +3,7 @@ import { FlyArrow } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
 import { StageLight } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
+import { useMagneticStops } from '@/lib/useMagneticStops'
 import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { stages as cxStages } from '@/content/cxUiDesign'
 
@@ -24,6 +25,11 @@ export type StagesContent = typeof cxStages
    moves through the stage, the line filling between them, and the last
    point pulsing once it is reached. Each stage's path is carried in and
    out like the panels beside it.
+
+   14 Oct: one scroll gesture moves one stage (lib/useMagneticStops, as in
+   every pinned section), each stage a lane of scroll apart (v2-scroll.css).
+   The stages rest where the scrubbed panels sit fully in, so the reels
+   still roll with the scroll, now along the glide between two stages.
 
    v1's notes on the mechanics follow.
 
@@ -85,6 +91,15 @@ export function StagesV2({
   const [picked, setPicked] = useState(0)
 
   const laneSize = (1 - CARDS_START) / items.length
+  /* Each stage rests at CARDS_START + i * laneSize of the travel, so the
+     stops' lanes are laid from half a lane before the first rest. */
+  const glideTo = useMagneticStops(ref, items.length, pinned, (el) => {
+    const travel = el.offsetHeight - window.innerHeight
+    return {
+      top: el.getBoundingClientRect().top + window.scrollY + travel * (CARDS_START - laneSize / 2),
+      travel: travel * laneSize * items.length,
+    }
+  })
   const lane = pinned ? (progress - CARDS_START) / laneSize : picked
   const u = pinned ? Math.min(items.length - 1, Math.max(0, lane)) : picked
 
@@ -130,14 +145,7 @@ export function StagesV2({
       tab?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
       return
     }
-    const el = ref.current
-    if (!el) return
-    const travel = el.offsetHeight - window.innerHeight
-    if (travel <= 0) return
-    window.scrollTo({
-      top: el.offsetTop + travel * (CARDS_START + i * laneSize),
-      behavior: 'smooth',
-    })
+    glideTo(i)
   }
 
   return (
@@ -146,7 +154,9 @@ export function StagesV2({
       id="stages"
       ref={ref}
       data-mode={pinned ? 'scroll' : 'stack'}
-      style={{ ['--umm-pin-steps' as string]: items.length }}
+      /* a lane per stage, measured between the stages' rests: the stages
+         take the travel after CARDS_START */
+      style={{ ['--umm-pin-steps' as string]: items.length / (1 - CARDS_START) }}
     >
       <div className="umm-pin__stage">
         <div className="umm-container umm-pin__inner umm-pin__inner--stack">

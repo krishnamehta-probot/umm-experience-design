@@ -33,8 +33,12 @@ export type RibbonContent = typeof cxRibbon
    sitting exactly on its stop.
 
    The ground is FlutedLight, a shader of blue light through fluted glass
-   that sweeps as the story moves. It stays on through the last point and
-   goes out as the section leaves, handing over to the film's black.
+   that sweeps as the story moves. It stays on through the last point.
+
+   14 Oct: one scroll gesture moves one beat (as in every pinned section),
+   and the section holds one lane more than its beats. Over that lane the
+   last point's shape lifts off as the film's window (v2/filmOpen.ts) while
+   the light and the point's words go out behind it.
 
    Phones, short windows: the same story stacked, each beat scrubbed by the
    scroll as it passes. Reduced motion: the finished state, no motion.
@@ -69,10 +73,10 @@ function within(n: HTMLElement, stage: HTMLElement) {
 }
 
 /** Where the hold starts and how long it lasts: from the strip reaching the
- *  top of the screen until the section's bottom meets the screen's. */
+ *  top of the screen, over the runway (one lane per stop, v2-scroll.css). */
 const holdOf = (el: HTMLElement) => {
   const top = el.getBoundingClientRect().top + window.scrollY + stripTop()
-  return { top, travel: el.offsetHeight - window.innerHeight - stripTop() }
+  return { top, travel: el.querySelector<HTMLElement>('.cx-why__runway')!.offsetHeight }
 }
 
 function usePinMedia() {
@@ -121,7 +125,10 @@ export function WhyBand({
   const pinned = usePinMedia()
   /** The beats the section rests on: the headline, then each point. */
   const STOPS = why.pairs.length + 1
-  useMagneticStops(ref, STOPS, pinned, holdOf, { pace: 1.6 })
+  /* one gesture, one beat (14 Oct, the same as every pinned section), and
+     one stop more than the beats: the film's opening, which plays over
+     the last lane while the section still holds (filmOpen) */
+  useMagneticStops(ref, STOPS + 1, pinned, holdOf)
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -322,10 +329,13 @@ export function WhyBand({
           light.current = p
           gsap.to(tl, { time: timeAt(p), duration: 0.55, ease: 'power3.out', overwrite: true })
         }
+        /* the beats take the runway's first STOPS lanes; the last lane is
+           the film's opening */
+        const runway = q<HTMLElement>('.cx-why__runway')
         const st = ScrollTrigger.create({
           trigger: el,
           start: () => `top top-=${stripTop()}`,
-          end: 'bottom bottom',
+          end: () => `+=${(runway.offsetHeight * STOPS) / (STOPS + 1)}`,
           invalidateOnRefresh: true,
           onUpdate: (self) => follow(self.progress),
           onLeaveBack: () => follow(0),
@@ -334,27 +344,13 @@ export function WhyBand({
         fadeTeams()
         tl.time(timeAt(st.progress))
 
-        /* The light stays on through the last point, and goes out as the
-           section leaves, so it hands over to the film's black. */
-        /* the bottom goes dark first (--exit masks it from below), so the
-           edge that rises off the screen is already black */
-        const fade = gsap.timeline({
-          scrollTrigger: {
-            trigger: el,
-            start: 'bottom bottom',
-            end: 'bottom 55%',
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        })
-        fade.fromTo(q('.cx-why__light'), { '--exit': 0 }, { '--exit': 1, ease: 'none', duration: 1 }, 0)
-        fade.to(q('.cx-why__light'), { autoAlpha: 0, ease: 'power1.in', duration: 0.6 }, 0.4)
+        /* The light stays on through the last point. It goes out behind
+           the film's window as that lifts off the last point (--hand, set
+           by filmOpen; v2-scroll.css), so there is no dark gap. */
 
         return () => {
           gsap.killTweensOf(tl)
           st.kill()
-          fade.scrollTrigger?.kill()
-          fade.kill()
           holding = () => false
           el.dataset.mode = 'stack'
         }
@@ -407,6 +403,7 @@ export function WhyBand({
       data-umm-theme="ink"
       data-mode="stack"
       aria-labelledby="cx-why-title"
+      style={{ ['--why-stops' as string]: STOPS + 1 }}
     >
       <div className="cx-why__pin">
         <RibbonCurtain items={ribbon} clearOf=".cx-hero__copy" tone={ribbonTone} />
@@ -444,7 +441,7 @@ export function WhyBand({
 
             {why.pairs.map((pair, i) => (
               <div className="cx-why__beat cx-why__pair" key={pair.title} data-umm-tone={pair.tone}>
-                <div className="cx-why__mark" aria-hidden="true">
+                <div className="cx-why__mark" aria-hidden="true" data-shape={pair.shape}>
                   <Shape name={pair.shape} tone={pair.tone} className="cx-why__shape" />
                   <span className="cx-why__num">{String(i + 1).padStart(2, '0')}</span>
                 </div>

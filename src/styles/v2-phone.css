@@ -29,12 +29,6 @@ html.cx-v2::-webkit-scrollbar {
 }
 
 @media (max-width: 899px) and (min-height: 560px) {
-  /* the pin itself: a phone screen held, a shorter lane per step than
-     desktop's so a thumb flick moves one step, not three */
-  html.cx-v2 .umm-pin {
-    min-height: calc(100svh + var(--umm-pin-steps) * 62svh);
-  }
-
   html.cx-v2 .umm-pin__stage {
     position: sticky;
     top: 0;

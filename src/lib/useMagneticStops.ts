@@ -20,7 +20,10 @@ import { useEffect, useRef, type RefObject } from 'react'
    different stretch passes `geometry`, giving the page scroll where its
    travel starts and how long it is.
 
-   `step: true` makes the section step rather than drift: while it holds,
+   Stepping is the default (Krish, 14 Oct: "the sections are too fast
+   scrolled"; every pinned section on the v2 pages steps, on the same lane,
+   styles/v2-scroll.css). `step: false` leaves the old drift-and-settle.
+   Stepping: while it holds,
    each scroll gesture (a wheel turn or trackpad swipe, a touch swipe, an
    arrow / page key) moves exactly one stop, gliding the page there, and
    the gesture's leftover momentum is swallowed so a hard flick can never
@@ -50,7 +53,7 @@ export function useMagneticStops(
   stops: number,
   enabled: boolean,
   geometryOf: Geometry = ownTravel,
-  { step = false, pace = 1 }: { step?: boolean; pace?: number } = {},
+  { step = true, pace = 1 }: { step?: boolean; pace?: number } = {},
 ) {
   const glide = useRef<(stop: number) => void>(() => {})
   const geo = useRef(geometryOf)
@@ -119,6 +122,8 @@ export function useMagneticStops(
     const EPS = 0.004
     let lockUntil = 0
     let lastWheel = 0
+    let lastMag = 0
+    let lastDir = 0
     let acc = 0
     let touchY: number | null = null
 
@@ -132,6 +137,9 @@ export function useMagneticStops(
 
     /** Whether a move in `dir` belongs to the section (true) or to the page. */
     const owns = (dir: number) => {
+      // a section that is not holding (no travel: stacked, reduced motion)
+      // never takes the scroll
+      if (geometry().travel <= 0) return false
       const { p } = where()
       const first = stopAnchor(0, stops)
       const last = stopAnchor(stops - 1, stops)
@@ -170,11 +178,20 @@ export function useMagneticStops(
       const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY
       const dir = Math.sign(dy)
       if (!dir) return
-      if (now - lastWheel > 160) {
+      /* a pause starts a new gesture, unless what follows is still the
+         last one's momentum dying away (small and still falling): a busy
+         page (the film starting) can hold those back past the pause, and
+         they must not carry the page on past the stop */
+      const gap = now - lastWheel
+      const mag = Math.abs(dy)
+      const dying = gap < 700 && dir === lastDir && mag <= lastMag && mag < 60
+      if (gap > 160 && !dying) {
         mine = false
         acc = 0
       }
       lastWheel = now
+      lastMag = mag
+      lastDir = dir
       if (mine || locked(now)) {
         e.preventDefault()
         return

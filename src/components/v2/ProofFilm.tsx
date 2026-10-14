@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { gsap } from '@/lib/gsap'
 import { film } from '@/content/cxUiDesign'
-import { SHAPES, type ShapeName, type ShapePart } from './shapes.data'
+import type { ShapeName } from './shapes.data'
 import { Shape } from './Shape'
+import { maskOf, openFilm } from './filmOpen'
 import { FlyArrow } from '../primitives'
 
 /* ============================================================================
@@ -30,10 +31,11 @@ import { FlyArrow } from '../primitives'
    motion blur, flash frames, camera shake on the slams, slow push-ins,
    12 fps film grain.
 
-   On big screens the film arrives inside a sky clover (the shape of
-   section 2's last point) that grows with the scroll until it fills the
-   screen; it starts the instant it is full. Phones get a 16:9 band that
-   plays on screen. Reduced motion: it waits on the cards. Screen readers
+   On big screens and upright phones the film arrives inside section 2's
+   last shape (the sky clover): it lifts off that point, glides to the
+   middle, starts the film inside it and grows until it fills the screen,
+   all on one scroll gesture (filmOpen.ts). Phones on their side get a 16:9
+   band that plays on screen. Reduced motion: it waits on the cards. Screen readers
    get the projects as a list of links.
    ========================================================================== */
 
@@ -62,8 +64,6 @@ function useTall(on = true) {
   }, [on])
   return tall
 }
-/** Scroll, in screen heights, over which the clover opens. */
-const GROW = 1
 
 const INK = '#100e14'
 const PAPER = '#ffffff'
@@ -97,16 +97,6 @@ const FLOWS: Record<string, Flow> = {
     { src: 's3' },
   ],
   fintuit: [{ src: 'p0', click: [0.5, 0.54] }, { src: 'p1', click: [0.235, 0.457] }, { src: 'p2' }, { src: 'p3' }],
-}
-
-/** A Cool Shape as a CSS mask. Only solid shapes: one with a hole would
- *  leave a window of the old scene in the new one. */
-const maskOf = (name: ShapeName) => {
-  const paths = (SHAPES[name] as readonly ShapePart[])
-    .map((p) => `<path d='${p.d}'${p.evenodd ? " fill-rule='evenodd'" : ''}/>`)
-    .join('')
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>${paths}</svg>`
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
 }
 
 /** A line split into words, with `chip` (if it ends the line) as one chip. */
@@ -462,76 +452,23 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
           return () => io.disconnect()
         }
 
-        /* Big screens: section 2 hands over black to black, and the film
-           arrives inside a sky clover, the shape of section 2's last point.
-           The scroll grows the clover (exponentially, so it feels like one
-           steady push) until it covers the screen; the film starts the
-           instant it is full, and the page then holds a while. */
-        section.dataset.mode = 'open'
-        const pin = pinRef.current!
-        const win = windowRef.current!
-        const halo = haloRef.current!
-        const tag = tagRef.current!
-        const controls = controlsRef.current!
-        const ease = gsap.parseEase('power1.inOut')
-        const state = { p: 0 }
-        let inZone = false
-        win.style.setProperty('--clover', maskOf('clover-1'))
-
-        const apply = () => {
-          const vw = pin.clientWidth
-          const vh = pin.clientHeight
-          const s0 = Math.min(vw, vh) * 0.5
-          const s1 = Math.max(vw, vh) * 2.6
-          const e = ease(state.p)
-          const s = s0 * Math.pow(s1 / s0, e)
-          const full = state.p > 0.995
-          win.style.setProperty('--ms', `${s}px`)
-          win.dataset.full = full ? 'true' : 'false'
-          halo.style.width = `${s * 1.07}px`
-          halo.style.opacity = String(Math.max(0, 1 - e * 1.6))
-          tag.style.top = `${vh / 2 + s / 2 + 30}px`
-          tag.style.opacity = String(Math.max(0, 1 - state.p * 3))
-          controls.dataset.shown = full ? 'true' : 'false'
-          fitRef.current()
-          if (full && inZone) start()
-        }
-        apply()
-
-        gsap.to(state, {
-          p: 1,
-          ease: 'none',
-          onUpdate: apply,
-          scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: () => `+=${window.innerHeight * GROW}`,
-            scrub: 0.8,
-            invalidateOnRefresh: true,
+        /* Big screens and upright phones: section 2's last shape lifts off
+           as the film's window, glides to the middle with the film starting
+           inside it, and grows until it covers the screen (filmOpen). */
+        return openFilm({
+          section,
+          pin: pinRef.current!,
+          win: windowRef.current!,
+          halo: haloRef.current!,
+          tag: tagRef.current!,
+          controls: controlsRef.current!,
+          fit: () => fitRef.current(),
+          start,
+          stop,
+          rewind: () => {
+            if (tl.time() > 0 && tl.time() < 3) tl.pause(0)
           },
         })
-        /* from fully open until most of it has scrolled away */
-        ScrollTrigger.create({
-          trigger: section,
-          start: () => `top+=${window.innerHeight * GROW} top`,
-          end: 'bottom 55%',
-          invalidateOnRefresh: true,
-          onToggle: (self) => {
-            inZone = self.isActive
-            if (!inZone) stop()
-            else if (state.p > 0.995) start()
-          },
-        })
-        window.addEventListener('resize', apply)
-
-        return () => {
-          window.removeEventListener('resize', apply)
-          delete section.dataset.mode
-          ;[win, halo, tag, controls].forEach((el) => el.removeAttribute('style'))
-          delete controls.dataset.shown
-          delete win.dataset.full
-          fitRef.current()
-        }
       },
       section,
     )
@@ -632,12 +569,14 @@ export function ProofFilm({ mode = 'page' }: { mode?: 'page' | 'render' }) {
 
       <div className="cx-film__pin" ref={pinRef}>
         {mode === 'page' && (
-          <div className="cx-film__halo" ref={haloRef} aria-hidden="true">
-            <Shape name="clover-1" tone="sky" />
-          </div>
+          <div className="cx-film__halo" ref={haloRef} aria-hidden="true" />
         )}
 
         <div className="cx-film__window" ref={windowRef}>
+
+          {/* the last point's colour, clearing as the window glides (filmOpen) */}
+
+          <div className="cx-film__cover" aria-hidden="true" />
           <div className="cx-film__screen" ref={screenRef}>
             <div className="cx-film__frame" ref={frameRef} data-tall={tall || undefined} aria-hidden="true">
               <div className="cx-f-cam">

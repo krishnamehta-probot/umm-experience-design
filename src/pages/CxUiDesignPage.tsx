@@ -12,6 +12,7 @@ import { ToTop } from '@/components/v2/ToTop'
 import { ScrollTrigger } from '@/lib/gsap'
 import { meta } from '@/content/cxUiDesign'
 import '@/styles/v2-phone.css'
+import '@/styles/v2-scroll.css'
 
 /**
  * CX and UI Design — v2, the second iteration after Santosh's 30 Sep review.

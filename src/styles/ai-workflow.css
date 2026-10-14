@@ -44,13 +44,6 @@
 
 /* --- the pin: tabs, track, caption, on the viewport below the nav -------- */
 
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .ai-flow__pin.umm-pin {
-    /* the same steady stretch per stop as the other magnetic sections */
-    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
-  }
-}
-
 @media (min-width: 900px) {
   .ai-flow__pin .umm-pin__stage {
     padding: 96px 0 14px;

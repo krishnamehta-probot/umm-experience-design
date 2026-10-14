@@ -146,6 +146,32 @@ clicks a tab, then that project loops.
   seven layers), always on the card's right so the flow's words stay clear.
   (A first, scattered "plexus" version read as random; Krish asked for it
   to fit the site.) CX keeps the fluted light.
+- **14 Oct, one scroll rhythm, and section 2 opening into the film (a
+  review: "the sections are too fast scrolled"; Krish: "all of a sudden
+  it's getting dark and then that video is playing"):**
+  - Measured first: steps were 0.55 to 0.68 of a screen and differed by
+    section and screen, so one trackpad flick crossed 2–3 steps.
+  - Now every pinned section on both pages (section 2, stages, rules,
+    tools, workflow, roadmap) moves one lane per step, `--umm-lane: 80svh`
+    on every screen (`styles/v2-scroll.css`; the per-section 55/58/62/
+    88svh and section 2's 260svh runway are gone). Measured 0.80 at nine
+    sizes from 390x664 to 2560x1440.
+  - One gesture = one step everywhere: `useMagneticStops` steps by
+    default (wheel, trackpad, touch, keys); StagesV2 now uses it too (its
+    tabs glide). A busy frame can no longer split a gesture's momentum
+    into a second step. Sections that don't hold never take the scroll
+    (reduced motion scrolls freely). Checked with hard flicks, wheel spins
+    and touch swipes on desktop, a 1280x720 laptop and a phone, both
+    pages: every gesture lands on the next stop.
+  - Section 2 → film (`v2/filmOpen.ts`, shared by ProofFilm and AiFilm):
+    section 2 holds one lane more; on that step the last point's number
+    fades, its shape (CX sky clover, AI coral moon) lifts off as the film's
+    window, glides to the middle with a ring of its colour while the words
+    lift and the light goes out, clears to show the film starting inside
+    it, and grows to full screen. The film section is pulled up under
+    section 2 so both hold through it; the opening trails the glide by
+    about 2s. Swiping back up reverses it. The strip stays (under it is
+    the hero).
 - **14 Oct, the film went black mid-way (Krish: "getting black out in
   middle sometimes"):** after a pause or rewind across the whip pan (0:10,
   TFP to Fintuit, e.g. scrolling up a little and back), Fintuit slid in

@@ -778,9 +778,7 @@ html.cx-v2 body {
   padding: 0;
 }
 
-.cx-why[data-mode='pin'] .cx-why__runway {
-  height: 260svh;
-}
+/* the runway's length, one lane per stop, is in v2-scroll.css */
 
 .cx-why[data-mode='pin'] .cx-why__teams {
   position: absolute;
@@ -1223,8 +1221,8 @@ html.cx-v2 body {
 
 .cx-film[data-mode='open'] .cx-film__runway {
   display: block;
-  /* one screen to open (GROW in ProofFilm), then a one-screen hold */
-  height: 200svh;
+  /* one lane to open (filmOpen), then a one-screen hold (v2-scroll.css) */
+  height: calc(var(--umm-lane, 100svh) + 100svh);
 }
 
 .cx-film[data-mode='open'] .cx-film__tag {
@@ -3050,13 +3048,6 @@ html.cx-v2 body {
     --k5 0.9s var(--umm-ease-out);
 }
 
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .cx-fix.umm-pin {
-    /* one stop per rule plus the broken screen, each a steady stretch */
-    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
-  }
-}
-
 .cx-fix__inner {
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.5rem);
@@ -4029,13 +4020,6 @@ html.cx-v2 body {
 [data-ramp='coral'] { --p0: #fff0f0; --p1: #ffc3c4; --p2: #ff9ea1; }
 [data-ramp='lilac'] { --p0: #f5f1ff; --p1: #dccfff; --p2: #bfa9f7; }
 
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .cx-kit.umm-pin {
-    /* the same steady stretch per stop as the rules */
-    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
-  }
-}
-
 .cx-kit {
   color: var(--umm-ink);
 }
@@ -4379,13 +4363,6 @@ html.cx-v2 body {
 /* --- the five steps: a roadmap board -------------------------------------- */
 
 @property --today { syntax: '<number>'; inherits: true; initial-value: 0; }
-
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .cx-plan.umm-pin {
-    /* the same steady stretch per stop as the rules and the tools */
-    min-height: calc(100svh + var(--umm-pin-steps) * 55svh);
-  }
-}
 
 .cx-plan {
   color: var(--umm-ink);
@@ -5111,19 +5088,6 @@ html.cx-v2 body {
   background: inherit;
   -webkit-background-clip: text;
   background-clip: text;
-}
-
-/* ---------------------------------------------------------------------------
-   PAGE LENGTH
-   Santosh's brief is a short page, and every pin adds scroll. v1 gave each
-   stage 88svh of travel; 58 is still enough for the odometer to roll
-   readably between two stages.
-   ------------------------------------------------------------------------- */
-
-@media (min-width: 900px) {
-  .cx-stages.umm-pin {
-    min-height: calc(100svh + var(--umm-pin-steps) * 58svh);
-  }
 }
 
 /* Short laptop screens (768px tall) cannot hold the size tabs' headline,
