@@ -58,6 +58,26 @@ const RAMPS = {
     [212, 240, 88],
     [240, 255, 112],
   ],
+  /* the Digital Engineering page's: ink through deep plum to blossom */
+  blossom: [
+    [16, 14, 20],
+    [26, 10, 30],
+    [80, 20, 90],
+    [160, 50, 170],
+    [220, 120, 220],
+    [245, 180, 240],
+    [255, 196, 242],
+  ],
+  /* the Integrated Growth page's: ink through deep amber to sun */
+  sun: [
+    [16, 14, 20],
+    [26, 18, 8],
+    [90, 56, 6],
+    [180, 120, 14],
+    [232, 180, 60],
+    [250, 214, 120],
+    [255, 226, 137],
+  ],
 }
 export type LightTone = keyof typeof RAMPS
 

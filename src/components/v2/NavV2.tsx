@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IconClose, IconMenu } from '../icons'
 import { FlyArrow } from '../primitives'
 import { nav as cxNav } from '@/content/cxUiDesign'
@@ -14,20 +14,40 @@ export type NavContent = typeof cxNav
    coming back the moment the reader scrolls up.
    ========================================================================== */
 
-/* The service pages link to each other from the pill: CX and AI to each
-   other, Cloud & Data to CX (the first page that isn't the one open). */
+/* Every service page, in the pill's menu (Krish, 15 Oct: "add the links to
+   the navbar so that we can directly check from there"), the open one
+   marked; on phones they close the sheet. */
 const PAGES = [
   { href: '/', label: 'CX & UI Design' },
   { href: '/ai-automation', label: 'AI & Automation' },
   { href: '/cloud-data', label: 'Cloud & Data' },
+  { href: '/digital-engineering', label: 'Digital Engineering' },
+  { href: '/integrated-growth', label: 'Integrated Growth & Strategy' },
 ]
 
 export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
   const here = typeof window === 'undefined' ? '/' : window.location.pathname.replace(/\/$/, '') || '/'
-  const other = PAGES.find((p) => p.href !== here) ?? PAGES[1]
+  const others = PAGES.filter((p) => p.href !== here)
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [open, setOpen] = useState(false)
+  const [menu, setMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  /* the pages menu closes on Escape, or a click anywhere outside it */
+  useEffect(() => {
+    if (!menu) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenu(false)
+    const onDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenu(false)
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [menu])
 
   useEffect(() => {
     let last = window.scrollY
@@ -71,9 +91,29 @@ export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
           ))}
         </nav>
 
-        <a className="cx-nav__page" href={other.href}>
-          {other.label}
-        </a>
+        <div className="cx-nav__pages" ref={menuRef}>
+          <button
+            type="button"
+            className="cx-nav__page"
+            aria-expanded={menu}
+            aria-controls="cx-nav-pages"
+            onClick={() => setMenu((v) => !v)}
+          >
+            All services
+            <svg viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+          </button>
+          <ul className="cx-nav__menu" id="cx-nav-pages" hidden={!menu}>
+            {PAGES.map((p) => (
+              <li key={p.href}>
+                <a href={p.href} aria-current={p.href === here ? 'page' : undefined} onClick={() => setMenu(false)}>
+                  {p.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <a className="cx-nav__cta" href="#contact">
           Let&rsquo;s talk
@@ -106,10 +146,12 @@ export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
             <span>{String(nav.length + 1).padStart(2, '0')}</span>
             Let&rsquo;s talk
           </a>
-          <a href={other.href} onClick={() => setOpen(false)}>
-            <span>{String(nav.length + 2).padStart(2, '0')}</span>
-            {other.label}
-          </a>
+          {others.map((p, i) => (
+            <a key={p.href} href={p.href} onClick={() => setOpen(false)}>
+              <span>{String(nav.length + 2 + i).padStart(2, '0')}</span>
+              {p.label}
+            </a>
+          ))}
         </nav>
       </div>
     </header>

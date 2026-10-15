@@ -195,9 +195,20 @@ html.cx-v2 body {
   color: var(--umm-ink);
 }
 
-.cx-nav__page {
+.cx-nav__pages {
+  position: relative;
   margin-left: auto;
-  padding: 0.5em 1em;
+}
+
+.cx-nav__page {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  margin: 0;
+  padding: 0.5em 0.85em 0.5em 1em;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
   border: 1px solid var(--umm-line, rgba(16, 14, 20, 0.16));
   border-radius: var(--umm-r-pill);
   font-size: 0.875rem;
@@ -207,11 +218,73 @@ html.cx-v2 body {
   transition: background var(--umm-dur-fast) ease;
 }
 
-.cx-nav__page:hover {
+.cx-nav__page:hover,
+.cx-nav__page[aria-expanded='true'] {
   background: rgba(16, 14, 20, 0.06);
 }
 
-.cx-nav__page + .cx-nav__cta {
+.cx-nav__page svg {
+  width: 12px;
+  height: 12px;
+  transition: transform var(--umm-dur-fast) ease;
+}
+
+.cx-nav__page[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+/* the service pages, dropped from the pill in its own frosted card */
+.cx-nav__menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  display: grid;
+  gap: 2px;
+  min-width: 250px;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.92);
+  border: 1px solid rgb(255 255 255 / 0.8);
+  box-shadow: 0 18px 40px -20px rgb(16 14 20 / 0.45);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.cx-nav__menu[hidden] {
+  display: none;
+}
+
+.cx-nav__menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cx-nav__menu a:hover {
+  background: rgba(16, 14, 20, 0.06);
+}
+
+/* the page that is open, marked with a citrus dot */
+.cx-nav__menu a[aria-current='page']::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 0 1px rgb(16 14 20 / 0.3);
+}
+
+.cx-nav__pages + .cx-nav__cta {
   margin-left: 0.6rem;
 }
 
@@ -287,7 +360,7 @@ html.cx-v2 body {
 
 @media (max-width: 899px) {
   .cx-nav__links,
-  .cx-nav__page {
+  .cx-nav__pages {
     display: none;
   }
   .cx-nav__toggle {
@@ -1468,6 +1541,51 @@ html.cx-v2 body {
   background: #1c0a24;
 }
 
+/* the Digital Engineering and Integrated Growth films (EngFilm, GrowthFilm) */
+.cx-f-proj--penny {
+  background: #14161f;
+}
+
+.cx-f-proj--enda {
+  background: #06121c;
+}
+
+.cx-f-proj--biocon {
+  background: #061533;
+}
+
+.cx-f-proj--iadeptive {
+  background: #1a0606;
+}
+
+/* Penny: their navy, with the yellow of their buttons */
+.cx-f-proj--penny .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(40 60 120 / 0.85), transparent 70%),
+    radial-gradient(35% 45% at 95% 12%, rgb(255 196 0 / 0.45), transparent 70%);
+}
+
+/* Enda: the blue sky of their campaign, with the green of the forest run */
+.cx-f-proj--enda .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(40 120 220 / 0.75), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(40 150 90 / 0.5), transparent 70%);
+}
+
+/* Biocon: their deep blue, with the teal of their commitment */
+.cx-f-proj--biocon .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(20 80 190 / 0.85), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(30 160 150 / 0.5), transparent 70%);
+}
+
+/* iAdeptive: their red */
+.cx-f-proj--iadeptive .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(220 30 40 / 0.7), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(120 20 30 / 0.6), transparent 70%);
+}
+
 /* Zceppa: their mint green, with the blue of their buttons */
 .cx-f-proj--zceppa .cx-f-proj__glow {
   background:
@@ -1707,13 +1825,17 @@ html.cx-v2 body {
 }
 
 
-/* the Cloud & Data film's title is two sentences: one a line, the cards
-   below them (wide frame; the tall one has room) */
-.cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
+/* the other service pages' film titles run to two lines: the cards below
+   them (wide frame; the tall one has room) */
+.cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__h,
+.cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-end__h,
+.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
   max-width: 1040px;
 }
 
-.cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__cards {
+.cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__cards,
+.cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-end__cards,
+.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__cards {
   top: 400px;
 }
 

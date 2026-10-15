@@ -622,3 +622,402 @@
     width: 100%;
   }
 }
+
+/* ============================================================================
+   THE SAME BOARD, FOR THE OTHER PAGES' EXAMPLES
+   Digital Engineering's release example (ReleaseFlow) and Integrated Growth's
+   model (GrowthModel) are built on the board above, with these additions.
+   ========================================================================== */
+
+/* scenario pills marked with where the release ends up (the AI workflow's
+   dots): citrus where it goes ahead, coral where it stops */
+.cd-arch__tab--dot {
+  gap: 0.55em;
+  padding-left: 12px;
+}
+
+.cd-arch__tab--dot::before {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--umm-ink) 25%, transparent);
+}
+
+.cd-arch__tab--dot[data-outcome='stop']::before {
+  background: var(--umm-coral);
+}
+
+.cd-arch__version {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  font-family: var(--umm-font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+}
+
+/* --- the release: four gates, the line solid as far as the release gets -- */
+
+.cd-arch__route--gates {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cd-arch__route--gates::before {
+  left: calc(100% / 8);
+  right: calc(100% / 8);
+}
+
+/* the solid part, over the dashed one */
+.cd-arch__route--gates::after {
+  content: '';
+  position: absolute;
+  top: 31px;
+  left: calc(100% / 8);
+  width: calc((100% - 100% / 4) * var(--reach, 1));
+  border-top: 2.5px solid var(--umm-ink);
+  transform-origin: left center;
+  animation: cd-arch-draw 0.9s var(--umm-ease-out) both;
+}
+
+/* a gate the release has not reached waits in grey */
+.cd-arch__node[data-state='idle'] .cd-arch__station {
+  background: var(--umm-veil);
+}
+
+.cd-arch__node[data-state='idle'] .cd-arch__card {
+  border-style: dashed;
+}
+
+.cd-arch__node[data-state='idle'] .cd-arch__place {
+  background: var(--umm-veil);
+}
+
+/* where it stopped: the station rings in coral */
+.cd-arch__node[data-state='fail'] .cd-arch__station,
+.cd-arch__node[data-state='alert'] .cd-arch__station {
+  box-shadow:
+    0 0 0 5px var(--umm-paper),
+    0 0 0 7px var(--umm-coral);
+}
+
+.cd-arch__verdict {
+  display: grid;
+  gap: 8px;
+  animation: cd-arch-in 0.55s var(--umm-ease-out) 0.4s both;
+}
+
+.cd-arch__status {
+  display: inline-flex;
+  align-self: start;
+  justify-self: start;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 10px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cd-arch__status::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--umm-ink) 25%, transparent);
+}
+
+.cd-arch__verdict[data-outcome='stop'] .cd-arch__status::before {
+  background: var(--umm-coral);
+}
+
+.cd-arch__read--one {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 10px;
+}
+
+/* --- the growth model: three levers, the result beside them -------------- */
+
+.ig-model {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(16px, 2.4vw, 32px);
+  align-items: start;
+}
+
+.ig-model__levers {
+  display: grid;
+  gap: 12px;
+}
+
+.ig-model__lever {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px 18px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 18px;
+  background: var(--umm-paper);
+}
+
+.ig-model__lever-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ig-model__value {
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ig-model__label {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--umm-ink-soft);
+}
+
+/* the slider: an ink track, filled in the lever's colour up to the thumb */
+.ig-model__range {
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.ig-model__range::-webkit-slider-runnable-track {
+  height: 10px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--umm-tone) var(--fill), var(--umm-paper) var(--fill));
+}
+
+.ig-model__range::-moz-range-track {
+  height: 10px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--umm-tone) var(--fill), var(--umm-paper) var(--fill));
+}
+
+.ig-model__range::-webkit-slider-thumb {
+  width: 26px;
+  height: 26px;
+  margin-top: -9.5px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-paper);
+  box-shadow: 0 2px 0 var(--umm-ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ig-model__range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-paper);
+  box-shadow: 0 2px 0 var(--umm-ink);
+}
+
+.ig-model__range:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.ig-model__aov {
+  margin: 4px 0 0;
+  font-size: 0.9375rem;
+  color: var(--umm-ink-soft);
+}
+
+.ig-model__aov strong {
+  color: var(--umm-ink);
+  font-weight: var(--umm-weight-medium);
+}
+
+.ig-model__result {
+  position: sticky;
+  top: calc(var(--umm-nav-h, 72px) + 16px);
+  display: grid;
+  gap: 10px;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 22px;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+}
+
+.ig-model__result .cd-arch__tag {
+  color: rgb(255 255 255 / 0.6);
+}
+
+.ig-model__result-label {
+  margin: 6px 0 0;
+  font-size: 0.9375rem;
+  color: rgb(255 255 255 / 0.72);
+}
+
+.ig-model__total {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(2.5rem, 4.6vw, 4rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ig-model__delta {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.ig-model__delta strong {
+  display: inline-block;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-paper);
+}
+
+.ig-model__delta[data-dir='up'] strong {
+  background: var(--umm-citrus);
+  color: var(--umm-ink);
+}
+
+.ig-model__delta[data-dir='down'] strong {
+  background: var(--umm-coral);
+  color: var(--umm-ink);
+}
+
+/* what the revenue is made of: first orders, then repeat orders */
+.ig-model__bar {
+  display: flex;
+  height: 14px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.ig-model__bar span {
+  height: 100%;
+  transition: width 0.45s var(--umm-ease-out);
+}
+
+.ig-model__bar-first {
+  background: var(--umm-sky);
+}
+
+.ig-model__bar-repeat {
+  background: var(--umm-coral);
+}
+
+.ig-model__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin: 8px 0 0;
+}
+
+.ig-model__stats dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: rgb(255 255 255 / 0.66);
+}
+
+.ig-model__stats [data-part] dt::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--umm-sky);
+}
+
+.ig-model__stats [data-part='repeat'] dt::before {
+  background: var(--umm-coral);
+}
+
+.ig-model__stats dd {
+  margin: 2px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ig-model__how {
+  border-top: 1px solid var(--umm-line);
+  padding-top: 14px;
+}
+
+.ig-model__how summary {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ig-model__how p {
+  margin: 10px 0 0;
+  max-width: 72ch;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-arch__route--gates::after,
+  .cd-arch__verdict {
+    animation: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .cd-arch__route--gates {
+    grid-template-columns: 1fr;
+  }
+
+  .cd-arch__route--gates::after {
+    top: 32px;
+    left: 31px;
+    width: 0;
+    height: calc((100% - 64px) * var(--reach, 1));
+    border-top: 0;
+    border-left: 2.5px solid var(--umm-ink);
+    transform-origin: center top;
+    animation-name: cd-arch-draw-down;
+  }
+
+  .ig-model {
+    grid-template-columns: 1fr;
+  }
+
+  .ig-model__result {
+    position: static;
+  }
+}

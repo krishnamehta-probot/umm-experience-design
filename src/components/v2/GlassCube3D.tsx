@@ -183,12 +183,73 @@ function cloudGeometry() {
   return geometry
 }
 
+/** The Digital Engineering page's object: a gear, as a slab of glass, its
+ *  eight teeth rounded off and a hole through the middle. */
+function gearGeometry() {
+  const TEETH = 8
+  const OUTER = 1
+  const ROOT = 0.78
+  const N = 640
+  const pts = Array.from({ length: N }, (_, i) => {
+    const a = (i / N) * Math.PI * 2
+    /* a rounded square wave round the rim: flat-topped teeth, soft flanks */
+    const w = Math.cos(a * TEETH)
+    const k = Math.min(1, Math.max(0, (w + 0.15) * 1.9))
+    const tooth = k * k * (3 - 2 * k)
+    const r = ROOT + (OUTER - ROOT) * tooth
+    return new THREE.Vector2(Math.cos(a) * r, Math.sin(a) * r)
+  })
+  const shape = new THREE.Shape(pts)
+  const hole = new THREE.Path()
+  hole.absarc(0, 0, 0.32, 0, Math.PI * 2, true)
+  shape.holes.push(hole)
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.42,
+    bevelEnabled: true,
+    bevelThickness: 0.16,
+    bevelSize: 0.06,
+    bevelSegments: 12,
+    curveSegments: 48,
+  })
+  geometry.center()
+  return geometry
+}
+
+/** The Integrated Growth page's object: an arrow rising to the right, as a
+ *  slab of glass with the sparkle's rounded edge. */
+function arrowGeometry() {
+  const outline: [number, number][] = [
+    [0, 1.05],
+    [0.78, 0.2],
+    [0.3, 0.2],
+    [0.3, -1.0],
+    [-0.3, -1.0],
+    [-0.3, 0.2],
+    [-0.78, 0.2],
+  ]
+  /* turned to point up and to the right */
+  const turn = -Math.PI / 4
+  const pts = outline.map(
+    ([x, y]) => new THREE.Vector2(x * Math.cos(turn) - y * Math.sin(turn), x * Math.sin(turn) + y * Math.cos(turn)),
+  )
+  const geometry = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
+    depth: 0.42,
+    bevelEnabled: true,
+    bevelThickness: 0.2,
+    bevelSize: 0.12,
+    bevelSegments: 16,
+    curveSegments: 32,
+  })
+  geometry.center()
+  return geometry
+}
+
 export default function GlassCube3D({
   coveredBy,
   shape = 'cube',
 }: {
   coveredBy?: string
-  shape?: 'cube' | 'sparkle' | 'cloud'
+  shape?: 'cube' | 'sparkle' | 'cloud' | 'gear' | 'arrow'
 }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -232,7 +293,11 @@ export default function GlassCube3D({
         ? sparkleGeometry()
         : shape === 'cloud'
           ? cloudGeometry()
-          : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
+          : shape === 'gear'
+            ? gearGeometry()
+            : shape === 'arrow'
+              ? arrowGeometry()
+              : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
       new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         metalness: 0,
@@ -251,6 +316,8 @@ export default function GlassCube3D({
     )
     if (shape === 'sparkle') cube.scale.setScalar(0.84) // the star's tips reach further than the cube's corners
     if (shape === 'cloud') cube.scale.setScalar(0.86)
+    if (shape === 'gear') cube.scale.setScalar(0.9)
+    if (shape === 'arrow') cube.scale.setScalar(0.88)
     scene.add(cube)
 
     const resize = () => {
@@ -285,13 +352,14 @@ export default function GlassCube3D({
       turn += (window.scrollY * 0.004 - turn) * 0.08
       /* sways around the three-quarter view rather than spinning through
          it: face-on, the glass reads as a dark box */
-      if (shape === 'sparkle' || shape === 'cloud') {
+      if (shape !== 'cube') {
         /* held at a three-quarter view, like the cube, so its thickness and
            rounded edges show; it rocks rather than spins, so the slab never
            turns edge-on */
         cube.rotation.x = 0.36 + lean.x * 0.6 + Math.sin(t * 0.6) * 0.05
         cube.rotation.y = -0.5 + Math.sin(t * 0.32) * 0.3 + lean.y * 0.6 + Math.sin(turn) * 0.3
-        cube.rotation.z = 0.08 + Math.sin(t * 0.25) * 0.08
+        /* the gear turns slowly on its axle, as a gear does */
+        cube.rotation.z = shape === 'gear' ? -t * 0.18 : 0.08 + Math.sin(t * 0.25) * 0.08
       } else {
         cube.rotation.x = 0.42 + lean.x + Math.sin(t * 0.6) * 0.05
         cube.rotation.y = -0.62 + Math.sin(t * 0.32) * 0.32 + lean.y + turn

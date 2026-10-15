@@ -72,19 +72,19 @@ export const why = {
     {
       title: 'Make the environment easier to run.',
       body: 'Understand dependencies, define ownership and plan capacity, recovery and monitoring around the workloads that matter.',
-      shape: 'star-5' as ShapeName,
+      shape: 'flower-9' as ShapeName,
       tone: 'sky' as Tone,
     },
     {
       title: 'Give the numbers a common meaning.',
       body: 'Connect sources with agreed definitions and quality checks so teams can spend less time reconciling different versions of the same answer.',
-      shape: 'polygon-6' as ShapeName,
+      shape: 'polygon-3' as ShapeName,
       tone: 'citrus' as Tone,
     },
     {
       title: 'Keep cost and control in view.',
       body: 'Make access, usage and spend visible, with practical policies and regular reviews as the environment changes.',
-      shape: 'flower-12' as ShapeName,
+      shape: 'misc-9' as ShapeName,
       tone: 'coral' as Tone,
     },
   ],
