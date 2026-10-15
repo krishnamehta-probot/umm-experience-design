@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties, type ReactElement } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
 import { architecture, type ArchScenario } from '@/content/cloudData'
@@ -101,7 +101,7 @@ const Reset = () => (
 )
 
 /** each scenario's three stations */
-const STATIONS: Record<ArchScenario['id'], (() => JSX.Element)[]> = {
+const STATIONS: Record<ArchScenario['id'], (() => ReactElement)[]> = {
   freshness: [Data, Cloud, Chart],
   demand: [Window, Cloud, People],
   economics: [Coin, Tag, Chart],
