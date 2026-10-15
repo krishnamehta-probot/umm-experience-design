@@ -79,6 +79,9 @@ export function useMagneticStops(
 
     const glideTo = (to: number) => {
       cancel()
+      /* a glide decides where the page goes: a settle still waiting (a
+         tap's lift queues one) would pull it straight back */
+      window.clearTimeout(idle)
       const from = window.scrollY
       const d = to - from
       if (Math.abs(d) < 2) return
