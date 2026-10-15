@@ -1255,6 +1255,24 @@ html.cx-v2 body {
   contain: strict;
 }
 
+/* the page plays the film as a video (useFilmVideo): the exported cut
+   fills the frame, and the live last frame takes over on top of it once the
+   video's cards have settled, so the cards are real links */
+.cx-f-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--umm-ink);
+}
+
+.cx-film__frame[data-cards='true'] .cx-f-end {
+  visibility: visible;
+  opacity: 1;
+}
+
 /* sealed, so a scene lifted for a wipe never rises over the flash and grain */
 .cx-f-cam {
   position: absolute;

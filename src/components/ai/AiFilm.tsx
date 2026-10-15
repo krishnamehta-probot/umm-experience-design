@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '@/lib/gsap'
 import { applications, type AppDemo } from '@/content/aiAutomation'
 import type { ShapeName } from '@/components/v2/shapes.data'
 import { Shape } from '@/components/v2/Shape'
-import { maskOf, openFilm } from '@/components/v2/filmOpen'
+import { maskOf } from '@/components/v2/filmOpen'
+import { useFilmVideo } from '@/components/v2/useFilmVideo'
 import { FlyArrow, type Tone } from '@/components/primitives'
 import { Vignette } from './AiApplications'
 import '@/styles/ai-apps.css'
@@ -73,6 +74,11 @@ const TITLE = `${applications.line1} ${applications.line2}`
 const AT = [3.2, 9.4, 15.6]
 const LEN = 6.2
 const END = 21.8
+/** the cards in the video have settled (the art's push-in is the last to
+ *  land, a breath before the end): the live cards take over from here */
+const CARDS_AT = FILM_SECONDS - 0.1
+/** the film's two cuts (scripts/render-film.mjs) */
+const VIDEO = `${import.meta.env.BASE_URL}film/ai-`
 
 /** the app window's view, in px (the stage is 940 wide) */
 const VW = 940
@@ -99,8 +105,6 @@ function Words({ text, chip, className = 'cx-f-w' }: { text: string; chip?: stri
     </>
   )
 }
-
-const fmt = (t: number) => `0:${String(Math.floor(t)).padStart(2, '0')}`
 
 const Arrow = () => <FlyArrow size={18} strokeWidth={2} />
 
@@ -284,7 +288,7 @@ function DecisionUI() {
   )
 }
 
-export function AiFilm() {
+export function AiFilm({ mode = 'page', tall: tallCut = false }: { mode?: 'page' | 'render'; tall?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
   const windowRef = useRef<HTMLDivElement>(null)
@@ -295,21 +299,21 @@ export function AiFilm() {
   const frameRef = useRef<HTMLDivElement>(null)
   const fillRef = useRef<HTMLSpanElement>(null)
   const timeRef = useRef<HTMLSpanElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
   const syncRef = useRef<() => void>(() => {})
-  const userPaused = useRef(false)
 
-  const [playing, setPlaying] = useState(false)
-  const [ended, setEnded] = useState(false)
-  const tall = useTall()
+  const tallScreen = useTall(mode === 'page')
+  /** the page follows the screen; the export is told which cut it makes */
+  const tall = mode === 'render' ? tallCut : tallScreen
   /** the frame's size: wide, or tall on an upright phone */
   const FW = tall ? H : W
   const FH = tall ? W : H
 
-  /* ── the timeline ─────────────────────────────────────────────────────── */
+  /* ── the timeline: the coded film, which the export records ─────────── */
   useLayoutEffect(() => {
     const frame = frameRef.current
-    if (!frame) return
+    if (!frame || mode !== 'render') return
 
     const ctx = gsap.context(() => {
       const one = (s: string, root: Element = frame) => root.querySelector(s) as HTMLElement
@@ -323,18 +327,12 @@ export function AiFilm() {
         paused: true,
         defaults: { ease: 'power3.out' },
         onUpdate: () => syncRef.current(),
-        onComplete: () => {
-          setPlaying(false)
-          setEnded(true)
-        },
       })
       tlRef.current = tl
 
       const sync = () => {
         const t = tl.time()
         typers.forEach((f) => f(t))
-        if (fillRef.current) fillRef.current.style.transform = `scaleX(${t / FILM_SECONDS})`
-        if (timeRef.current) timeRef.current.textContent = `${fmt(t)} / ${fmt(FILM_SECONDS)}`
       }
       syncRef.current = sync
 
@@ -814,7 +812,7 @@ export function AiFilm() {
       tlRef.current = null
       ctx.revert()
     }
-  }, [tall, FW])
+  }, [tall, FW, mode])
 
   /* ── fit the 1920 x 1080 frame to its window ──────────────────────────── */
   const fitRef = useRef<() => void>(() => {})
@@ -823,22 +821,17 @@ export function AiFilm() {
     const frame = frameRef.current
     if (!screen || !frame) return
     const fit = () => {
+      if (mode === 'render') return frame.style.setProperty('--film-scale', '1')
       const w = screen.clientWidth
       const h = screen.clientHeight
       if (!w || !h) return
       /* landscape fills the window (the frame keeps a safe area for the
          crop); portrait shows the whole frame */
-      if (tall) {
-        /* upright: the tall frame takes the screen's own proportions (the
-           words are pinned to its top, the browser to its bottom), so it
-           fills the screen edge to edge without cropping either */
-        const fh = Math.round(Math.min(2600, Math.max(1500, (FW * h) / w)))
-        frame.style.height = `${fh}px`
-        frame.style.setProperty('--film-scale', String(Math.min(w / FW, h / fh)))
-        return
-      }
-      frame.style.removeProperty('height')
-      const s = w / h >= 1.25 ? Math.max(w / FW, h / FH) : Math.min(w / FW, h / FH)
+      /* upright: the tall cut fills the screen, losing up to a tenth
+         off its top and bottom (or sides) before it letterboxes on ink */
+      const fill = Math.max(w / FW, h / FH)
+      const whole = Math.min(w / FW, h / FH)
+      const s = tall ? Math.min(fill, whole * 1.1) : w / h >= 1.25 ? fill : whole
       frame.style.setProperty('--film-scale', String(s))
     }
     fitRef.current = fit
@@ -846,153 +839,51 @@ export function AiFilm() {
     const ro = new ResizeObserver(fit)
     ro.observe(screen)
     return () => ro.disconnect()
-  }, [FW, FH, tall])
+  }, [mode, FW, FH, tall])
 
-  /* ── how it arrives, and when it plays ─────────────────────────────────── */
+  /* ── the export: the coded timeline, seeked frame by frame ───────────── */
   useLayoutEffect(() => {
     const section = sectionRef.current
     const tl = tlRef.current
-    if (!section || !tl) return
-
-    const start = () => {
-      if (userPaused.current || tl.progress() >= 1 || tl.isActive()) return
-      section.dataset.state = 'rolling'
-      tl.play()
-      setPlaying(true)
-    }
-    const stop = () => {
-      if (!tl.isActive()) return
-      tl.pause()
-      setPlaying(false)
-    }
-
-    /* the screens are well below the fold; decode them before the first cut */
-    const near = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return
-        section.querySelectorAll('img').forEach((i) => i.decode().catch(() => undefined))
-        near.disconnect()
+    if (!section || !tl || mode !== 'render') return
+    const imgs = [...section.querySelectorAll('img')]
+    const ready = Promise.all(imgs.map((i) => i.decode().catch(() => undefined)))
+    ;(window as unknown as { __film: unknown }).__film = {
+      duration: FILM_SECONDS,
+      ready,
+      /* returns nothing on purpose: handing back the timeline would make
+         the export script try to copy the whole object graph */
+      seek: (t: number) => {
+        tl.seek(t, false)
+        syncRef.current()
       },
-      { rootMargin: '1400px 0px' },
-    )
-    near.observe(section)
-
-    const mm = gsap.matchMedia()
-    mm.add(
-      /* "always" is there because matchMedia only runs this when at least
-         one condition matches; phones with motion allowed match neither of
-         the other two and still need the band's autoplay */
-      { open: OPEN, reduce: '(prefers-reduced-motion: reduce)', always: 'all' },
-      (ctx) => {
-        const { open, reduce } = ctx.conditions as { open: boolean; reduce: boolean }
-
-        /* reduced motion: wait on the cards, play on request */
-        if (reduce) {
-          tl.progress(1)
-          syncRef.current()
-          setEnded(true)
-          return
-        }
-
-        /* phones, short or portrait windows: a 16:9 band that plays when
-           most of it is on screen */
-        if (!open) {
-          const io = new IntersectionObserver(([e]) => (e.intersectionRatio >= 0.55 ? start() : stop()), {
-            threshold: [0, 0.55],
-          })
-          io.observe(section)
-          return () => io.disconnect()
-        }
-
-        /* Big screens and upright phones: section 2's last shape lifts off
-           as the film's window, glides to the middle with the film starting
-           inside it, and grows until it covers the screen (filmOpen). */
-        return openFilm({
-          section,
-          pin: pinRef.current!,
-          win: windowRef.current!,
-          halo: haloRef.current!,
-          tag: tagRef.current!,
-          controls: controlsRef.current!,
-          fit: () => fitRef.current(),
-          start,
-          stop,
-          rewind: () => {
-            if (tl.time() > 0 && tl.time() < 3) tl.pause(0)
-          },
-        })
-      },
-      section,
-    )
-
-    return () => {
-      mm.revert()
-      near.disconnect()
     }
-  }, [tall])
+  }, [mode, tall])
 
-  /* While the film plays, the bar steps out of the way: it hides after two
-     seconds without the mouse moving, and any movement (or a tap) brings it
-     back. Paused or finished, it stays. */
-  const [idle, setIdle] = useState(false)
-  useLayoutEffect(() => {
-    const pin = pinRef.current
-    if (!pin) return
-    if (!playing) {
-      setIdle(false)
-      return
-    }
-    let timer = 0
-    const wake = () => {
-      setIdle(false)
-      window.clearTimeout(timer)
-      timer = window.setTimeout(() => setIdle(true), 2000)
-    }
-    wake()
-    pin.addEventListener('pointermove', wake)
-    pin.addEventListener('pointerdown', wake)
-    pin.addEventListener('focusin', wake)
-    return () => {
-      window.clearTimeout(timer)
-      pin.removeEventListener('pointermove', wake)
-      pin.removeEventListener('pointerdown', wake)
-      pin.removeEventListener('focusin', wake)
-    }
-  }, [playing])
-
-  const toggle = () => {
-    const tl = tlRef.current
-    if (!tl) return
-    sectionRef.current?.setAttribute('data-state', 'rolling')
-    if (ended) {
-      userPaused.current = false
-      setEnded(false)
-      tl.restart()
-      setPlaying(true)
-    } else if (playing) {
-      userPaused.current = true
-      tl.pause()
-      setPlaying(false)
-    } else {
-      userPaused.current = false
-      tl.play()
-      setPlaying(true)
-    }
-  }
-
-  const seek = (e: MouseEvent<HTMLDivElement>) => {
-    const tl = tlRef.current
-    if (!tl) return
-    const r = e.currentTarget.getBoundingClientRect()
-    const p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))
-    tl.progress(p)
-    syncRef.current()
-    setEnded(p >= 1)
-  }
+  /* ── the page: the exported film, played as a video ─────────────────── */
+  const src = `${VIDEO}${tall ? 'tall' : 'wide'}.mp4`
+  const { playing, ended, cards, idle, toggle, seek } = useFilmVideo({
+    on: mode === 'page',
+    section: sectionRef,
+    pin: pinRef,
+    win: windowRef,
+    halo: haloRef,
+    tag: tagRef,
+    controls: controlsRef,
+    video: videoRef,
+    fill: fillRef,
+    time: timeRef,
+    fit: () => fitRef.current(),
+    seconds: FILM_SECONDS,
+    cardsAt: CARDS_AT,
+    open: OPEN,
+    src,
+  })
 
   return (
     <section
-      className="cx-film"
+      className={`cx-film${mode === 'render' ? ' cx-film--render' : ''}`}
+      style={mode === 'render' ? { width: FW, height: FH } : undefined}
       id="applications"
       ref={sectionRef}
       data-state="waiting"
@@ -1012,7 +903,7 @@ export function AiFilm() {
       </ul>
 
       <div className="cx-film__pin" ref={pinRef}>
-        <div className="cx-film__halo" ref={haloRef} aria-hidden="true" />
+        {mode === 'page' && <div className="cx-film__halo" ref={haloRef} aria-hidden="true" />}
 
         <div className="cx-film__window" ref={windowRef}>
 
@@ -1020,76 +911,99 @@ export function AiFilm() {
 
           <div className="cx-film__cover" aria-hidden="true" />
           <div className="cx-film__screen" ref={screenRef}>
-            <div className="cx-film__frame" ref={frameRef} data-tall={tall || undefined} aria-hidden="true">
+            <div
+              className="cx-film__frame"
+              ref={frameRef}
+              data-tall={tall || undefined}
+              data-cards={mode === 'page' && cards ? 'true' : undefined}
+              aria-hidden="true"
+            >
+              {mode === 'page' && (
+                <video
+                  className="cx-f-video"
+                  ref={videoRef}
+                  key={src}
+                  src={src}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  disablePictureInPicture
+                />
+              )}
               <div className="cx-f-cam">
-                {/* 0:00 */}
-                <div className="cx-f-scene cx-f-intro">
-                  {(['cross-1', 'flower-13', 'clover-1'] as ShapeName[]).map((s, k) => (
-                    <Shape
-                      key={s}
-                      name={s}
-                      tone={(['citrus', 'blossom', 'sky'] as const)[k]}
-                      className={`cx-f-intro__shape cx-f-intro__shape--${k}`}
-                    />
-                  ))}
-                  <p className="cx-f-eyebrow">
-                    <span className="cx-f-eyebrow__mark" />
-                    {applications.chip}
-                  </p>
-                  <p className="cx-f-intro__title">
-                    <Words text={TITLE} chip={applications.accent} />
-                  </p>
-                  <p className="cx-f-intro__names">
-                    {P.map((item) => (
-                      <span className="cx-f-intro__name" key={item.label}>
-                        {item.label}
-                      </span>
+                {mode === 'render' && (
+                  <>
+                    {/* 0:00 */}
+                    <div className="cx-f-scene cx-f-intro">
+                      {(['cross-1', 'flower-13', 'clover-1'] as ShapeName[]).map((s, k) => (
+                        <Shape
+                          key={s}
+                          name={s}
+                          tone={(['citrus', 'blossom', 'sky'] as const)[k]}
+                          className={`cx-f-intro__shape cx-f-intro__shape--${k}`}
+                        />
+                      ))}
+                      <p className="cx-f-eyebrow">
+                        <span className="cx-f-eyebrow__mark" />
+                        {applications.chip}
+                      </p>
+                      <p className="cx-f-intro__title">
+                        <Words text={TITLE} chip={applications.accent} />
+                      </p>
+                      <p className="cx-f-intro__names">
+                        {P.map((item) => (
+                          <span className="cx-f-intro__name" key={item.label}>
+                            {item.label}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+
+                    {/* 0:03 – 0:22: the three use cases */}
+                    {P.map((item, i) => (
+                      <div className={`cx-f-scene cx-f-proj ai-f-scene ai-f-scene--${item.kind}`} key={item.label}>
+                        <div className="cx-f-proj__glow" />
+                        <span className="cx-f-proj__index">
+                          {String(i + 1).padStart(2, '0')} / {String(P.length).padStart(2, '0')}
+                        </span>
+                        <div className="cx-f-proj__copy">
+                          <p className="cx-f-proj__meta">
+                            <span>{item.area}</span>
+                            <span className="cx-f-proj__type">{item.label}</span>
+                          </p>
+                          <p className="cx-f-proj__title">
+                            <Words text={item.title} chip={item.chip} />
+                          </p>
+                          <p className="cx-f-proj__body">{item.body}</p>
+                        </div>
+                        <div className="cx-f-proj__stage">
+                          <div className="cx-f-proj__bar">
+                            <i />
+                            <i />
+                            <i />
+                            <span />
+                          </div>
+                          <div className="cx-f-proj__view">
+                            {item.kind === 'assistant' && <AssistantUI />}
+                            {item.kind === 'document' && <DocumentUI demo={item.demo} />}
+                            {item.kind === 'decision' && <DecisionUI />}
+                            {item.kind !== 'document' && (
+                              <>
+                                <span className="cx-f-ring" />
+                                <svg className="cx-f-cursor" viewBox="0 0 32 36" aria-hidden="true">
+                                  <path d="M3 2 3 30 10.5 23 15.5 34 21 31.5 16 20.5 26.5 20.5Z" />
+                                </svg>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </p>
-                </div>
 
-                {/* 0:03 – 0:22: the three use cases */}
-                {P.map((item, i) => (
-                  <div className={`cx-f-scene cx-f-proj ai-f-scene ai-f-scene--${item.kind}`} key={item.label}>
-                    <div className="cx-f-proj__glow" />
-                    <span className="cx-f-proj__index">
-                      {String(i + 1).padStart(2, '0')} / {String(P.length).padStart(2, '0')}
-                    </span>
-                    <div className="cx-f-proj__copy">
-                      <p className="cx-f-proj__meta">
-                        <span>{item.area}</span>
-                        <span className="cx-f-proj__type">{item.label}</span>
-                      </p>
-                      <p className="cx-f-proj__title">
-                        <Words text={item.title} chip={item.chip} />
-                      </p>
-                      <p className="cx-f-proj__body">{item.body}</p>
-                    </div>
-                    <div className="cx-f-proj__stage">
-                      <div className="cx-f-proj__bar">
-                        <i />
-                        <i />
-                        <i />
-                        <span />
-                      </div>
-                      <div className="cx-f-proj__view">
-                        {item.kind === 'assistant' && <AssistantUI />}
-                        {item.kind === 'document' && <DocumentUI demo={item.demo} />}
-                        {item.kind === 'decision' && <DecisionUI />}
-                        {item.kind !== 'document' && (
-                          <>
-                            <span className="cx-f-ring" />
-                            <svg className="cx-f-cursor" viewBox="0 0 32 36" aria-hidden="true">
-                              <path d="M3 2 3 30 10.5 23 15.5 34 21 31.5 16 20.5 26.5 20.5Z" />
-                            </svg>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  </>
+                )}
 
-                {/* 0:22 — the last frame */}
+                {/* 0:22 — the last frame: in the video, then live over it */}
                 <div className="cx-f-scene cx-f-end ai-f-end">
                   <div className="cx-f-end__head">
                     <p className="cx-f-end__eyebrow">{applications.chip}</p>
@@ -1120,54 +1034,62 @@ export function AiFilm() {
                 </div>
 
                 {/* the colour that leads a shape wipe */}
-                <div className="cx-f-veil" />
+                {mode === 'render' && <div className="cx-f-veil" />}
               </div>
 
-              <div className="cx-f-flash" />
-              <div className="cx-f-grain" />
+              {mode === 'render' && (
+                <>
+                  <div className="cx-f-flash" />
+                  <div className="cx-f-grain" />
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        <span className="cx-film__tag" ref={tagRef} data-umm-tone="sky" aria-hidden="true">
-          {applications.chip}
-        </span>
-
-        <div className="cx-film__controls" ref={controlsRef}>
-          <button
-            type="button"
-            className="cx-film__play"
-            onClick={toggle}
-            aria-label={ended ? 'Play the film again' : playing ? 'Pause the film' : 'Play the film'}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              {ended ? (
-                <path
-                  d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              ) : playing ? (
-                <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" />
-              ) : (
-                <path d="M7 4.5v15l12.5-7.5z" fill="currentColor" />
-              )}
-            </svg>
-          </button>
-          <div className="cx-film__bar" onClick={seek} role="presentation">
-            <span className="cx-film__fill" ref={fillRef} />
-          </div>
-          <span className="cx-film__time" ref={timeRef}>
-            0:00 / 0:24
+        {mode === 'page' && (
+          <span className="cx-film__tag" ref={tagRef} data-umm-tone="sky" aria-hidden="true">
+            {applications.chip}
           </span>
-        </div>
+        )}
+
+        {mode === 'page' && (
+          <div className="cx-film__controls" ref={controlsRef}>
+            <button
+              type="button"
+              className="cx-film__play"
+              onClick={toggle}
+              aria-label={ended ? 'Play the film again' : playing ? 'Pause the film' : 'Play the film'}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {ended ? (
+                  <path
+                    d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ) : playing ? (
+                  <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" />
+                ) : (
+                  <path d="M7 4.5v15l12.5-7.5z" fill="currentColor" />
+                )}
+              </svg>
+            </button>
+            <div className="cx-film__bar" onClick={seek} role="presentation">
+              <span className="cx-film__fill" ref={fillRef} />
+            </div>
+            <span className="cx-film__time" ref={timeRef}>
+              0:00 / 0:24
+            </span>
+          </div>
+        )}
       </div>
 
       {/* the scroll the clover opens over, and the hold after it */}
-      <div className="cx-film__runway" aria-hidden="true" />
+      {mode === 'page' && <div className="cx-film__runway" aria-hidden="true" />}
     </section>
   )
 }

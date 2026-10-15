@@ -1,17 +1,28 @@
 /* ============================================================================
-   Export the "Our work" film to MP4
+   Export a service page's film to MP4
 
      npm run dev            (in another terminal)
-     node scripts/render-film.mjs [out.mp4] [--fps 30] [--url http://localhost:5173]
+     node scripts/render-film.mjs [out.mp4] [--film cx|ai] [--tall] [--web]
+                                  [--fps 30] [--url http://localhost:5173]
 
-   Opens /film (the film alone on its 1920 x 1080 frame), steps its GSAP
+   The pages play these files (useFilmVideo), so after changing a film,
+   export its four cuts again into public/film:
+
+     node scripts/render-film.mjs public/film/cx-wide.mp4 --web
+     node scripts/render-film.mjs public/film/cx-tall.mp4 --tall --web
+     node scripts/render-film.mjs public/film/ai-wide.mp4 --film ai --web
+     node scripts/render-film.mjs public/film/ai-tall.mp4 --film ai --tall --web
+
+   Opens /film (the film alone on its 1920 x 1080 frame, or 1080 x 1920
+   with --tall, the cut upright phones get), steps its GSAP
    timeline one frame at a time through window.__film.seek(), screenshots
    each frame and pipes them straight into ffmpeg. Because every frame is
    seeked, not played, the export is exact whatever the machine's speed: no
    dropped frames, every cut on the frame it was timed for.
 
    Output: H.264, yuv420p (plays everywhere, LinkedIn and decks included),
-   no audio track. Default file: exports/umm-our-work-30s.mp4
+   no audio track. --web trades a little quality for a file a page can
+   stream on a phone. Default file: exports/umm-our-work-30s.mp4
    ========================================================================== */
 
 import { spawn } from 'node:child_process'
@@ -28,6 +39,9 @@ const flag = (name, fallback) => {
 const out = resolve(args.find((a) => a.endsWith('.mp4')) ?? 'exports/umm-our-work-30s.mp4')
 const fps = Number(flag('--fps', 30))
 const url = flag('--url', 'http://localhost:5173')
+const which = flag('--film', 'cx')
+const tall = args.includes('--tall')
+const web = args.includes('--web')
 
 mkdirSync(dirname(out), { recursive: true })
 
@@ -39,8 +53,11 @@ try {
 } catch {
   browser = await chromium.launch()
 }
-const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 })
-await page.goto(`${url}/film`, { waitUntil: 'networkidle' })
+const page = await browser.newPage({
+  viewport: tall ? { width: 1080, height: 1920 } : { width: 1920, height: 1080 },
+  deviceScaleFactor: 1,
+})
+await page.goto(`${url}/film?film=${which}${tall ? '&cut=tall' : ''}`, { waitUntil: 'networkidle' })
 await page.waitForFunction(() => window.__film)
 await page.evaluate(() => window.__film.ready)
 await page.evaluate(() => document.fonts.ready)
@@ -57,7 +74,8 @@ const enc = spawn(
     '-i', '-',
     '-c:v', 'libx264',
     '-preset', 'slow',
-    '-crf', '17',
+    '-crf', web ? '24' : '17',
+    ...(web ? ['-profile:v', 'high', '-level', '4.1', '-maxrate', '6M', '-bufsize', '12M'] : []),
     '-pix_fmt', 'yuv420p',
     '-movflags', '+faststart',
     out,
