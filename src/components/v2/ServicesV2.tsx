@@ -12,7 +12,8 @@ import brand from '@/lottie/services/brand.json'
 import data from '@/lottie/services/data.json'
 import testing from '@/lottie/services/testing.json'
 
-export type ServicesContent = typeof cxServices
+/** the signpost under the grid is optional: the Cloud & Data copy has none */
+export type ServicesContent = Omit<typeof cxServices, 'closing'> & { closing?: (typeof cxServices)['closing'] }
 
 /* ============================================================================
    4 · WHAT WE CAN HELP YOU DO — six services, all at once, each a card with
@@ -156,23 +157,26 @@ export function ServicesV2({
           ))}
         </ul>
 
-        <aside className="cx-signpost">
-          <p>
-            <strong>{services.closing.question}</strong>{' '}
-            <a href={services.closing.href} {...offSite(services.closing.href)}>
-              {services.closing.link}
+        {/* the signpost under the grid, on pages whose copy has one */}
+        {services.closing ? (
+          <aside className="cx-signpost">
+            <p>
+              <strong>{services.closing.question}</strong>{' '}
+              <a href={services.closing.href} {...offSite(services.closing.href)}>
+                {services.closing.link}
+              </a>
+            </p>
+            <a
+              className="cx-signpost__mark"
+              href={services.closing.href}
+              {...offSite(services.closing.href)}
+              tabIndex={-1}
+              aria-hidden="true"
+            >
+              <FlyArrow size={18} strokeWidth={1.9} />
             </a>
-          </p>
-          <a
-            className="cx-signpost__mark"
-            href={services.closing.href}
-            {...offSite(services.closing.href)}
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            <FlyArrow size={18} strokeWidth={1.9} />
-          </a>
-        </aside>
+          </aside>
+        ) : null}
       </div>
     </section>
   )

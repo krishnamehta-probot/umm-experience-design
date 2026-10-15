@@ -13,6 +13,7 @@ const HomeShowcase = lazy(() => import('./pages/HomeShowcase').then((m) => ({ de
 const AiAutomationPage = lazy(() =>
   import('./pages/AiAutomationPage').then((m) => ({ default: m.AiAutomationPage })),
 )
+const CloudDataPage = lazy(() => import('./pages/CloudDataPage').then((m) => ({ default: m.CloudDataPage })))
 const FilmRenderPage = lazy(() =>
   import('./pages/FilmRenderPage').then((m) => ({ default: m.FilmRenderPage })),
 )
@@ -28,6 +29,7 @@ const FilmRenderPage = lazy(() =>
  *                side-by-side comparison
  *   /styleguide  the living component library
  *   /ai-automation  the AI & Automation service page, on v2's design
+ *   /cloud-data  the Cloud & Data service page, on v2's design
  *   /home        the umm.digital homepage hero, with an options dock that
  *                switches between its three versions (ASCII, print,
  *                particles) and every option of each; /home-ascii, -print
@@ -49,6 +51,13 @@ export function App() {
     return (
       <Suspense fallback={null}>
         <AiAutomationPage />
+      </Suspense>
+    )
+  }
+  if (path === '/cloud-data') {
+    return (
+      <Suspense fallback={null}>
+        <CloudDataPage />
       </Suspense>
     )
   }

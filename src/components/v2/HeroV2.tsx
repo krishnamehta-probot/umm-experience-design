@@ -31,8 +31,8 @@ export function HeroV2({
 }: {
   content?: HeroContent
   chipTone?: Tone
-  /** the glass object: the CX cube, or the AI sparkle */
-  object?: 'cube' | 'sparkle'
+  /** the glass object: the CX cube, the AI sparkle or the Cloud & Data cloud */
+  object?: 'cube' | 'sparkle' | 'cloud'
 }) {
   const ref = useRef<HTMLElement>(null)
 

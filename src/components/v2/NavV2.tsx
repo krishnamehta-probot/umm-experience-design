@@ -14,11 +14,12 @@ export type NavContent = typeof cxNav
    coming back the moment the reader scrolls up.
    ========================================================================== */
 
-/* The two service pages link to each other from the pill, so either one is a
-   way into the other. */
+/* The service pages link to each other from the pill: CX and AI to each
+   other, Cloud & Data to CX (the first page that isn't the one open). */
 const PAGES = [
   { href: '/', label: 'CX & UI Design' },
   { href: '/ai-automation', label: 'AI & Automation' },
+  { href: '/cloud-data', label: 'Cloud & Data' },
 ]
 
 export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {

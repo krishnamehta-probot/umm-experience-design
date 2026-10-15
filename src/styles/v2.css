@@ -1455,6 +1455,40 @@ html.cx-v2 body {
     radial-gradient(35% 45% at 10% 100%, rgb(46 194 126 / 0.55), transparent 70%);
 }
 
+/* the Cloud & Data page's film (CloudFilm) */
+.cx-f-proj--zceppa {
+  background: #04201a;
+}
+
+.cx-f-proj--mohawk {
+  background: #1a0708;
+}
+
+.cx-f-proj--qcare {
+  background: #1c0a24;
+}
+
+/* Zceppa: their mint green, with the blue of their buttons */
+.cx-f-proj--zceppa .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(29 204 150 / 0.7), transparent 70%),
+    radial-gradient(35% 45% at 95% 12%, rgb(42 120 240 / 0.45), transparent 70%);
+}
+
+/* Mohawk: their red, with the green of the online switch */
+.cx-f-proj--mohawk .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(214 40 52 / 0.7), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(60 180 90 / 0.35), transparent 70%);
+}
+
+/* QCare: their purple, with the amber of their logo */
+.cx-f-proj--qcare .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(150 40 170 / 0.8), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(246 168 34 / 0.45), transparent 70%);
+}
+
 .cx-f-proj__index {
   position: absolute;
   left: 140px;
@@ -1475,7 +1509,8 @@ html.cx-v2 body {
 
 .cx-f-proj__meta {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 8px 18px;
   margin-bottom: 28px;
   font-size: 22px;
   color: rgb(255 255 255 / 0.75);
@@ -1483,6 +1518,11 @@ html.cx-v2 body {
 
 .cx-f-proj__type {
   color: var(--umm-paper);
+}
+
+/* a long name and kind of work wrap as a whole, never mid-phrase */
+.cx-f-proj__meta > span {
+  white-space: nowrap;
 }
 
 /* a dot after the project's name, between it and the kind of work */
@@ -1666,6 +1706,16 @@ html.cx-v2 body {
   height: 18px;
 }
 
+
+/* the Cloud & Data film's title is two sentences: one a line, the cards
+   below them (wide frame; the tall one has room) */
+.cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
+  max-width: 1040px;
+}
+
+.cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__cards {
+  top: 400px;
+}
 
 .cx-f-end__cards {
   position: absolute;

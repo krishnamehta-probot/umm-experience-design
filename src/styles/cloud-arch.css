@@ -1,0 +1,624 @@
+/* ============================================================================
+   CLOUD & DATA · THE THINKING BEHIND THE INFRASTRUCTURE (ArchitectureFlow)
+   ----------------------------------------------------------------------------
+   Class prefix cd-arch__. The language of the AI page's workflow
+   (ai-workflow.css): the white board on the canvas with a fine edge and a
+   soft shadow, ink-bordered pill buttons (the chosen one filled in ink),
+   64px white stations ringed in ink, white state badges, rule cards with a
+   tone tag. Only tokens are read here.
+   ========================================================================== */
+
+.cd-arch {
+  color: var(--umm-ink);
+}
+
+/* --- heading (as the workflow's) ----------------------------------------- */
+
+.cd-arch__head {
+  display: grid;
+  gap: 0.9rem;
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.cd-arch__head .cx-head {
+  margin-bottom: 0;
+}
+
+.cd-arch__lead {
+  margin: 0;
+  max-width: 58ch;
+}
+
+@media (min-width: 900px) {
+  .cd-arch__head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 40ch);
+    align-items: end;
+    column-gap: clamp(2rem, 4vw, 4rem);
+  }
+
+  .cd-arch__lead {
+    justify-self: end;
+    margin-bottom: 0.35rem;
+    max-width: 40ch;
+  }
+}
+
+/* --- the board ------------------------------------------------------------ */
+
+.cd-arch__board {
+  display: grid;
+  /* one column that never grows past the board: the scenario row scrolls
+     inside it on a phone rather than widening it */
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.25rem, 2.4vw, 1.75rem);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border: 1px solid var(--umm-line);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-paper);
+  box-shadow: 0 30px 60px -40px rgb(16 14 20 / 0.35);
+}
+
+.cd-arch__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.cd-arch__eyebrow,
+.cd-arch__tag,
+.cd-arch__label {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cd-arch__eyebrow {
+  color: var(--umm-ink);
+}
+
+.cd-arch__tag,
+.cd-arch__label {
+  color: var(--umm-ink-soft);
+}
+
+/* --- controls: scenarios, compare, reset ---------------------------------- */
+
+.cd-arch__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
+
+.cd-arch__tabs,
+.cd-arch__compare {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cd-arch__label {
+  margin-right: 6px;
+}
+
+/* the scenarios: the workflow's pill buttons */
+.cd-arch__tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  margin: 0;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  background: var(--umm-paper);
+  font: inherit;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1rem, 1.2vw, 1.0625rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--umm-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.3s var(--umm-ease-out),
+    color 0.3s var(--umm-ease-out);
+}
+
+.cd-arch__tab:hover {
+  background: var(--umm-veil);
+}
+
+.cd-arch__tab[aria-selected='true'] {
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+}
+
+/* the two views: one track, the chosen side lit in its colour (coral for
+   the challenge, citrus for the designed response) */
+.cd-arch__switch {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  background: var(--umm-paper);
+}
+
+.cd-arch__switch::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: var(--umm-coral);
+  transition:
+    transform 0.45s var(--umm-ease-out),
+    background-color 0.45s var(--umm-ease-out);
+}
+
+.cd-arch__switch[data-view='response']::before {
+  transform: translateX(100%);
+  background: var(--umm-citrus);
+}
+
+.cd-arch__seg {
+  position: relative;
+  z-index: 1;
+  padding: 7px 16px;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cd-arch__reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  margin: 0 0 0 4px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--umm-ink-soft);
+  cursor: pointer;
+  transition:
+    color 0.3s var(--umm-ease-out),
+    opacity 0.3s var(--umm-ease-out);
+}
+
+.cd-arch__reset svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cd-arch__reset:hover:not(:disabled) {
+  color: var(--umm-ink);
+  background: var(--umm-veil);
+}
+
+.cd-arch__reset:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cd-arch__tab:focus-visible,
+.cd-arch__seg:focus-visible,
+.cd-arch__reset:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 3px;
+}
+
+/* --- the scene ------------------------------------------------------------ */
+
+.cd-arch__scene {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.cd-arch__brief {
+  animation: cd-arch-in 0.5s var(--umm-ease-out) both;
+}
+
+.cd-arch__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.cd-arch__prompt {
+  margin: 8px 0 0;
+  max-width: 64ch;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.5;
+  color: var(--umm-text-secondary);
+}
+
+/* the route: three stations on one line, each card under its station */
+.cd-arch__route {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* the line through the stations: dashed while it is the challenge, drawn
+   solid in ink once the design is in place */
+.cd-arch__route::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: calc(100% / 6);
+  right: calc(100% / 6);
+  border-top: 2px dashed var(--umm-border-strong);
+}
+
+.cd-arch__scene[data-view='response'] .cd-arch__route::before {
+  border-top: 2.5px solid var(--umm-ink);
+  transform-origin: left center;
+  animation: cd-arch-draw 0.9s var(--umm-ease-out) both;
+}
+
+.cd-arch__node {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  animation: cd-arch-in 0.55s var(--umm-ease-out) both;
+  animation-delay: calc(0.08s + var(--i, 0) * 0.12s);
+}
+
+.cd-arch__station {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+}
+
+.cd-arch__station svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* every state badge white, ringed in ink: a check where the design holds,
+   a mark where the challenge shows */
+.cd-arch__state {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-paper);
+  animation: cd-arch-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(0.35s + var(--i, 0) * 0.12s);
+}
+
+.cd-arch__state svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.4;
+}
+
+/* each card under its station, its pointer up to it (the workflow's rule
+   cards) */
+.cd-arch__card {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 14px 16px 16px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 18px;
+  background: var(--umm-paper);
+}
+
+.cd-arch__card::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-top: 1.5px solid var(--umm-ink);
+  border-left: 1.5px solid var(--umm-ink);
+  border-top-left-radius: 3px;
+  background: var(--umm-paper);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.cd-arch__place {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--umm-tone);
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.cd-arch__node-title {
+  margin: 10px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.cd-arch__node-body {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+/* --- what it means / the decision / the checks ---------------------------- */
+
+.cd-arch__read {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 28px);
+  margin: 0;
+  padding-top: clamp(1.25rem, 2.4vw, 1.75rem);
+  border-top: 1px solid var(--umm-line);
+}
+
+.cd-arch__cell {
+  animation: cd-arch-in 0.55s var(--umm-ease-out) 0.45s both;
+}
+
+.cd-arch__cell dt {
+  font-family: var(--umm-font-mono);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.cd-arch__cell dd {
+  margin: 8px 0 0;
+  font-size: clamp(0.95rem, 1.1vw, 1.0625rem);
+  line-height: 1.5;
+  color: var(--umm-ink);
+}
+
+.cd-arch__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cd-arch__checks li {
+  padding: 5px 12px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.cd-arch__note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--umm-text-tertiary);
+}
+
+/* --- the three principles: the workflow's rule cards ---------------------- */
+
+.cd-arch__rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+  margin: clamp(1.25rem, 2.4vw, 2rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cd-arch__rule {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 20px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 18px;
+  background: var(--umm-paper);
+}
+
+.cd-arch__rule-tag {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--umm-tone);
+  font-family: var(--umm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.cd-arch__rule-title {
+  margin: 4px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.cd-arch__rule-body {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+/* --- motion ---------------------------------------------------------------- */
+
+@keyframes cd-arch-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cd-arch-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cd-arch-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-arch__brief,
+  .cd-arch__node,
+  .cd-arch__state,
+  .cd-arch__cell,
+  .cd-arch__scene[data-view='response'] .cd-arch__route::before {
+    animation: none;
+  }
+}
+
+/* --- narrow screens: the route runs down, a card beside each station ------ */
+
+@media (max-width: 899px) {
+  .cd-arch__controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cd-arch__controls > * {
+    min-width: 0;
+  }
+
+  .cd-arch__tabs {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2.5rem));
+    padding-inline: clamp(1.25rem, 3vw, 2.5rem);
+    scrollbar-width: none;
+  }
+
+  .cd-arch__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cd-arch__route {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .cd-arch__route::before {
+    top: 32px;
+    bottom: 32px;
+    left: 31px;
+    right: auto;
+    border-top: 0;
+    border-left: 2px dashed var(--umm-border-strong);
+  }
+
+  .cd-arch__scene[data-view='response'] .cd-arch__route::before {
+    border-top: 0;
+    border-left: 2.5px solid var(--umm-ink);
+    transform-origin: center top;
+    animation-name: cd-arch-draw-down;
+  }
+
+  .cd-arch__node {
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: start;
+    justify-items: stretch;
+  }
+
+  .cd-arch__card::before {
+    top: 24px;
+    left: -8px;
+    transform: rotate(-45deg);
+  }
+
+  .cd-arch__read,
+  .cd-arch__rules {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes cd-arch-draw-down {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .cd-arch__switch {
+    width: 100%;
+  }
+
+  .cd-arch__seg {
+    padding: 7px 10px;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .cd-arch__compare {
+    width: 100%;
+  }
+}

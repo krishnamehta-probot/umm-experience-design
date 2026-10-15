@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '@/lib/gsap'
-import { film } from '@/content/cxUiDesign'
+import { film as cxFilm } from '@/content/cxUiDesign'
 import type { ShapeName } from './shapes.data'
 import { Shape } from './Shape'
 import { maskOf } from './filmOpen'
@@ -72,7 +72,6 @@ const CITRUS = '#f0ff70'
 const CORAL = '#ffc3c4'
 const SKY = '#d1e7ff'
 
-const P = film.projects
 /** The project screens (public/work), from wherever the page is served:
  *  the site's root, or a relative base when the page is bundled elsewhere. */
 const WORK = `${import.meta.env.BASE_URL}work/`
@@ -83,19 +82,21 @@ const END = 24.8
 /** the cards in the video have settled (the explore button's pop is the
  *  last to land, at END + 2.15): the live cards take over from here */
 const CARDS_AT = END + 2.3
-/** the film's two cuts (scripts/render-film.mjs) */
-const VIDEO = `${import.meta.env.BASE_URL}film/cx-`
+/** the film's two cuts (scripts/render-film.mjs): film/<cut>-wide.mp4 and
+ *  film/<cut>-tall.mp4 */
+const VIDEO = `${import.meta.env.BASE_URL}film/`
 
 /** Each project's real screens, in the order they play. A project in PAGES
  *  is its live homepage as one long capture (site.webp) that scrolls,
  *  resting at each stop (yPercent of the capture); the others are screen
  *  flows, with where the cursor clicks to get to the next one (share of the
  *  view). */
-type Flow = { src: string; click?: [number, number] }[]
-const PAGES: Record<string, number[]> = {
+export type Flow = { src: string; click?: [number, number] }[]
+export type FilmContent = typeof cxFilm
+const CX_PAGES: Record<string, number[]> = {
   licuido: [-18.5, -37, -60.5, -74],
 }
-const FLOWS: Record<string, Flow> = {
+const CX_FLOWS: Record<string, Flow> = {
   tfp: [
     { src: 's0', click: [0.164, 0.715] },
     { src: 's1', click: [0.231, 0.542] },
@@ -123,7 +124,28 @@ function Words({ text, chip, className = 'cx-f-w' }: { text: string; chip?: stri
 
 const Arrow = () => <FlyArrow size={18} strokeWidth={2} />
 
-export function ProofFilm({ mode = 'page', tall: tallCut = false }: { mode?: 'page' | 'render'; tall?: boolean }) {
+/**
+ * The film. The CX page's by default; the Cloud & Data page passes its own
+ * three projects (`content`), their screens (`flows`, `pages`, by project
+ * id) and the name of its exported cuts (`cut`). The timing, the cuts and
+ * the last frame are the same for every page.
+ */
+export function ProofFilm({
+  mode = 'page',
+  tall: tallCut = false,
+  content: film = cxFilm,
+  flows: FLOWS = CX_FLOWS,
+  pages: PAGES = CX_PAGES,
+  cut = 'cx',
+}: {
+  mode?: 'page' | 'render'
+  tall?: boolean
+  content?: FilmContent
+  flows?: Record<string, Flow>
+  pages?: Record<string, number[]>
+  cut?: string
+}) {
+  const P = film.projects
   const sectionRef = useRef<HTMLElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
   const windowRef = useRef<HTMLDivElement>(null)
@@ -386,7 +408,7 @@ export function ProofFilm({ mode = 'page', tall: tallCut = false }: { mode?: 'pa
   }, [mode, tall])
 
   /* ── the page: the exported film, played as a video ─────────────────── */
-  const src = `${VIDEO}${tall ? 'tall' : 'wide'}.mp4`
+  const src = `${VIDEO}${cut}-${tall ? 'tall' : 'wide'}.mp4`
   const { playing, ended, cards, idle, toggle, seek } = useFilmVideo({
     on: mode === 'page',
     section: sectionRef,
@@ -413,6 +435,7 @@ export function ProofFilm({ mode = 'page', tall: tallCut = false }: { mode?: 'pa
     <section
       className={`cx-film${mode === 'render' ? ' cx-film--render' : ''}`}
       style={mode === 'render' ? { width: FW, height: FH } : undefined}
+      data-cut={cut}
       id="work"
       ref={sectionRef}
       data-state="waiting"

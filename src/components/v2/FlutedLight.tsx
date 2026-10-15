@@ -48,6 +48,16 @@ const RAMPS = {
     [200, 180, 255],
     [220, 207, 255],
   ],
+  /* the Cloud & Data page's: ink through deep olive to citrus */
+  citrus: [
+    [16, 14, 20],
+    [14, 22, 10],
+    [38, 66, 8],
+    [104, 150, 18],
+    [170, 212, 42],
+    [212, 240, 88],
+    [240, 255, 112],
+  ],
 }
 export type LightTone = keyof typeof RAMPS
 

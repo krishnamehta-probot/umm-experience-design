@@ -137,7 +137,59 @@ function sparkleGeometry() {
   return geometry
 }
 
-export default function GlassCube3D({ coveredBy, shape = 'cube' }: { coveredBy?: string; shape?: 'cube' | 'sparkle' }) {
+/** The Cloud & Data page's object: a cloud, as a slab of glass. Its outline
+ *  is the union of three puffs on a flat base, traced round from the middle
+ *  and lightly smoothed so the notches between the puffs read as soft folds
+ *  rather than cuts, then extruded with the sparkle's rounded edge. */
+function cloudGeometry() {
+  const puffs: [number, number, number][] = [
+    [-0.74, -0.16, 0.28],
+    [-0.3, 0.08, 0.4],
+    [0.22, 0.18, 0.44],
+    [0.74, -0.12, 0.32],
+  ]
+  const BASE = -0.44
+  const inside = (x: number, y: number) =>
+    puffs.some(([cx, cy, r]) => (x - cx) ** 2 + (y - cy) ** 2 <= r * r) ||
+    (x >= -0.74 && x <= 0.74 && y >= BASE && y <= -0.12)
+  /* how far the outline is from the middle, all the way round */
+  const N = 480
+  const ox = 0
+  const oy = -0.12
+  const reach = Array.from({ length: N }, (_, i) => {
+    const a = (i / N) * Math.PI * 2
+    let r = 0
+    while (r < 2 && inside(ox + Math.cos(a) * (r + 0.004), oy + Math.sin(a) * (r + 0.004))) r += 0.004
+    return r
+  })
+  const soft = reach.map((_, i) => {
+    let sum = 0
+    for (let k = -3; k <= 3; k++) sum += reach[(i + k + N) % N]
+    return sum / 7
+  })
+  const pts = soft.map((r, i) => {
+    const a = (i / N) * Math.PI * 2
+    return new THREE.Vector2(ox + Math.cos(a) * r, oy + Math.sin(a) * r)
+  })
+  const geometry = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
+    depth: 0.5,
+    bevelEnabled: true,
+    bevelThickness: 0.22,
+    bevelSize: 0.1,
+    bevelSegments: 16,
+    curveSegments: 64,
+  })
+  geometry.center()
+  return geometry
+}
+
+export default function GlassCube3D({
+  coveredBy,
+  shape = 'cube',
+}: {
+  coveredBy?: string
+  shape?: 'cube' | 'sparkle' | 'cloud'
+}) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -176,7 +228,11 @@ export default function GlassCube3D({ coveredBy, shape = 'cube' }: { coveredBy?:
     scene.add(studio(true))
 
     const cube = new THREE.Mesh(
-      shape === 'sparkle' ? sparkleGeometry() : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
+      shape === 'sparkle'
+        ? sparkleGeometry()
+        : shape === 'cloud'
+          ? cloudGeometry()
+          : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
       new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         metalness: 0,
@@ -194,6 +250,7 @@ export default function GlassCube3D({ coveredBy, shape = 'cube' }: { coveredBy?:
       }),
     )
     if (shape === 'sparkle') cube.scale.setScalar(0.84) // the star's tips reach further than the cube's corners
+    if (shape === 'cloud') cube.scale.setScalar(0.86)
     scene.add(cube)
 
     const resize = () => {
@@ -228,7 +285,7 @@ export default function GlassCube3D({ coveredBy, shape = 'cube' }: { coveredBy?:
       turn += (window.scrollY * 0.004 - turn) * 0.08
       /* sways around the three-quarter view rather than spinning through
          it: face-on, the glass reads as a dark box */
-      if (shape === 'sparkle') {
+      if (shape === 'sparkle' || shape === 'cloud') {
         /* held at a three-quarter view, like the cube, so its thickness and
            rounded edges show; it rocks rather than spins, so the slab never
            turns edge-on */
