@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { screenPx } from './lane'
 
 /* ============================================================================
    PIN PROGRESS
@@ -40,7 +41,7 @@ export function usePinProgress<T extends HTMLElement>() {
 
     /** Where the scrollbar says we are, and whether anyone can see it. */
     const measure = () => {
-      const travel = el.offsetHeight - window.innerHeight
+      const travel = el.offsetHeight - screenPx()
       const box = el.getBoundingClientRect()
       /* Shorter than the viewport means it is not pinning at all. */
       if (travel <= 0) return { value: 0, visible: false }

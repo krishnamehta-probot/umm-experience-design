@@ -1,4 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { screenPx } from './lane'
 
 /* ============================================================================
    MAGNETIC STOPS — a pinned section that rests on one step at a time
@@ -47,7 +48,7 @@ type Geometry = (el: HTMLElement) => { top: number; travel: number }
 
 const ownTravel: Geometry = (el) => ({
   top: el.getBoundingClientRect().top + window.scrollY,
-  travel: el.offsetHeight - window.innerHeight,
+  travel: el.offsetHeight - screenPx(),
 })
 
 export function useMagneticStops(
@@ -110,13 +111,29 @@ export function useMagneticStops(
       glideTo(top + travel * stopAnchor(Math.round(p * stops - 0.5), stops))
     }
 
+    /* A finger resting on the screen sends no scroll, but it still holds
+       the page: settling then made the glide and the finger fight over it,
+       and the page shook (iPhone, 15 Oct). So nothing settles while a
+       finger is down; once it lifts, the momentum's own scroll restarts
+       the wait. */
+    let touching = false
     const onScroll = () => {
       if (gliding) return
       window.clearTimeout(idle)
-      idle = window.setTimeout(settle, 160 * pace)
+      if (!touching) idle = window.setTimeout(settle, 160 * pace)
     }
     const interrupt = () => {
       if (gliding) cancel()
+    }
+    const onTouchDown = () => {
+      touching = true
+      window.clearTimeout(idle)
+      interrupt()
+    }
+    const onTouchUp = (e: TouchEvent) => {
+      if (e.touches.length) return
+      touching = false
+      onScroll()
     }
 
     /* A touchpad sends a stream of fine steps plus a second or two of
@@ -272,13 +289,17 @@ export function useMagneticStops(
       window.addEventListener('keydown', onKey)
     } else {
       window.addEventListener('wheel', onWheelFree, { passive: false })
-      window.addEventListener('touchstart', interrupt, { passive: true })
+      window.addEventListener('touchstart', onTouchDown, { passive: true })
+      window.addEventListener('touchend', onTouchUp, { passive: true })
+      window.addEventListener('touchcancel', onTouchUp, { passive: true })
       window.addEventListener('keydown', interrupt)
     }
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('wheel', onWheelFree)
-      window.removeEventListener('touchstart', interrupt)
+      window.removeEventListener('touchstart', onTouchDown)
+      window.removeEventListener('touchend', onTouchUp)
+      window.removeEventListener('touchcancel', onTouchUp)
       window.removeEventListener('keydown', interrupt)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('touchstart', onTouchStart)

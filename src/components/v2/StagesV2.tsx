@@ -4,6 +4,7 @@ import { ChipHead, withAccent } from './ChipHead'
 import { StageLight } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { useMagneticStops } from '@/lib/useMagneticStops'
+import { screenPx } from '@/lib/lane'
 import { PIN_V2, usePinned } from '@/lib/usePinned'
 import { stages as cxStages } from '@/content/cxUiDesign'
 
@@ -94,7 +95,7 @@ export function StagesV2({
   /* Each stage rests at CARDS_START + i * laneSize of the travel, so the
      stops' lanes are laid from half a lane before the first rest. */
   const glideTo = useMagneticStops(ref, items.length, pinned, (el) => {
-    const travel = el.offsetHeight - window.innerHeight
+    const travel = el.offsetHeight - screenPx()
     return {
       top: el.getBoundingClientRect().top + window.scrollY + travel * (CARDS_START - laneSize / 2),
       travel: travel * laneSize * items.length,
