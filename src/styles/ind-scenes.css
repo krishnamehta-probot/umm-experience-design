@@ -1,0 +1,707 @@
+/* ============================================================================
+   ENGINEERING AND UX · THE INDUSTRY SCENES' MOTION (eng/art.tsx, ux/art.tsx)
+
+   Short loops, as Cloud's and Growth's (cloud-ind.css holds the shared
+   tile, confetti and flecks): a thing arrives with a small overshoot,
+   confetti pops, it settles, round again. Transforms only, on groups with
+   no transform of their own. Prefix sc-ind.
+   ========================================================================== */
+
+.sc-ind * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.sc-ind {
+  --loop: 4.6s;
+}
+
+/* a tap: the ring opens round the place touched */
+.sc-ind__ring {
+  opacity: 0;
+  animation: sc-ring var(--loop) ease-out infinite;
+}
+
+@keyframes sc-ring {
+  0%,
+  14% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  18% {
+    opacity: 1;
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* ── Engineering · Property & Living ───────────────────────────────────── */
+
+.sc-ind__wrench {
+  opacity: 0;
+  animation: sc-wrench var(--loop) cubic-bezier(0.5, 0, 0.4, 1) infinite;
+}
+
+@keyframes sc-wrench {
+  0%,
+  20% {
+    opacity: 0;
+    transform: none;
+  }
+  24% {
+    opacity: 1;
+  }
+  38% {
+    transform: translate(-38px, -26px) rotate(-90deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-74px, -4px) rotate(-200deg);
+  }
+  54%,
+  100% {
+    opacity: 0;
+    transform: translate(-74px, -4px) rotate(-200deg);
+  }
+}
+
+.sc-ind__win {
+  animation: sc-win var(--loop) steps(1, end) infinite;
+  animation-delay: calc(var(--i) * 0.08s);
+}
+
+@keyframes sc-win {
+  0%,
+  50% {
+    fill: var(--umm-paper);
+  }
+  52%,
+  94% {
+    fill: currentColor;
+  }
+  100% {
+    fill: var(--umm-paper);
+  }
+}
+
+.sc-ind__done {
+  animation: sc-pop var(--loop) cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+}
+
+@keyframes sc-pop {
+  0%,
+  56% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.4);
+  }
+  64%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.sc-ind__burst--done {
+  animation-name: sc-burst-late;
+}
+
+@keyframes sc-burst-late {
+  0%,
+  56% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  74%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* ── Engineering · Manufacturing & Distribution ─────────────────────────── */
+
+.sc-ind__plugger {
+  animation: sc-plug var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes sc-plug {
+  0%,
+  10% {
+    transform: translateX(-12px);
+  }
+  32% {
+    transform: translateX(24px);
+  }
+  36%,
+  80% {
+    transform: translateX(22px);
+  }
+  96%,
+  100% {
+    transform: translateX(-12px);
+  }
+}
+
+.sc-ind__burst--plug {
+  animation-name: sc-burst-mid;
+}
+
+@keyframes sc-burst-mid {
+  0%,
+  31% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  37% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  50%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.sc-ind__led {
+  fill: var(--umm-paper);
+  stroke: currentColor;
+  stroke-width: 1.4;
+  animation: sc-led var(--loop) steps(1, end) infinite;
+  animation-delay: calc(var(--i) * 0.15s);
+}
+
+@keyframes sc-led {
+  0%,
+  36% {
+    fill: var(--umm-paper);
+  }
+  38%,
+  82% {
+    fill: currentColor;
+  }
+  100% {
+    fill: var(--umm-paper);
+  }
+}
+
+.sc-ind__tag {
+  transform-box: view-box;
+  transform-origin: 140px 30px;
+  animation: sc-swing var(--loop) ease-in-out infinite;
+}
+
+@keyframes sc-swing {
+  0%,
+  36% {
+    transform: rotate(0deg);
+  }
+  44% {
+    transform: rotate(14deg);
+  }
+  52% {
+    transform: rotate(-9deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  68%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* ── Engineering · Digital products & services ─────────────────────────── */
+
+.sc-ind__block,
+.sc-ind__placer {
+  animation: sc-place var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes sc-place {
+  0% {
+    opacity: 0;
+    transform: translate(46px, 36px) rotate(8deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  34% {
+    transform: translate(-2px, -2px) rotate(-1deg);
+  }
+  40%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* the hand lets go and leaves; the block stays */
+.sc-ind__placer {
+  animation-name: sc-placer;
+}
+
+@keyframes sc-placer {
+  0% {
+    opacity: 0;
+    transform: translate(46px, 36px) rotate(8deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  34% {
+    transform: translate(-2px, -2px) rotate(-1deg);
+  }
+  42% {
+    transform: none;
+  }
+  62% {
+    opacity: 1;
+    transform: translate(56px, 44px);
+  }
+  66%,
+  100% {
+    opacity: 0;
+    transform: translate(56px, 44px);
+  }
+}
+
+.sc-ind__slot {
+  stroke-dasharray: 4 4;
+}
+
+.sc-ind__burst--slot {
+  animation-name: sc-burst-mid;
+}
+
+/* ── UX · Brands & retail ───────────────────────────────────────────────── */
+
+.sc-ind__heart {
+  animation: sc-heart var(--loop) cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+}
+
+@keyframes sc-heart {
+  0%,
+  16% {
+    fill: none;
+    transform: none;
+  }
+  20% {
+    fill: currentColor;
+    transform: scale(1.5);
+  }
+  28%,
+  90% {
+    fill: currentColor;
+    transform: none;
+  }
+  100% {
+    fill: none;
+  }
+}
+
+.sc-ind__burst--heart {
+  animation-name: sc-burst-early;
+}
+
+@keyframes sc-burst-early {
+  0%,
+  17% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  23% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.sc-ind__fly {
+  opacity: 0;
+  animation: sc-fly var(--loop) cubic-bezier(0.5, 0, 0.4, 1) infinite;
+}
+
+@keyframes sc-fly {
+  0%,
+  30% {
+    opacity: 0;
+    transform: none;
+  }
+  34% {
+    opacity: 1;
+  }
+  46% {
+    transform: translate(40px, -18px) rotate(20deg) scale(0.9);
+  }
+  58% {
+    opacity: 1;
+    transform: translate(76px, 34px) rotate(40deg) scale(0.7);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: translate(76px, 34px) scale(0.7);
+  }
+}
+
+.sc-ind__bag {
+  transform-origin: bottom center;
+  animation: sc-bag var(--loop) ease-out infinite;
+}
+
+@keyframes sc-bag {
+  0%,
+  58% {
+    transform: none;
+  }
+  62% {
+    transform: scale(1.08, 0.9);
+  }
+  68% {
+    transform: scale(0.96, 1.05);
+  }
+  74%,
+  100% {
+    transform: none;
+  }
+}
+
+/* ── UX · Manufacturing & distribution ─────────────────────────────────── */
+
+.sc-ind__box {
+  animation: sc-box var(--loop) cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: calc(var(--i) * 0.22s);
+}
+
+@keyframes sc-box {
+  0% {
+    opacity: 0;
+    transform: translateY(-34px);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  15% {
+    transform: translateY(-3px);
+  }
+  18%,
+  84% {
+    opacity: 1;
+    transform: none;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.sc-ind__stamper {
+  animation: sc-stamper var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes sc-stamper {
+  0%,
+  44% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  50% {
+    opacity: 1;
+  }
+  62% {
+    transform: translateY(14px);
+  }
+  66% {
+    transform: translateY(10px);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-40px);
+  }
+  84%,
+  100% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+}
+
+.sc-ind__approved {
+  animation: sc-approved var(--loop) cubic-bezier(0.5, 0, 0.5, 1.6) infinite;
+}
+
+@keyframes sc-approved {
+  0%,
+  61% {
+    opacity: 0;
+    transform: scale(1.6) rotate(-20deg);
+  }
+  66%,
+  92% {
+    opacity: 1;
+    transform: rotate(-8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-8deg);
+  }
+}
+
+.sc-ind__burst--stamp {
+  animation-name: sc-burst-stamp;
+}
+
+@keyframes sc-burst-stamp {
+  0%,
+  62% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  67% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  78%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* ── UX · Subscription businesses ──────────────────────────────────────── */
+
+.sc-ind--sub {
+  --loop: 5.2s;
+}
+
+.sc-ind__month {
+  animation: sc-month var(--loop) steps(1, end) infinite;
+  animation-delay: calc(var(--i) * 0.18s);
+}
+
+@keyframes sc-month {
+  0%,
+  6% {
+    fill: var(--umm-paper);
+  }
+  8%,
+  86% {
+    fill: currentColor;
+  }
+  100% {
+    fill: var(--umm-paper);
+  }
+}
+
+.sc-ind__renew {
+  animation: sc-renew 3s linear infinite;
+}
+
+@keyframes sc-renew {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.sc-ind__finger {
+  animation: sc-finger var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes sc-finger {
+  0%,
+  10% {
+    transform: translate(24px, 24px);
+  }
+  26% {
+    transform: translate(-26px, -12px);
+  }
+  44% {
+    transform: translate(-6px, -12px);
+  }
+  56% {
+    transform: translate(-6px, -12px);
+  }
+  76%,
+  100% {
+    transform: translate(24px, 24px);
+  }
+}
+
+.sc-ind__knob {
+  animation: sc-knob var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes sc-knob {
+  0%,
+  26% {
+    transform: none;
+  }
+  44%,
+  90% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.sc-ind__track {
+  animation: sc-track var(--loop) steps(1, end) infinite;
+}
+
+@keyframes sc-track {
+  0%,
+  40% {
+    fill: var(--umm-paper);
+  }
+  42%,
+  92% {
+    fill: currentColor;
+  }
+  100% {
+    fill: var(--umm-paper);
+  }
+}
+
+/* ── UX · Services & experiences ───────────────────────────────────────── */
+
+.sc-ind__tapper {
+  animation: sc-tapper var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes sc-tapper {
+  0%,
+  8% {
+    transform: translate(34px, 22px);
+  }
+  28% {
+    transform: translate(-26px, -10px);
+  }
+  32% {
+    transform: translate(-24px, -8px);
+  }
+  50%,
+  100% {
+    transform: translate(34px, 22px);
+  }
+}
+
+.sc-ind__slot-pick {
+  animation: sc-slot var(--loop) steps(1, end) infinite;
+}
+
+@keyframes sc-slot {
+  0%,
+  30% {
+    fill: var(--umm-paper);
+  }
+  32%,
+  92% {
+    fill: var(--umm-tone, currentColor);
+  }
+  100% {
+    fill: var(--umm-paper);
+  }
+}
+
+.sc-ind__slot-tick {
+  stroke-dasharray: 14;
+  animation: sc-tick var(--loop) linear infinite;
+}
+
+@keyframes sc-tick {
+  0%,
+  34% {
+    stroke-dashoffset: 14;
+  }
+  42%,
+  92% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 14;
+  }
+}
+
+.sc-ind__bell {
+  transform-origin: 50% 0;
+  animation: sc-bell var(--loop) ease-in-out infinite;
+}
+
+@keyframes sc-bell {
+  0%,
+  44% {
+    transform: rotate(0deg);
+  }
+  48% {
+    transform: rotate(16deg);
+  }
+  54% {
+    transform: rotate(-14deg);
+  }
+  60% {
+    transform: rotate(9deg);
+  }
+  66% {
+    transform: rotate(-5deg);
+  }
+  72%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.sc-ind__burst--bell {
+  animation-name: sc-burst-bell;
+}
+
+@keyframes sc-burst-bell {
+  0%,
+  46% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  52% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  64%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-ind *,
+  .sc-ind__ring {
+    animation: none !important;
+  }
+
+  .sc-ind__wrench,
+  .sc-ind__fly,
+  .sc-ind__ring {
+    opacity: 0;
+  }
+}

@@ -456,7 +456,7 @@
   color: var(--umm-lilac);
 }
 
-.cf__step[data-on] .cf__loop svg {
+.cf__step[data-on] .cf__loop svg[data-spin] {
   animation: cf-turn 3s linear infinite reverse;
 }
 
@@ -511,6 +511,117 @@
   }
 }
 
+/* --- pieces UX's cards carry (CommerceArchitecture) ------------------------- */
+
+/* short items as chips on the ink */
+.cf__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cf__chips li {
+  padding: 9px 14px;
+  border: 1px solid var(--cf-line);
+  border-radius: 999px;
+  background: var(--umm-ink-raise);
+  font-family: var(--umm-font-display);
+  font-size: 1rem;
+  font-weight: var(--umm-weight-medium);
+}
+
+@media (min-width: 600px) {
+  .cf__list--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* a heading between the cards, over the group that follows */
+.cf__divider {
+  display: grid;
+  gap: 6px;
+  padding-top: clamp(0.5rem, 2svh, 1.5rem);
+}
+
+.cf__divider .cf__mono {
+  margin: 0;
+}
+
+.cf__divider-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+/* a labelled part of a card */
+.cf__part {
+  display: grid;
+  gap: 10px;
+  padding-top: 1rem;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf__part p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* a chain, link by link down a line */
+.cf__chain {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cf__chain li {
+  position: relative;
+  padding: 0 0 12px 26px;
+  line-height: 1.45;
+}
+
+.cf__chain li::first-letter {
+  text-transform: uppercase;
+}
+
+.cf__chain li::before {
+  content: '';
+  position: absolute;
+  top: 0.45em;
+  left: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tone);
+}
+
+.cf__chain li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(0.45em + 12px);
+  bottom: 2px;
+  left: 6px;
+  width: 1px;
+  background: var(--cf-line);
+}
+
+.cf__chain li:last-child {
+  padding-bottom: 0;
+}
+
+/* what holds across the architecture, closing the board */
+.cf__across {
+  display: grid;
+  gap: 10px;
+  padding-top: clamp(1rem, 2vw, 1.4rem);
+  border-top: 1px solid var(--cf-line);
+}
+
 .cf__note {
   margin-top: 14px;
 }
@@ -518,7 +629,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cf__live,
   .cf__layer-icon svg,
-  .cf__step[data-on] .cf__loop svg {
+  .cf__step[data-on] .cf__loop svg[data-spin] {
     animation: none;
   }
 

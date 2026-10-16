@@ -65,39 +65,6 @@
   overflow: visible;
 }
 
-.cx-ind__wire {
-  stroke-dasharray: 3 4;
-}
-
-.cx-ind__packet {
-  fill: var(--umm-ink);
-  animation: cx-ind-run 3.2s linear infinite;
-}
-
-@keyframes cx-ind-run {
-  from {
-    transform: translateX(4px);
-  }
-  to {
-    transform: translateX(112px);
-  }
-}
-
-.cx-ind__packet--curve {
-  offset-path: path('M44 44C62 44 66 22 84 22');
-  animation-name: cx-ind-curve;
-  animation-duration: 2.4s;
-}
-
-@keyframes cx-ind-curve {
-  from {
-    offset-distance: 0%;
-  }
-  to {
-    offset-distance: 100%;
-  }
-}
-
 .cx-ind__num {
   justify-self: start;
   margin-bottom: 6px;
@@ -134,8 +101,3 @@
   line-height: 1.55;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cx-ind__packet {
-    display: none;
-  }
-}

@@ -68,7 +68,7 @@ const MODULE_ICONS = [
 ]
 
 const Loop = () => (
-  <svg {...ICON}>
+  <svg {...ICON} data-spin>
     <path d="M4 12a8 8 0 1 0 2.4-5.7" />
     <path d="M4 4v4.5h4.5" />
   </svg>

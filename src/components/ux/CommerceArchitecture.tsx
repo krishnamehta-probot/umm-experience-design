@@ -1,38 +1,35 @@
-import { useState, type CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
-import { commerce as commerce0, type CommerceModel } from '@/content/uxCommerce'
+import { useReadingStep } from '@/lib/useReadingStep'
+import { commerce as commerce0 } from '@/content/uxCommerce'
+import { CommerceScene, type CommerceFocus } from './CommerceScene'
 import '@/styles/cloud-arch.css'
-import '@/styles/ux-commerce.css'
+import '@/styles/cloud-flow.css'
 
 /* ============================================================================
    UX & DIGITAL COMMERCE · THE THINKING BEHIND THE INTERFACE
 
    The page's story: one order, from the first search to the systems that
-   fulfil it. The board stacks the doc's four layers, as the visual does:
+   fulfil it, through the doc's four layers (experience, AI and
+   personalization, commerce services, business operations), then four
+   business models, then three principles.
 
-     01 Experience        where the customer is (storefront, app, portal…)
-     02 AI & personalization   making discovery more relevant
-     03 Commerce services      the ink band: products, accounts, payments, orders
-     04 Business operations    ERP, fulfilment, product data, CRM, analytics
+   16 Oct, evening, Krish: tell it as you scroll, as the other service
+   pages' boards now are (cloud-flow.css). One ink board: a picture of the
+   order's journey holds still (CommerceScene) beside eight cards in the
+   page's flow (over them on a phone), every word on screen as the reader
+   scrolls:
 
-   An order travels down the connectors between them, one layer after the
-   next, and the signals loop back to the top. Choosing a business model
-   (Retail and DTC, B2B, Subscriptions, Services and bookings) lights the
-   parts of each layer that model leans on, and plays "what connects behind
-   it" as a chain, link by link. Then the three principles as rule cards.
+     01–04  the layers: experience, AI and personalization, commerce
+            services, business operations
+     05–08  the business models: where AI adds value, what connects
+            behind it, link by link
+
+   The card being read lights its part of the picture, an order running
+   its route; the stations scroll to their card. What holds across the
+   architecture closes the board. Then the principles.
    ========================================================================== */
-
-/** What each model lights in each layer. */
-const LIT: Record<CommerceModel['id'], { exp: number[]; ai: number[]; svc: number[]; ops: number[] }> = {
-  retail: { exp: [0, 1], ai: [0, 1], svc: [0, 2], ops: [1, 2] },
-  b2b: { exp: [2], ai: [2, 1], svc: [1, 0], ops: [0] },
-  subscriptions: { exp: [0, 1], ai: [3, 1], svc: [1, 3], ops: [3, 4] },
-  bookings: { exp: [0, 1], ai: [0, 1], svc: [3, 2], ops: [3] },
-}
-
-const TONES: Tone[] = ['coral', 'sky', 'blossom', 'sun']
-const RULE_TONES: Tone[] = ['coral', 'sky', 'citrus']
 
 const ICON = {
   width: 22,
@@ -46,31 +43,8 @@ const ICON = {
   'aria-hidden': true,
 } as const
 
-const SERVICE_ICONS = [
-  // products and pricing: a tag
-  <svg {...ICON} key="p">
-    <path d="M3.5 12.5V4.5h8l9 9-8 8z" />
-    <circle cx="8" cy="9" r="1.4" />
-  </svg>,
-  // accounts and access: a person
-  <svg {...ICON} key="a">
-    <circle cx="12" cy="8" r="3.5" />
-    <path d="M5 20c.8-3.6 3.6-6 7-6s6.2 2.4 7 6" />
-  </svg>,
-  // transactions: a card
-  <svg {...ICON} key="t">
-    <rect x="3" y="6" width="18" height="12" rx="2.5" />
-    <path d="M3 10h18M7 14.5h4" />
-  </svg>,
-  // orders and lifecycle: a box
-  <svg {...ICON} key="o">
-    <path d="M3.5 8 12 4l8.5 4v8L12 20l-8.5-4z" />
-    <path d="M3.5 8 12 12l8.5-4M12 12v8" />
-  </svg>,
-]
-
 const Loop = () => (
-  <svg {...ICON}>
+  <svg {...ICON} data-spin>
     <path d="M4 12a8 8 0 1 0 2.4-5.7" />
     <path d="M4 4v4.5h4.5" />
   </svg>
@@ -80,33 +54,58 @@ const Check = () => (
     <path d="M5 12.5l4.2 4.2L19 7" />
   </svg>
 )
-const Bag = () => (
+const Arrow = () => (
   <svg {...ICON}>
-    <path d="M5 8h14l-1 12H6z" />
-    <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+    <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 )
 
-/** A connector between layers: its line, and the order travelling it. */
-function Pass({ label, step, both }: { label: string; step: number; both?: boolean }) {
-  return (
-    <div className="uc__pass" style={{ ['--s' as string]: step } as CSSProperties}>
-      <span className="uc__pass-line" aria-hidden="true">
-        <span className="uc__order">
-          <Bag />
-        </span>
-        {both ? <i className="uc__back" /> : null}
-      </span>
-      <span className="uc__pass-label">{label}</span>
-    </div>
-  )
+const TONES: Tone[] = ['coral', 'sky', 'blossom', 'sun']
+const RULE_TONES: Tone[] = ['coral', 'sky', 'citrus']
+
+/** "01 Experience" → ["01", "Experience"] */
+const split = (label: string) => {
+  const m = label.match(/^(\d+)\s+(.*)$/)
+  return m ? [m[1], m[2]] : ['', label]
 }
 
 export function CommerceArchitecture({ content = commerce0 }: { content?: typeof commerce0 }) {
   const { board, models, principles } = content
-  const [pick, setPick] = useState(0)
-  const model = models[pick]
-  const lit = LIT[model.id]
+  const { at, holdRef, cardRef, goTo } = useReadingStep()
+
+  /* the eight cards, in order: the layers, then the business models */
+  const steps: { focus: CommerceFocus; tone: Tone; name: string }[] = [
+    { focus: 'experience', tone: 'coral', name: split(board.experience.label)[1] },
+    { focus: 'ai', tone: 'lilac', name: split(board.ai.label)[1] },
+    { focus: 'services', tone: 'sky', name: split(board.services.label)[1] },
+    { focus: 'operations', tone: 'citrus', name: split(board.operations.label)[1] },
+    ...models.map((m, i) => ({ focus: m.id as CommerceFocus, tone: TONES[i], name: m.label })),
+  ]
+  const num = (i: number) => String(i + 1).padStart(2, '0')
+
+  /** a card, with its tone, lit while it is read */
+  const card = (i: number, body: ReactNode) => (
+    <li
+      key={steps[i].focus}
+      className="cf__step"
+      data-on={i === at || undefined}
+      ref={cardRef(i)}
+      style={{ ['--tone' as string]: `var(--umm-${steps[i].tone})` } as CSSProperties}
+    >
+      {body}
+    </li>
+  )
+
+  /** a layer: its number, its name */
+  const head = (label: string) => {
+    const [n, name] = split(label)
+    return (
+      <>
+        <span className="cf__label">{n}</span>
+        <h3 className="cf__title">{name}</h3>
+      </>
+    )
+  }
 
   return (
     <section className="umm-section cd-arch uc" id="commerce" aria-labelledby="uc-title">
@@ -117,83 +116,164 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
           line1={content.line1}
           line2={content.line2}
           accent={content.accent}
-          tone="coral"
+          tone="blossom"
           lineRecipe={2}
         />
         <p className="cx-lead cd-arch__lead">{content.lead}</p>
       </div>
 
       <div className="umm-container">
-        <div className="uc__board" role="group" aria-label={board.label} data-model={model.id}>
-          <p className="uc__label uc__board-label">{board.label}</p>
-
-          {/* 01 · where the customer is */}
-          <div className="uc__layer uc__layer--exp">
-            <span className="uc__label">{board.experience.label}</span>
-            <ul className="uc__row">
-              {board.experience.items.map((x, i) => (
-                <li key={x} className="uc__item" data-on={lit.exp.includes(i)}>
-                  {x}
-                </li>
-              ))}
-            </ul>
+        <div className="cf__board" data-umm-theme="ink" role="group" aria-label={board.label}>
+          <div className="cf__top">
+            <span className="cf__eyebrow">
+              <span className="cf__live" aria-hidden="true" />
+              {board.label}
+            </span>
           </div>
-          <Pass label={board.experience.link} step={0} />
 
-          {/* 02 · relevance */}
-          <div className="uc__layer uc__layer--ai">
-            <div>
-              <span className="uc__label">{board.ai.label}</span>
-              <p className="uc__layer-title">{board.ai.title}</p>
+          <div className="cf__story">
+            {/* the picture, held still while the cards pass */}
+            <div
+              className="cf__hold"
+              ref={holdRef}
+              style={{ ['--tone' as string]: `var(--umm-${steps[at].tone})` } as CSSProperties}
+            >
+              <CommerceScene focus={steps[at].focus} />
+              <ol
+                className="cf__stations"
+                aria-label={board.label}
+                style={{ ['--n' as string]: steps.length } as CSSProperties}
+              >
+                {steps.map((s, i) => (
+                  <li key={s.focus} data-umm-tone={s.tone}>
+                    <button
+                      type="button"
+                      className="cf__station"
+                      aria-current={i === at ? 'step' : undefined}
+                      data-done={i < at || undefined}
+                      aria-label={s.name}
+                      onClick={() => goTo(i)}
+                    >
+                      <span className="cf__station-num">{num(i)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+              <p className="cf__now" aria-hidden="true">
+                <span>{num(at)}</span> {steps[at].name}
+              </p>
             </div>
-            <ul className="uc__pills">
-              {board.ai.items.map((x, i) => (
-                <li key={x} className="uc__pill" data-on={lit.ai.includes(i)}>
-                  {x}
-                </li>
-              ))}
-            </ul>
+
+            {/* the cards, in the page's flow */}
+            <ol className="cf__steps">
+              {card(
+                0,
+                <>
+                  {head(board.experience.label)}
+                  <ul className="cf__chips">
+                    {board.experience.items.map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                  </ul>
+                  <p className="cf__loop">
+                    <Arrow />
+                    {board.experience.link}
+                  </p>
+                </>,
+              )}
+
+              {card(
+                1,
+                <>
+                  {head(board.ai.label)}
+                  <p className="cf__layer-title">{board.ai.title}</p>
+                  <ul className="cf__chips">
+                    {board.ai.items.map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                  </ul>
+                  <p className="cf__loop">
+                    <Arrow />
+                    {board.ai.link}
+                  </p>
+                </>,
+              )}
+
+              {card(
+                2,
+                <>
+                  {head(board.services.label)}
+                  <p className="cf__body">{board.services.note}</p>
+                  <ul className="cf__list cf__list--two">
+                    {board.services.items.map((s) => (
+                      <li key={s.title} className="cf__node">
+                        <span>
+                          <span className="cf__node-title">{s.title}</span>
+                          <span className="cf__node-sub">{s.body}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="cf__loop">
+                    <Arrow />
+                    {board.services.link}
+                  </p>
+                </>,
+              )}
+
+              {card(
+                3,
+                <>
+                  {head(board.operations.label)}
+                  <ul className="cf__chips">
+                    {board.operations.items.map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                  </ul>
+                  <p className="cf__loop">
+                    <Loop />
+                    {board.operations.loop}
+                  </p>
+                </>,
+              )}
+
+              {/* the business models, under their heading */}
+              <li className="cf__divider">
+                <p className="cf__mono">{content.modelsEyebrow}</p>
+                <p className="cf__divider-title">{content.modelsTitle}</p>
+              </li>
+
+              {models.map((m, k) =>
+                card(
+                  4 + k,
+                  <>
+                    <span className="cf__label">
+                      {num(4 + k)} / {m.eyebrow}
+                    </span>
+                    <h3 className="cf__title">{m.title}</h3>
+                    <p className="cf__body">{m.body}</p>
+                    <div className="cf__part">
+                      <span className="cf__mono">{content.aiLabel}</span>
+                      <p>{m.ai}</p>
+                    </div>
+                    <div className="cf__part">
+                      <span className="cf__mono">{content.connectsLabel}</span>
+                      <ol className="cf__chain">
+                        {m.connects.map((c) => (
+                          <li key={c}>{c}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  </>,
+                ),
+              )}
+            </ol>
           </div>
-          <Pass label={board.ai.link} step={1} />
 
-          {/* 03 · the commerce services: the ink band */}
-          <div className="uc__layer uc__layer--svc" data-umm-theme="ink">
-            <div className="uc__svc-head">
-              <span className="uc__label">{board.services.label}</span>
-              <span className="uc__note">{board.services.note}</span>
-            </div>
-            <ul className="uc__cards">
-              {board.services.items.map((s, i) => (
-                <li key={s.title} className="uc__card" data-on={lit.svc.includes(i)}>
-                  {SERVICE_ICONS[i]}
-                  <p className="uc__card-title">{s.title}</p>
-                  <p className="uc__card-body">{s.body}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <Pass label={board.services.link} step={2} both />
-
-          {/* 04 · the business behind it */}
-          <div className="uc__layer uc__layer--ops">
-            <span className="uc__label">{board.operations.label}</span>
-            <ul className="uc__row uc__row--ops">
-              {board.operations.items.map((x, i) => (
-                <li key={x} className="uc__item" data-on={lit.ops.includes(i)}>
-                  {x}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <p className="uc__loop">
-            <Loop />
-            {board.operations.loop}
-          </p>
-
-          <div className="uc__across">
-            <span className="uc__label">{board.across.label}</span>
-            <ul>
+          {/* across the architecture */}
+          <div className="cf__across">
+            <span className="cf__mono">{board.across.label}</span>
+            <ul className="cf__checks">
               {board.across.items.map((a) => (
                 <li key={a}>
                   <Check />
@@ -201,48 +281,6 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-
-        {/* one architecture, different business needs */}
-        <div className="uc__models">
-          <p className="uc__models-eyebrow">{content.modelsEyebrow}</p>
-          <h3 className="uc__models-title">{content.modelsTitle}</h3>
-          <div className="uc__picks" role="tablist" aria-label={content.modelsTitle}>
-            {models.map((m, i) => (
-              <button
-                key={m.id}
-                type="button"
-                role="tab"
-                className="uc__pick"
-                aria-selected={i === pick}
-                aria-controls="uc-panel"
-                data-umm-tone={TONES[i]}
-                onClick={() => setPick(i)}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="uc__detail" id="uc-panel" role="tabpanel" aria-live="polite" key={model.id}>
-            <div className="uc__detail-intro">
-              <span className="uc__label uc__label--ink">{model.eyebrow}</span>
-              <h4 className="uc__detail-title">{model.title}</h4>
-              <p className="uc__detail-body">{model.body}</p>
-            </div>
-            <div className="uc__detail-side">
-              <span className="uc__label uc__label--ink">{content.aiLabel}</span>
-              <p className="uc__detail-text">{model.ai}</p>
-              <span className="uc__label uc__label--ink">{content.connectsLabel}</span>
-              <ol className="uc__chain" data-umm-tone={TONES[pick]}>
-                {model.connects.map((c, i) => (
-                  <li key={c} style={{ ['--i' as string]: i } as CSSProperties}>
-                    {c}
-                  </li>
-                ))}
-              </ol>
-            </div>
           </div>
         </div>
 
