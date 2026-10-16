@@ -1838,26 +1838,18 @@ html.cx-v2 body {
 
 /* the other service pages' film titles run to two lines: the cards below
    them (wide frame; the tall one has room) */
-.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__h,
-.cx-film[data-cut='ux'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
-  max-width: 1040px;
-}
-
-.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__cards,
-.cx-film[data-cut='ux'] .cx-film__frame:not([data-tall]) .cx-f-end__cards {
-  top: 400px;
-}
-
 /* 16 Oct: on a wide laptop window the film fills the width and loses the
    frame's top and bottom (at 1890 x 900 about 80px of each), under the nav
    and the play bar. Two-line titles pushed the cards' words into the bar.
-   Cloud and Engineering: the title on one line, everything inside the
-   band that every landscape window shows. */
-.cx-film:is([data-cut='cloud'], [data-cut='eng']) .cx-film__frame:not([data-tall]) .cx-f-end__head {
+   Cloud, Engineering, Growth and UX: the title on one line, everything
+   inside the band that every landscape window shows. */
+.cx-film:is([data-cut='cloud'], [data-cut='eng'], [data-cut='growth'], [data-cut='ux'])
+  .cx-film__frame:not([data-tall])
+  .cx-f-end__head {
   top: 160px;
 }
 
-.cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
+.cx-film:is([data-cut='eng'], [data-cut='growth']) .cx-film__frame:not([data-tall]) .cx-f-end__h {
   font-size: 80px;
 }
 
@@ -1865,11 +1857,24 @@ html.cx-v2 body {
   font-size: 72px;
 }
 
-.cx-film:is([data-cut='cloud'], [data-cut='eng']) .cx-film__frame:not([data-tall]) .cx-f-end__cards {
+.cx-film[data-cut='ux'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
+  font-size: 66px;
+}
+
+/* Growth's "Biocon Group" ran into "Campaigns & customer journeys" */
+.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__meta {
+  gap: 24px;
+}
+
+.cx-film:is([data-cut='cloud'], [data-cut='eng'], [data-cut='growth'], [data-cut='ux'])
+  .cx-film__frame:not([data-tall])
+  .cx-f-end__cards {
   top: 320px;
 }
 
-.cx-film:is([data-cut='cloud'], [data-cut='eng']) .cx-film__frame:not([data-tall]) .cx-f-end__img {
+.cx-film:is([data-cut='cloud'], [data-cut='eng'], [data-cut='growth'], [data-cut='ux'])
+  .cx-film__frame:not([data-tall])
+  .cx-f-end__img {
   height: 230px;
 }
 

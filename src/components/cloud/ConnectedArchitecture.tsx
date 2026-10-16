@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
+import { useReadingStep } from '@/lib/useReadingStep'
 import type { Tone } from '@/components/primitives'
 import { architecture } from '@/content/cloudData'
 import { CloudScene, type SceneFocus } from './CloudScene'
@@ -117,41 +118,7 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
     ...workflows.map((w, i) => ({ focus: w.id as SceneFocus, tone: OUT_TONE[i], name: w.label })),
   ]
 
-  const [at, setAt] = useState(0)
-  const holdRef = useRef<HTMLDivElement>(null)
-  const cardRefs = useRef<(HTMLLIElement | null)[]>([])
-
-  /* the card being read: the last whose top the reading line (mid-screen,
-     or a little under the held picture on a phone) has passed */
-  useEffect(() => {
-    let raf = 0
-    const measure = () => {
-      raf = 0
-      const hold = holdRef.current
-      if (!hold) return
-      const vh = window.innerHeight
-      const held = hold.getBoundingClientRect()
-      const line = window.innerWidth < 1000 ? held.bottom + (vh - held.bottom) * 0.35 : vh * 0.5
-      let now = 0
-      cardRefs.current.forEach((c, i) => {
-        if (c && c.getBoundingClientRect().top < line) now = i
-      })
-      setAt((p) => (p === now ? p : now))
-    }
-    const queue = () => {
-      if (!raf) raf = requestAnimationFrame(measure)
-    }
-    measure()
-    window.addEventListener('scroll', queue, { passive: true })
-    window.addEventListener('resize', queue)
-    return () => {
-      window.removeEventListener('scroll', queue)
-      window.removeEventListener('resize', queue)
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [])
-
-  const goTo = (i: number) => cardRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const { at, holdRef, cardRef, goTo } = useReadingStep()
   const num = (i: number) => String(i + 1).padStart(2, '0')
 
   /** a card, with its tone, lit while it is read */
@@ -160,9 +127,7 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
       key={steps[i].focus}
       className="cf__step"
       data-on={i === at || undefined}
-      ref={(el) => {
-        cardRefs.current[i] = el
-      }}
+      ref={cardRef(i)}
       style={{ ['--tone' as string]: `var(--umm-${steps[i].tone})` } as CSSProperties}
     >
       {body}
@@ -217,7 +182,11 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
               style={{ ['--tone' as string]: `var(--umm-${steps[at].tone})` } as CSSProperties}
             >
               <CloudScene focus={steps[at].focus} />
-              <ol className="cf__stations" aria-label={board.label}>
+              <ol
+                className="cf__stations"
+                aria-label={board.label}
+                style={{ ['--n' as string]: steps.length } as CSSProperties}
+              >
                 {steps.map((s, i) => (
                   <li key={s.focus} data-umm-tone={s.tone}>
                     <button
