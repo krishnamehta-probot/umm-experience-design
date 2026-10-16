@@ -20,10 +20,25 @@ html.cx-v2 {
 
 /* every pinned section: one screen to hold it, plus a lane per step
    (PIN_V2 in lib/usePinned decides where they pin) */
-@media (min-width: 900px) and (prefers-reduced-motion: no-preference),
-  (min-height: 560px) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 900px) and (min-height: 500px) and (prefers-reduced-motion: no-preference),
+  (max-width: 899px) and (min-height: 560px) and (prefers-reduced-motion: no-preference) {
   html.cx-v2 .umm-pin {
     min-height: calc(100svh + var(--umm-pin-steps) * var(--umm-lane));
+  }
+}
+
+/* 16 Oct: laptop windows under 500px tall (a browser zoomed right in) hold
+   nothing: no stage there can show all of its content, so the sections
+   read in order instead, as they do with reduced motion */
+@media (min-width: 900px) and (max-height: 499px) {
+  html.cx-v2 .umm-pin {
+    min-height: 0;
+  }
+
+  html.cx-v2 .umm-pin__stage {
+    position: static;
+    height: auto;
+    padding-block: var(--umm-section-y);
   }
 }
 

@@ -186,7 +186,7 @@ export const services = {
   scope: 'We agree the deliverables, responsibilities and measures around your use case.',
   includesLabel: 'What the work can include',
   hint: "See what's included",
-  cta: { label: 'Discuss this service', href: '#contact' },
+  cta: { label: 'Discuss this service', href: 'https://umm.digital/contact/' },
   items: [
     {
       step: 'Find the right start',
@@ -282,7 +282,7 @@ export const services = {
   closing: {
     question: 'Not sure which opportunity deserves investment first?',
     link: 'Start with an AI assessment',
-    href: '#contact',
+    href: 'https://umm.digital/contact/',
   },
 }
 

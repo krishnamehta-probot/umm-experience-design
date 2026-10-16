@@ -156,7 +156,7 @@ export function Platforms({ content = platforms0 }: { content?: typeof platforms
               <span className="ux-plat__mark">{PLATFORM_MARKS[p.id]}</span>
               <h3 className="ux-plat__title">{p.title}</h3>
               <p className="ux-plat__body">{p.body}</p>
-              <a className="ux-plat__cta" href="#contact">
+              <a className="ux-plat__cta" href="https://umm.digital/contact/">
                 {p.cta}
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M7 17 17 7M9 7h8v8" />

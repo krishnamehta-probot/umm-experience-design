@@ -150,7 +150,7 @@ export const services = {
   scope: SCOPE,
   includesLabel: 'What the work can include',
   hint: "See what's included",
-  cta: { label: 'Discuss this service', href: '#contact' },
+  cta: { label: 'Discuss this service', href: 'https://umm.digital/contact/' },
   items: [
     {
       step: 'Build',

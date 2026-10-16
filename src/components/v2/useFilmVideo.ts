@@ -1,4 +1,11 @@
-import { useLayoutEffect, useRef, useState, type MouseEvent, type RefObject } from 'react'
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+  type RefObject,
+} from 'react'
 import { gsap } from '@/lib/gsap'
 import { openFilm } from './filmOpen'
 
@@ -16,6 +23,10 @@ import { openFilm } from './filmOpen'
    opened (filmOpen.ts) exactly as the coded scenes were. Only the last
    frame stays live: once the video's cards have settled (`cardsAt`) the
    real cards, every one a link, take over on top of it, pixel for pixel.
+
+   16 Oct, from testing on iPhones: the bar drags (mouse or finger), not
+   just clicks; and where the phone refuses to play on its own (Low Power
+   Mode), the film starts on the reader's next touch while it is on screen.
    ========================================================================== */
 
 const fmt = (t: number) => `0:${String(Math.floor(t)).padStart(2, '0')}`
@@ -47,6 +58,10 @@ export function useFilmVideo(o: {
   const [ended, setEnded] = useState(false)
   const [cards, setCards] = useState(false)
   const userPaused = useRef(false)
+  /* the film is in view and should be rolling (start/stop below) */
+  const wanted = useRef(false)
+  /* the browser refused to play it without a gesture */
+  const blocked = useRef(false)
   const opts = useRef(o)
   opts.current = o
 
@@ -62,7 +77,14 @@ export function useFilmVideo(o: {
     let raf = 0
     const paint = () => {
       const t = v.currentTime
-      if (fill.current) fill.current.style.transform = `scaleX(${Math.min(1, t / seconds)})`
+      const p = Math.min(1, t / seconds)
+      if (fill.current) {
+        fill.current.style.transform = `scaleX(${p})`
+        const bar = fill.current.parentElement
+        bar?.style.setProperty('--p', String(p))
+        bar?.setAttribute('aria-valuenow', String(Math.round(t)))
+        bar?.setAttribute('aria-valuetext', `${fmt(t)} of ${fmt(seconds)}`)
+      }
       if (time.current) time.current.textContent = `${fmt(t)} / ${fmt(seconds)}`
       setCards(t >= cardsAt)
     }
@@ -106,6 +128,7 @@ export function useFilmVideo(o: {
     v.play().catch((e: unknown) => {
       /* a pause before it started (scrolled back out) is not a refusal */
       if ((e as Error)?.name !== 'NotAllowedError') return
+      blocked.current = true
       setPlaying(false)
       setEnded(true)
       setCards(true)
@@ -124,11 +147,13 @@ export function useFilmVideo(o: {
 
     const done = () => v.ended || v.currentTime >= seconds - 0.05
     const start = () => {
-      if (userPaused.current || done() || !v.paused) return
+      wanted.current = true
+      if (userPaused.current || blocked.current || done() || !v.paused) return
       section.dataset.state = 'rolling'
       play(v)
     }
     const stop = () => {
+      wanted.current = false
       if (v.paused) return
       v.pause()
       setPlaying(false)
@@ -195,9 +220,29 @@ export function useFilmVideo(o: {
       section,
     )
 
+    /* refused (an iPhone in Low Power Mode): any touch, click or key while
+       the film is in view counts as the gesture the phone wants, so it
+       rolls from the top then. Not one on the controls: they do their own. */
+    const controls = opts.current.controls
+    const retry = (e: Event) => {
+      if (!blocked.current || !wanted.current || userPaused.current) return
+      if (controls.current?.contains(e.target as Node)) return
+      blocked.current = false
+      setEnded(false)
+      setCards(false)
+      v.currentTime = 0
+      section.dataset.state = 'rolling'
+      play(v)
+    }
+    const GESTURES = ['touchend', 'pointerup', 'keydown'] as const
+    GESTURES.forEach((t) => window.addEventListener(t, retry, { capture: true, passive: true }))
+
     return () => {
       mm.revert()
       near.disconnect()
+      GESTURES.forEach((t) => window.removeEventListener(t, retry, { capture: true }))
+      wanted.current = false
+      blocked.current = false
     }
   }, [o.on, o.src, o.section, o.video])
 
@@ -235,6 +280,7 @@ export function useFilmVideo(o: {
     if (!v) return
     o.section.current?.setAttribute('data-state', 'rolling')
     userPaused.current = false
+    blocked.current = false
     if (ended) {
       setEnded(false)
       setCards(false)
@@ -249,15 +295,75 @@ export function useFilmVideo(o: {
     }
   }
 
-  const seek = (e: MouseEvent<HTMLDivElement>) => {
+  /* ── the bar: click or drag to any point, arrows to step ─────────────── */
+  const drag = useRef<{ resume: boolean } | null>(null)
+
+  const seekTo = (t: number) => {
     const v = o.video.current
     if (!v) return
-    const r = e.currentTarget.getBoundingClientRect()
-    const p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))
-    v.currentTime = p * o.seconds
+    const at = Math.min(o.seconds, Math.max(0, t))
+    v.currentTime = at
+    /* the bar follows the finger at once, not when the frame has decoded */
+    const p = at / o.seconds
+    const fill = o.fill.current
+    if (fill) {
+      fill.style.transform = `scaleX(${p})`
+      fill.parentElement?.style.setProperty('--p', String(p))
+    }
+    if (o.time.current) o.time.current.textContent = `${fmt(at)} / ${fmt(o.seconds)}`
     setEnded(p >= 1)
-    setCards(p >= 1 || p * o.seconds >= o.cardsAt)
+    setCards(p >= 1 || at >= o.cardsAt)
   }
 
-  return { playing, ended, cards, idle, toggle, seek }
+  const pointAt = (e: PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * o.seconds
+  }
+
+  const release = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current
+    if (!d) return
+    drag.current = null
+    delete e.currentTarget.dataset.drag
+    const v = o.video.current
+    if (!v) return
+    if (d.resume && v.currentTime < o.seconds - 0.05) {
+      userPaused.current = false
+      play(v)
+    } else {
+      setPlaying(false)
+    }
+  }
+
+  const scrub = {
+    onPointerDown: (e: PointerEvent<HTMLDivElement>) => {
+      const v = o.video.current
+      if (!v || e.button > 0) return
+      e.preventDefault()
+      e.currentTarget.setPointerCapture(e.pointerId)
+      /* the film holds still under the finger, and carries on from where
+         it is let go if it was playing */
+      drag.current = { resume: !v.paused }
+      if (!v.paused) v.pause()
+      e.currentTarget.dataset.drag = 'true'
+      o.section.current?.setAttribute('data-state', 'rolling')
+      blocked.current = false
+      seekTo(pointAt(e))
+    },
+    onPointerMove: (e: PointerEvent<HTMLDivElement>) => {
+      if (drag.current) seekTo(pointAt(e))
+    },
+    onPointerUp: release,
+    onPointerCancel: release,
+    onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
+      const v = o.video.current
+      if (!v) return
+      const step = ({ ArrowLeft: -5, ArrowRight: 5, Home: -o.seconds, End: o.seconds } as Record<string, number>)[e.key]
+      if (step === undefined) return
+      e.preventDefault()
+      seekTo(v.currentTime + step)
+    },
+  }
+
+  return { playing, ended, cards, idle, toggle, scrub }
 }

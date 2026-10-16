@@ -62,6 +62,53 @@
   }
 }
 
+/* 16 Oct, short laptop windows (a 1080p laptop at 150% leaves the page
+   about 540px under the browser's bars): the board is drawn for a 440px
+   track, so the principles under the stations ran off its foot. Under
+   700px the whole room is drawn a little smaller instead, in steps, never
+   cut. A scale, laid out 1/--fit as large so it still spans the container:
+   the track measures itself in layout px, which a transform leaves alone. */
+@media (min-width: 900px) and (max-height: 700px) {
+  .ai-flow__pin .umm-pin__stage {
+    padding: 82px 0 10px;
+  }
+  .ai-flow__pin .ai-flow__inner {
+    --fit: 0.96;
+    flex: none;
+    width: calc(100% / var(--fit));
+    max-width: calc(var(--umm-container) / var(--fit));
+    height: calc(100% / var(--fit));
+    margin-inline: max(0px, (100% - var(--umm-container)) / 2) 0;
+    padding-inline: calc(var(--umm-gutter) / var(--fit));
+    transform: scale(var(--fit));
+    transform-origin: 0 0;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 650px) {
+  .ai-flow__pin .ai-flow__inner {
+    --fit: 0.9;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 600px) {
+  .ai-flow__pin .ai-flow__inner {
+    --fit: 0.84;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 550px) {
+  .ai-flow__pin .ai-flow__inner {
+    --fit: 0.76;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 500px) {
+  .ai-flow__pin .ai-flow__inner {
+    --fit: 0.68;
+  }
+}
+
 .ai-flow__inner {
   width: 100%;
 }

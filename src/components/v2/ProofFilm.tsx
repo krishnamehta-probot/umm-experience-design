@@ -409,7 +409,7 @@ export function ProofFilm({
 
   /* ── the page: the exported film, played as a video ─────────────────── */
   const src = `${VIDEO}${cut}-${tall ? 'tall' : 'wide'}.mp4`
-  const { playing, ended, cards, idle, toggle, seek } = useFilmVideo({
+  const { playing, ended, cards, idle, toggle, scrub } = useFilmVideo({
     on: mode === 'page',
     section: sectionRef,
     pin: pinRef,
@@ -645,8 +645,18 @@ export function ProofFilm({
                 )}
               </svg>
             </button>
-            <div className="cx-film__bar" onClick={seek} role="presentation">
+            <div
+              className="cx-film__bar"
+              {...scrub}
+              role="slider"
+              tabIndex={0}
+              aria-label="Film position"
+              aria-valuemin={0}
+              aria-valuemax={FILM_SECONDS}
+              aria-valuenow={0}
+            >
               <span className="cx-film__fill" ref={fillRef} />
+              <span className="cx-film__knob" aria-hidden="true" />
             </div>
             <span className="cx-film__time" ref={timeRef}>
               0:00 / 0:30

@@ -161,7 +161,7 @@ export function Discovery({ content = discovery0 }: { content?: typeof discovery
                   <li key={p}>{p}</li>
                 ))}
               </ul>
-              <a className="gx-disc__cta" href="#contact">
+              <a className="gx-disc__cta" href="https://umm.digital/contact/">
                 {c.cta}
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M7 17 17 7M9 7h8v8" />

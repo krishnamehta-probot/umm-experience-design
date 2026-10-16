@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react'
 const PIN_AT = '(min-width: 900px)'
 /* v2's pages (CX and AI) pin on phones too: any screen tall enough to hold a
    stage, which is every phone held upright. Phones on their side, too short
-   for a stage, keep the stacked fallback. */
-export const PIN_V2 = '(min-width: 900px), (min-height: 560px)'
+   for a stage, keep the stacked fallback. 16 Oct: and so do laptop windows
+   under 500px tall (a browser zoomed right in), where no stage can hold its
+   content; the sections then read in order, nothing held or cut. */
+export const PIN_V2 = '(min-width: 900px) and (min-height: 500px), (max-width: 899px) and (min-height: 560px)'
 
 /**
  * Whether pinned sections are pinning at this size.

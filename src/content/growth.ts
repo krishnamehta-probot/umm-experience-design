@@ -152,7 +152,7 @@ export const services = {
   scope: SCOPE,
   includesLabel: 'What the work can include',
   hint: "See what's included",
-  cta: { label: 'Discuss this service', href: '#contact' },
+  cta: { label: 'Discuss this service', href: 'https://umm.digital/contact/' },
   items: [
     {
       step: 'Align',
@@ -267,7 +267,7 @@ export const gensify = {
     'Editorial approval and performance feedback loops',
   ],
   scope: 'We agree the scope, responsibilities and measures around your growth priorities.',
-  cta: { label: 'Discuss this service', href: '#contact' },
+  cta: { label: 'Discuss this service', href: 'https://umm.digital/contact/' },
 }
 
 /* ── 4c · Search, ads & AI discovery ─────────────────────────────────────── */

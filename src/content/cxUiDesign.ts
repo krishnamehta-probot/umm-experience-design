@@ -288,7 +288,7 @@ export const services = {
   scope: 'We agree the deliverables around your goals, team and technology.',
   includesLabel: 'What the work can include',
   hint: "See what's included",
-  cta: { label: 'Discuss this service', href: '#contact' },
+  cta: { label: 'Discuss this service', href: 'https://umm.digital/contact/' },
   items: [
     {
       step: 'Understand',
