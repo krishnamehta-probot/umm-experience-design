@@ -698,6 +698,136 @@
   }
 }
 
+/* ── 16 Oct: the board as a way in ─────────────────────────────────────────
+   Every part opens its view; the lit path flashes in order when a view
+   opens; a light follows the pointer; the chosen tab fills while the views
+   turn on their own (ConnectedArchitecture). */
+
+.cd-net__board {
+  position: relative;
+  isolation: isolate;
+}
+
+.cd-net__board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, -200px),
+    color-mix(in srgb, var(--umm-sky) 16%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+[data-way] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cd-net__node[data-way]:hover:not([data-on='true']),
+.cd-net__outcome[data-way]:hover:not([data-on='true']) {
+  border-color: var(--umm-ink-paper-soft);
+}
+
+.cd-net__box[data-way]:hover:not([data-on='true']),
+.cd-net__observe[data-way]:hover:not([data-on='true']) {
+  border-color: color-mix(in srgb, var(--umm-ink) 35%, transparent);
+}
+
+.cd-net__loop[data-way]:hover {
+  color: var(--umm-ink-paper);
+}
+
+/* the path lights in order: systems, platform, outcome, the loop */
+.cd-net__node[data-on='true'],
+.cd-net__move[data-on='true'],
+.cd-net__box[data-on='true'],
+.cd-net__observe[data-on='true'],
+.cd-net__outcome[data-on='true'] {
+  animation: cd-net-hit 0.9s var(--umm-ease-out) both;
+  animation-delay: var(--at, 0s);
+}
+
+.cd-net__move,
+.cd-net__box {
+  --at: 0.22s;
+}
+
+.cd-net__observe {
+  --at: 0.32s;
+}
+
+.cd-net__outcome {
+  --at: 0.46s;
+}
+
+@keyframes cd-net-hit {
+  0% {
+    outline: 0 solid color-mix(in srgb, var(--umm-sky) 70%, transparent);
+    outline-offset: 0;
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.025);
+  }
+  100% {
+    outline: 10px solid transparent;
+    outline-offset: 4px;
+    transform: scale(1);
+  }
+}
+
+.cd-net__loop[data-on='true'] {
+  animation: cd-net-loop-in 0.6s var(--umm-ease-out) 0.6s both;
+}
+
+@keyframes cd-net-loop-in {
+  from {
+    opacity: 0.4;
+    transform: translateY(6px);
+  }
+}
+
+/* the chosen tab fills while the views turn */
+.cd-net__tab {
+  isolation: isolate;
+}
+
+.cd-net__tab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--umm-ink) 8%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+
+.cd-net__tab[data-turning='true']::before {
+  animation: cd-net-turn-fill var(--turn, 7s) linear both;
+}
+
+@keyframes cd-net-turn-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-net__node,
+  .cd-net__move,
+  .cd-net__box,
+  .cd-net__observe,
+  .cd-net__outcome,
+  .cd-net__loop {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cd-net__live,
   .cd-net__layer-icon svg,

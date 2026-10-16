@@ -1,0 +1,487 @@
+/* ============================================================================
+   CLOUD & DATA · THE INDUSTRY SCENES' MOTION (cloud/art.tsx)
+
+   Short loops in the manner of umm.digital's home page drawings: a thing
+   arrives with a small overshoot, confetti pops, it settles, it goes round
+   again. Transforms only, on groups that carry no transform of their own.
+   ========================================================================== */
+
+/* the tile: wider than the old diagrams, and the hands come in from past
+   its edges, as in the site's drawings */
+.cx-ind__art:has(> .cd-ind) {
+  width: min(100%, 320px);
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+.cd-ind :is(.cd-ind__drop, .cd-ind__lift, .cd-ind__card, .cd-ind__crate, .cd-ind__take, .cd-ind__hold, .cd-ind__ping, .cd-ind__burst, .cd-ind__smoke circle, .cd-ind__sig) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cd-ind__route {
+  stroke-dasharray: 2.6 4;
+  animation: cd-ind-march 1.2s linear infinite;
+}
+
+@keyframes cd-ind-march {
+  to {
+    stroke-dashoffset: -13.2;
+  }
+}
+
+.cd-ind__fleck {
+  animation: cd-ind-twinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes cd-ind-twinkle {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* confetti: pops when the thing lands, then fades */
+.cd-ind__burst {
+  opacity: 0;
+  animation: var(--loop) ease-out infinite;
+}
+
+/* ── Property & Living ─────────────────────────────────────────────────── */
+
+.cd-ind--property {
+  --loop: 5s;
+}
+
+.cd-ind__drop {
+  animation: cd-ind-drop var(--loop) cubic-bezier(0.3, 0.7, 0.3, 1) infinite;
+}
+
+@keyframes cd-ind-drop {
+  0% {
+    transform: translateY(-46px);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  26% {
+    transform: translateY(0);
+  }
+  29% {
+    transform: translateY(-3px);
+  }
+  32%,
+  90% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+.cd-ind__lift {
+  animation: cd-ind-lift var(--loop) cubic-bezier(0.3, 0.7, 0.3, 1) infinite;
+}
+
+@keyframes cd-ind-lift {
+  0% {
+    transform: translateY(-46px);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  26%,
+  38% {
+    transform: translateY(0);
+  }
+  56% {
+    transform: translateY(-64px);
+    opacity: 1;
+  }
+  60%,
+  100% {
+    transform: translateY(-64px);
+    opacity: 0;
+  }
+}
+
+.cd-ind__burst--land {
+  animation-name: cd-ind-burst-land;
+}
+
+@keyframes cd-ind-burst-land {
+  0%,
+  26% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  32% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  44%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* the windows light one after another once it is in */
+.cd-ind__wins rect {
+  animation: cd-ind-win var(--loop) steps(1, end) infinite;
+  animation-delay: calc(var(--i) * 0.12s);
+}
+
+@keyframes cd-ind-win {
+  0%,
+  38% {
+    fill: var(--umm-paper);
+  }
+  40%,
+  92% {
+    fill: currentColor;
+  }
+  100% {
+    fill: var(--umm-paper);
+  }
+}
+
+.cd-ind__card {
+  animation: cd-ind-card var(--loop) cubic-bezier(0.3, 1.5, 0.5, 1) infinite;
+}
+
+@keyframes cd-ind-card {
+  0%,
+  60% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  70%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* ── Manufacturing & Distribution ──────────────────────────────────────── */
+
+.cd-ind--plant {
+  --loop: 4.4s;
+}
+
+.cd-ind__smoke circle {
+  animation: cd-ind-smoke 2.2s ease-out infinite;
+  animation-delay: calc(var(--i, 0) * -1.1s);
+}
+
+@keyframes cd-ind-smoke {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.5);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(6px, -8px) scale(1.4);
+  }
+}
+
+.cd-ind__crate {
+  animation: cd-ind-crate var(--loop) ease-in-out infinite;
+}
+
+@keyframes cd-ind-crate {
+  0% {
+    opacity: 0;
+    transform: translate(0, -8px);
+  }
+  8%,
+  18% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  34% {
+    transform: translate(52px, -24px) rotate(8deg);
+  }
+  50% {
+    transform: translate(104px, 0) rotate(0deg);
+  }
+  53% {
+    transform: translate(104px, -3px);
+  }
+  56%,
+  86% {
+    opacity: 1;
+    transform: translate(104px, 0);
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: translate(104px, 0);
+  }
+}
+
+/* the speed lines only while it flies */
+.cd-ind__speed {
+  opacity: 0;
+  animation: cd-ind-speed var(--loop) ease-in-out infinite;
+}
+
+@keyframes cd-ind-speed {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  28%,
+  44% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* the catching hand reaches, then takes it back */
+.cd-ind__take {
+  animation: cd-ind-take var(--loop) ease-in-out infinite;
+}
+
+@keyframes cd-ind-take {
+  0%,
+  30% {
+    transform: translateX(0);
+  }
+  46% {
+    transform: translateX(-6px);
+  }
+  58%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.cd-ind__burst--catch {
+  animation-name: cd-ind-burst-catch;
+}
+
+@keyframes cd-ind-burst-catch {
+  0%,
+  48% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  54% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  66%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* ── Multi-location businesses ─────────────────────────────────────────── */
+
+.cd-ind--places {
+  --loop: 4.8s;
+}
+
+.cd-ind__pin {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: cd-ind-pin var(--loop) cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+  animation-delay: calc(var(--i) * 0.4s);
+}
+
+@keyframes cd-ind-pin {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+.cd-ind__sig {
+  opacity: 0;
+  animation: var(--loop) ease-in infinite;
+}
+
+.cd-ind__sig--0 {
+  animation-name: cd-ind-sig0;
+  animation-delay: 0.3s;
+}
+
+.cd-ind__sig--1 {
+  animation-name: cd-ind-sig1;
+  animation-delay: 0.7s;
+}
+
+.cd-ind__sig--2 {
+  animation-name: cd-ind-sig2;
+  animation-delay: 1.1s;
+}
+
+@keyframes cd-ind-sig0 {
+  0%,
+  10% {
+    opacity: 0;
+    transform: none;
+  }
+  14% {
+    opacity: 1;
+  }
+  34% {
+    opacity: 1;
+    transform: translateX(72px);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translateX(72px);
+  }
+}
+
+@keyframes cd-ind-sig1 {
+  0%,
+  10% {
+    opacity: 0;
+    transform: none;
+  }
+  14% {
+    opacity: 1;
+  }
+  34% {
+    opacity: 1;
+    transform: translateX(66px);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translateX(66px);
+  }
+}
+
+@keyframes cd-ind-sig2 {
+  0%,
+  10% {
+    opacity: 0;
+    transform: none;
+  }
+  14% {
+    opacity: 1;
+  }
+  34% {
+    opacity: 1;
+    transform: translate(24px, -6px);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translate(24px, -6px);
+  }
+}
+
+/* the phone nods; its chart grows */
+.cd-ind__hold {
+  transform-origin: 60% 100%;
+  animation: cd-ind-hold var(--loop) ease-in-out infinite;
+}
+
+@keyframes cd-ind-hold {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-2.5deg);
+  }
+}
+
+.cd-ind__bars rect {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: cd-ind-bar var(--loop) cubic-bezier(0.3, 1.4, 0.5, 1) infinite;
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+.cd-ind__bars rect:nth-child(1) {
+  --h: 0.45;
+}
+
+.cd-ind__bars rect:nth-child(2) {
+  --h: 0.7;
+}
+
+.cd-ind__bars rect:nth-child(3) {
+  --h: 0.55;
+}
+
+.cd-ind__bars rect:nth-child(4) {
+  --h: 1;
+}
+
+@keyframes cd-ind-bar {
+  0%,
+  30% {
+    transform: scaleY(0.12);
+  }
+  50%,
+  90% {
+    transform: scaleY(var(--h));
+  }
+  100% {
+    transform: scaleY(0.12);
+  }
+}
+
+.cd-ind__ping {
+  animation: cd-ind-ping var(--loop) cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+}
+
+@keyframes cd-ind-ping {
+  0%,
+  56% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  64%,
+  90% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-ind *,
+  .cd-ind__burst {
+    animation: none !important;
+  }
+  .cd-ind__burst,
+  .cd-ind__sig,
+  .cd-ind__speed {
+    opacity: 0;
+  }
+}
