@@ -1,0 +1,696 @@
+/* ============================================================================
+   DIGITAL ENGINEERING · THE PULL REQUEST HISTORY (EngineeringFactory)
+   ----------------------------------------------------------------------------
+   Prefix ep__. 16 Oct, Krish: each service page's thinking section should
+   show something its service would recognise, so the engineering factory is
+   told as a pull request history in a code tool's window. The heading, lead
+   and rule cards are the shared cd-arch__ ones (cloud-arch.css).
+
+   The ink board: a window bar (the repo), the shared context as connected
+   integrations, then the log. The log is a lane holding the git graph (an
+   SVG drawn from the measured rows; the scroll lights it through a clip and
+   draws the loop back up) and the five stages as pull request cards, every
+   word in the page's flow. A card lit by the reading line ticks its check
+   and marks its file merged. The cards are two columns (the PR beside its
+   people) when the list is wide enough, one column otherwise. On a phone
+   the lane narrows and stays at the cards' left. Labels are Mosvita in
+   tracked capitals. Tokens only.
+   ========================================================================== */
+
+.ep__intro {
+  max-width: 64ch;
+  margin: 0 0 clamp(1.25rem, 2.6vw, 2rem);
+}
+
+.ep__board {
+  --ep-line: var(--umm-ink-line-strong);
+  --ep-pad: clamp(14px, 2.4vw, 30px);
+  --ep-lane: 84px;
+  --ep-gap: clamp(10px, 1.6vw, 18px);
+  overflow: hidden;
+  border: 1px solid var(--umm-ink-line);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+  box-shadow: 0 40px 80px -48px rgb(16 14 20 / 0.6);
+}
+
+.ep__label {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: var(--umm-tracking-label);
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ep__label--tone {
+  color: var(--tone);
+}
+
+/* --- the window bar -------------------------------------------------------- */
+
+.ep__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  padding: 13px var(--ep-pad);
+  border-bottom: 1px solid var(--umm-ink-line);
+  background: var(--umm-ink-raise);
+}
+
+.ep__lights {
+  display: inline-flex;
+  gap: 7px;
+}
+
+.ep__lights i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--umm-coral);
+}
+
+.ep__lights i:nth-child(2) {
+  background: var(--umm-sun);
+}
+
+.ep__lights i:nth-child(3) {
+  background: var(--umm-citrus);
+}
+
+.ep__repo,
+.ep__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-label);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.ep__repo svg {
+  flex: none;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ep__tag {
+  margin-left: auto;
+  padding: 6px 12px 6px 9px;
+  border: 1px solid var(--ep-line);
+  border-radius: 999px;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ep__tag svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--umm-blossom);
+}
+
+/* --- the shared context, as connected integrations ------------------------ */
+
+.ep__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  padding: 14px var(--ep-pad);
+  border-bottom: 1px solid var(--umm-ink-line);
+}
+
+.ep__context ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ep__context li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 8px;
+  border: 1px solid var(--ep-line);
+  border-radius: 12px;
+  background: var(--umm-ink-raise);
+  font-size: 0.8125rem;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ep__context strong {
+  font-family: var(--umm-font-display);
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink-paper);
+}
+
+.ep__tool-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--umm-sky) 16%, var(--umm-ink));
+  color: var(--umm-sky);
+}
+
+.ep__tool-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* connected: a quiet citrus pip */
+.ep__linked {
+  width: 6px;
+  height: 6px;
+  margin-left: 2px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--umm-citrus) 18%, transparent);
+}
+
+/* --- the log: the lane and the cards ------------------------------------- */
+
+.ep__log {
+  position: relative;
+  padding: var(--ep-pad) var(--ep-pad) calc(var(--ep-pad) + 10px)
+    calc(var(--ep-pad) + var(--ep-lane) + var(--ep-gap));
+}
+
+.ep__lane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--ep-pad);
+  width: var(--ep-lane);
+  pointer-events: none;
+}
+
+.ep__graph {
+  display: block;
+  overflow: visible;
+}
+
+.ep__graph path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ep__track path {
+  stroke: var(--umm-ink-line-strong);
+  stroke-width: 2;
+}
+
+.ep__track .ep__track-loop {
+  stroke-dasharray: 2 6;
+}
+
+.ep__lit path {
+  stroke-width: 2.5;
+}
+
+.ep__lit-feature {
+  stroke: var(--umm-sky);
+}
+
+.ep__lit-main {
+  stroke: var(--umm-citrus);
+}
+
+.ep__lit-evolve {
+  stroke: var(--umm-coral);
+}
+
+.ep__graph .ep__lit-loop {
+  stroke: var(--umm-lilac);
+  stroke-width: 2.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.ep__graph .ep__arrow {
+  stroke: var(--umm-ink-line-strong);
+  stroke-width: 2.5;
+  transition: stroke 0.4s var(--umm-ease-out);
+}
+
+.ep__graph .ep__arrow[data-on] {
+  stroke: var(--umm-lilac);
+}
+
+/* a commit: dark until its card is reached, then its stage's tone */
+.ep__dot,
+.ep__halo,
+.ep__core,
+.ep__loop-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.ep__dot {
+  fill: var(--umm-ink);
+  stroke: var(--umm-ink-line-strong);
+  stroke-width: 2.5;
+  transition:
+    fill 0.35s var(--umm-ease-out),
+    stroke 0.35s var(--umm-ease-out),
+    transform 0.5s var(--umm-ease-spring);
+}
+
+.ep__halo {
+  fill: var(--tone);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.4s var(--umm-ease-out),
+    transform 0.6s var(--umm-ease-out);
+}
+
+.ep__core {
+  fill: var(--umm-ink-line-strong);
+}
+
+.ep__commit[data-on] .ep__dot {
+  fill: var(--tone);
+  stroke: var(--tone);
+  transform: scale(1.12);
+}
+
+.ep__commit[data-on] .ep__halo {
+  opacity: 0.22;
+  transform: scale(1);
+}
+
+.ep__commit[data-on] .ep__core {
+  fill: var(--umm-ink);
+}
+
+/* the merge commit sits a touch larger, ringed */
+.ep__commit[data-merge] .ep__dot {
+  stroke-width: 3.5;
+}
+
+.ep__loop-dot {
+  fill: var(--umm-ink);
+  stroke: var(--umm-ink-line-strong);
+  stroke-width: 2;
+  transition: stroke 0.4s var(--umm-ease-out);
+}
+
+.ep__loop-dot[data-on] {
+  stroke: var(--umm-lilac);
+}
+
+/* --- a pull request -------------------------------------------------------- */
+
+.ep__prs {
+  display: grid;
+  gap: clamp(14px, 1.8vw, 20px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  container: ep-list / inline-size;
+}
+
+.ep__pr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'head'
+    'title'
+    'desc'
+    'people'
+    'checks'
+    'file';
+  gap: 14px;
+  padding: clamp(16px, 2vw, 26px);
+  border: 1px solid var(--ep-line);
+  border-radius: 18px;
+  background: var(--umm-ink-raise);
+  transition: border-color 0.5s var(--umm-ease-out);
+}
+
+.ep__pr[data-on] {
+  border-color: color-mix(in srgb, var(--tone) 38%, var(--umm-ink-line-strong));
+}
+
+.ep__pr-head {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ep__pr-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tone) 16%, var(--umm-ink));
+  color: var(--tone);
+}
+
+.ep__pr-mark svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ep__title {
+  grid-area: title;
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.ep__desc {
+  grid-area: desc;
+  margin: 0;
+  max-width: 52ch;
+  line-height: 1.55;
+  color: var(--umm-ink-paper-soft);
+}
+
+/* who directs and who assists, as the PR's people */
+.ep__people {
+  grid-area: people;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--umm-ink-line);
+  list-style: none;
+}
+
+.ep__people li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.ep__people p {
+  margin: 5px 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.ep__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--umm-lilac) 22%, var(--umm-ink));
+  color: var(--umm-lilac);
+}
+
+.ep__avatar--agent {
+  background: color-mix(in srgb, var(--umm-citrus) 14%, var(--umm-ink));
+  color: var(--umm-citrus);
+}
+
+.ep__avatar svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* the review gate, as the required check */
+.ep__checks {
+  grid-area: checks;
+  overflow: hidden;
+  border: 1px solid var(--ep-line);
+  border-radius: 14px;
+  background: var(--umm-ink);
+}
+
+.ep__checks-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--umm-ink-line);
+}
+
+.ep__checks-head svg {
+  width: 16px;
+  height: 16px;
+  color: var(--umm-sky);
+}
+
+.ep__check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  margin: 0;
+  padding: 13px 14px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.ep__tick {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.5px;
+  border-radius: 50%;
+  color: var(--umm-ink);
+}
+
+/* pending: a turning dashed ring in sun */
+.ep__tick::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px dashed var(--umm-sun);
+  border-radius: 50%;
+  animation: ep-turn 3s linear infinite;
+  transition:
+    border-color 0.3s var(--umm-ease-out) 0.25s,
+    background-color 0.3s var(--umm-ease-out) 0.25s;
+}
+
+.ep__tick svg {
+  position: relative;
+  width: 16px;
+  height: 16px;
+}
+
+.ep__tick-mark {
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.4s var(--umm-ease-out) 0.45s;
+}
+
+.ep__pr[data-on] .ep__tick::before {
+  border-style: solid;
+  border-color: var(--umm-citrus);
+  background-color: var(--umm-citrus);
+  animation: none;
+}
+
+.ep__pr[data-on] .ep__tick-mark {
+  stroke-dashoffset: 0;
+}
+
+@keyframes ep-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the delivery artifact, as the file it merges */
+.ep__file {
+  grid-area: file;
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.ep__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--ep-line);
+  border-radius: 10px;
+  background: var(--umm-ink);
+  font-family: var(--umm-font-display);
+  font-size: 1rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.3;
+  transition: border-color 0.4s var(--umm-ease-out) 0.7s;
+}
+
+.ep__chip > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.4s var(--umm-ease-out) 0.7s;
+}
+
+.ep__pr[data-on] .ep__chip {
+  border-color: color-mix(in srgb, var(--umm-citrus) 45%, var(--umm-ink-line-strong));
+}
+
+.ep__pr[data-on] .ep__chip > svg {
+  color: var(--umm-citrus);
+}
+
+/* the diff stat: five small blocks that fill as the file merges */
+.ep__diff {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.ep__diff i {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--umm-ink-line-strong);
+  transition: background-color 0.3s var(--umm-ease-out);
+}
+
+.ep__pr[data-on] .ep__diff i:nth-child(-n + 3) {
+  background: var(--umm-citrus);
+}
+
+.ep__pr[data-on] .ep__diff i:nth-child(4) {
+  background: var(--umm-coral);
+}
+
+.ep__pr[data-on] .ep__diff i:nth-child(1) {
+  transition-delay: 0.75s;
+}
+.ep__pr[data-on] .ep__diff i:nth-child(2) {
+  transition-delay: 0.82s;
+}
+.ep__pr[data-on] .ep__diff i:nth-child(3) {
+  transition-delay: 0.89s;
+}
+.ep__pr[data-on] .ep__diff i:nth-child(4) {
+  transition-delay: 0.96s;
+}
+
+/* a wide list: the PR on the left, its people in a side column */
+@container ep-list (min-width: 700px) {
+  .ep__pr {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-areas:
+      'head   people'
+      'title  people'
+      'desc   people'
+      'checks people'
+      'file   people';
+    column-gap: clamp(22px, 3vw, 40px);
+  }
+
+  .ep__people {
+    gap: 20px;
+    padding: 2px 0 0 clamp(18px, 2.4vw, 30px);
+    border-top: 0;
+    border-left: 1px solid var(--umm-ink-line);
+  }
+
+  .ep__checks {
+    margin-top: 4px;
+  }
+}
+
+/* the loop row: production feedback returning */
+.ep__loop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 22px 0 6px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.4s var(--umm-ease-out);
+}
+
+.ep__loop svg {
+  flex: none;
+  color: var(--umm-lilac);
+}
+
+.ep__loop[data-on] {
+  color: var(--umm-ink-paper);
+}
+
+/* --- phones ---------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .ep__board {
+    --ep-pad: 12px;
+    --ep-lane: 38px;
+    --ep-gap: 8px;
+  }
+
+  .ep__bar,
+  .ep__context {
+    padding-inline: 16px;
+  }
+
+  .ep__tag {
+    margin-left: 0;
+  }
+
+  .ep__pr {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+
+  .ep__dot {
+    stroke-width: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ep__tick::before {
+    animation: none;
+  }
+
+  .ep__dot,
+  .ep__halo,
+  .ep__pr,
+  .ep__tick::before,
+  .ep__tick-mark,
+  .ep__chip,
+  .ep__chip > svg,
+  .ep__diff i,
+  .ep__loop,
+  .ep__graph .ep__arrow,
+  .ep__loop-dot {
+    transition: none !important;
+  }
+}

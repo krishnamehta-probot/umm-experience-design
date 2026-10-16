@@ -1,0 +1,1312 @@
+/* ============================================================================
+   CLOUD & DATA · THE CONNECTED ARCHITECTURE, AS A DATA PIPELINE
+   ----------------------------------------------------------------------------
+   ConnectedArchitecture (and usePipeFlow). Prefix cp__. The heading, note
+   and rule cards are the shared cd-arch__ ones (cloud-arch.css).
+
+   16 Oct, Krish: each service page's thinking section should show something
+   its service would recognise, and the four should look clearly different.
+   Cloud & Data's is a data pipeline on a light board (a sky wash, where the
+   other pages' boards are ink), drawn in clean ink lines with sky water and
+   citrus data.
+
+   One pipe hangs from the intelligence layer (the sensor head) and runs
+   down the board: down the middle on a wide screen with the cards hanging
+   off it left and right, down a lane at the board's left on a phone or
+   tablet with the cards to its right. Systems pour in through inlets, the
+   platform is a tank, outcomes leave through outlets, oversight is a valve
+   with a gauge, and the three workflows are taps at the bottom (a manifold
+   across three columns on a wide screen).
+
+   The water's level is the reader's: usePipeFlow writes --cp-len (the pipe's
+   length), --cp-fill (how far the water has come), --cp-level (the tank's
+   level, 0 to 1) and data-flow (dry, run, full) on .cp__run, and lights
+   each card (data-on) as the water reaches its joint. Nothing pins; every
+   word is in the page's flow. Tokens only.
+   ========================================================================== */
+
+.cp__board {
+  --cp-ink: var(--umm-ink);
+  --cp-water: var(--umm-sky);
+  --cp-data: var(--umm-citrus);
+  --cp-line: color-mix(in srgb, var(--umm-ink) 18%, transparent);
+  --cp-soft: var(--umm-ink-soft);
+  /* card padding, which the inlets and outlets reach through */
+  --cp-pad: clamp(18px, 2vw, 26px);
+  /* the pipe: its width, its centre (from the run's left) and the distance
+     from a card's edge to that centre */
+  --cp-w: 16px;
+  --cp-x: 18px;
+  --cp-reach: 32px;
+  /* where a card's joint meets it: level with its badge */
+  --cp-joint-y: calc(var(--cp-pad) + 14px);
+  display: grid;
+  padding: clamp(1rem, 2.6vw, 2.25rem);
+  border: 1.5px solid var(--cp-ink);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-sky-wash);
+  color: var(--cp-ink);
+}
+
+@media (min-width: 1000px) {
+  .cp__board {
+    --cp-w: 22px;
+    --cp-x: 50%;
+    --cp-reach: clamp(44px, 4.4vw, 60px);
+    --cp-cap: 0px;
+  }
+}
+
+.cp__mono,
+.cp__eyebrow {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--cp-soft);
+}
+
+.cp__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.cp__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cp-ink);
+}
+
+.cp__live {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--cp-ink);
+  border-radius: 50%;
+  background: var(--cp-data);
+  animation: cp-live 2.4s ease-out infinite;
+}
+
+@keyframes cp-live {
+  0% {
+    box-shadow: 0 0 0 0 rgb(16 14 20 / 0.3);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px rgb(16 14 20 / 0);
+  }
+}
+
+/* --- the sensor head: the intelligence layer, reading the flow ------------- */
+
+.cp__sensor {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 14px 16px;
+  padding: clamp(14px, 1.8vw, 20px);
+  border: 1.5px solid var(--cp-ink);
+  /* the pipe hangs from its lower left corner on a phone */
+  border-radius: 18px 18px 18px 6px;
+  background: var(--umm-paper);
+}
+
+@media (min-width: 1000px) {
+  .cp__sensor {
+    justify-self: center;
+    width: min(100%, 46rem);
+    border-radius: 18px;
+  }
+}
+
+.cp__lens {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--cp-ink);
+  border-radius: 50%;
+  background: var(--umm-lilac);
+  box-shadow: inset 0 0 0 5px var(--umm-paper);
+}
+
+.cp__lens svg {
+  width: 20px;
+  height: 20px;
+  animation: cp-turn 16s linear infinite;
+}
+
+@keyframes cp-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cp__sensor-text {
+  display: grid;
+  gap: 4px;
+}
+
+.cp__sensor-text p {
+  margin: 0;
+}
+
+.cp__sensor-title {
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.cp__sensor-note {
+  margin-top: 4px !important;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cp-soft);
+}
+
+.cp__sensor-assist {
+  margin-top: 4px !important;
+}
+
+/* --- the run: the pipe, and the cards hanging off it ----------------------- */
+
+.cp__run {
+  position: relative;
+  padding-top: clamp(2rem, 4vw, 3rem);
+}
+
+.cp__pipe {
+  position: absolute;
+  top: 0;
+  left: calc(var(--cp-x) - var(--cp-w) / 2);
+  width: var(--cp-w);
+  /* past the last joint by its rounded end (hidden under the manifold on
+     a wide screen) */
+  height: calc(var(--cp-len, 100%) + var(--cp-cap, 8px));
+  border: 2px solid var(--cp-ink);
+  border-top: 0;
+  border-radius: 0 0 999px 999px;
+  background: var(--umm-paper);
+}
+
+/* level marks along both sides of the pipe */
+.cp__pipe::before,
+.cp__pipe::after {
+  content: '';
+  position: absolute;
+  top: 44px;
+  bottom: 24px;
+  width: 5px;
+  background: repeating-linear-gradient(180deg, var(--cp-ink) 0 1.5px, transparent 1.5px 48px);
+  opacity: 0.3;
+}
+
+.cp__pipe::before {
+  left: -10px;
+}
+
+.cp__pipe::after {
+  right: -10px;
+}
+
+/* the sensor's collar, where the layer reads the flow */
+.cp__collar {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: -7px;
+  right: -7px;
+  height: 12px;
+  border: 1.5px solid var(--cp-ink);
+  border-radius: 4px;
+  background: var(--umm-lilac);
+  animation: cp-read 2.8s ease-out infinite;
+}
+
+@keyframes cp-read {
+  0% {
+    box-shadow: 0 0 0 0 rgb(16 14 20 / 0.22);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgb(16 14 20 / 0);
+  }
+}
+
+/* the water: only as far as the reader has come */
+.cp__water {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  clip-path: inset(0 0 calc(100% - var(--cp-fill, 0px)) 0);
+}
+
+.cp__run[data-flow='full'] .cp__water {
+  clip-path: none;
+}
+
+/* flowing dashes down the middle of the water */
+.cp__stream {
+  position: absolute;
+  top: -36px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background:
+    repeating-linear-gradient(
+        180deg,
+        transparent 0 14px,
+        color-mix(in srgb, var(--cp-ink) 30%, transparent) 14px 24px,
+        transparent 24px 36px
+      )
+      center top / 2px 100% no-repeat,
+    var(--cp-water);
+  animation: cp-stream 1.5s linear infinite;
+}
+
+@keyframes cp-stream {
+  to {
+    transform: translateY(36px);
+  }
+}
+
+/* packets of data riding the water down */
+.cp__packet {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(var(--cp-w) - 10px);
+  height: 12px;
+  margin-left: calc((var(--cp-w) - 10px) / -2);
+  border-radius: 999px;
+  background: var(--cp-data);
+  box-shadow: 0 0 0 1.5px var(--cp-ink);
+  animation: cp-ride var(--cp-dur, 12s) linear infinite;
+  animation-delay: calc(var(--cp-dur, 12s) * var(--k) / -8);
+}
+
+@keyframes cp-ride {
+  from {
+    transform: translateY(-16px);
+  }
+  to {
+    transform: translateY(var(--cp-len, 2000px));
+  }
+}
+
+/* the water's front, at the reader's line */
+.cp__front {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  width: calc(var(--cp-w) + 8px);
+  height: calc(var(--cp-w) + 8px);
+  border: 2px solid var(--cp-ink);
+  border-radius: 50%;
+  background: var(--cp-data);
+  opacity: 0;
+  transform: translate(-50%, calc(var(--cp-fill, 0px) - 50%));
+  transition: opacity 0.4s var(--umm-ease-out);
+}
+
+.cp__front::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  animation: cp-ripple 2s ease-out infinite;
+}
+
+@keyframes cp-ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgb(16 14 20 / 0.28);
+  }
+  80%,
+  100% {
+    box-shadow: 0 0 0 12px rgb(16 14 20 / 0);
+  }
+}
+
+.cp__run[data-flow='run'] .cp__front {
+  opacity: 1;
+}
+
+/* --- the cards --------------------------------------------------------------- */
+
+.cp__stages,
+.cp__flows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 6vw, 3rem);
+  margin: 0;
+  padding: 0 0 0 calc(var(--cp-x) + var(--cp-reach));
+  list-style: none;
+}
+
+.cp__card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: var(--cp-pad);
+  border: 1.5px solid var(--cp-line);
+  border-radius: 20px;
+  background: var(--umm-paper);
+  transition:
+    border-color 0.5s var(--umm-ease-out),
+    box-shadow 0.6s var(--umm-ease-out);
+}
+
+.cp__card[data-on] {
+  border-color: var(--cp-ink);
+  box-shadow: 6px 6px 0 var(--tone);
+}
+
+.cp__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cp__badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1.5px solid var(--cp-ink);
+  border-radius: 999px;
+  background: var(--umm-paper);
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+  transition: background-color 0.5s var(--umm-ease-out);
+}
+
+.cp__card[data-on] .cp__badge {
+  background: var(--tone);
+}
+
+.cp__title {
+  margin: 0;
+  padding-top: 1px;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.3rem, 1.9vw, 1.75rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.cp__body {
+  margin: 0;
+  max-width: 46ch;
+  line-height: 1.5;
+  color: var(--cp-soft);
+}
+
+.cp__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp__node,
+.cp__outcome {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cp-line);
+  border-radius: 14px;
+  background: var(--umm-paper);
+}
+
+.cp__node-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--umm-sky-wash);
+}
+
+.cp__node-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cp__node-title {
+  display: block;
+  font-family: var(--umm-font-display);
+  font-size: 1.0625rem;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.cp__node-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--cp-soft);
+}
+
+/* a connector, named: where the data goes next */
+.cp__link {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 14px 6px 10px;
+  border: 1.5px dashed var(--cp-line);
+  border-radius: 999px;
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cp-soft);
+}
+
+.cp__link svg {
+  width: 16px;
+  height: 16px;
+  color: var(--cp-ink);
+}
+
+/* --- joints: a stub of pipe from the pipe to a card's side ------------------ */
+
+.cp__joint {
+  position: absolute;
+  top: var(--cp-joint-y);
+  right: 100%;
+  width: calc(var(--cp-reach) - var(--cp-w) / 2 + 3px);
+  height: 14px;
+  margin-top: -7px;
+}
+
+.cp__stub,
+.cp__inlet,
+.cp__outlet,
+.cp__feed {
+  border-block: 2px solid var(--cp-ink);
+  background: var(--umm-paper);
+}
+
+.cp__stub {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* the stub's water, filling from the pipe's end */
+.cp__stub::after,
+.cp__inlet::after,
+.cp__outlet::after,
+.cp__feed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cp-water);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s var(--umm-ease-out);
+}
+
+.cp__card[data-on] .cp__stub::after,
+.cp__card[data-on] .cp__inlet::after,
+.cp__card[data-on] .cp__outlet::after,
+.cp__card[data-on] .cp__feed::after {
+  transform: scaleX(1);
+}
+
+/* the flange where the stub meets the card */
+.cp__joint::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: -4px;
+  width: 7px;
+  height: 24px;
+  margin-top: -12px;
+  border: 2px solid var(--cp-ink);
+  border-radius: 3px;
+  background: var(--umm-paper);
+}
+
+/* --- systems pour in, each through its own inlet; outcomes branch off --------- */
+
+.cp__inlet,
+.cp__outlet {
+  --span: calc(var(--cp-pad) + var(--cp-reach) - var(--cp-w) / 2 + 5px);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 1.5px);
+  width: var(--span);
+  height: 10px;
+  margin-top: -5px;
+  overflow: hidden;
+}
+
+/* systems pour toward the pipe, outcomes fill away from it */
+.cp__inlet::after {
+  transform-origin: right center;
+}
+
+.cp__node:nth-child(2) .cp__inlet::after {
+  transition-delay: 0.15s;
+}
+
+.cp__node:nth-child(3) .cp__inlet::after {
+  transition-delay: 0.3s;
+}
+
+.cp__outlet::after {
+  transition-delay: 0.2s;
+}
+
+.cp__outcome:nth-child(2) .cp__outlet::after {
+  transition-delay: 0.45s;
+}
+
+.cp__outcome:nth-child(3) .cp__outlet::after {
+  transition-delay: 0.7s;
+}
+
+/* a drop of data running along it, once lit */
+.cp__drop {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--cp-ink);
+  opacity: 0;
+}
+
+.cp__card[data-on] .cp__inlet .cp__drop {
+  animation: cp-back 2.2s linear infinite;
+  animation-delay: calc(var(--k) * -0.7s);
+}
+
+.cp__card[data-on] .cp__outlet .cp__drop {
+  animation: cp-go 2.2s linear infinite;
+  animation-delay: calc(var(--k) * -0.7s + 0.8s);
+}
+
+@keyframes cp-go {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(var(--span) - 6px));
+  }
+}
+
+@keyframes cp-back {
+  0% {
+    opacity: 0;
+    transform: translateX(calc(var(--span) - 6px));
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+.cp__outcome {
+  align-items: baseline;
+  background: var(--umm-tone);
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.0625rem, 1.3vw, 1.2rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.cp__outcome .cp__outlet {
+  align-self: center;
+}
+
+.cp__loop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--cp-soft);
+}
+
+.cp__loop svg {
+  flex: none;
+  color: var(--cp-ink);
+}
+
+.cp__card[data-on] .cp__loop svg {
+  animation: cp-turn 4s linear infinite reverse;
+}
+
+/* --- the platform: a tank that fills as the water passes it ------------------- */
+
+.cp__tank {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.cp__tank-water {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--cp-water) 75%, var(--umm-paper));
+  transform: translateY(calc((1 - var(--cp-level, 0)) * 100% + 12px));
+}
+
+.cp__wave {
+  position: absolute;
+  bottom: calc(100% - 1px);
+  left: 0;
+  width: calc(100% + 64px);
+  height: 10px;
+  background: inherit;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10'%3E%3Cpath d='M0 5Q16 0 32 5T64 5V10H0z' fill='black'/%3E%3C/svg%3E")
+    0 0 / 64px 10px repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10'%3E%3Cpath d='M0 5Q16 0 32 5T64 5V10H0z' fill='black'/%3E%3C/svg%3E")
+    0 0 / 64px 10px repeat-x;
+  animation: cp-wave 3.2s linear infinite;
+}
+
+@keyframes cp-wave {
+  to {
+    transform: translateX(-64px);
+  }
+}
+
+/* the tank's level marks, down its far side */
+.cp__marks {
+  position: absolute;
+  top: 20px;
+  right: 7px;
+  bottom: 20px;
+  width: 7px;
+  background: repeating-linear-gradient(180deg, var(--cp-ink) 0 1.5px, transparent 1.5px 16px);
+  opacity: 0.35;
+}
+
+.cp__card--platform > :not(.cp__tank, .cp__joint) {
+  position: relative;
+}
+
+.cp__move {
+  margin: 0;
+  padding: 9px 14px;
+  border: 1.5px dashed var(--cp-line);
+  border-radius: 999px;
+  background: var(--umm-paper);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.cp__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cp__box {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px;
+  border: 1.5px solid var(--cp-line);
+  border-radius: 14px;
+  background: var(--umm-paper);
+}
+
+.cp__box svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cp__box--row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cp__box--row svg {
+  flex: none;
+}
+
+.cp__providers {
+  margin: 0;
+  font-size: 0.8125rem;
+  text-align: center;
+  color: var(--cp-soft);
+}
+
+@media (max-width: 420px) {
+  .cp__pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- oversight: a valve on its joint, a gauge in its head ----------------------- */
+
+.cp__valve {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+}
+
+/* the valve's stem */
+.cp__valve::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 2px;
+  height: 6px;
+  margin-left: -1px;
+  background: var(--cp-ink);
+}
+
+.cp__valve svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: var(--umm-paper);
+  stroke: var(--cp-ink);
+  stroke-width: 2.4;
+  transition: transform 1.1s var(--umm-ease-out);
+}
+
+.cp__card[data-on] .cp__valve svg {
+  transform: rotate(180deg);
+}
+
+.cp__gauge {
+  flex: none;
+  width: 64px;
+  height: auto;
+  margin-left: auto;
+  margin-top: -6px;
+  overflow: visible;
+}
+
+.cp__gauge-face {
+  fill: var(--umm-paper);
+}
+
+.cp__gauge-band {
+  fill: none;
+  stroke: var(--umm-citrus);
+  stroke-width: 6;
+}
+
+.cp__gauge-ticks,
+.cp__gauge-arc,
+.cp__needle path {
+  fill: none;
+  stroke: var(--cp-ink);
+  stroke-linecap: round;
+}
+
+.cp__gauge-ticks {
+  stroke-width: 1.5;
+}
+
+.cp__gauge-arc {
+  stroke-width: 2;
+}
+
+.cp__needle path {
+  stroke-width: 2.4;
+}
+
+.cp__gauge-hub {
+  fill: var(--cp-ink);
+}
+
+.cp__needle {
+  transform-box: view-box;
+  transform-origin: 36px 38px;
+  transform: rotate(-64deg);
+  transition: transform 1.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.cp__card[data-on] .cp__needle {
+  transform: rotate(44deg);
+  animation: cp-needle 3.6s ease-in-out 1.4s infinite;
+}
+
+@keyframes cp-needle {
+  0%,
+  100% {
+    transform: rotate(44deg);
+  }
+  50% {
+    transform: rotate(38deg);
+  }
+}
+
+.cp__checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp__checks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cp-line);
+  border-radius: 14px;
+  font-family: var(--umm-font-display);
+  font-size: 1.0625rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.25;
+}
+
+.cp__checks svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+}
+
+/* --- the workflows: three taps at the bottom of the pipe ----------------------- */
+
+.cp__flows {
+  position: relative;
+  /* room above each card for its tap */
+  --cp-drop: 46px;
+  margin-top: calc(clamp(2rem, 6vw, 3rem) + var(--cp-drop));
+  gap: calc(clamp(2rem, 6vw, 3rem) + var(--cp-drop));
+}
+
+/* on a phone: a pipe from the main one, over the card's top left corner,
+   then a spout pouring into it */
+.cp__tap {
+  position: absolute;
+  bottom: 100%;
+  right: calc(100% - 36px);
+  width: calc(var(--cp-reach) - var(--cp-w) / 2 + 39px);
+  height: var(--cp-drop);
+}
+
+.cp__feed {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  border-right: 2px solid var(--cp-ink);
+  border-radius: 0 6px 6px 0;
+  overflow: hidden;
+}
+
+.cp__spout {
+  position: absolute;
+  top: 16px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--cp-ink);
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  background: var(--umm-paper);
+}
+
+/* the tap's handle: a T on the pipe, a quarter turn to open */
+.cp__handle {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  right: 18px;
+  width: 18px;
+  height: 10px;
+  transform-origin: 50% 100%;
+  transition: transform 0.8s var(--umm-ease-out);
+}
+
+.cp__handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border: 2px solid var(--cp-ink);
+  border-radius: 999px;
+  background: var(--tone);
+}
+
+.cp__handle::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 2px;
+  height: 5px;
+  margin-left: -1px;
+  background: var(--cp-ink);
+}
+
+.cp__card[data-on] .cp__handle {
+  transform: rotate(-40deg);
+}
+
+/* the pour: drops falling from the spout into the card */
+.cp__pour {
+  position: absolute;
+  top: 28px;
+  right: 6px;
+  bottom: -2px;
+  width: 6px;
+  --cp-pour: 20px;
+}
+
+.cp__pour i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 8px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--cp-water);
+  box-shadow: 0 0 0 1.5px var(--cp-ink);
+  opacity: 0;
+}
+
+.cp__card[data-on] .cp__pour i {
+  animation: cp-fall 1.5s ease-in infinite;
+}
+
+.cp__card[data-on] .cp__pour i:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.cp__card[data-on] .cp__pour i:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes cp-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--cp-pour, 14px) - 4px)) scale(0.8);
+  }
+}
+
+.cp__plate {
+  align-self: center;
+  padding: 3px 10px;
+  border: 1.5px solid var(--cp-ink);
+  border-radius: 6px;
+  background: var(--umm-tone-wash, var(--umm-paper));
+  font-family: var(--umm-font-display);
+  font-size: 0.875rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.3;
+}
+
+.cp__facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem 1.5rem;
+  margin: 4px 0 0;
+  padding-top: 1rem;
+  border-top: 1.5px solid var(--cp-line);
+}
+
+.cp__facts dd {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) and (max-width: 999px) {
+  .cp__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cp__note {
+  margin-top: 14px;
+}
+
+/* --- a wide screen: the pipe down the middle, the cards either side ------------ */
+
+@media (min-width: 1000px) {
+  .cp__stages {
+    /* each card tucks up beside the one before it, on the pipe's other side */
+    --cp-tuck: 9rem;
+    padding: 0;
+  }
+
+  .cp__stages > .cp__card {
+    width: calc(50% - var(--cp-reach));
+  }
+
+  .cp__stages > [data-side='r'] {
+    align-self: flex-end;
+  }
+
+  .cp__stages > .cp__card + .cp__card {
+    margin-top: calc(-1 * var(--cp-tuck));
+  }
+
+  /* a card on the left: its joints run right, to the pipe */
+  .cp__card[data-side='l'] .cp__joint {
+    right: auto;
+    left: 100%;
+  }
+
+  .cp__card[data-side='l'] .cp__joint::before {
+    right: auto;
+    left: -4px;
+  }
+
+  .cp__card[data-side='l'] .cp__stub::after {
+    transform-origin: right center;
+  }
+
+  .cp__card[data-side='l'] .cp__inlet,
+  .cp__card[data-side='l'] .cp__outlet {
+    right: auto;
+    left: calc(100% + 1.5px);
+  }
+
+  .cp__card[data-side='l'] .cp__inlet::after {
+    transform-origin: left center;
+  }
+
+  .cp__card[data-side='l'] .cp__outlet::after {
+    transform-origin: right center;
+  }
+
+  .cp__card[data-side='l'][data-on] .cp__inlet .cp__drop {
+    animation-name: cp-go;
+  }
+
+  .cp__card[data-side='l'][data-on] .cp__outlet .cp__drop {
+    animation-name: cp-back;
+  }
+
+  /* the taps: a manifold across three columns, a tap down to each card */
+  .cp__flows {
+    --cp-drop: 104px;
+    --cp-mani: 22px;
+    --cp-g: clamp(16px, 2vw, 28px);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--cp-g);
+    margin-top: clamp(2.5rem, 4vw, 3.5rem);
+    padding: var(--cp-drop) 0 0;
+  }
+
+  .cp__flows::before,
+  .cp__flows::after {
+    content: '';
+    position: absolute;
+    left: calc((100% - 2 * var(--cp-g)) / 6 - 9px);
+    right: calc((100% - 2 * var(--cp-g)) / 6 - 9px);
+  }
+
+  .cp__flows::before {
+    top: calc(var(--cp-mani) - 9px);
+    height: 18px;
+    border: 2px solid var(--cp-ink);
+    border-radius: 999px;
+    background: var(--umm-paper);
+  }
+
+  .cp__flows::after {
+    z-index: 1;
+    top: calc(var(--cp-mani) - 7px);
+    height: 14px;
+    margin-inline: 2px;
+    border-radius: 999px;
+    background: var(--cp-water);
+    transform: scaleX(0);
+    transition: transform 1s var(--umm-ease-out);
+  }
+
+  .cp__flows[data-on]::after {
+    transform: scaleX(1);
+  }
+
+  .cp__tap {
+    right: auto;
+    left: 50%;
+    width: 0;
+    height: calc(var(--cp-drop) - var(--cp-mani));
+  }
+
+  .cp__feed {
+    z-index: 2;
+    top: 0;
+    left: -8px;
+    right: auto;
+    width: 16px;
+    height: calc(100% - 40px);
+    border-block: 0;
+    border-inline: 2px solid var(--cp-ink);
+    border-radius: 0;
+  }
+
+  .cp__feed::after {
+    transform: scaleY(0);
+    transform-origin: center top;
+    transition-delay: 0.6s;
+  }
+
+  .cp__card[data-on] .cp__feed::after {
+    transform: scaleY(1);
+  }
+
+  .cp__spout {
+    top: auto;
+    right: auto;
+    bottom: 26px;
+    left: -6px;
+    width: 12px;
+    height: 16px;
+  }
+
+  .cp__handle {
+    bottom: auto;
+    right: auto;
+    top: 18px;
+    left: 8px;
+    width: 22px;
+    height: 10px;
+    transform: none;
+    transform-origin: 2px 50%;
+  }
+
+  .cp__handle::before {
+    top: 50%;
+    left: auto;
+    right: 0;
+    width: 6px;
+    height: 20px;
+    margin-top: -10px;
+  }
+
+  .cp__handle::after {
+    top: 50%;
+    left: 0;
+    width: 16px;
+    height: 2px;
+    margin: -1px 0 0;
+  }
+
+  .cp__card[data-on] .cp__handle {
+    transform: rotate(-55deg);
+  }
+
+  .cp__pour {
+    --cp-pour: 26px;
+    top: auto;
+    right: auto;
+    bottom: -2px;
+    left: -3px;
+    height: 26px;
+  }
+}
+
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .cp__stages {
+    --cp-tuck: 7rem;
+  }
+}
+
+/* --- reduced motion: the pipe full, nothing moving ------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .cp__live,
+  .cp__lens svg,
+  .cp__collar,
+  .cp__stream,
+  .cp__packet,
+  .cp__front::after,
+  .cp__wave,
+  .cp__card[data-on] .cp__loop svg,
+  .cp__card[data-on] .cp__needle,
+  .cp__card[data-on] .cp__drop,
+  .cp__card[data-on] .cp__pour i {
+    animation: none;
+  }
+
+  .cp__packet {
+    display: none;
+  }
+
+  .cp__card,
+  .cp__badge,
+  .cp__needle,
+  .cp__valve svg,
+  .cp__handle,
+  .cp__flows::after,
+  .cp__stub::after,
+  .cp__inlet::after,
+  .cp__outlet::after,
+  .cp__feed::after {
+    transition: none;
+  }
+}

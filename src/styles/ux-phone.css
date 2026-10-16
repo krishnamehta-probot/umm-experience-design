@@ -1,0 +1,2657 @@
+/* ============================================================================
+   UX & DIGITAL COMMERCE · THE SHOPPER'S PHONE, TOLD AS YOU SCROLL
+   ----------------------------------------------------------------------------
+   CommerceArchitecture and ShopPhone. Prefix up__. The heading and the rule
+   cards are the shared cd-arch__ ones (cloud-arch.css).
+
+   16 Oct, Krish: the four service pages' thinking boards had grown alike,
+   so this one is its own thing, a product rather than a diagram. A paper
+   board washed in blossom, ringed in ink like the rule cards under it. A
+   drawn phone (ink frame, notch, a shop inside drawn from shapes) is held
+   still (sticky) beside the cards on a wide screen, small over them on a
+   phone, and not held at all where the window is too short. Its screen
+   slides to the shop moment of the card being read; a receipt beside it
+   prints a line for each card read so far.
+
+   Inside the phone everything is sized in cqw (the screen is a size
+   container), so the same shop draws at 116px wide or 270px. Each screen's
+   motion runs when it slides in ([data-pos='now']); every keyframe starts
+   from the "before" and lands on the element's own style, which is the
+   finished state, so reduced motion simply shows the end. Tokens only.
+   ========================================================================== */
+
+/* --- the board -------------------------------------------------------------- */
+
+.up__board {
+  --up-pad: clamp(1.1rem, 2.6vw, 2.25rem);
+  --up-grey: color-mix(in srgb, var(--umm-ink) 13%, var(--umm-paper));
+  --up-rule: color-mix(in srgb, var(--umm-ink) 14%, var(--umm-paper));
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.1rem, 2.2vw, 1.6rem);
+  padding: var(--up-pad);
+  border: 1.5px solid var(--umm-ink);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-blossom-wash);
+  color: var(--umm-ink);
+  overflow: clip;
+}
+
+.up__eyebrow,
+.up__mono,
+.up__tag {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.up__eyebrow {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid var(--up-rule);
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-paper);
+}
+
+.up__live {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--umm-coral);
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+  animation: up-live 2.4s ease-out infinite;
+}
+
+@keyframes up-live {
+  0% {
+    outline: 0 solid rgb(255 195 196 / 0.9);
+  }
+  70%,
+  100% {
+    outline: 8px solid rgb(255 195 196 / 0);
+  }
+}
+
+.up__mono {
+  color: var(--umm-ink-soft);
+}
+
+/* --- the story: the phone held, the cards passing ----------------------------- */
+
+.up__story {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+}
+
+/* on a phone or tablet: a small phone, flush with the top of the screen */
+.up__hold {
+  --ph: min(29svh, 280px);
+  --rw: clamp(124px, 36vw, 176px);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin-inline: calc(-1 * var(--up-pad));
+  padding: 12px var(--up-pad) 14px;
+  border-bottom: 1.5px solid var(--umm-ink);
+  border-radius: 0 0 22px 22px;
+  background: var(--umm-blossom-wash);
+  box-shadow: 0 18px 24px -20px rgb(16 14 20 / 0.4);
+  overflow: clip;
+}
+
+.up__stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* the screen's light, in the pastel of the card being read */
+.up__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--ph) * 0.8);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--tone);
+  filter: blur(36px);
+  opacity: 0.8;
+  translate: -72% -50%;
+  transition: background-color 0.7s var(--umm-ease-out);
+  pointer-events: none;
+}
+
+@media (min-width: 1000px) {
+  .up__story {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: start;
+    column-gap: clamp(1.5rem, 3vw, 3rem);
+  }
+
+  /* beside the cards, its height following the window's */
+  .up__hold {
+    --ph: min(clamp(300px, calc(100svh - 5rem), 560px), 44vw);
+    --rw: clamp(150px, 14vw, 196px);
+    grid-column: 2;
+    grid-row: 1;
+    top: max(1rem, calc(50svh - var(--ph) / 2));
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .up__steps {
+    grid-column: 1;
+    grid-row: 1;
+    /* room for the last card to reach the middle of the screen */
+    padding-bottom: 16svh;
+  }
+}
+
+@media (max-height: 560px) {
+  .up__hold {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* --- the cards ------------------------------------------------------------------ */
+
+.up__steps {
+  display: grid;
+  gap: clamp(1.25rem, 7svh, 4.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__step {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: clamp(1.1rem, 2.4vw, 1.75rem);
+  border: 1.5px solid var(--up-rule);
+  border-radius: 22px;
+  background: var(--umm-paper);
+  opacity: 0.6;
+  transform: scale(0.985);
+  transition:
+    opacity 0.5s var(--umm-ease-out),
+    transform 0.5s var(--umm-ease-out),
+    border-color 0.5s var(--umm-ease-out),
+    box-shadow 0.5s var(--umm-ease-out);
+}
+
+.up__step[data-on] {
+  opacity: 1;
+  transform: none;
+  border-color: var(--umm-ink);
+  box-shadow: 0 28px 50px -34px rgb(16 14 20 / 0.45);
+}
+
+.up__tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: var(--umm-r-pill);
+  background: color-mix(in srgb, var(--tone) 40%, var(--umm-paper));
+  transition: background-color 0.5s var(--umm-ease-out);
+}
+
+.up__tag i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.up__step[data-on] .up__tag {
+  background: var(--tone);
+}
+
+.up__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.45rem, 2.2vw, 2.1rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.up__lede {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.up__body {
+  margin: 0;
+  max-width: 46ch;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* short items as chips, tinted while their card is read */
+.up__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__chips li {
+  padding: 8px 14px;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-veil);
+  font-family: var(--umm-font-display);
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.3;
+  transition: background-color 0.5s var(--umm-ease-out);
+}
+
+.up__step[data-on] .up__chips li {
+  background: color-mix(in srgb, var(--tone) 38%, var(--umm-paper));
+}
+
+/* a connector, named: where the order goes next */
+.up__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--umm-hairline);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.up__link-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--tone);
+  color: var(--umm-ink);
+}
+
+.up__step[data-on] .up__link-icon svg[data-spin] {
+  animation: up-turn 3s linear infinite reverse;
+}
+
+@keyframes up-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the commerce services, as tiles */
+.up__svcs {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__svcs li {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--umm-veil);
+}
+
+.up__svc-title {
+  font-family: var(--umm-font-display);
+  font-size: 1.0625rem;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.up__svc-sub {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+@media (min-width: 600px) {
+  .up__svcs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* a heading between the cards, over the business models */
+.up__divider {
+  display: grid;
+  gap: 6px;
+  padding-top: clamp(0.5rem, 2svh, 1.5rem);
+}
+
+.up__divider .up__mono {
+  margin: 0;
+}
+
+.up__divider-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* a labelled part of a card */
+.up__part {
+  display: grid;
+  gap: 10px;
+  padding-top: 1rem;
+  border-top: 1px solid var(--umm-line);
+}
+
+.up__part p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* what connects behind it: a chain of pills, filling link by link */
+.up__chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__chain li {
+  position: relative;
+  padding: 6px 12px;
+  border: 1px solid var(--umm-hairline);
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-paper);
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+.up__chain li::first-letter {
+  text-transform: uppercase;
+}
+
+.up__chain li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid var(--umm-ink);
+  border-right: 1.5px solid var(--umm-ink);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.up__step[data-on] .up__chain li {
+  border-color: var(--umm-ink);
+  background: color-mix(in srgb, var(--tone) 45%, var(--umm-paper));
+  animation: up-link 0.45s var(--umm-ease-out) calc(0.25s + var(--i, 0) * 0.14s) both;
+}
+
+@keyframes up-link {
+  from {
+    border-color: var(--umm-hairline);
+    background: var(--umm-paper);
+  }
+}
+
+/* what holds across the architecture, closing the board */
+.up__across {
+  display: grid;
+  gap: 12px;
+  padding-top: clamp(1rem, 2vw, 1.4rem);
+  border-top: 1.5px dashed color-mix(in srgb, var(--umm-ink) 25%, transparent);
+}
+
+.up__checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__checks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--up-rule);
+  border-radius: 14px;
+  background: var(--umm-paper);
+  font-family: var(--umm-font-display);
+  font-size: 1rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.3;
+}
+
+.up__check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+}
+
+.up__check svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* --- the phone ------------------------------------------------------------------ */
+
+.up__phone {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  height: var(--ph);
+  aspect-ratio: 9 / 19;
+  padding: calc(var(--ph) * 0.02);
+  border-radius: calc(var(--ph) * 0.09);
+  background: var(--umm-ink);
+  box-shadow:
+    inset 0 0 0 1px var(--umm-ink-line-strong),
+    0 30px 50px -28px rgb(16 14 20 / 0.55),
+    0 8px 16px -10px rgb(16 14 20 / 0.3);
+}
+
+/* the side buttons */
+.up__phone::before,
+.up__phone::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--umm-ink);
+}
+
+.up__phone::before {
+  top: 22%;
+  left: -2px;
+  height: 9%;
+}
+
+.up__phone::after {
+  top: 28%;
+  right: -2px;
+  height: 13%;
+}
+
+.up__screen {
+  position: relative;
+  height: 100%;
+  border-radius: calc(var(--ph) * 0.072);
+  background: var(--umm-paper);
+  overflow: hidden;
+  container-type: size;
+}
+
+.up__notch {
+  position: absolute;
+  z-index: 5;
+  top: 2.6cqw;
+  left: 50%;
+  width: 30cqw;
+  height: 8cqw;
+  border-radius: 99px;
+  background: var(--umm-ink);
+  translate: -50% 0;
+}
+
+.up__status {
+  position: absolute;
+  z-index: 4;
+  top: 4.4cqw;
+  left: 8cqw;
+  right: 7cqw;
+  display: flex;
+  align-items: center;
+  height: 4cqw;
+}
+
+.up__clock {
+  width: 9cqw;
+  height: 2.4cqw;
+  border-radius: 9px;
+  background: var(--umm-ink);
+}
+
+.up__signal {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7cqw;
+  height: 3cqw;
+  margin: 0 1.8cqw 0 auto;
+}
+
+.up__signal i {
+  width: 0.9cqw;
+  height: 45%;
+  border-radius: 1px;
+  background: var(--umm-ink);
+}
+
+.up__signal i:nth-child(2) {
+  height: 72%;
+}
+
+.up__signal i:nth-child(3) {
+  height: 100%;
+}
+
+.up__battery {
+  width: 5.6cqw;
+  height: 2.8cqw;
+  padding: 0.45cqw;
+  border: 0.45cqw solid var(--umm-ink);
+  border-radius: 1cqw;
+  background: var(--umm-ink);
+  background-clip: content-box;
+}
+
+.up__home {
+  position: absolute;
+  z-index: 4;
+  bottom: 2.2cqw;
+  left: 50%;
+  width: 34cqw;
+  height: 1.2cqw;
+  border-radius: 9px;
+  background: var(--umm-ink);
+  translate: -50% 0;
+}
+
+/* a screen: the one being read in place, the rest slid aside */
+.up__app {
+  position: absolute;
+  inset: 13.5cqw 0 6.5cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 4cqw;
+  padding: 0 5.5cqw;
+  transition:
+    transform 0.7s var(--umm-ease-out),
+    opacity 0.45s var(--umm-ease-out);
+}
+
+.up__app[data-pos='next'] {
+  opacity: 0;
+  transform: translateX(22%) scale(0.95);
+}
+
+.up__app[data-pos='past'] {
+  opacity: 0;
+  transform: translateX(-22%) scale(0.95);
+}
+
+/* --- what a shop is drawn from ---------------------------------------------------- */
+
+.up__bar {
+  display: block;
+  flex: none;
+  width: var(--w);
+  height: 2.3cqw;
+  border-radius: 9px;
+  background: var(--up-grey);
+}
+
+.up__bar[data-k='ink'] {
+  background: color-mix(in srgb, var(--umm-ink) 82%, var(--umm-paper));
+}
+
+.up__bar[data-k='bold'] {
+  height: 3cqw;
+  background: var(--umm-ink);
+}
+
+.up__bar[data-k='paper'] {
+  background: color-mix(in srgb, var(--umm-paper) 92%, transparent);
+}
+
+.up__col {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.8cqw;
+  min-width: 0;
+}
+
+.up__app > .up__col {
+  flex: none;
+}
+
+.up__i {
+  flex: none;
+  width: 4.8cqw;
+  height: 4.8cqw;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.up__i[data-k='spark'] {
+  fill: var(--umm-lilac);
+  stroke: var(--umm-ink);
+  stroke-width: 1.6;
+}
+
+.up__top {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3cqw;
+  height: 9cqw;
+}
+
+.up__top-mid {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+}
+
+.up__top-mid .up__btn {
+  margin-left: auto;
+}
+
+.up__logo {
+  position: relative;
+  flex: none;
+  width: 9cqw;
+  height: 9cqw;
+  border-radius: 3cqw;
+  background: var(--umm-ink);
+}
+
+.up__logo::after {
+  content: '';
+  position: absolute;
+  inset: 2.6cqw;
+  border-radius: 50%;
+  background: var(--umm-blossom);
+}
+
+.up__btn {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 9cqw;
+  height: 9cqw;
+  border-radius: 50%;
+  background: var(--umm-veil);
+  color: var(--umm-ink);
+}
+
+.up__badge {
+  position: absolute;
+  top: -0.4cqw;
+  right: -0.4cqw;
+  width: 3.8cqw;
+  height: 3.8cqw;
+  border: 0.7cqw solid var(--umm-paper);
+  border-radius: 50%;
+  background: var(--umm-coral);
+}
+
+.up__avatar {
+  background: var(--umm-sky);
+}
+
+/* a product photo: a pastel ground, an object on it */
+.up__img {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 0.92;
+  border-radius: 4cqw;
+  background: var(--umm-tone);
+  overflow: hidden;
+}
+
+.up__img[data-size='sm'] {
+  width: 15cqw;
+  aspect-ratio: 1;
+  border-radius: 3cqw;
+}
+
+.up__obj {
+  position: relative;
+  display: block;
+  background: var(--umm-paper);
+  box-shadow: 0 1.2cqw 0 -0.2cqw rgb(16 14 20 / 0.1);
+}
+
+.up__obj[data-s='0'] {
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: inset -1.8cqw -1.8cqw 0 rgb(16 14 20 / 0.07);
+}
+
+.up__obj[data-s='1'] {
+  width: 24%;
+  height: 58%;
+  margin-top: 8%;
+  border-radius: 3cqw 3cqw 1.6cqw 1.6cqw;
+}
+
+.up__obj[data-s='1']::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 24%;
+  right: 24%;
+  height: 22%;
+  border-radius: 0.8cqw 0.8cqw 0 0;
+  background: var(--umm-ink);
+}
+
+.up__obj[data-s='2'] {
+  width: 44%;
+  aspect-ratio: 1;
+  border-radius: 1.6cqw;
+  rotate: -8deg;
+}
+
+.up__obj[data-s='2']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 42%;
+  width: 16%;
+  background: var(--umm-ink);
+}
+
+.up__obj[data-s='3'] {
+  width: 36%;
+  height: 40%;
+  margin-right: 8%;
+  border-radius: 0.8cqw 0.8cqw 3cqw 3cqw;
+}
+
+.up__obj[data-s='3']::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 100%;
+  width: 28%;
+  height: 46%;
+  border: 1.4cqw solid var(--umm-paper);
+  border-left: 0;
+  border-radius: 0 50% 50% 0;
+}
+
+.up__img[data-size='sm'] .up__obj[data-s='3']::after {
+  border-width: 0.8cqw;
+}
+
+.up__pill {
+  display: block;
+  width: 20cqw;
+  height: 6.4cqw;
+  margin-top: 1.4cqw;
+  border-radius: 99px;
+  background: var(--umm-ink);
+}
+
+.up__cta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 2.4cqw;
+  height: 12cqw;
+  margin-top: auto;
+  border-radius: 99px;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+}
+
+.up__cta[data-k='line'] {
+  border: 0.6cqw solid var(--umm-ink);
+  background: var(--umm-paper);
+  color: var(--umm-ink);
+}
+
+/* the screens rise in, piece by piece */
+@keyframes up-rise {
+  from {
+    opacity: 0;
+    transform: translateY(5cqw);
+  }
+}
+
+@keyframes up-slide {
+  from {
+    opacity: 0;
+    transform: translateX(8cqw);
+  }
+}
+
+@keyframes up-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+/* --- 01 experience: the storefront ------------------------------------------------- */
+
+.up__banner {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3cqw;
+  padding: 5cqw;
+  border-radius: 5cqw;
+  background: var(--umm-tone);
+}
+
+.up__banner .up__col {
+  gap: 2.2cqw;
+}
+
+.up__sun {
+  flex: none;
+  width: 22cqw;
+  aspect-ratio: 1;
+  margin-right: 4cqw;
+  border-radius: 50%;
+  background: var(--umm-sun);
+  box-shadow:
+    inset 0 0 0 0.6cqw var(--umm-ink),
+    6cqw 5cqw 0 -4cqw var(--umm-coral);
+}
+
+.up__cats {
+  display: flex;
+  flex: none;
+  gap: 2cqw;
+}
+
+.up__cat {
+  flex: 1;
+  height: 6.4cqw;
+  border: 0.4cqw solid var(--umm-line);
+  border-radius: 99px;
+  background: var(--umm-veil);
+}
+
+.up__cat[data-on] {
+  border-color: var(--umm-ink);
+  background: var(--umm-ink);
+}
+
+.up__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3.6cqw 3.4cqw;
+}
+
+.up__tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8cqw;
+}
+
+.up__tile .up__img {
+  margin-bottom: 0.6cqw;
+}
+
+/* the add button, tapped: plus to check, the bag's badge pops */
+.up__add {
+  position: absolute;
+  top: 29.5cqw;
+  right: 2cqw;
+  display: grid;
+  place-items: center;
+  width: 8cqw;
+  height: 8cqw;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: inset 0 0 0 0.5cqw var(--umm-ink);
+  color: var(--umm-ink);
+}
+
+.up__add .up__i {
+  grid-area: 1 / 1;
+  width: 4.4cqw;
+  height: 4.4cqw;
+  stroke-width: 2.6;
+}
+
+.up__add .up__i[data-k='plus'] {
+  opacity: 0;
+}
+
+.up__app[data-pos='now'] .up__banner {
+  animation: up-rise 0.7s var(--umm-ease-out) 0.1s both;
+}
+
+.up__app[data-pos='now'] .up__tile {
+  animation: up-rise 0.7s var(--umm-ease-out) calc(0.25s + var(--i) * 0.09s) both;
+}
+
+.up__app[data-pos='now'] .up__add {
+  animation: up-add 0.6s var(--umm-ease-out) 1.5s both;
+}
+
+@keyframes up-add {
+  0%,
+  30% {
+    background: var(--umm-ink);
+    color: var(--umm-paper);
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.75);
+  }
+}
+
+.up__app[data-pos='now'] .up__add .up__i[data-k='plus'] {
+  animation: up-out 0.2s linear 1.7s both;
+}
+
+.up__app[data-pos='now'] .up__add .up__i[data-k='check'] {
+  animation: up-pop 0.45s var(--umm-ease-spring) 1.75s both;
+}
+
+@keyframes up-out {
+  from {
+    opacity: 1;
+  }
+}
+
+.up__app[data-pos='now'] .up__badge {
+  animation: up-pop 0.5s var(--umm-ease-spring) 1.95s both;
+}
+
+/* --- 02 ai: search that understands ------------------------------------------------ */
+
+.up__search {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2.4cqw;
+}
+
+.up__field {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 2cqw;
+  height: 10cqw;
+  padding: 0 3.4cqw;
+  border: 0.6cqw solid var(--umm-ink);
+  border-radius: 99px;
+}
+
+.up__typed {
+  display: block;
+  width: 46%;
+  height: 2.4cqw;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--umm-ink) 82%, var(--umm-paper));
+}
+
+.up__caret {
+  width: 0.6cqw;
+  height: 5cqw;
+  margin-left: -1cqw;
+  background: var(--umm-ink);
+}
+
+.up__answer {
+  position: relative;
+}
+
+/* the assistant, thinking, then the suggestions in its place */
+.up__think {
+  position: absolute;
+  top: 1cqw;
+  left: 0;
+  display: inline-flex;
+  gap: 1.4cqw;
+  padding: 3cqw 4cqw;
+  border-radius: 4cqw 4cqw 4cqw 1cqw;
+  background: var(--umm-lilac);
+  opacity: 0;
+}
+
+.up__think i {
+  width: 2.2cqw;
+  height: 2.2cqw;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.up__sugs {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__sugs li {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  height: 8.6cqw;
+  border-bottom: 0.3cqw solid var(--umm-line);
+  color: var(--umm-ink-quiet);
+}
+
+.up__sugs .up__i {
+  width: 4cqw;
+  height: 4cqw;
+}
+
+.up__picks-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2cqw;
+}
+
+.up__picks-head .up__bar {
+  flex: 1;
+  max-width: var(--w);
+}
+
+.up__grid--picks .up__img {
+  aspect-ratio: 1 / 1.1;
+}
+
+/* a personalized pick, lit */
+.up__tile[data-hit] .up__img {
+  box-shadow:
+    0 0 0 0.8cqw var(--umm-paper),
+    0 0 0 1.4cqw var(--umm-ink);
+}
+
+.up__glint {
+  position: absolute;
+  top: 1.6cqw;
+  right: 1.6cqw;
+  display: grid;
+  place-items: center;
+  width: 7.4cqw;
+  height: 7.4cqw;
+  border-radius: 50%;
+  background: var(--umm-paper);
+}
+
+.up__glint .up__i {
+  width: 4.6cqw;
+  height: 4.6cqw;
+  fill: var(--umm-lilac);
+  stroke: var(--umm-ink);
+  stroke-width: 1.6;
+}
+
+.up__app[data-pos='now'] .up__typed {
+  animation: up-type 1.1s steps(7, end) 0.35s both;
+}
+
+@keyframes up-type {
+  from {
+    width: 0;
+  }
+}
+
+.up__app[data-pos='now'] .up__caret {
+  animation: up-blink 1s steps(1) infinite;
+}
+
+@keyframes up-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.up__app[data-pos='now'] .up__think {
+  animation: up-think 1.6s var(--umm-ease-out) 0.3s both;
+}
+
+@keyframes up-think {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  15%,
+  78% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.up__app[data-pos='now'] .up__think i {
+  animation: up-hop 0.9s ease-in-out infinite;
+  animation-delay: calc(0.3s + var(--n, 0) * 0.15s);
+}
+
+.up__think i:nth-child(2) {
+  --n: 1;
+}
+
+.up__think i:nth-child(3) {
+  --n: 2;
+}
+
+@keyframes up-hop {
+  50% {
+    transform: translateY(-1.2cqw);
+    opacity: 0.4;
+  }
+}
+
+.up__app[data-pos='now'] .up__sugs li {
+  animation: up-drop 0.5s var(--umm-ease-out) calc(1.75s + var(--i) * 0.12s) both;
+}
+
+@keyframes up-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-2cqw);
+  }
+}
+
+.up__app[data-pos='now'] .up__picks-head {
+  animation: up-rise 0.6s var(--umm-ease-out) 2.05s both;
+}
+
+.up__app[data-pos='now'] .up__grid--picks .up__tile {
+  animation: up-rise 0.6s var(--umm-ease-out) calc(2.15s + var(--i) * 0.08s) both;
+}
+
+.up__app[data-pos='now'] .up__tile[data-hit] .up__img {
+  animation: up-ring 0.5s var(--umm-ease-out) 2.75s both;
+}
+
+@keyframes up-ring {
+  from {
+    box-shadow:
+      0 0 0 0 var(--umm-paper),
+      0 0 0 0 var(--umm-ink);
+  }
+}
+
+.up__app[data-pos='now'] .up__glint {
+  animation: up-pop 0.5s var(--umm-ease-spring) 2.85s both;
+}
+
+/* --- 03 services: cart and checkout ------------------------------------------------- */
+
+.up__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2.6cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__line {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  padding-bottom: 2.6cqw;
+  border-bottom: 0.3cqw solid var(--umm-line);
+}
+
+.up__line:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.up__line .up__col {
+  gap: 1.5cqw;
+}
+
+.up__qty {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 1.4cqw;
+  padding: 0.9cqw 0.9cqw 0.9cqw 1.6cqw;
+  border: 0.35cqw solid var(--umm-line);
+  border-radius: 99px;
+  color: var(--umm-ink-quiet);
+}
+
+.up__qty > .up__i {
+  width: 3.4cqw;
+  height: 3.4cqw;
+}
+
+.up__qty-n {
+  width: 3cqw;
+  height: 2.4cqw;
+  border-radius: 9px;
+  background: var(--umm-ink);
+}
+
+.up__qty[data-live] .up__qty-n {
+  width: 6cqw;
+}
+
+.up__qty-plus {
+  display: grid;
+  place-items: center;
+  width: 5.2cqw;
+  height: 5.2cqw;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+}
+
+.up__qty-plus .up__i {
+  width: 3.2cqw;
+  height: 3.2cqw;
+  stroke-width: 2.6;
+}
+
+.up__sum {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 2.4cqw;
+  padding-top: 3cqw;
+  border-top: 0.35cqw dashed var(--umm-hairline);
+}
+
+.up__sum > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.up__total {
+  padding-top: 0.6cqw;
+}
+
+.up__method {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3cqw;
+  padding: 2.6cqw 3cqw;
+  border: 0.35cqw solid var(--umm-line);
+  border-radius: 3.6cqw;
+  color: var(--umm-ink-quiet);
+}
+
+.up__card {
+  flex: none;
+  width: 11cqw;
+  height: 7.6cqw;
+  border-radius: 1.4cqw;
+  background:
+    linear-gradient(var(--umm-ink), var(--umm-ink)) 0 32% / 100% 1.4cqw no-repeat,
+    var(--umm-sky);
+  box-shadow: inset 0 0 0 0.35cqw var(--umm-ink);
+}
+
+/* pay, pressed: ink, a tap, then the check on citrus */
+.up__pay {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  height: 12cqw;
+  margin-top: auto;
+  border-radius: 99px;
+  background: var(--umm-citrus);
+  box-shadow: inset 0 0 0 0.6cqw var(--umm-ink);
+  overflow: hidden;
+}
+
+.up__pay > * {
+  grid-area: 1 / 1;
+}
+
+.up__pay-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqw;
+  width: 100%;
+  color: var(--umm-paper);
+  opacity: 0;
+}
+
+.up__pay-done {
+  display: grid;
+}
+
+.up__pay-done .up__i {
+  display: block;
+  width: 6.4cqw;
+  height: 6.4cqw;
+  stroke-width: 2.6;
+}
+
+.up__tap {
+  width: 12cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--umm-paper) 55%, transparent);
+  opacity: 0;
+}
+
+.up__app[data-pos='now'] .up__line {
+  animation: up-slide 0.55s var(--umm-ease-out) calc(0.15s + var(--i) * 0.1s) both;
+}
+
+.up__app[data-pos='now'] .up__pay {
+  animation: up-pay 2.6s var(--umm-ease-out) 0.2s both;
+}
+
+@keyframes up-pay {
+  0%,
+  62% {
+    background: var(--umm-ink);
+    transform: scale(1);
+  }
+  68% {
+    background: var(--umm-ink);
+    transform: scale(0.94);
+  }
+  80% {
+    transform: scale(1.03);
+  }
+}
+
+.up__app[data-pos='now'] .up__pay-label {
+  animation: up-label 2.6s linear 0.2s both;
+}
+
+@keyframes up-label {
+  0%,
+  66% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0;
+  }
+}
+
+.up__app[data-pos='now'] .up__pay-done {
+  animation: up-done 2.6s var(--umm-ease-out) 0.2s both;
+}
+
+@keyframes up-done {
+  0%,
+  70% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  86% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.up__app[data-pos='now'] .up__tap {
+  animation: up-tap 2.6s ease-out 0.2s both;
+}
+
+@keyframes up-tap {
+  0%,
+  60% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  64% {
+    opacity: 1;
+  }
+  84%,
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+/* --- 04 operations: order tracking -------------------------------------------------- */
+
+.up__map {
+  flex: none;
+  aspect-ratio: 200 / 156;
+  border-radius: 5cqw;
+  background: var(--umm-sky);
+  overflow: hidden;
+}
+
+.up__map svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.up__blocks rect {
+  fill: color-mix(in srgb, var(--umm-paper) 45%, var(--umm-sky));
+}
+
+.up__road {
+  fill: none;
+  stroke: var(--umm-paper);
+  stroke-width: 10;
+}
+
+.up__route {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 7;
+}
+
+.up__from {
+  fill: var(--umm-paper);
+  stroke: var(--umm-ink);
+  stroke-width: 3;
+}
+
+.up__pin path {
+  fill: var(--umm-coral);
+  stroke: var(--umm-ink);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+.up__pin circle {
+  fill: var(--umm-ink);
+}
+
+/* the parcel, resting at the door */
+.up__parcel {
+  transform: translate(142px, 44px);
+}
+
+.up__parcel rect {
+  fill: var(--umm-sun);
+  stroke: var(--umm-ink);
+  stroke-width: 2.4;
+}
+
+.up__parcel path {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2;
+}
+
+.up__app[data-pos='now'] .up__route {
+  animation: up-run 0.9s linear infinite;
+}
+
+@keyframes up-run {
+  to {
+    stroke-dashoffset: -8;
+  }
+}
+
+.up__app[data-pos='now'] .up__parcel {
+  animation: up-parcel 6s linear 0.4s infinite both;
+}
+
+@keyframes up-parcel {
+  0% {
+    transform: translate(28px, 116px);
+  }
+  17% {
+    transform: translate(72px, 116px);
+  }
+  44% {
+    transform: translate(72px, 48px);
+  }
+  72% {
+    transform: translate(142px, 48px);
+  }
+  76%,
+  100% {
+    transform: translate(142px, 44px);
+  }
+}
+
+.up__eta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3cqw;
+  padding: 3cqw;
+  border-radius: 4cqw;
+  background: color-mix(in srgb, var(--umm-citrus) 45%, var(--umm-paper));
+}
+
+.up__eta-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 9cqw;
+  height: 9cqw;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: var(--umm-citrus);
+}
+
+.up__track {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 0 1cqw;
+  list-style: none;
+}
+
+.up__track li {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 3.4cqw;
+  padding-bottom: 3.6cqw;
+}
+
+.up__track li:last-child {
+  padding-bottom: 0;
+}
+
+.up__track li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 6.6cqw;
+  bottom: 0.6cqw;
+  left: 2.65cqw;
+  width: 0.7cqw;
+  border-radius: 9px;
+  background: var(--umm-line);
+}
+
+.up__track li[data-k='done']::before {
+  background: linear-gradient(var(--umm-ink), var(--umm-ink)) top / 100% 100% no-repeat var(--umm-line);
+}
+
+.up__track .up__col {
+  gap: 1.5cqw;
+  padding-top: 0.9cqw;
+}
+
+.up__dot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 6cqw;
+  height: 6cqw;
+  border: 0.6cqw solid var(--umm-hairline);
+  border-radius: 50%;
+  background: var(--umm-paper);
+  color: transparent;
+}
+
+.up__dot .up__i {
+  width: 3.6cqw;
+  height: 3.6cqw;
+  stroke-width: 3;
+}
+
+.up__track li[data-k='done'] .up__dot {
+  border-color: var(--umm-ink);
+  background: var(--umm-citrus);
+  color: var(--umm-ink);
+}
+
+.up__track li[data-k='now'] .up__dot {
+  border-color: var(--umm-ink);
+}
+
+.up__app[data-pos='now'] .up__track li[data-k='done'] .up__dot {
+  animation: up-fill 0.5s var(--umm-ease-spring) calc(0.45s + var(--i) * 0.5s) both;
+}
+
+@keyframes up-fill {
+  from {
+    border-color: var(--umm-hairline);
+    background: var(--umm-paper);
+    color: transparent;
+    transform: scale(0.7);
+  }
+}
+
+.up__app[data-pos='now'] .up__track li[data-k='done']::before {
+  animation: up-fill-line 0.45s var(--umm-ease-out) calc(0.75s + var(--i) * 0.5s) both;
+}
+
+@keyframes up-fill-line {
+  from {
+    background-size: 100% 0;
+  }
+}
+
+.up__app[data-pos='now'] .up__track li[data-k='now'] .up__dot {
+  animation: up-ping 1.8s ease-out 1.6s infinite;
+}
+
+@keyframes up-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgb(16 14 20 / 0.35);
+  }
+  80%,
+  100% {
+    box-shadow: 0 0 0 2.6cqw rgb(16 14 20 / 0);
+  }
+}
+
+/* --- 05 retail: a product page, its heart popping ----------------------------------- */
+
+.up__gallery {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  aspect-ratio: 1 / 1.06;
+  border-radius: 6cqw;
+  background: var(--umm-tone);
+  overflow: hidden;
+}
+
+.up__gallery > .up__btn {
+  position: absolute;
+  top: 3cqw;
+  left: 3cqw;
+  background: var(--umm-paper);
+}
+
+.up__heart {
+  position: absolute;
+  top: 3cqw;
+  right: 3cqw;
+  display: grid;
+  place-items: center;
+  width: 9cqw;
+  height: 9cqw;
+  border-radius: 50%;
+  background: var(--umm-paper);
+}
+
+.up__heart > .up__i {
+  width: 5.4cqw;
+  height: 5.4cqw;
+  fill: var(--umm-coral);
+  stroke: var(--umm-ink);
+  stroke-width: 2;
+}
+
+.up__burst i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.6cqw;
+  height: 1.6cqw;
+  margin: -0.8cqw;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  opacity: 0;
+}
+
+/* a vase on the coral ground */
+.up__vase {
+  position: relative;
+  display: block;
+  width: 32%;
+  aspect-ratio: 0.74;
+  margin-top: 10%;
+  border-radius: 46% 46% 22% 22% / 34% 34% 14% 14%;
+  background: var(--umm-paper);
+  box-shadow:
+    inset -3cqw -2cqw 0 rgb(16 14 20 / 0.06),
+    0 2.6cqw 0 -1.2cqw rgb(16 14 20 / 0.12);
+}
+
+.up__vase::before {
+  content: '';
+  position: absolute;
+  bottom: 96%;
+  left: 31%;
+  right: 31%;
+  height: 22%;
+  border-radius: 1cqw 1cqw 0 0;
+  background: var(--umm-paper);
+}
+
+.up__vase::after {
+  content: '';
+  position: absolute;
+  top: 44%;
+  left: 0;
+  right: 0;
+  height: 10%;
+  background: var(--umm-ink);
+}
+
+.up__dots {
+  position: absolute;
+  bottom: 3.4cqw;
+  left: 50%;
+  display: flex;
+  gap: 1.4cqw;
+  translate: -50% 0;
+}
+
+.up__dots i {
+  width: 1.8cqw;
+  height: 1.8cqw;
+  border-radius: 9px;
+  background: var(--umm-paper);
+}
+
+.up__dots i[data-on] {
+  width: 5cqw;
+  background: var(--umm-ink);
+}
+
+.up__rate {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.up__stars {
+  display: flex;
+  gap: 0.6cqw;
+}
+
+.up__stars .up__i {
+  width: 4.2cqw;
+  height: 4.2cqw;
+  fill: var(--umm-sun);
+  stroke: var(--umm-ink);
+  stroke-width: 1.6;
+}
+
+.up__swatches {
+  display: flex;
+  flex: none;
+  gap: 2.8cqw;
+  padding-left: 1.4cqw;
+}
+
+.up__swatches i {
+  width: 7cqw;
+  height: 7cqw;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 0.4cqw rgb(16 14 20 / 0.14);
+}
+
+.up__swatches i[data-on] {
+  box-shadow:
+    0 0 0 0.8cqw var(--umm-paper),
+    0 0 0 1.4cqw var(--umm-ink);
+}
+
+.up__sizes {
+  display: flex;
+  flex: none;
+  gap: 2cqw;
+}
+
+.up__sizes i {
+  flex: 1;
+  height: 8cqw;
+  border: 0.4cqw solid var(--umm-line);
+  border-radius: 2.4cqw;
+}
+
+.up__sizes i[data-on] {
+  border-color: var(--umm-ink);
+  background: var(--umm-ink);
+}
+
+.up__info {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.up__info li {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  padding: 2.6cqw 0;
+  border-top: 0.3cqw solid var(--umm-line);
+  color: var(--umm-ink-quiet);
+}
+
+.up__info .up__col {
+  gap: 1.4cqw;
+}
+
+.up__app[data-pos='now'] .up__vase {
+  animation: up-float 4s ease-in-out 0.6s infinite;
+}
+
+@keyframes up-float {
+  50% {
+    transform: translateY(-1.8cqw);
+  }
+}
+
+.up__app[data-pos='now'] .up__heart {
+  animation: up-press-soft 0.35s ease-out 1.05s both;
+}
+
+@keyframes up-press-soft {
+  50% {
+    transform: scale(0.86);
+  }
+}
+
+.up__app[data-pos='now'] .up__heart > .up__i {
+  animation: up-heart 0.8s var(--umm-ease-out) 1.1s both;
+}
+
+@keyframes up-heart {
+  0%,
+  30% {
+    fill: var(--umm-paper);
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.up__app[data-pos='now'] .up__burst i {
+  animation: up-burst 0.7s var(--umm-ease-out) 1.35s both;
+}
+
+@keyframes up-burst {
+  from {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(-3cqw) scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-8cqw) scale(1);
+  }
+}
+
+/* --- 06 b2b: a bulk quote, its price tiers ------------------------------------------ */
+
+.up__tiers {
+  position: relative;
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 1cqw;
+  border-radius: 4cqw;
+  background: var(--umm-veil);
+}
+
+.up__tier-mark {
+  position: absolute;
+  top: 1cqw;
+  bottom: 1cqw;
+  left: 1cqw;
+  width: calc((100% - 2cqw) / 3);
+  border-radius: 3cqw;
+  background: var(--umm-sky);
+  box-shadow: inset 0 0 0 0.5cqw var(--umm-ink);
+  transform: translateX(200%);
+}
+
+.up__tier {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4cqw;
+  padding: 2.6cqw 0;
+}
+
+.up__app[data-pos='now'] .up__tier-mark {
+  animation: up-tier 3s var(--umm-ease-out) 0.4s both;
+}
+
+@keyframes up-tier {
+  0%,
+  30% {
+    transform: translateX(0);
+  }
+  42%,
+  64% {
+    transform: translateX(100%);
+  }
+  76%,
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.up__app[data-pos='now'] .up__qty[data-live] .up__qty-plus {
+  animation: up-press 3s linear 0.4s both;
+}
+
+@keyframes up-press {
+  0%,
+  22%,
+  32%,
+  56%,
+  66%,
+  100% {
+    background: var(--umm-ink);
+    transform: scale(1);
+  }
+  27%,
+  61% {
+    background: var(--umm-sky);
+    transform: scale(0.7);
+  }
+}
+
+.up__app[data-pos='now'] .up__qty[data-live] .up__qty-n {
+  animation: up-count 3s linear 0.4s both;
+}
+
+@keyframes up-count {
+  0%,
+  29% {
+    width: 2.4cqw;
+  }
+  30%,
+  63% {
+    width: 4.2cqw;
+  }
+}
+
+/* the buyer's approval, stamped */
+.up__approve {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3cqw;
+  padding: 2.6cqw 3cqw;
+  border-radius: 3.6cqw;
+  background: color-mix(in srgb, var(--umm-sky) 45%, var(--umm-paper));
+}
+
+.up__approve .up__col {
+  gap: 1.5cqw;
+}
+
+.up__stamp {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 7.4cqw;
+  height: 7.4cqw;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: inset 0 0 0 0.5cqw var(--umm-ink);
+}
+
+.up__stamp .up__i {
+  width: 4.4cqw;
+  height: 4.4cqw;
+  stroke-width: 2.8;
+}
+
+.up__app[data-pos='now'] .up__stamp {
+  animation: up-pop 0.5s var(--umm-ease-spring) 3.3s both;
+}
+
+/* --- 07 subscriptions: a plan, auto-renew on, the cycle ----------------------------- */
+
+.up__plans {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 2.6cqw;
+}
+
+.up__plan {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  padding: 3.4cqw;
+  border: 0.5cqw solid var(--umm-line);
+  border-radius: 4cqw;
+}
+
+.up__plan[data-pick] {
+  border-color: var(--umm-ink);
+  background: color-mix(in srgb, var(--umm-blossom) 40%, var(--umm-paper));
+}
+
+.up__radio {
+  flex: none;
+  width: 5.6cqw;
+  height: 5.6cqw;
+  border: 0.6cqw solid var(--umm-hairline);
+  border-radius: 50%;
+}
+
+.up__plan[data-pick] .up__radio {
+  border-color: var(--umm-ink);
+  background: var(--umm-ink);
+  box-shadow: inset 0 0 0 1cqw var(--umm-paper);
+}
+
+.up__toggle-row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4cqw;
+  padding: 0 1cqw;
+}
+
+.up__switch {
+  position: relative;
+  flex: none;
+  width: 13cqw;
+  height: 7.4cqw;
+  border-radius: 99px;
+  background: var(--umm-blossom);
+  box-shadow: inset 0 0 0 0.5cqw var(--umm-ink);
+}
+
+.up__switch i {
+  position: absolute;
+  top: 1.1cqw;
+  left: 1.1cqw;
+  width: 5.2cqw;
+  height: 5.2cqw;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  transform: translateX(5.6cqw);
+}
+
+.up__cycle {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4cqw;
+  padding: 3.4cqw;
+  border-radius: 5cqw;
+  background: color-mix(in srgb, var(--umm-blossom) 30%, var(--umm-paper));
+}
+
+.up__ring {
+  flex: none;
+  width: 30cqw;
+  height: 30cqw;
+}
+
+.up__ring-track {
+  fill: none;
+  stroke: var(--umm-paper);
+  stroke-width: 7;
+}
+
+.up__ring-arc {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 72 100;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+.up__ring-orbit {
+  transform-box: view-box;
+  transform-origin: 40px 40px;
+  transform: rotate(259deg);
+}
+
+.up__ring-orbit circle {
+  fill: var(--umm-blossom);
+  stroke: var(--umm-ink);
+  stroke-width: 2.4;
+}
+
+.up__ring-mid {
+  position: absolute;
+  top: 50%;
+  left: calc(3.4cqw + 15cqw);
+  display: grid;
+  translate: -50% -50%;
+}
+
+.up__ring-mid .up__i {
+  width: 7cqw;
+  height: 7cqw;
+}
+
+.up__months {
+  display: flex;
+  gap: 1.4cqw;
+  margin-top: 1cqw;
+}
+
+.up__months i {
+  width: 4cqw;
+  height: 4cqw;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  box-shadow: inset 0 0 0 0.45cqw var(--umm-ink);
+}
+
+.up__app[data-pos='now'] .up__plan[data-pick] {
+  animation: up-plan 0.45s var(--umm-ease-out) 0.6s both;
+}
+
+@keyframes up-plan {
+  from {
+    border-color: var(--umm-line);
+    background: var(--umm-paper);
+  }
+}
+
+.up__app[data-pos='now'] .up__plan[data-pick] .up__radio {
+  animation: up-radio 0.5s var(--umm-ease-spring) 0.65s both;
+}
+
+@keyframes up-radio {
+  from {
+    border-color: var(--umm-hairline);
+    background: var(--umm-paper);
+    box-shadow: inset 0 0 0 3cqw var(--umm-paper);
+  }
+}
+
+.up__app[data-pos='now'] .up__switch {
+  animation: up-track 0.4s var(--umm-ease-out) 1.3s both;
+}
+
+@keyframes up-track {
+  from {
+    background: var(--umm-veil);
+    box-shadow: inset 0 0 0 0.5cqw var(--umm-hairline);
+  }
+}
+
+.up__app[data-pos='now'] .up__switch i {
+  animation: up-knob 0.5s var(--umm-ease-spring) 1.3s both;
+}
+
+@keyframes up-knob {
+  from {
+    background: var(--umm-hairline);
+    transform: translateX(0);
+  }
+}
+
+.up__app[data-pos='now'] .up__ring-arc {
+  animation: up-arc 1.4s var(--umm-ease-out) 0.5s both;
+}
+
+@keyframes up-arc {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+
+.up__app[data-pos='now'] .up__ring-orbit {
+  animation: up-orbit 8s linear 0.5s infinite both;
+}
+
+@keyframes up-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.up__app[data-pos='now'] .up__months i {
+  animation: up-month 0.4s var(--umm-ease-spring) calc(1.8s + var(--i) * 0.22s) both;
+}
+
+@keyframes up-month {
+  from {
+    background: var(--umm-paper);
+    transform: scale(0.6);
+  }
+}
+
+/* --- 08 bookings: a calendar, a day and a slot picked -------------------------------- */
+
+.up__row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3cqw;
+  padding: 2.4cqw 3cqw 2.4cqw 2.4cqw;
+  border: 0.35cqw solid var(--umm-line);
+  border-radius: 4cqw;
+  color: var(--umm-ink-quiet);
+}
+
+.up__row > .up__btn {
+  color: var(--umm-ink);
+}
+
+.up__face {
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 0.45cqw var(--umm-ink);
+}
+
+/* who the booking is with */
+.up__people {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2.4cqw;
+  padding-left: 0.8cqw;
+}
+
+.up__people .up__bar {
+  margin-left: auto;
+}
+
+.up__people .up__face[data-on] {
+  box-shadow:
+    0 0 0 0.8cqw var(--umm-paper),
+    0 0 0 1.4cqw var(--umm-ink);
+}
+
+.up__row .up__col {
+  gap: 1.5cqw;
+}
+
+.up__month {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1cqw;
+}
+
+.up__cal {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1.6cqw;
+}
+
+.up__wd {
+  justify-self: center;
+  width: 50%;
+  height: 1.8cqw;
+  margin-bottom: 0.8cqw;
+  border-radius: 9px;
+  background: var(--up-grey);
+}
+
+.up__day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--umm-sun) 40%, var(--umm-paper));
+}
+
+.up__day::after {
+  content: '';
+  width: 1.6cqw;
+  height: 1.6cqw;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--umm-ink) 55%, var(--umm-paper));
+}
+
+.up__day[data-k='blank'] {
+  visibility: hidden;
+}
+
+.up__day[data-k='off'] {
+  background: var(--umm-veil);
+}
+
+.up__day[data-k='off']::after {
+  background: var(--up-grey);
+}
+
+.up__day[data-k='pick'] {
+  background: var(--umm-ink);
+  box-shadow: 0 0 0 0.8cqw var(--umm-sun);
+}
+
+.up__day[data-k='pick']::after {
+  background: var(--umm-sun);
+}
+
+.up__slots {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2cqw;
+}
+
+.up__slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 9cqw;
+  border: 0.4cqw solid var(--umm-line);
+  border-radius: 99px;
+}
+
+.up__slot[data-off] {
+  border-style: dashed;
+  opacity: 0.5;
+}
+
+.up__slot[data-pick] {
+  border-color: var(--umm-ink);
+  background: var(--umm-sun);
+}
+
+.up__app[data-pos='now'] .up__day {
+  animation: up-day 0.4s var(--umm-ease-out) calc(0.1s + var(--r) * 0.06s) both;
+}
+
+@keyframes up-day {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.up__app[data-pos='now'] .up__day[data-k='pick'] {
+  animation:
+    up-day 0.4s var(--umm-ease-out) calc(0.1s + var(--r) * 0.06s) both,
+    up-pick-day 0.6s var(--umm-ease-spring) 1s both;
+}
+
+@keyframes up-pick-day {
+  from {
+    background: color-mix(in srgb, var(--umm-sun) 40%, var(--umm-paper));
+    box-shadow: 0 0 0 0 var(--umm-sun);
+    transform: scale(0.7);
+  }
+}
+
+.up__app[data-pos='now'] .up__day[data-k='pick']::after {
+  animation: up-pick-dot 0.3s linear 1s both;
+}
+
+@keyframes up-pick-dot {
+  from {
+    background: color-mix(in srgb, var(--umm-ink) 55%, var(--umm-paper));
+  }
+}
+
+.up__app[data-pos='now'] .up__slot[data-pick] {
+  animation: up-slot 0.45s var(--umm-ease-spring) 1.7s both;
+}
+
+@keyframes up-slot {
+  from {
+    border-color: var(--umm-line);
+    background: var(--umm-paper);
+    transform: scale(0.92);
+  }
+}
+
+.up__app[data-screen='bookings'][data-pos='now'] .up__cta {
+  animation: up-ready 0.4s var(--umm-ease-out) 2.1s both;
+}
+
+@keyframes up-ready {
+  from {
+    opacity: 0.3;
+  }
+}
+
+/* --- the receipt ---------------------------------------------------------------- */
+
+.up__receipt {
+  position: relative;
+  flex: none;
+  width: var(--rw);
+  margin-top: calc(var(--ph) * 0.1);
+  margin-left: calc(var(--ph) * -0.03);
+  rotate: 2.2deg;
+  filter: drop-shadow(0 12px 12px rgb(16 14 20 / 0.14));
+}
+
+/* the paper, its foot torn in a zigzag */
+.up__paper {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--ph) * 0.84);
+  padding: 14px 14px 22px 20px;
+  background: var(--umm-paper);
+  mask: conic-gradient(from -45deg at bottom, transparent, black 1deg 89deg, transparent 90deg) 50% / 10px 100%;
+}
+
+.up__r-head {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px dashed var(--umm-hairline);
+}
+
+.up__r-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--umm-ink);
+  box-shadow: inset 0 0 0 6px var(--umm-ink), inset 0 0 0 11px var(--umm-blossom);
+}
+
+.up__r-bar {
+  display: block;
+  width: var(--w);
+  height: 5px;
+  border-radius: 9px;
+  background: var(--up-grey);
+}
+
+.up__r-bar[data-k='ink'] {
+  height: 6px;
+  background: var(--umm-ink);
+}
+
+/* a line a card: the newest prints at the foot, the oldest roll up out of
+   sight when the paper runs out of room */
+.up__r-lines {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  overflow: hidden;
+  mask: linear-gradient(transparent, black 12px);
+}
+
+.up__r-lines li {
+  display: grid;
+  flex: none;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--umm-hairline);
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  overflow: hidden;
+  animation: up-print 0.6s var(--umm-ease-out) both;
+}
+
+@keyframes up-print {
+  from {
+    max-height: 0;
+    padding-block: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    max-height: 60px;
+  }
+}
+
+.up__r-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+}
+
+.up__r-lines .up__i {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.4;
+}
+
+.up__r-foot {
+  display: grid;
+  flex: none;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1.5px dashed var(--umm-hairline);
+}
+
+.up__r-total {
+  display: flex;
+  justify-content: space-between;
+}
+
+.up__barcode {
+  display: block;
+  height: 24px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--umm-ink) 0 2px,
+    transparent 2px 4px,
+    var(--umm-ink) 4px 5px,
+    transparent 5px 8px,
+    var(--umm-ink) 8px 11px,
+    transparent 11px 13px
+  );
+}
+
+/* the small phone's receipt, in small type */
+@media (max-width: 999px) {
+  .up__paper {
+    padding: 10px 10px 18px 14px;
+  }
+
+  /* no letterhead: the room goes to the lines */
+  .up__r-head {
+    display: none;
+  }
+
+  .up__r-lines {
+    mask: linear-gradient(transparent, black 18px);
+  }
+
+  .up__r-lines li {
+    gap: 6px;
+    padding: 5px 0;
+    font-size: 0.5625rem;
+  }
+
+  .up__r-lines .up__i {
+    width: 11px;
+    height: 11px;
+  }
+
+  .up__r-foot {
+    gap: 7px;
+    padding-top: 7px;
+  }
+
+  .up__barcode {
+    height: 16px;
+  }
+}
+
+/* --- reduced motion: the finished state, no travel -------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .up__board *,
+  .up__board *::before,
+  .up__board *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .up__step {
+    transform: none;
+  }
+}

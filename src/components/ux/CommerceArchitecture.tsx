@@ -3,9 +3,9 @@ import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
 import { useReadingStep } from '@/lib/useReadingStep'
 import { commerce as commerce0 } from '@/content/uxCommerce'
-import { CommerceScene, type CommerceFocus } from './CommerceScene'
+import { Receipt, ShopPhone, type PhoneStep } from './ShopPhone'
 import '@/styles/cloud-arch.css'
-import '@/styles/cloud-flow.css'
+import '@/styles/ux-phone.css'
 
 /* ============================================================================
    UX & DIGITAL COMMERCE · THE THINKING BEHIND THE INTERFACE
@@ -15,29 +15,30 @@ import '@/styles/cloud-flow.css'
    personalization, commerce services, business operations), then four
    business models, then three principles.
 
-   16 Oct, evening, Krish: tell it as you scroll, as the other service
-   pages' boards now are (cloud-flow.css). One ink board: a picture of the
-   order's journey holds still (CommerceScene) beside eight cards in the
-   page's flow (over them on a phone), every word on screen as the reader
-   scrolls:
+   16 Oct, Krish: the four service pages' thinking sections had grown alike
+   (the same ink board, a diagram, numbered stations). This one is now the
+   shopper's phone: a paper board washed in blossom, a drawn phone held
+   beside the cards (ShopPhone, ux-phone.css), its shop changing with the
+   card being read, and a receipt printing a line for each card read so
+   far. It reads as a product, not a diagram, so there are no stations.
 
-     01–04  the layers: experience, AI and personalization, commerce
-            services, business operations
-     05–08  the business models: where AI adds value, what connects
-            behind it, link by link
+     01–04  the layers: storefront, AI search, checkout, order tracking
+     05–08  the business models: a product page, a bulk quote, a plan
+            switched on, a booking
 
-   The card being read lights its part of the picture, an order running
-   its route; the stations scroll to their card. What holds across the
-   architecture closes the board. Then the principles.
+   Every word sits in the cards, in the page's flow. Wide screens hold the
+   phone beside them; phones and tablets hold a small one over them; short
+   windows don't hold it at all. What holds across the architecture closes
+   the board. Then the principles.
    ========================================================================== */
 
 const ICON = {
-  width: 22,
-  height: 22,
+  width: 18,
+  height: 18,
   viewBox: '0 0 24 24',
   fill: 'none',
   stroke: 'currentColor',
-  strokeWidth: 1.7,
+  strokeWidth: 1.8,
   strokeLinecap: 'round',
   strokeLinejoin: 'round',
   'aria-hidden': true,
@@ -69,17 +70,19 @@ const split = (label: string) => {
   return m ? [m[1], m[2]] : ['', label]
 }
 
+const tone = (t: Tone) => ({ ['--tone' as string]: `var(--umm-${t})` }) as CSSProperties
+
 export function CommerceArchitecture({ content = commerce0 }: { content?: typeof commerce0 }) {
   const { board, models, principles } = content
-  const { at, holdRef, cardRef, goTo } = useReadingStep()
+  const { at, holdRef, cardRef } = useReadingStep()
 
   /* the eight cards, in order: the layers, then the business models */
-  const steps: { focus: CommerceFocus; tone: Tone; name: string }[] = [
+  const steps: PhoneStep[] = [
     { focus: 'experience', tone: 'coral', name: split(board.experience.label)[1] },
     { focus: 'ai', tone: 'lilac', name: split(board.ai.label)[1] },
     { focus: 'services', tone: 'sky', name: split(board.services.label)[1] },
     { focus: 'operations', tone: 'citrus', name: split(board.operations.label)[1] },
-    ...models.map((m, i) => ({ focus: m.id as CommerceFocus, tone: TONES[i], name: m.label })),
+    ...models.map((m, i) => ({ focus: m.id, tone: TONES[i], name: m.label })),
   ]
   const num = (i: number) => String(i + 1).padStart(2, '0')
 
@@ -87,10 +90,11 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
   const card = (i: number, body: ReactNode) => (
     <li
       key={steps[i].focus}
-      className="cf__step"
+      className="up__step"
       data-on={i === at || undefined}
+      data-read={i < at || undefined}
       ref={cardRef(i)}
-      style={{ ['--tone' as string]: `var(--umm-${steps[i].tone})` } as CSSProperties}
+      style={tone(steps[i].tone)}
     >
       {body}
     </li>
@@ -101,11 +105,22 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
     const [n, name] = split(label)
     return (
       <>
-        <span className="cf__label">{n}</span>
-        <h3 className="cf__title">{name}</h3>
+        <span className="up__tag">
+          <i aria-hidden="true" />
+          {n}
+        </span>
+        <h3 className="up__title">{name}</h3>
       </>
     )
   }
+
+  /** a connector, named: where the order goes next */
+  const link = (text: string, icon: ReactNode = <Arrow />) => (
+    <p className="up__link">
+      <span className="up__link-icon">{icon}</span>
+      {text}
+    </p>
+  )
 
   return (
     <section className="umm-section cd-arch uc" id="commerce" aria-labelledby="uc-title">
@@ -123,62 +138,34 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
       </div>
 
       <div className="umm-container">
-        <div className="cf__board" data-umm-theme="ink" role="group" aria-label={board.label}>
-          <div className="cf__top">
-            <span className="cf__eyebrow">
-              <span className="cf__live" aria-hidden="true" />
-              {board.label}
-            </span>
-          </div>
+        <div className="up__board" role="group" aria-label={board.label}>
+          <p className="up__eyebrow">
+            <span className="up__live" aria-hidden="true" />
+            {board.label}
+          </p>
 
-          <div className="cf__story">
-            {/* the picture, held still while the cards pass */}
-            <div
-              className="cf__hold"
-              ref={holdRef}
-              style={{ ['--tone' as string]: `var(--umm-${steps[at].tone})` } as CSSProperties}
-            >
-              <CommerceScene focus={steps[at].focus} />
-              <ol
-                className="cf__stations"
-                aria-label={board.label}
-                style={{ ['--n' as string]: steps.length } as CSSProperties}
-              >
-                {steps.map((s, i) => (
-                  <li key={s.focus} data-umm-tone={s.tone}>
-                    <button
-                      type="button"
-                      className="cf__station"
-                      aria-current={i === at ? 'step' : undefined}
-                      data-done={i < at || undefined}
-                      aria-label={s.name}
-                      onClick={() => goTo(i)}
-                    >
-                      <span className="cf__station-num">{num(i)}</span>
-                    </button>
-                  </li>
-                ))}
-              </ol>
-              <p className="cf__now" aria-hidden="true">
-                <span>{num(at)}</span> {steps[at].name}
-              </p>
+          <div className="up__story">
+            {/* the phone, held while the cards pass */}
+            <div className="up__hold" ref={holdRef} style={tone(steps[at].tone)}>
+              <div className="up__stage">
+                <i className="up__glow" aria-hidden="true" />
+                <ShopPhone steps={steps} at={at} />
+                <Receipt steps={steps} at={at} />
+              </div>
             </div>
 
             {/* the cards, in the page's flow */}
-            <ol className="cf__steps">
+            <ol className="up__steps">
               {card(
                 0,
                 <>
                   {head(board.experience.label)}
-                  <ul className="cf__chips">
+                  <ul className="up__chips">
                     {board.experience.items.map((x) => (
                       <li key={x}>{x}</li>
                     ))}
                   </ul>
-                  <p className="cf__loop">
-                    <Arrow />
-                    {board.experience.link}
-                  </p>
+                  {link(board.experience.link)}
                 </>,
               )}
 
@@ -186,16 +173,13 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
                 1,
                 <>
                   {head(board.ai.label)}
-                  <p className="cf__layer-title">{board.ai.title}</p>
-                  <ul className="cf__chips">
+                  <p className="up__lede">{board.ai.title}</p>
+                  <ul className="up__chips">
                     {board.ai.items.map((x) => (
                       <li key={x}>{x}</li>
                     ))}
                   </ul>
-                  <p className="cf__loop">
-                    <Arrow />
-                    {board.ai.link}
-                  </p>
+                  {link(board.ai.link)}
                 </>,
               )}
 
@@ -203,21 +187,16 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
                 2,
                 <>
                   {head(board.services.label)}
-                  <p className="cf__body">{board.services.note}</p>
-                  <ul className="cf__list cf__list--two">
+                  <p className="up__body">{board.services.note}</p>
+                  <ul className="up__svcs">
                     {board.services.items.map((s) => (
-                      <li key={s.title} className="cf__node">
-                        <span>
-                          <span className="cf__node-title">{s.title}</span>
-                          <span className="cf__node-sub">{s.body}</span>
-                        </span>
+                      <li key={s.title}>
+                        <span className="up__svc-title">{s.title}</span>
+                        <span className="up__svc-sub">{s.body}</span>
                       </li>
                     ))}
                   </ul>
-                  <p className="cf__loop">
-                    <Arrow />
-                    {board.services.link}
-                  </p>
+                  {link(board.services.link)}
                 </>,
               )}
 
@@ -225,42 +204,42 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
                 3,
                 <>
                   {head(board.operations.label)}
-                  <ul className="cf__chips">
+                  <ul className="up__chips">
                     {board.operations.items.map((x) => (
                       <li key={x}>{x}</li>
                     ))}
                   </ul>
-                  <p className="cf__loop">
-                    <Loop />
-                    {board.operations.loop}
-                  </p>
+                  {link(board.operations.loop, <Loop />)}
                 </>,
               )}
 
               {/* the business models, under their heading */}
-              <li className="cf__divider">
-                <p className="cf__mono">{content.modelsEyebrow}</p>
-                <p className="cf__divider-title">{content.modelsTitle}</p>
+              <li className="up__divider">
+                <p className="up__mono">{content.modelsEyebrow}</p>
+                <p className="up__divider-title">{content.modelsTitle}</p>
               </li>
 
               {models.map((m, k) =>
                 card(
                   4 + k,
                   <>
-                    <span className="cf__label">
+                    <span className="up__tag">
+                      <i aria-hidden="true" />
                       {num(4 + k)} / {m.eyebrow}
                     </span>
-                    <h3 className="cf__title">{m.title}</h3>
-                    <p className="cf__body">{m.body}</p>
-                    <div className="cf__part">
-                      <span className="cf__mono">{content.aiLabel}</span>
+                    <h3 className="up__title">{m.title}</h3>
+                    <p className="up__body">{m.body}</p>
+                    <div className="up__part">
+                      <span className="up__mono">{content.aiLabel}</span>
                       <p>{m.ai}</p>
                     </div>
-                    <div className="cf__part">
-                      <span className="cf__mono">{content.connectsLabel}</span>
-                      <ol className="cf__chain">
-                        {m.connects.map((c) => (
-                          <li key={c}>{c}</li>
+                    <div className="up__part">
+                      <span className="up__mono">{content.connectsLabel}</span>
+                      <ol className="up__chain">
+                        {m.connects.map((c, j) => (
+                          <li key={c} style={{ ['--i' as string]: j } as CSSProperties}>
+                            {c}
+                          </li>
                         ))}
                       </ol>
                     </div>
@@ -271,12 +250,14 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
           </div>
 
           {/* across the architecture */}
-          <div className="cf__across">
-            <span className="cf__mono">{board.across.label}</span>
-            <ul className="cf__checks">
+          <div className="up__across">
+            <span className="up__mono">{board.across.label}</span>
+            <ul className="up__checks">
               {board.across.items.map((a) => (
                 <li key={a}>
-                  <Check />
+                  <span className="up__check">
+                    <Check />
+                  </span>
                   {a}
                 </li>
               ))}

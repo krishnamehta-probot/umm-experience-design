@@ -1,0 +1,965 @@
+/* ============================================================================
+   INTEGRATED GROWTH · THE GROWTH CURVE (GrowthSystem)
+   ----------------------------------------------------------------------------
+   Prefix gc__. The heading is the shared cd-arch__ one (cloud-arch.css).
+
+   16 Oct, late, Krish: the four service pages' thinking sections looked
+   alike (one ink board, a held picture beside cards). Growth's is now its
+   own: one large chart on a light chart-paper board, ink lines on sun,
+   citrus and coral ribbons. The lines themselves are drawn by
+   growthCurve.ts into .gc__svg, behind the cards; this sheet places the
+   cards where the lines need them:
+
+     wide (1200px+)  the system's four cards in four columns, each lifted
+                     higher than the one before so their pins climb the
+                     curve; the four workflows the same below, each pin at
+                     its card's top right, where its line ends
+     narrow          every card full width, pins in a gutter at the left
+                     where the line runs down as a rail
+
+   Nothing is held; every card is in the page's flow. Decoration (axis,
+   ticks, guides) lives inside the board only. Tokens only. The marketing
+   factory under the board moved here from growth-system.css.
+   ========================================================================== */
+
+.gc__board {
+  --gc-gutter: 44px;
+  --gc-pin: 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 2.6vw, 2.25rem);
+  border: 1px solid var(--umm-line);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--umm-sun) 26%, var(--umm-paper)), transparent 26rem),
+    color-mix(in srgb, var(--umm-sun) 6%, var(--umm-paper));
+  color: var(--umm-ink);
+  box-shadow: var(--umm-shadow-2);
+}
+
+.gc__mono,
+.gc__eyebrow {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+/* --- the board's top line ---------------------------------------------------- */
+
+.gc__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.gc__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--umm-ink);
+}
+
+.gc__live {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+  animation: gc-live 2.6s ease-out infinite;
+}
+
+@keyframes gc-live {
+  0% {
+    outline: 0 solid rgb(16 14 20 / 0.22);
+  }
+  70%,
+  100% {
+    outline: 9px solid rgb(16 14 20 / 0);
+  }
+}
+
+/* --- the commercial direction, heading the chart --------------------------- */
+
+.gc__direction {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 16px;
+  padding: clamp(14px, 1.8vw, 20px);
+  border: 1px solid var(--umm-line);
+  border-radius: 18px;
+  background: var(--umm-paper);
+}
+
+.gc__dir-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--umm-ink);
+  color: var(--umm-sun);
+}
+
+.gc__dir-head {
+  display: grid;
+  gap: 4px;
+}
+
+.gc__dir-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.gc__dir-items {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gc__dir-items li {
+  padding: 6px 12px;
+  border-radius: var(--umm-r-pill);
+  background: color-mix(in srgb, var(--umm-sun) 40%, var(--umm-paper));
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+@media (min-width: 900px) {
+  .gc__direction {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .gc__dir-items {
+    grid-column: auto;
+    justify-content: flex-end;
+    max-width: 34rem;
+  }
+}
+
+/* --- the plot: the lines behind, the cards over them ------------------------ */
+
+.gc__plot {
+  position: relative;
+  padding-bottom: 30px;
+}
+
+.gc__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.gc__axis,
+.gc__ticks {
+  fill: none;
+  stroke: var(--umm-ink-quiet);
+  stroke-width: 1.25;
+}
+
+.gc__ticks {
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.gc__guides {
+  fill: none;
+  stroke: var(--umm-hairline);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+
+.gc__target {
+  fill: none;
+  stroke: var(--umm-ink-quiet);
+  stroke-width: 1;
+  stroke-dasharray: 6 6;
+  opacity: 0.6;
+}
+
+.gc__ribbon,
+.gc__ink {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gc__ribbon {
+  stroke: var(--tone);
+  stroke-width: 5;
+}
+
+.gc__main .gc__ribbon {
+  stroke: url(#gc-rise);
+  stroke-width: 7;
+}
+
+/* the four lanes on a phone sit 6px apart */
+.gc__series .gc__ribbon {
+  stroke-width: 3.5;
+}
+
+.gc__ink {
+  stroke: var(--umm-ink);
+  stroke-width: 1.5;
+}
+
+.gc__main .gc__ink {
+  stroke-width: 2;
+}
+
+.gc__area {
+  stroke: none;
+}
+
+.gc__head {
+  fill: var(--umm-ink);
+  stroke: var(--umm-paper);
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity var(--umm-dur) var(--umm-ease-out);
+}
+
+.gc__series,
+.gc__area {
+  transition:
+    opacity var(--umm-dur) var(--umm-ease-out),
+    fill-opacity var(--umm-dur) var(--umm-ease-out);
+}
+
+/* a workflow chosen in the legend: the others step back */
+.gc__plot[data-focus] .gc__series:not([data-picked]) {
+  opacity: 0.18;
+}
+
+.gc__plot[data-focus] .gc__area:not([data-picked]) {
+  fill-opacity: 0.15;
+}
+
+.gc__plot[data-focus] .gc__flow:not([data-picked]) .gc__card {
+  opacity: 0.5;
+}
+
+.gc__flow[data-picked] .gc__card {
+  box-shadow:
+    0 0 0 2px var(--umm-ink),
+    var(--umm-shadow-2);
+}
+
+/* the two lists, over the lines */
+.gc__system,
+.gc__flows {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  margin: 0;
+  padding: 0 0 0 var(--gc-gutter);
+  list-style: none;
+}
+
+.gc__flows {
+  margin-top: 30px;
+}
+
+.gc__point,
+.gc__flow {
+  position: relative;
+  min-width: 0;
+}
+
+/* --- a pin: its step number, rolling up as the line arrives ----------------- */
+
+.gc__pin {
+  position: absolute;
+  top: 12px;
+  left: calc(var(--gc-gutter) * -1);
+  display: flex;
+  justify-content: center;
+  width: var(--gc-gutter);
+}
+
+.gc__dot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--gc-pin);
+  height: var(--gc-pin);
+  border: 1.5px solid var(--umm-hairline);
+  border-radius: 50%;
+  background: var(--umm-paper);
+  color: var(--umm-ink-quiet);
+  font-family: var(--umm-font-display);
+  font-size: 0.8125rem;
+  font-weight: var(--umm-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transition:
+    background var(--umm-dur) var(--umm-ease-out),
+    border-color var(--umm-dur) var(--umm-ease-out),
+    color var(--umm-dur) var(--umm-ease-out),
+    transform var(--umm-dur-slow) var(--umm-ease-spring);
+}
+
+/* the pulse, once, as the pin lights */
+.gc__dot::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-on] > .gc__pin .gc__dot {
+  border-color: var(--umm-ink);
+  background: var(--tone);
+  color: var(--umm-ink);
+  transform: scale(1.08);
+}
+
+[data-on] > .gc__pin .gc__dot::after {
+  animation: gc-pulse 1.4s var(--umm-ease-out) 1;
+}
+
+@keyframes gc-pulse {
+  0% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+.gc__roll {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.gc__digits {
+  display: flex;
+  flex-direction: column;
+  transition: transform 1.1s var(--umm-ease-out);
+}
+
+.gc__digits > span {
+  height: 1em;
+  line-height: 1;
+}
+
+[data-on] > .gc__pin .gc__digits {
+  transform: translateY(calc(var(--n) * -1em));
+}
+
+/* --- a card ------------------------------------------------------------------ */
+
+.gc__card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: clamp(16px, 1.6vw, 22px);
+  border: 1px solid var(--umm-line);
+  border-radius: 18px;
+  background: var(--umm-paper);
+  box-shadow: var(--umm-shadow-1);
+  overflow: hidden;
+  transition:
+    opacity var(--umm-dur) var(--umm-ease-out),
+    box-shadow var(--umm-dur) var(--umm-ease-out);
+}
+
+/* its tone along the top, once its pin is lit */
+.gc__card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--tone);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--umm-dur-slow) var(--umm-ease-out);
+}
+
+[data-on] > .gc__card::before {
+  transform: scaleX(1);
+}
+
+.gc__name {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.15rem, 1.35vw, 1.3rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.gc__name--flow {
+  font-size: clamp(1.2rem, 1.5vw, 1.4rem);
+}
+
+.gc__big {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.25rem, 1.6vw, 1.5rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.gc__sub,
+.gc__body {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.gc__node-title {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: var(--umm-weight-semibold);
+  line-height: 1.3;
+}
+
+.gc__node-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+/* sources and channels */
+.gc__nodes {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gc__nodes li {
+  position: relative;
+  padding: 10px 0 10px 18px;
+  border-top: 1px solid var(--umm-line);
+}
+
+.gc__nodes li::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+}
+
+.gc__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--umm-hairline);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.gc__link svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--umm-ink);
+}
+
+/* the growth engine */
+.gc__engine {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--tone) 32%, var(--umm-paper));
+}
+
+.gc__mods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gc__mods li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--umm-line);
+  border-radius: 12px;
+}
+
+.gc__mod-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--umm-veil);
+}
+
+.gc__mod-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.gc__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gc__checks li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px 6px 8px;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-veil);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+.gc__checks svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+/* measurement's chain */
+.gc__chain {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+.gc__chain span:last-child {
+  color: var(--umm-ink);
+  font-weight: var(--umm-weight-medium);
+}
+
+/* a workflow: what it does, step by step down a line; what people control */
+.gc__part {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--umm-line);
+}
+
+.gc__does {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gc__does li {
+  position: relative;
+  padding: 0 0 12px 24px;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.gc__does li::first-letter {
+  text-transform: uppercase;
+}
+
+.gc__does li::before {
+  content: '';
+  position: absolute;
+  top: 0.4em;
+  left: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+}
+
+.gc__does li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(0.4em + 12px);
+  bottom: 3px;
+  left: 5px;
+  width: 1px;
+  background: var(--umm-hairline);
+}
+
+.gc__does li:last-child {
+  padding-bottom: 0;
+  color: var(--umm-ink-soft);
+}
+
+.gc__controls {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+/* --- the workflows' heading and the chart's legend --------------------------- */
+
+.gc__legend-wrap {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 10px 0 0;
+}
+
+.gc__follow {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.2rem, 1.6vw, 1.5rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.gc__follow-lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--umm-ink-soft);
+}
+
+.gc__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gc__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid var(--umm-hairline);
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-paper);
+  color: var(--umm-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--umm-dur-fast) var(--umm-ease-out),
+    border-color var(--umm-dur-fast) var(--umm-ease-out);
+}
+
+.gc__key[aria-pressed='true'] {
+  border-color: var(--umm-ink);
+  background: var(--tone);
+}
+
+.gc__key:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 2px;
+}
+
+.gc__swatch {
+  flex: none;
+  width: 18px;
+  height: 6px;
+  border-radius: var(--umm-r-pill);
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.35);
+}
+
+/* --- across the architecture: the chart's baseline ------------------------- */
+
+.gc__across {
+  display: grid;
+  gap: 10px;
+  padding-left: var(--gc-gutter);
+}
+
+/* --- wide: the chart in four columns ----------------------------------------- */
+
+@media (min-width: 1200px) {
+  .gc__board {
+    --gc-gutter: 40px;
+    /* how far the first card sits under the last: the curve's climb */
+    --gc-r: clamp(170px, 15vw, 240px);
+    --gc-rw: clamp(150px, 13vw, 210px);
+  }
+
+  .gc__system,
+  .gc__flows {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 24px 20px;
+  }
+
+  .gc__system {
+    grid-template-rows: auto auto;
+    padding-top: 56px;
+  }
+
+  .gc__flows {
+    margin-top: 8px;
+    padding-top: 48px;
+  }
+
+  .gc__point,
+  .gc__flow {
+    padding-top: 46px;
+  }
+
+  /* the pin above its card's corner, on a short stem */
+  .gc__pin {
+    top: 0;
+    left: 10px;
+    width: var(--gc-pin);
+  }
+
+  .gc__flow .gc__pin {
+    right: 10px;
+    left: auto;
+  }
+
+  .gc__pin::after {
+    content: '';
+    position: absolute;
+    top: var(--gc-pin);
+    left: 50%;
+    width: 1.5px;
+    height: 10px;
+    margin-left: -0.75px;
+    background: var(--umm-ink-quiet);
+  }
+
+  /* each card higher than the one before: the curve's climb */
+  .gc__point:nth-child(1) {
+    grid-row: 1 / 3;
+    margin-top: var(--gc-r);
+  }
+
+  .gc__point:nth-child(2) {
+    grid-row: 1 / 3;
+    margin-top: calc(var(--gc-r) * 0.8);
+  }
+
+  .gc__point:nth-child(3) {
+    margin-top: calc(var(--gc-r) * 0.5);
+  }
+
+  .gc__legend-wrap {
+    grid-column: 3 / 5;
+    grid-row: 2;
+    align-self: end;
+    padding: 12px 0 0 10px;
+  }
+
+  .gc__flow:nth-child(1) {
+    margin-top: var(--gc-rw);
+  }
+
+  .gc__flow:nth-child(2) {
+    margin-top: calc(var(--gc-rw) * 0.62);
+  }
+
+  .gc__flow:nth-child(3) {
+    margin-top: calc(var(--gc-rw) * 0.3);
+  }
+
+  .gc__ribbon,
+  .gc__series .gc__ribbon {
+    stroke-width: 7;
+  }
+
+  .gc__main .gc__ribbon {
+    stroke-width: 11;
+  }
+
+  .gc__main .gc__ink {
+    stroke-width: 2.25;
+  }
+
+  /* the safeguards, the across items: the plot's columns, as axis labels */
+  .gc__checks--across {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .gc__checks--across li {
+    justify-self: start;
+  }
+}
+
+/* --- the marketing factory, under the board ---------------------------------- */
+
+.gc__factory {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.gc__factory-head {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.gc__factory-head .cx-lead {
+  margin: 0;
+  max-width: 44ch;
+}
+
+.gc__steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .gc__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.gc__step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  border: 1px solid var(--umm-line);
+  border-radius: 18px;
+  background: var(--umm-paper);
+  overflow: hidden;
+}
+
+/* the work travelling the four: each card's top lights in turn */
+.gc__step::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--umm-tone);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: gc-travel 6s calc(var(--i) * 1.5s) linear infinite;
+}
+
+@keyframes gc-travel {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  22% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  32%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.gc__step-label {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.gc__step-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.2rem, 1.6vw, 1.4rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.gc__step-body {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+@media (min-width: 1000px) {
+  .gc__factory {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+
+/* --- reduced motion: the chart drawn and lit, still ------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .gc__live,
+  .gc__step::before,
+  [data-on] > .gc__pin .gc__dot::after {
+    animation: none !important;
+  }
+
+  .gc__step::before {
+    transform: scaleX(1);
+  }
+
+  .gc__dot,
+  .gc__digits,
+  .gc__card,
+  .gc__card::before,
+  .gc__head,
+  .gc__series,
+  .gc__area,
+  .gc__key {
+    transition: none !important;
+  }
+}
