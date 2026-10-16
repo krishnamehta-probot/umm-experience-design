@@ -10,8 +10,9 @@ import { ToTop } from '@/components/v2/ToTop'
 import { Engagement } from '@/components/ai/Engagement'
 import { CloudFilm } from '@/components/cloud/CloudFilm'
 import { ConnectedArchitecture } from '@/components/cloud/ConnectedArchitecture'
-import { Industries } from '@/components/cloud/Industries'
-import { CLOUD_FLAVOUR, DataLine, STAGE_LIGHT, flavourWhy } from '@/components/cloud/flavour'
+import { Industries } from '@/components/v2/Industries'
+import { CLOUD_INDUSTRY_ART } from '@/components/cloud/art'
+import { CLOUD_FLAVOUR, FLAVOUR_CLASSES, STAGE_LIGHT } from '@/components/cloud/flavour'
 import { ScrollTrigger } from '@/lib/gsap'
 import '@/styles/v2-phone.css'
 import '@/styles/v2-scroll.css'
@@ -26,6 +27,7 @@ import {
   engagement,
   faq,
   hero,
+  industries,
   meta,
   nav,
   process,
@@ -53,11 +55,6 @@ import {
  * CLOUD_FLAVOUR: cloud and data motifs through the whole page.
  */
 
-/** section 2, its numbers on cloud shapes while the flavour is on */
-const WHY = flavourWhy(why)
-
-/** the sections the data line marks, top to bottom */
-const LINE_IDS = ['work', 'services', 'stages', 'architecture', 'process', 'contact']
 
 /** The cloud services' own Lottie scenes (scripts/build_cloud_service_marks.py),
  *  keyed by the marks the content's cards carry, each resting finished on
@@ -75,14 +72,14 @@ export function CloudDataPage() {
   useEffect(() => {
     document.title = meta.title
     document.documentElement.classList.add('cx-v2', 'cloud-page')
-    if (CLOUD_FLAVOUR) document.documentElement.classList.add('cloud-flavour')
+    if (CLOUD_FLAVOUR) document.documentElement.classList.add(...FLAVOUR_CLASSES)
     /* as on the CX page: measure the pins again once fonts and images land */
     const refresh = () => ScrollTrigger.refresh()
     document.fonts?.ready.then(refresh)
     window.addEventListener('load', refresh)
     return () => {
       window.removeEventListener('load', refresh)
-      document.documentElement.classList.remove('cx-v2', 'cloud-page', 'cloud-flavour')
+      document.documentElement.classList.remove('cx-v2', 'cloud-page', ...FLAVOUR_CLASSES)
     }
   }, [])
 
@@ -95,11 +92,11 @@ export function CloudDataPage() {
       <main className="cx-page">
         <div className="cx-intro">
           <HeroV2 content={hero} chipTone="sky" object="cloud" />
-          <WhyBand content={WHY} ribbon={ribbon} ribbonTone="citrus" lightTone="citrus" />
+          <WhyBand content={why} ribbon={ribbon} ribbonTone="citrus" lightTone="citrus" />
         </div>
         <CloudFilm />
         <ServicesV2 content={services} marks={CLOUD_MARKS} still={0} />
-        <Industries />
+        <Industries content={industries} art={CLOUD_INDUSTRY_ART} />
         <StagesV2 content={stages} light={STAGE_LIGHT} />
         <ConnectedArchitecture />
         <ToolsStack content={tools} />
@@ -108,7 +105,6 @@ export function CloudDataPage() {
         </ProcessClose>
       </main>
       <ToTop />
-      {CLOUD_FLAVOUR && <DataLine ids={LINE_IDS} />}
     </>
   )
 }

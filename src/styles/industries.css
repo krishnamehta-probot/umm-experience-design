@@ -1,0 +1,136 @@
+/* ============================================================================
+   INDUSTRIES (v2/Industries.tsx) — prefix cx-ind__
+
+   The band under a page's services that says where the work makes a
+   difference: three or four sectors as cards, each with an optional small
+   drawing of its system (art, per page) or its number.
+   ========================================================================== */
+
+.cx-ind {
+  padding-top: 0;
+  background: var(--umm-paper);
+}
+
+.cx-ind__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 700px) {
+  .cx-ind__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  .cx-ind__grid {
+    grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+  }
+}
+
+.cx-ind__card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border: 1px solid var(--umm-line);
+  border-left: 4px solid var(--umm-tone);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-paper);
+}
+
+.cx-ind__art {
+  display: block;
+  width: min(100%, 220px);
+  margin-bottom: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--umm-tone) 55%, var(--umm-paper));
+  color: var(--umm-ink);
+}
+
+.cx-ind__art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.cx-ind__wire {
+  stroke-dasharray: 3 4;
+}
+
+.cx-ind__packet {
+  fill: var(--umm-ink);
+  animation: cx-ind-run 3.2s linear infinite;
+}
+
+@keyframes cx-ind-run {
+  from {
+    transform: translateX(4px);
+  }
+  to {
+    transform: translateX(112px);
+  }
+}
+
+.cx-ind__packet--curve {
+  offset-path: path('M44 44C62 44 66 22 84 22');
+  animation-name: cx-ind-curve;
+  animation-duration: 2.4s;
+}
+
+@keyframes cx-ind-curve {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+.cx-ind__num {
+  justify-self: start;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--umm-tone);
+  font-family: var(--umm-font-display);
+  font-size: 0.8125rem;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.04em;
+}
+
+.cx-ind__sector {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.cx-ind__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.25rem, 1.7vw, 1.55rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.cx-ind__body {
+  margin: 0;
+  color: var(--umm-ink-soft);
+  line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-ind__packet {
+    display: none;
+  }
+}
