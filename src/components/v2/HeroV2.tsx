@@ -9,7 +9,8 @@ const GlassCube3D = lazy(() => import('./GlassCube3D'))
 
 const SHOW_ACTIONS = false
 
-export type HeroContent = typeof cxHero
+/** `secondaryHref`: where the outline button goes (default: the work) */
+export type HeroContent = typeof cxHero & { secondaryHref?: string }
 
 /* ============================================================================
    1 · HERO — the AI & Automation artifact's arrangement
@@ -158,7 +159,7 @@ export function HeroV2({
             {SHOW_ACTIONS ? (
               <div className="cx-hero__actions">
                 <SplitButton href="#contact">{hero.primaryCta}</SplitButton>
-                <SplitButton href="#work" variant="outline">
+                <SplitButton href={hero.secondaryHref ?? '#work'} variant="outline">
                   {hero.secondaryCta}
                 </SplitButton>
               </div>

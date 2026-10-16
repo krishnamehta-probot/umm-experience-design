@@ -9,7 +9,9 @@ import { ProcessClose } from '@/components/v2/ProcessClose'
 import { ToTop } from '@/components/v2/ToTop'
 import { Engagement } from '@/components/ai/Engagement'
 import { CloudFilm } from '@/components/cloud/CloudFilm'
-import { ArchitectureFlow } from '@/components/cloud/ArchitectureFlow'
+import { ConnectedArchitecture } from '@/components/cloud/ConnectedArchitecture'
+import { Industries } from '@/components/cloud/Industries'
+import { CLOUD_FLAVOUR, DataLine, STAGE_LIGHT, flavourWhy } from '@/components/cloud/flavour'
 import { ScrollTrigger } from '@/lib/gsap'
 import '@/styles/v2-phone.css'
 import '@/styles/v2-scroll.css'
@@ -42,11 +44,20 @@ import {
  * (its stickers are the pieces of an estate converging on the work), the
  * film (CX's, on Zceppa, Mohawk PriceFx and QCare), services, stages, the
  * tools wheel, the roadmap with the starting points under it, and the
- * closing. The one new section is the interactive architecture example
- * (ArchitectureFlow), in the language of the AI page's workflow.
+ * closing. Its own sections: the industries under the services
+ * (Industries) and the connected architecture (ConnectedArchitecture).
  * The hero's glass object is a cloud, the strip and section 2's light are
  * citrus, so the page doesn't read as a copy of CX or AI.
+ *
+ * 16 Oct: the cloud flavour (components/cloud/flavour.tsx), a trial behind
+ * CLOUD_FLAVOUR: cloud and data motifs through the whole page.
  */
+
+/** section 2, its numbers on cloud shapes while the flavour is on */
+const WHY = flavourWhy(why)
+
+/** the sections the data line marks, top to bottom */
+const LINE_IDS = ['work', 'services', 'stages', 'architecture', 'process', 'contact']
 
 /** The cloud services' own Lottie scenes (scripts/build_cloud_service_marks.py),
  *  keyed by the marks the content's cards carry, each resting finished on
@@ -64,13 +75,14 @@ export function CloudDataPage() {
   useEffect(() => {
     document.title = meta.title
     document.documentElement.classList.add('cx-v2', 'cloud-page')
+    if (CLOUD_FLAVOUR) document.documentElement.classList.add('cloud-flavour')
     /* as on the CX page: measure the pins again once fonts and images land */
     const refresh = () => ScrollTrigger.refresh()
     document.fonts?.ready.then(refresh)
     window.addEventListener('load', refresh)
     return () => {
       window.removeEventListener('load', refresh)
-      document.documentElement.classList.remove('cx-v2', 'cloud-page')
+      document.documentElement.classList.remove('cx-v2', 'cloud-page', 'cloud-flavour')
     }
   }, [])
 
@@ -83,18 +95,20 @@ export function CloudDataPage() {
       <main className="cx-page">
         <div className="cx-intro">
           <HeroV2 content={hero} chipTone="sky" object="cloud" />
-          <WhyBand content={why} ribbon={ribbon} ribbonTone="citrus" lightTone="citrus" />
+          <WhyBand content={WHY} ribbon={ribbon} ribbonTone="citrus" lightTone="citrus" />
         </div>
         <CloudFilm />
         <ServicesV2 content={services} marks={CLOUD_MARKS} still={0} />
-        <StagesV2 content={stages} light="network" />
-        <ArchitectureFlow />
+        <Industries />
+        <StagesV2 content={stages} light={STAGE_LIGHT} />
+        <ConnectedArchitecture />
         <ToolsStack content={tools} />
         <ProcessClose process={process} closing={closing} faq={faq}>
           <Engagement content={engagement} />
         </ProcessClose>
       </main>
       <ToTop />
+      {CLOUD_FLAVOUR && <DataLine ids={LINE_IDS} />}
     </>
   )
 }

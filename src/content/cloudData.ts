@@ -5,7 +5,8 @@ import type { ServiceMark } from '@/content/cxUiDesign'
 /* ============================================================================
    CLOUD AND DATA — PAGE CONTENT
 
-   Word for word from Krish's Cloud & Data content doc, 15 Oct 2026:
+   Word for word from Krish's Cloud & Data content doc (15 Oct 2026, updated
+   16 Oct: the hero, the industries, the connected architecture, FAQ 07):
    https://docs.google.com/document/d/1RQQgCgX1AtTp_tBAeveRw1NMyxLZgD7jfG6EOQk7YbI
    Visual reference: https://umm-cloud-data.ai-umm.chatgpt.site
 
@@ -33,12 +34,13 @@ export const nav = [
 
 export const hero = {
   eyebrow: 'Cloud & Data',
-  lines: ['A stronger cloud.', 'A clearer picture.'],
-  accent: 'A better next move.',
+  lines: ['Your cloud.', 'Your data.'],
+  accent: 'Working intelligently.',
   tail: '',
-  lead: 'Your infrastructure should support the way you work. Your data should help you decide what comes next. UMM connects cloud architecture, data engineering and analytics so your business can move forward with a clearer view of performance, cost and control.',
+  lead: 'Connect cloud infrastructure, enterprise data, and AI-powered automation. We design, migrate, and operate the foundation behind your applications—with engineers directing the architecture and agents supporting delivery.',
   primaryCta: 'Discuss your cloud & data priorities',
-  secondaryCta: 'See what happens underneath',
+  secondaryCta: 'Explore the connected architecture',
+  secondaryHref: '#architecture',
 }
 
 /** From foundation to insight: the capabilities, on the ribbon */
@@ -249,6 +251,34 @@ export const services = {
   ],
 }
 
+/* ── 4b · Where the foundation makes a difference ─────────────────────────── */
+
+export const industries = {
+  eyebrow: 'Where the foundation makes a difference',
+  line1: 'Different businesses.',
+  line2: 'Connected possibilities.',
+  items: [
+    {
+      sector: 'Property & Living',
+      title: 'A clearer operational picture.',
+      body: 'Connect resident services, property workflows, and reporting across locations.',
+      tone: 'sky' as Tone,
+    },
+    {
+      sector: 'Manufacturing & Distribution',
+      title: 'Information that travels with the work.',
+      body: 'Connect pricing, enterprise applications, and data access across business systems.',
+      tone: 'citrus' as Tone,
+    },
+    {
+      sector: 'Multi location businesses',
+      title: 'One view across customer signals.',
+      body: 'Bring feedback and operational information together for consistent analysis.',
+      tone: 'blossom' as Tone,
+    },
+  ],
+}
+
 /* ── 5 · Business stages ──────────────────────────────────────────────────── */
 
 export const stages = {
@@ -288,22 +318,21 @@ export const stages = {
   ],
 }
 
-/* ── 6 · The thinking behind the infrastructure (new section) ─────────────── */
+/* ── 6 · The thinking behind the infrastructure ───────────────────────────── */
 
-export type ArchNode = { place: string; title: string; body: string }
-export type ArchView = {
-  nodes: [ArchNode, ArchNode, ArchNode]
-  means: string
-  decision: string
-  checks: string[]
-}
-export type ArchScenario = {
-  id: 'freshness' | 'demand' | 'economics'
+export type ArchWorkflow = {
+  id: 'provisioning' | 'migration' | 'operations'
+  /** the tab under the board */
   label: string
+  /** the pill in the intelligence layer */
+  short: string
+  eyebrow: string
   title: string
-  prompt: string
-  challenge: ArchView
-  response: ArchView
+  body: string
+  ai: string
+  decision: string
+  evidence: string[]
+  outcome: string
 }
 
 export const architecture: {
@@ -312,134 +341,116 @@ export const architecture: {
   line2: string
   accent: string
   lead: string
-  demo: {
+  board: {
     label: string
     eyebrow: string
     tag: string
-    scenariosLabel: string
-    viewsLabel: string
-    views: { challenge: string; response: string }
-    meansLabel: string
+    layerEyebrow: string
+    layerTitle: string
+    layerNote: string
+    assist: string
+    systemsLabel: string
+    systems: { title: string; items: string }[]
+    systemsLink: string
+    platformLabel: string
+    movement: string
+    runtime: { title: string; body: string }
+    data: { title: string; body: string }
+    observe: { title: string; items: string }
+    providers: string[]
+    outcomesLink: string
+    outcomesLabel: string
+    outcomes: string[]
+    loop: string
+    oversightLabel: string
+    oversight: string[]
+    workflowsLabel: string
+    aiLabel: string
     decisionLabel: string
-    checksLabel: string
+    evidenceLabel: string
+    outcomeLabel: string
     reset: string
     disclaimer: string
   }
-  scenarios: ArchScenario[]
+  workflows: ArchWorkflow[]
   principles: { step: string; title: string; body: string }[]
 } = {
   chip: 'The thinking behind the infrastructure',
-  line1: 'What happens underneath',
-  line2: 'changes what happens next.',
-  accent: 'happens next.',
-  lead: 'Follow the system. See the decisions behind its design.',
-  demo: {
-    label: 'Interactive architecture examples',
-    eyebrow: 'From foundation to decision',
-    tag: 'Interactive architecture example',
-    scenariosLabel: 'Scenario',
-    viewsLabel: 'Compare',
-    views: { challenge: 'The challenge', response: 'The designed response' },
-    meansLabel: 'What this means',
-    decisionLabel: 'The design decision',
-    checksLabel: 'What we would check',
-    reset: 'Reset example',
-    disclaimer:
-      'Illustrative scenarios, not a live monitoring system. Cost examples use USD. Allocation alone does not reduce spend.',
+  line1: 'Connected by design.',
+  line2: 'Intelligent in operation.',
+  accent: 'Intelligent in operation.',
+  lead: 'See how your systems, cloud, and data work together—with AI built into delivery. See the decisions behind its design.',
+  board: {
+    label: 'The connected cloud and data architecture',
+    eyebrow: 'The connected cloud & data architecture',
+    tag: 'Human-led · AI-enabled',
+    layerEyebrow: 'Intelligence layer',
+    layerTitle: 'AI orchestration',
+    layerNote: 'Shared context. Scoped tasks. Reviewed actions.',
+    assist: 'Configuration, migration, and operational assistance',
+    systemsLabel: 'Your existing systems',
+    systems: [
+      { title: 'Business applications', items: 'ERP · CRM · operational tools' },
+      { title: 'Enterprise data', items: 'Databases · files · events' },
+      { title: 'Engineering context', items: 'Repositories · policies · runbooks' },
+    ],
+    systemsLink: 'APIs and events',
+    platformLabel: 'Connected platform',
+    movement: 'Integration and data movement',
+    runtime: { title: 'Cloud runtime', body: 'Compute, networking, containers, and services' },
+    data: { title: 'Data platform', body: 'Pipelines, warehouses, and lakehouses' },
+    observe: { title: 'Observability and FinOps', items: 'Health · performance · usage · cost' },
+    providers: ['AWS', 'Microsoft Azure', 'Google Cloud'],
+    outcomesLink: 'Connected experiences',
+    outcomesLabel: 'What it enables',
+    outcomes: ['Applications ready to evolve.', 'Trusted data. Clearer decisions.', 'Visible performance. Informed action.'],
+    loop: 'Production signals return to the intelligence layer, informing the next change.',
+    oversightLabel: 'Engineer oversight',
+    oversight: ['Identity and access', 'Data governance', 'Approval gates', 'Audit and recovery'],
+    workflowsLabel: 'Selectable workflow views',
+    aiLabel: 'What AI supports',
+    decisionLabel: 'Engineer decision',
+    evidenceLabel: 'Evidence',
+    outcomeLabel: 'Delivery outcome',
+    reset: 'Reset architecture',
+    disclaimer: 'Illustrative architecture. Components and automation boundaries are selected for each engagement.',
   },
-  scenarios: [
+  workflows: [
     {
-      id: 'freshness',
-      label: 'Data freshness',
-      title: 'The dashboard looks current. Is the data?',
-      prompt: 'A source feed has stopped refreshing. Follow the path from the source to the decision.',
-      challenge: {
-        nodes: [
-          { place: 'Source system', title: 'Feed delayed', body: 'A scheduled update did not arrive.' },
-          { place: 'Data platform', title: 'Last run completed', body: 'The pipeline finished using an older extract.' },
-          { place: 'Business view', title: 'Freshness unclear', body: 'The report does not make the source age visible.' },
-        ],
-        means:
-          'A successful job is not the whole story. A current-looking dashboard can still contain older information.',
-        decision: 'Check the age of the source data as well as the pipeline run.',
-        checks: ['Source timestamp', 'Refresh history', 'Report lineage'],
-      },
-      response: {
-        nodes: [
-          { place: 'Source system', title: 'Freshness check', body: 'Compare arrival time with the agreed update window.' },
-          { place: 'Data platform', title: 'Quality gate', body: 'Flag the delayed feed and notify its named owner.' },
-          { place: 'Business view', title: 'Context visible', body: 'Show the latest available timestamp with the report.' },
-        ],
-        means:
-          'Make the limits of the data visible. Teams can distinguish a current report from one waiting on a delayed source.',
-        decision: 'Define freshness expectations, escalation routes and how stale data is presented.',
-        checks: ['Freshness rule', 'Alert owner', 'Visible refresh time'],
-      },
+      id: 'provisioning',
+      label: 'Cloud provisioning',
+      short: 'Provisioning',
+      eyebrow: 'Provisioning path',
+      title: 'From requirements to a ready environment.',
+      body: 'Turn workload needs into a cloud configuration that can be reviewed, tested, and operated.',
+      ai: 'Translate engineering context into draft infrastructure configuration, policy checks, and deployment plans.',
+      decision: 'An authorized engineer approves the plan and its expected impact.',
+      evidence: ['Configuration diff', 'Policy checks', 'Deployment plan', 'Environment health'],
+      outcome: 'A reviewed and verified cloud environment',
     },
     {
-      id: 'demand',
-      label: 'Demand & resilience',
-      title: 'Demand changes. Can the platform respond?',
-      prompt:
-        'An application receives a sudden increase in requests. Trace the decisions that support a controlled response.',
-      challenge: {
-        nodes: [
-          { place: 'Application', title: 'Requests increase', body: 'Incoming work exceeds the usual pattern.' },
-          { place: 'Cloud platform', title: 'Capacity pressure', body: 'A fixed allocation reaches its operating limit.' },
-          { place: 'Operations', title: 'Response unclear', body: 'No agreed scaling boundary or recovery trigger.' },
-        ],
-        means:
-          'Capacity needs an operating plan. A traffic spike can expose dependencies beyond the application itself.',
-        decision: 'Understand bottlenecks, workload behavior and acceptable service limits.',
-        checks: ['Request volume', 'Latency', 'Dependency health'],
-      },
-      response: {
-        nodes: [
-          { place: 'Application', title: 'Demand measured', body: 'Observe traffic, response time and error signals.' },
-          {
-            place: 'Cloud platform',
-            title: 'Bounded scaling',
-            body: 'Apply tested capacity rules and queue work where appropriate.',
-          },
-          { place: 'Operations', title: 'Owners ready', body: 'Use alerts, runbooks and recovery procedures.' },
-        ],
-        means:
-          'Plan the response before the spike. The team has a defined way to scale, investigate and recover within agreed limits.',
-        decision: 'Validate scaling behavior alongside database, network and service dependencies.',
-        checks: ['Load-test results', 'Scaling limits', 'Recovery runbook'],
-      },
+      id: 'migration',
+      label: 'Data migration',
+      short: 'Data migration',
+      eyebrow: 'Data migration path',
+      title: 'Move the data. Preserve its meaning.',
+      body: 'Connect source understanding, AI-assisted mapping, and reconciliation before the migration is accepted.',
+      ai: 'Assist source profiling, schema mapping, transformation logic, and source-to-target reconciliation.',
+      decision: 'Reconciliation criteria are met and the recovery approach is approved.',
+      evidence: ['Mapping review', 'Reconciliation report', 'Exception log', 'Cutover checklist'],
+      outcome: 'Validated data in the target environment',
     },
     {
-      id: 'economics',
-      label: 'Cloud economics',
-      title: 'The bill is rising. What is driving it?',
-      prompt:
-        'A fictional monthly cloud bill totals $1,200. The useful question is which workloads account for it and who can act.',
-      challenge: {
-        nodes: [
-          { place: 'Monthly spend', title: '$1,200 total', body: 'An illustrative bill with limited workload context.' },
-          { place: 'Allocation', title: '$240 unassigned', body: 'Part of the spend has no mapped business owner.' },
-          { place: 'Business view', title: 'Value unclear', body: 'Spend is visible, but responsibility is not.' },
-        ],
-        means: 'A total does not explain the cost. Unassigned spend makes it harder to decide what to investigate.',
-        decision: 'Connect usage and cost to workloads and accountable owners.',
-        checks: ['Billing export', 'Resource inventory', 'Ownership tags'],
-      },
-      response: {
-        nodes: [
-          { place: 'Monthly spend', title: '$1,200 total', body: 'The example bill stays the same after allocation.' },
-          {
-            place: 'Allocation',
-            title: '$960 + $240',
-            body: 'Existing workloads plus the newly assigned resource group.',
-          },
-          { place: 'Business view', title: 'Review assigned', body: 'The $240 group now has an owner and a review action.' },
-        ],
-        means:
-          'Visibility comes before optimization. The team can investigate the resource group with its operational context intact.',
-        decision: 'Review utilization and dependencies before making cost or capacity changes.',
-        checks: ['Allocation coverage', 'Usage pattern', 'Review backlog'],
-      },
+      id: 'operations',
+      label: 'Cloud operations',
+      short: 'Operations',
+      eyebrow: 'Operations feedback loop',
+      title: 'Turn operational signals into informed action.',
+      body: 'Connect monitoring, investigation, and approved remediation to keep the platform improving.',
+      ai: 'Connect observability signals to investigation context, proposed remediation, and post-change verification.',
+      decision: 'The proposed action has a named owner, defined scope, and recovery steps.',
+      evidence: ['Alert context', 'Change record', 'Health checks', 'Usage and cost trends'],
+      outcome: 'A verified response and a clearer improvement plan',
     },
   ],
   principles: [
@@ -471,22 +482,22 @@ export const tools = {
   lead: 'We assess your workloads, existing estate and team capability before choosing platforms and services. Architecture decisions should account for operation, cost and future change.',
   groups: [
     {
-      label: 'Cloud platforms',
+      label: 'CLOUD PLATFORMS',
       tone: 'sky' as Tone,
       items: ['AWS', 'Microsoft Azure', 'Google Cloud'],
     },
     {
-      label: 'Data engineering',
+      label: 'DATA ENGINEERING',
       tone: 'citrus' as Tone,
       items: ['Apache Spark', 'Airflow', 'Databricks', 'Snowflake'],
     },
     {
-      label: 'Analytics and reporting',
+      label: 'ANALYTICS & REPORTING',
       tone: 'blossom' as Tone,
       items: ['Power BI', 'Tableau', 'Looker', 'Grafana'],
     },
     {
-      label: 'Platform operations',
+      label: 'PLATFORM OPERATIONS',
       tone: 'sun' as Tone,
       items: ['Terraform', 'Docker', 'Kubernetes', 'GitLab CI/CD'],
     },
@@ -597,6 +608,11 @@ export const faq = [
     question: 'What happens after the platform is live?',
     answer:
       'We agree the support model before handover. This may include monitoring, pipeline maintenance, quality checks, cost reviews and improvements, with named owners and an agreed response process.',
+  },
+  {
+    question: 'How do you use AI in cloud and data delivery?',
+    answer:
+      'AI assists tasks such as configuration drafting, schema mapping, validation, and operational investigation. Engineers set requirements, review outputs, and approve consequential changes. Automation is scoped to your environment, with clear access controls and verification steps.',
   },
 ]
 

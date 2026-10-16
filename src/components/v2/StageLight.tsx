@@ -31,6 +31,10 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
    three small layers on the right (2-3-2). Scale-ups: five (2-3-4-3-2).
    Enterprises: seven across the card (4-5-6-5-6-5-4). Same stage colours,
    same dark corner for the number.
+
+   variant="infra" (the Cloud & Data page, 16 Oct): infrastructure that
+   grows with the company. Startups: one server rack. Scale-ups: a cluster
+   wired to a hub. Enterprises: three cloud regions passing data.
    ========================================================================== */
 
 const VERT = `
@@ -270,6 +274,174 @@ void main() {
 }
 `
 
+/* The Cloud & Data page's picture: infrastructure that grows with the
+   company, behind the same reeded glass. Startups: one server rack, its
+   lights blinking. Scale-ups: a cluster of three racks wired to one hub,
+   data running up the wires. Enterprises: three cloud regions, two racks in
+   each, passing data between them. The stages cross-fade on the same `u`. */
+const INFRA = `
+precision highp float;
+uniform vec2 res;
+uniform float t;
+uniform float u;
+
+float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+
+vec3 ramp(float l, vec3 deep, vec3 mid, vec3 hot) {
+  vec3 ink = vec3(16.0, 14.0, 20.0) / 255.0;
+  vec3 c = mix(ink, deep, smoothstep(0.0, 0.16, l));
+  c = mix(c, mid, smoothstep(0.12, 0.62, l));
+  c = mix(c, hot, smoothstep(0.55, 1.02, l));
+  return mix(c, vec3(1.0), smoothstep(1.0, 1.5, l) * 0.6);
+}
+
+float sdBox(vec2 p, vec2 b, float r) {
+  vec2 q = abs(p) - b + r;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+float hair(float d, float w) { return exp(-pow(d / w, 2.0)); }
+float seg(vec2 p, vec2 A, vec2 B) {
+  vec2 ab = B - A;
+  float s = clamp(dot(p - A, ab) / dot(ab, ab), 0.0, 1.0);
+  return length(p - A - ab * s);
+}
+
+// a rack: a lit outline, three units, a blinking light and a vent in each
+float rack(vec2 p, vec2 c, vec2 h, float seed) {
+  vec2 d = p - c;
+  float b = sdBox(d, h, 0.18 * h.x);
+  float l = 0.95 * hair(b, 0.0035) + 0.12 * smoothstep(0.004, -0.004, b);
+  float inside = smoothstep(0.003, -0.003, b);
+  float uh = 2.0 * h.y / 3.0;
+  l += 0.5 * inside * hair(abs(abs(d.y) - uh * 0.5), 0.0022) * step(abs(d.x), h.x * 0.92);
+  for (int i = 0; i < 3; i++) {
+    float fy = (float(i) - 1.0) * uh;
+    float on = step(0.4, fract(t * (0.35 + 0.25 * hash(seed + float(i) * 7.0)) + hash(seed + float(i))));
+    float dd = length(p - (c + vec2(-h.x * 0.58, fy)));
+    l += (0.35 + 1.0 * on) * exp(-pow(dd / (0.11 * h.x), 2.0)) + 0.3 * on * exp(-dd / (0.3 * h.x));
+    vec2 v = p - (c + vec2(h.x * 0.22, fy));
+    l += 0.4 * hair(sdBox(v, vec2(h.x * 0.38, 0.0), 0.0), 0.0022);
+  }
+  return l;
+}
+
+// a cloud's outline: three bumps on a flat base
+float sdCloud(vec2 p, vec2 c, float s) {
+  vec2 d = (p - c) / s;
+  float k = length(d - vec2(-0.44, -0.08)) - 0.36;
+  k = min(k, length(d - vec2(0.02, 0.16)) - 0.48);
+  k = min(k, length(d - vec2(0.46, -0.06)) - 0.34);
+  k = min(k, sdBox(d - vec2(0.0, -0.26), vec2(0.8, 0.18), 0.18));
+  return k * s;
+}
+
+float packet(vec2 p, vec2 A, vec2 B, float ph, float r) {
+  vec2 pk = mix(A, B, ph);
+  float d = length(p - pk);
+  return exp(-pow(d / r, 2.0)) + 0.35 * exp(-d / (r * 3.0));
+}
+
+void main() {
+  vec2 q = gl_FragCoord.xy / res;
+  float a = res.x / res.y;
+
+  float N = 15.0;
+  float gx = pow(q.x, 0.8) * N;
+  float id = floor(gx);
+  float fu = fract(gx);
+  vec2 p = vec2(q.x * a, q.y);
+  // scale the drawing with the card: full size on a wide card, smaller on an upright one
+  float S = clamp(a / 1.7, 0.42, 1.0);
+
+  float w0 = clamp(1.0 - abs(u - 0.0), 0.0, 1.0);
+  float w1 = clamp(1.0 - abs(u - 1.0), 0.0, 1.0);
+  float w2 = clamp(1.0 - abs(u - 2.0), 0.0, 1.0);
+
+  float light = 0.0;
+
+  // 1 · Startups: one rack, on the right
+  if (w0 > 0.001) {
+    vec2 c = vec2(0.74 * a, 0.42);
+    light += w0 * rack(p, c, vec2(0.08, 0.17) * S, 1.0);
+    light += w0 * 0.25 * exp(-length((p - c) * vec2(0.8, 1.0)) / (0.28 * S));
+  }
+
+  // 2 · Scale-ups: three racks wired up to one hub
+  if (w1 > 0.001) {
+    vec2 H = vec2(0.72 * a, 0.76);
+    float s2 = 0.0;
+    for (int i = 0; i < 3; i++) {
+      float fi = float(i);
+      vec2 c = vec2((0.72 + (fi - 1.0) * 0.16 * S) * a, 0.36);
+      vec2 h = vec2(0.052, 0.12) * S;
+      s2 += rack(p, c, h, 10.0 + fi * 5.0);
+      vec2 top = c + vec2(0.0, h.y + 0.01);
+      vec2 hb = H - normalize(H - top) * 0.04 * S;
+      s2 += 0.3 * hair(seg(p, top, hb), 0.0026);
+      s2 += 0.9 * packet(p, top, hb, fract(t * 0.42 + fi * 0.31), 0.007);
+    }
+    float dh = length(p - H) - 0.04 * S;
+    s2 += 0.95 * hair(dh, 0.0035) + 0.5 * smoothstep(0.004, -0.004, dh) * (0.6 + 0.4 * sin(t * 2.0));
+    s2 += 0.22 * exp(-length(p - vec2(0.72 * a, 0.5)) / (0.35 * S));
+    light += w1 * s2;
+  }
+
+  // 3 · Enterprises: three cloud regions, two racks in each, linked
+  if (w2 > 0.001) {
+    float s3 = 0.0;
+    vec2 R0 = vec2((0.6 - 0.02 / S) * a, 0.7);
+    vec2 R1 = vec2(0.86 * a, 0.62);
+    vec2 R2 = vec2(0.7 * a, 0.25);
+    float cs = 0.17 * S;
+    for (int k = 0; k < 3; k++) {
+      vec2 R = k == 0 ? R0 : (k == 1 ? R1 : R2);
+      float dc = sdCloud(p, R, cs);
+      s3 += 0.95 * hair(dc, 0.0035) + 0.08 * smoothstep(0.004, -0.004, dc);
+      for (int j = 0; j < 2; j++) {
+        vec2 c = R + vec2((float(j) - 0.5) * 0.36 * cs, -0.12 * cs);
+        s3 += 0.8 * rack(p, c, vec2(0.13, 0.22) * cs, 20.0 + float(k * 2 + j) * 3.0);
+      }
+    }
+    // the links between regions: dashed, with data running both ways
+    for (int k = 0; k < 3; k++) {
+      vec2 A = k == 0 ? R0 : (k == 1 ? R1 : R2);
+      vec2 B = k == 0 ? R1 : (k == 1 ? R2 : R0);
+      vec2 dir = normalize(B - A);
+      vec2 A2 = A + dir * cs * 0.85;
+      vec2 B2 = B - dir * cs * 0.85;
+      vec2 ab = B2 - A2;
+      float s = clamp(dot(p - A2, ab) / dot(ab, ab), 0.0, 1.0);
+      float de = length(p - A2 - ab * s);
+      float dash = step(0.45, fract(s * 14.0 - t * 0.6));
+      s3 += 0.32 * dash * hair(de, 0.0028);
+      s3 += 0.9 * packet(p, A2, B2, fract(t * 0.22 + float(k) * 0.33), 0.008);
+      s3 += 0.6 * packet(p, B2, A2, fract(t * 0.17 + float(k) * 0.21 + 0.5), 0.006);
+    }
+    s3 += 0.2 * exp(-length(p - vec2(0.74 * a, 0.52)) / (0.5 * S));
+    light += w2 * s3;
+  }
+
+  light += 0.04 + 0.04 * q.x;
+
+  // the flutes: each shades its strip, a hairline of light on its left edge
+  float tint = 0.92 + 0.16 * hash(id + 3.0);
+  light *= tint;
+  light = light * (1.0 - 0.28 * exp(-(1.0 - fu) / 0.3)) + exp(-fu / 0.025) * light * 0.7;
+
+  float corner = length((q - vec2(0.0, 1.0)) * vec2(1.0, 1.25));
+  light *= mix(0.22, 1.0, smoothstep(0.25, 0.85, corner));
+  light *= mix(0.55, 1.0, smoothstep(0.1, 0.45, q.x));
+
+  vec3 deep = w0 * vec3(0.20, 0.10, 0.0) + w1 * vec3(0.20, 0.02, 0.17) + w2 * vec3(0.03, 0.06, 0.30);
+  vec3 mid3 = w0 * vec3(1.0, 0.62, 0.06) + w1 * vec3(0.92, 0.26, 0.74) + w2 * vec3(0.08, 0.38, 0.96);
+  vec3 hot  = w0 * vec3(1.0, 0.90, 0.56) + w1 * vec3(1.0, 0.77, 0.95) + w2 * vec3(0.82, 0.91, 1.0);
+  vec3 col = ramp(light, deep, mid3, hot);
+
+  col += (hash(dot(gl_FragCoord.xy, vec2(1.0, 113.0)) + fract(t)) - 0.5) / 255.0 * 2.0;
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
 function compile(gl: WebGLRenderingContext, type: number, src: string) {
   const s = gl.createShader(type)
   if (!s) return null
@@ -278,7 +450,9 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null
 }
 
-export function StageLight({ u, variant = 'glass' }: { u: number; variant?: 'glass' | 'network' }) {
+export type StageLightVariant = 'glass' | 'network' | 'infra'
+
+export function StageLight({ u, variant = 'glass' }: { u: number; variant?: StageLightVariant }) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const target = useRef(u)
   const wake = useRef<() => void>(() => {})
@@ -293,7 +467,7 @@ export function StageLight({ u, variant = 'glass' }: { u: number; variant?: 'gla
     const gl = el.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' })
     if (!gl) return
     const vs = compile(gl, gl.VERTEX_SHADER, VERT)
-    const fs = compile(gl, gl.FRAGMENT_SHADER, variant === 'network' ? NETWORK : FRAG)
+    const fs = compile(gl, gl.FRAGMENT_SHADER, variant === 'network' ? NETWORK : variant === 'infra' ? INFRA : FRAG)
     const prog = gl.createProgram()
     if (!vs || !fs || !prog) return
     gl.attachShader(prog, vs)

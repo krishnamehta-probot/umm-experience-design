@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { FlyArrow } from '../primitives'
 import { ChipHead, withAccent } from './ChipHead'
-import { StageLight } from './StageLight'
+import { StageLight, type StageLightVariant } from './StageLight'
 import { usePinProgress } from '@/lib/usePinProgress'
 import { useMagneticStops } from '@/lib/useMagneticStops'
 import { screenPx } from '@/lib/lane'
@@ -81,7 +81,7 @@ export function StagesV2({
 }: {
   content?: StagesContent
   /** the picture behind the flow: CX's fluted light, or the AI page's network */
-  light?: 'glass' | 'network'
+  light?: StageLightVariant
 }) {
   const items = stages.items
   const { ref, progress } = usePinProgress<HTMLElement>()
