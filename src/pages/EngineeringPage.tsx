@@ -9,7 +9,10 @@ import { ProcessClose } from '@/components/v2/ProcessClose'
 import { ToTop } from '@/components/v2/ToTop'
 import { Engagement } from '@/components/ai/Engagement'
 import { EngFilm } from '@/components/eng/EngFilm'
-import { ReleaseFlow } from '@/components/eng/ReleaseFlow'
+import { EngineeringFactory } from '@/components/eng/EngineeringFactory'
+import { ENG_INDUSTRY_ART } from '@/components/eng/art'
+import { ENG_FLAVOUR, FLAVOUR_CLASSES, STAGE_LIGHT } from '@/components/eng/flavour'
+import { Industries } from '@/components/v2/Industries'
 import { ScrollTrigger } from '@/lib/gsap'
 import '@/styles/v2-phone.css'
 import '@/styles/v2-scroll.css'
@@ -24,6 +27,7 @@ import {
   engagement,
   faq,
   hero,
+  industries,
   meta,
   nav,
   process,
@@ -38,8 +42,12 @@ import {
  * Digital Engineering — the fourth service page on the CX page's locked
  * design, built as the Cloud & Data page is: every CX section fed this page's
  * copy (src/content/engineering.ts), the film on QCare, Mohawk PriceFx and
- * Penny, and one new section, the release example (ReleaseFlow), on the same
- * board as Cloud's architecture example. Its glass object is a gear; the
+ * Penny. Its own sections: the industries under the services and, since the
+ * doc's 16 Oct version, the engineering factory (EngineeringFactory), the
+ * page's story, in place of the release example.
+ *
+ * 16 Oct: the engineering flavour (components/eng/flavour.tsx), a trial
+ * behind ENG_FLAVOUR. Its glass object is a gear; the
  * strip and section 2's light are blossom.
  */
 /** This page's own Lottie scenes (scripts/build_eng_service_marks.py), keyed
@@ -57,13 +65,14 @@ export function EngineeringPage() {
   useEffect(() => {
     document.title = meta.title
     document.documentElement.classList.add('cx-v2', 'eng-page')
+    if (ENG_FLAVOUR) document.documentElement.classList.add(...FLAVOUR_CLASSES)
     /* as on the CX page: measure the pins again once fonts and images land */
     const refresh = () => ScrollTrigger.refresh()
     document.fonts?.ready.then(refresh)
     window.addEventListener('load', refresh)
     return () => {
       window.removeEventListener('load', refresh)
-      document.documentElement.classList.remove('cx-v2', 'eng-page')
+      document.documentElement.classList.remove('cx-v2', 'eng-page', ...FLAVOUR_CLASSES)
     }
   }, [])
 
@@ -80,8 +89,9 @@ export function EngineeringPage() {
         </div>
         <EngFilm />
         <ServicesV2 content={services} marks={MARKS} still={0} />
-        <StagesV2 content={stages} light="glass" />
-        <ReleaseFlow />
+        <Industries content={industries} art={ENG_INDUSTRY_ART} tone="sun" />
+        <StagesV2 content={stages} light={STAGE_LIGHT} />
+        <EngineeringFactory />
         <ToolsStack content={tools} />
         <ProcessClose process={process} closing={closing} faq={faq}>
           <Engagement content={engagement} />

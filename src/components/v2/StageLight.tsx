@@ -35,6 +35,18 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
    variant="infra" (the Cloud & Data page, 16 Oct): infrastructure that
    grows with the company. Startups: one server rack. Scale-ups: a cluster
    wired to a hub. Enterprises: three cloud regions passing data.
+
+   variant="build" (Digital Engineering): the code base growing. Startups:
+   one branch of commits. Scale-ups: branches merging back. Enterprises: a
+   mesh of services around a core.
+
+   variant="rise" (Integrated Growth): growth taking shape. Startups: a
+   first sparkline. Scale-ups: bars climbing under a trend line. Enterprises:
+   channels orbiting one growth core.
+
+   variant="shop" (UX & Digital Commerce): the store growing. Startups:
+   one storefront. Scale-ups: web, tablet and phone. Enterprises: brand
+   stores and marketplaces round one commerce core.
    ========================================================================== */
 
 const VERT = `
@@ -442,6 +454,432 @@ void main() {
 }
 `
 
+/* The Digital Engineering page's picture: the code base growing with the
+   company, behind the same reeded glass. Startups: one branch, its commits
+   lit in turn up to the head. Scale-ups: feature branches leaving the main
+   line and merging back, work running along them. Enterprises: a mesh of
+   services around a core, requests passing between them. */
+const BUILD = `
+precision highp float;
+uniform vec2 res;
+uniform float t;
+uniform float u;
+
+float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+
+vec3 ramp(float l, vec3 deep, vec3 mid, vec3 hot) {
+  vec3 ink = vec3(16.0, 14.0, 20.0) / 255.0;
+  vec3 c = mix(ink, deep, smoothstep(0.0, 0.16, l));
+  c = mix(c, mid, smoothstep(0.12, 0.62, l));
+  c = mix(c, hot, smoothstep(0.55, 1.02, l));
+  return mix(c, vec3(1.0), smoothstep(1.0, 1.5, l) * 0.6);
+}
+
+float sdBox(vec2 p, vec2 b, float r) {
+  vec2 q = abs(p) - b + r;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+float hair(float d, float w) { return exp(-pow(d / w, 2.0)); }
+float seg(vec2 p, vec2 A, vec2 B) {
+  vec2 ab = B - A;
+  float s = clamp(dot(p - A, ab) / dot(ab, ab), 0.0, 1.0);
+  return length(p - A - ab * s);
+}
+// a commit: a lit ring, its core filling when lit
+float commit(vec2 p, vec2 c, float r, float lit) {
+  float d = length(p - c);
+  return 0.95 * hair(d - r, 0.0032) + smoothstep(r, r - 0.004, d) * (0.16 + 0.95 * lit)
+       + lit * 0.4 * exp(-max(d - r, 0.0) / (r * 2.5));
+}
+float packet(vec2 p, vec2 A, vec2 B, float ph, float r) {
+  float d = length(p - mix(A, B, ph));
+  return exp(-pow(d / r, 2.0)) + 0.3 * exp(-d / (r * 3.0));
+}
+
+void main() {
+  vec2 q = gl_FragCoord.xy / res;
+  float a = res.x / res.y;
+  float N = 15.0;
+  float gx = pow(q.x, 0.8) * N;
+  float id = floor(gx);
+  float fu = fract(gx);
+  vec2 p = vec2(q.x * a, q.y);
+  float S = clamp(a / 1.7, 0.42, 1.0);
+
+  float w0 = clamp(1.0 - abs(u - 0.0), 0.0, 1.0);
+  float w1 = clamp(1.0 - abs(u - 1.0), 0.0, 1.0);
+  float w2 = clamp(1.0 - abs(u - 2.0), 0.0, 1.0);
+  float light = 0.0;
+  float r = 0.022 * S;
+
+  // 1 · Startups: one branch, commits lighting in turn up to the head
+  if (w0 > 0.001) {
+    float s1 = 0.0;
+    float y = 0.42;
+    vec2 A = vec2(0.52 * a, y);
+    vec2 B = vec2(0.92 * a, y);
+    s1 += 0.35 * hair(seg(p, A, B), 0.0028);
+    float head = mod(floor(t * 0.9), 6.0);
+    for (int i = 0; i < 5; i++) {
+      float fi = float(i);
+      vec2 c = vec2((0.56 + fi * 0.085) * a, y);
+      float lit = fi == 4.0 ? 0.7 + 0.3 * sin(t * 2.4) : step(fi, head - 1.0) * 0.6;
+      s1 += commit(p, c, r * (fi == 4.0 ? 1.35 : 1.0), lit);
+    }
+    s1 += 0.2 * exp(-length(p - vec2(0.9 * a, y)) / (0.22 * S));
+    light += w0 * s1;
+  }
+
+  // 2 · Scale-ups: branches leave the main line and merge back
+  if (w1 > 0.001) {
+    float s2 = 0.0;
+    float y0 = 0.3;
+    float yA = 0.52;
+    float yB = 0.72;
+    vec2 M0 = vec2(0.5 * a, y0);
+    vec2 M1 = vec2(0.94 * a, y0);
+    s2 += 0.4 * hair(seg(p, M0, M1), 0.0028);
+    // branch A: out at .58, back at .8
+    vec2 a0 = vec2(0.58 * a, y0), a1 = vec2(0.63 * a, yA), a2 = vec2(0.75 * a, yA), a3 = vec2(0.8 * a, y0);
+    // branch B: out at .66, back at .9
+    vec2 b0 = vec2(0.66 * a, yA), b1 = vec2(0.71 * a, yB), b2 = vec2(0.85 * a, yB), b3 = vec2(0.9 * a, y0);
+    s2 += 0.35 * (hair(seg(p, a0, a1), 0.0028) + hair(seg(p, a1, a2), 0.0028) + hair(seg(p, a2, a3), 0.0028));
+    s2 += 0.35 * (hair(seg(p, b0, b1), 0.0028) + hair(seg(p, b1, b2), 0.0028) + hair(seg(p, b2, b3), 0.0028));
+    s2 += commit(p, M0 + vec2(0.03 * a, 0.0), r, 0.3) + commit(p, a0, r, 0.3) + commit(p, a3, r * 1.2, 0.8);
+    s2 += commit(p, b3, r * 1.2, 0.6 + 0.4 * sin(t * 2.0)) + commit(p, vec2(0.7 * a, y0), r, 0.2);
+    s2 += commit(p, a1 + vec2(0.04 * a, 0.0), r, 0.4) + commit(p, a2, r, 0.5);
+    s2 += commit(p, b1 + vec2(0.05 * a, 0.0), r, 0.4) + commit(p, b2, r, 0.5);
+    s2 += 0.9 * packet(p, a1, a2, fract(t * 0.35), 0.007) + 0.9 * packet(p, b1, b2, fract(t * 0.28 + 0.4), 0.007);
+    s2 += 0.8 * packet(p, M0, M1, fract(t * 0.18), 0.007);
+    s2 += 0.2 * exp(-length(p - vec2(0.72 * a, 0.5)) / (0.35 * S));
+    light += w1 * s2;
+  }
+
+  // 3 · Enterprises: a mesh of services around a core
+  if (w2 > 0.001) {
+    float s3 = 0.0;
+    vec2 C = vec2(0.72 * a, 0.48);
+    float R = 0.26 * S;
+    s3 += 0.95 * hair(sdBox(p - C, vec2(0.045 * S), 0.012), 0.0034) + 0.25 * smoothstep(0.004, -0.004, sdBox(p - C, vec2(0.045 * S), 0.012));
+    for (int i = 0; i < 6; i++) {
+      float ang = float(i) / 6.0 * 6.2832 + 0.52;
+      vec2 c = C + vec2(cos(ang) * R * 1.15, sin(ang) * R);
+      float ang2 = float(i + 1) / 6.0 * 6.2832 + 0.52;
+      vec2 c2 = C + vec2(cos(ang2) * R * 1.15, sin(ang2) * R);
+      float db = sdBox(p - c, vec2(0.03 * S), 0.009);
+      s3 += 0.9 * hair(db, 0.0032) + (0.15 + 0.5 * step(0.5, fract(t * 0.5 + hash(float(i))))) * smoothstep(0.004, -0.004, db);
+      vec2 dir = normalize(c - C);
+      s3 += 0.3 * hair(seg(p, C + dir * 0.06 * S, c - dir * 0.045 * S), 0.0026);
+      s3 += 0.18 * hair(seg(p, c, c2), 0.0024);
+      s3 += 0.9 * packet(p, C + dir * 0.06 * S, c - dir * 0.045 * S, fract(t * 0.4 + float(i) * 0.17), 0.006);
+    }
+    s3 += 0.22 * exp(-length(p - C) / (0.4 * S));
+    light += w2 * s3;
+  }
+
+  light += 0.04 + 0.04 * q.x;
+  float tint = 0.92 + 0.16 * hash(id + 3.0);
+  light *= tint;
+  light = light * (1.0 - 0.28 * exp(-(1.0 - fu) / 0.3)) + exp(-fu / 0.025) * light * 0.7;
+  float corner = length((q - vec2(0.0, 1.0)) * vec2(1.0, 1.25));
+  light *= mix(0.22, 1.0, smoothstep(0.25, 0.85, corner));
+  light *= mix(0.55, 1.0, smoothstep(0.1, 0.45, q.x));
+
+  vec3 deep = w0 * vec3(0.20, 0.10, 0.0) + w1 * vec3(0.20, 0.02, 0.17) + w2 * vec3(0.03, 0.06, 0.30);
+  vec3 mid3 = w0 * vec3(1.0, 0.62, 0.06) + w1 * vec3(0.92, 0.26, 0.74) + w2 * vec3(0.08, 0.38, 0.96);
+  vec3 hot  = w0 * vec3(1.0, 0.90, 0.56) + w1 * vec3(1.0, 0.77, 0.95) + w2 * vec3(0.82, 0.91, 1.0);
+  vec3 col = ramp(light, deep, mid3, hot);
+  col += (hash(dot(gl_FragCoord.xy, vec2(1.0, 113.0)) + fract(t)) - 0.5) / 255.0 * 2.0;
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
+/* The Integrated Growth page's picture: growth taking shape, behind the
+   same reeded glass. Startups: a first sparkline, rising, a point running
+   along it. Scale-ups: bars climbing under a trend line. Enterprises:
+   channels orbiting one growth core, each passing signal into it. */
+const RISE = `
+precision highp float;
+uniform vec2 res;
+uniform float t;
+uniform float u;
+
+float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+
+vec3 ramp(float l, vec3 deep, vec3 mid, vec3 hot) {
+  vec3 ink = vec3(16.0, 14.0, 20.0) / 255.0;
+  vec3 c = mix(ink, deep, smoothstep(0.0, 0.16, l));
+  c = mix(c, mid, smoothstep(0.12, 0.62, l));
+  c = mix(c, hot, smoothstep(0.55, 1.02, l));
+  return mix(c, vec3(1.0), smoothstep(1.0, 1.5, l) * 0.6);
+}
+
+float sdBox(vec2 p, vec2 b, float r) {
+  vec2 q = abs(p) - b + r;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+float hair(float d, float w) { return exp(-pow(d / w, 2.0)); }
+float seg(vec2 p, vec2 A, vec2 B) {
+  vec2 ab = B - A;
+  float s = clamp(dot(p - A, ab) / dot(ab, ab), 0.0, 1.0);
+  return length(p - A - ab * s);
+}
+float dot_(vec2 p, vec2 c, float r, float lit) {
+  float d = length(p - c);
+  return 0.9 * hair(d - r, 0.003) + smoothstep(r, r - 0.004, d) * (0.2 + 0.9 * lit) + lit * 0.35 * exp(-max(d - r, 0.0) / (r * 2.5));
+}
+// the sparkline's height at x (0..1 along it)
+float spark(float x) { return 0.24 + 0.32 * x + 0.05 * sin(x * 11.0) * (1.0 - x * 0.6); }
+
+void main() {
+  vec2 q = gl_FragCoord.xy / res;
+  float a = res.x / res.y;
+  float N = 15.0;
+  float gx = pow(q.x, 0.8) * N;
+  float id = floor(gx);
+  float fu = fract(gx);
+  vec2 p = vec2(q.x * a, q.y);
+  float S = clamp(a / 1.7, 0.42, 1.0);
+
+  float w0 = clamp(1.0 - abs(u - 0.0), 0.0, 1.0);
+  float w1 = clamp(1.0 - abs(u - 1.0), 0.0, 1.0);
+  float w2 = clamp(1.0 - abs(u - 2.0), 0.0, 1.0);
+  float light = 0.0;
+
+  // 1 · Startups: a first sparkline, rising
+  if (w0 > 0.001) {
+    float s1 = 0.0;
+    float x0 = 0.54;
+    float x1 = 0.92;
+    for (int i = 0; i < 6; i++) {
+      float fa = float(i) / 6.0;
+      float fb = float(i + 1) / 6.0;
+      vec2 A = vec2(mix(x0, x1, fa) * a, spark(fa));
+      vec2 B = vec2(mix(x0, x1, fb) * a, spark(fb));
+      s1 += 0.7 * hair(seg(p, A, B), 0.003);
+      s1 += dot_(p, B, 0.012 * S, fb > 0.99 ? 0.8 + 0.2 * sin(t * 2.4) : 0.15);
+    }
+    float ph = fract(t * 0.16);
+    vec2 run = vec2(mix(x0, x1, ph) * a, spark(ph));
+    s1 += 1.0 * exp(-pow(length(p - run) / 0.009, 2.0)) + 0.4 * exp(-length(p - run) / 0.03);
+    // the area under it, faintly
+    float under = step(p.y, spark(clamp((p.x / a - x0) / (x1 - x0), 0.0, 1.0))) * step(x0 * a, p.x) * step(p.x, x1 * a) * step(0.16, p.y);
+    s1 += 0.1 * under;
+    light += w0 * s1;
+  }
+
+  // 2 · Scale-ups: bars climbing under a trend line
+  if (w1 > 0.001) {
+    float s2 = 0.0;
+    float base = 0.18;
+    for (int i = 0; i < 6; i++) {
+      float fi = float(i);
+      float h = 0.12 + fi * 0.09 + 0.02 * sin(t * 0.8 + fi);
+      vec2 c = vec2((0.55 + fi * 0.07) * a, base + h * 0.5);
+      vec2 hb = vec2(0.022 * S, h * 0.5);
+      float d = sdBox(p - c, hb, 0.006);
+      s2 += 0.8 * hair(d, 0.003) + smoothstep(0.004, -0.004, d) * (0.14 + 0.16 * fi / 5.0);
+      if (i < 5) {
+        float h2 = 0.12 + (fi + 1.0) * 0.09 + 0.02 * sin(t * 0.8 + fi + 1.0);
+        vec2 A = vec2(c.x, base + h + 0.05);
+        vec2 B = vec2((0.55 + (fi + 1.0) * 0.07) * a, base + h2 + 0.05);
+        s2 += 0.75 * hair(seg(p, A, B), 0.003);
+      }
+      s2 += dot_(p, vec2(c.x, base + h + 0.05), 0.009 * S, i == 5 ? 0.8 : 0.2);
+    }
+    s2 += 0.35 * hair(abs(p.y - base), 0.0025) * step(0.52 * a, p.x) * step(p.x, 0.94 * a);
+    light += w1 * s2;
+  }
+
+  // 3 · Enterprises: channels orbiting one growth core
+  if (w2 > 0.001) {
+    float s3 = 0.0;
+    vec2 C = vec2(0.73 * a, 0.48);
+    s3 += dot_(p, C, 0.04 * S, 0.7 + 0.3 * sin(t * 1.6));
+    for (int k = 0; k < 3; k++) {
+      float fk = float(k);
+      float rx = (0.12 + fk * 0.075) * S * 1.25;
+      float ry = (0.1 + fk * 0.07) * S;
+      vec2 d = (p - C) / vec2(rx, ry);
+      float ring = abs(length(d) - 1.0) * min(rx, ry);
+      s3 += 0.32 * hair(ring, 0.0028);
+      for (int j = 0; j < 2; j++) {
+        float ang = t * (0.25 - fk * 0.05) + fk * 2.1 + float(j) * 3.14159;
+        vec2 o = C + vec2(cos(ang) * rx, sin(ang) * ry);
+        s3 += dot_(p, o, 0.013 * S, 0.5);
+        // its signal, running in to the core
+        float ph = fract(t * 0.35 + fk * 0.27 + float(j) * 0.5);
+        vec2 pk = mix(o, C, ph);
+        s3 += 0.7 * exp(-pow(length(p - pk) / 0.006, 2.0));
+      }
+    }
+    s3 += 0.22 * exp(-length(p - C) / (0.3 * S));
+    light += w2 * s3;
+  }
+
+  light += 0.04 + 0.04 * q.x;
+  float tint = 0.92 + 0.16 * hash(id + 3.0);
+  light *= tint;
+  light = light * (1.0 - 0.28 * exp(-(1.0 - fu) / 0.3)) + exp(-fu / 0.025) * light * 0.7;
+  float corner = length((q - vec2(0.0, 1.0)) * vec2(1.0, 1.25));
+  light *= mix(0.22, 1.0, smoothstep(0.25, 0.85, corner));
+  light *= mix(0.55, 1.0, smoothstep(0.1, 0.45, q.x));
+
+  vec3 deep = w0 * vec3(0.20, 0.10, 0.0) + w1 * vec3(0.20, 0.02, 0.17) + w2 * vec3(0.03, 0.06, 0.30);
+  vec3 mid3 = w0 * vec3(1.0, 0.62, 0.06) + w1 * vec3(0.92, 0.26, 0.74) + w2 * vec3(0.08, 0.38, 0.96);
+  vec3 hot  = w0 * vec3(1.0, 0.90, 0.56) + w1 * vec3(1.0, 0.77, 0.95) + w2 * vec3(0.82, 0.91, 1.0);
+  vec3 col = ramp(light, deep, mid3, hot);
+  col += (hash(dot(gl_FragCoord.xy, vec2(1.0, 113.0)) + fract(t)) - 0.5) / 255.0 * 2.0;
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
+/* The UX & Digital Commerce page's picture: the store growing with the
+   company, behind the same reeded glass. Startups: one storefront, its
+   products lighting as a cursor browses. Scale-ups: the same store on web,
+   tablet and phone, orders running between them. Enterprises: brand
+   stores and marketplaces round one commerce core, orders flowing in. */
+const SHOP = `
+precision highp float;
+uniform vec2 res;
+uniform float t;
+uniform float u;
+
+float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+
+vec3 ramp(float l, vec3 deep, vec3 mid, vec3 hot) {
+  vec3 ink = vec3(16.0, 14.0, 20.0) / 255.0;
+  vec3 c = mix(ink, deep, smoothstep(0.0, 0.16, l));
+  c = mix(c, mid, smoothstep(0.12, 0.62, l));
+  c = mix(c, hot, smoothstep(0.55, 1.02, l));
+  return mix(c, vec3(1.0), smoothstep(1.0, 1.5, l) * 0.6);
+}
+
+float sdBox(vec2 p, vec2 b, float r) {
+  vec2 q = abs(p) - b + r;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+float hair(float d, float w) { return exp(-pow(d / w, 2.0)); }
+float seg(vec2 p, vec2 A, vec2 B) {
+  vec2 ab = B - A;
+  float s = clamp(dot(p - A, ab) / dot(ab, ab), 0.0, 1.0);
+  return length(p - A - ab * s);
+}
+float packet(vec2 p, vec2 A, vec2 B, float ph, float r) {
+  float d = length(p - mix(A, B, ph));
+  return exp(-pow(d / r, 2.0)) + 0.3 * exp(-d / (r * 3.0));
+}
+
+// a screen: a lit frame, its top bar, and a grid of product tiles, the
+// tile "hot" (0..cols*rows-1) lit
+float screen(vec2 p, vec2 c, vec2 h, float cols, float rows, float hot, float seed) {
+  vec2 d = p - c;
+  float b = sdBox(d, h, 0.16 * min(h.x, h.y));
+  float l = 0.95 * hair(b, 0.0034) + 0.08 * smoothstep(0.004, -0.004, b);
+  float bar = h.y * 0.82;
+  l += 0.45 * hair(abs(d.y - bar), 0.0022) * step(abs(d.x), h.x * 0.94);
+  // the tiles
+  vec2 area = vec2(h.x * 0.86, h.y * 0.62);
+  vec2 org = c + vec2(-area.x, -h.y * 0.88);
+  vec2 cell = vec2(2.0 * area.x / cols, 2.0 * h.y * 0.76 / rows);
+  vec2 g = (p - org) / cell;
+  vec2 id = floor(g);
+  if (id.x >= 0.0 && id.x < cols && id.y >= 0.0 && id.y < rows) {
+    vec2 f = fract(g) - 0.5;
+    float tb = sdBox(f * cell, cell * 0.36, cell.y * 0.08);
+    float k = id.x + (rows - 1.0 - id.y) * cols;
+    float on = 1.0 - step(0.5, abs(k - hot));
+    l += 0.6 * hair(tb, 0.003) + smoothstep(0.003, -0.003, tb) * (0.1 + 0.85 * on);
+  }
+  return l;
+}
+
+void main() {
+  vec2 q = gl_FragCoord.xy / res;
+  float a = res.x / res.y;
+  float N = 15.0;
+  float gx = pow(q.x, 0.8) * N;
+  float id = floor(gx);
+  float fu = fract(gx);
+  vec2 p = vec2(q.x * a, q.y);
+  float S = clamp(a / 1.7, 0.42, 1.0);
+
+  float w0 = clamp(1.0 - abs(u - 0.0), 0.0, 1.0);
+  float w1 = clamp(1.0 - abs(u - 1.0), 0.0, 1.0);
+  float w2 = clamp(1.0 - abs(u - 2.0), 0.0, 1.0);
+  float light = 0.0;
+
+  // 1 · Startups: one storefront, a cursor browsing it
+  if (w0 > 0.001) {
+    vec2 c = vec2(0.73 * a, 0.44);
+    vec2 h = vec2(0.17, 0.17) * S;
+    float lit = mod(floor(t * 0.8), 6.0);
+    float s1 = screen(p, c, h, 3.0, 2.0, lit, 1.0);
+    // the cursor, gliding to the lit tile
+    float tc = mod(lit, 3.0);
+    float tr = floor(lit / 3.0);
+    vec2 target = c + vec2((-0.86 + (tc + 0.5) * 0.573) * h.x, (-0.88 + (1.0 - tr + 0.5) * 0.76) * h.y);
+    float dc = length(p - target - vec2(0.012, -0.014) * S);
+    s1 += 0.9 * exp(-pow(dc / (0.008 * S), 2.0));
+    s1 += 0.22 * exp(-length((p - c) * vec2(0.8, 1.0)) / (0.3 * S));
+    light += w0 * s1;
+  }
+
+  // 2 · Scale-ups: one store on web, tablet and phone
+  if (w1 > 0.001) {
+    float s2 = 0.0;
+    vec2 cw = vec2(0.66 * a, 0.5);
+    vec2 ct = vec2(0.84 * a, 0.36);
+    vec2 cp = vec2(0.93 * a, 0.62);
+    s2 += screen(p, cw, vec2(0.15, 0.13) * S, 3.0, 2.0, mod(floor(t * 0.7), 6.0), 2.0);
+    s2 += screen(p, ct, vec2(0.065, 0.085) * S, 2.0, 2.0, mod(floor(t * 0.7 + 1.0), 4.0), 3.0);
+    s2 += screen(p, cp, vec2(0.035, 0.07) * S, 1.0, 2.0, mod(floor(t * 0.7 + 2.0), 2.0), 4.0);
+    s2 += 0.25 * hair(seg(p, cw + vec2(0.15 * S, -0.04), ct - vec2(0.065 * S, 0.0)), 0.0025);
+    s2 += 0.25 * hair(seg(p, ct + vec2(0.0, 0.085 * S), cp - vec2(0.0, 0.07 * S)), 0.0025);
+    s2 += 0.9 * packet(p, cw + vec2(0.15 * S, -0.04), ct - vec2(0.065 * S, 0.0), fract(t * 0.4), 0.007);
+    s2 += 0.9 * packet(p, ct + vec2(0.0, 0.085 * S), cp - vec2(0.0, 0.07 * S), fract(t * 0.4 + 0.5), 0.007);
+    s2 += 0.2 * exp(-length(p - vec2(0.76 * a, 0.5)) / (0.35 * S));
+    light += w1 * s2;
+  }
+
+  // 3 · Enterprises: brand stores and marketplaces round one core
+  if (w2 > 0.001) {
+    float s3 = 0.0;
+    vec2 C = vec2(0.74 * a, 0.48);
+    float dcore = length(p - C) - 0.04 * S;
+    s3 += 0.95 * hair(dcore, 0.0035) + smoothstep(0.004, -0.004, dcore) * (0.5 + 0.3 * sin(t * 2.0));
+    for (int i = 0; i < 6; i++) {
+      float ang = float(i) / 6.0 * 6.2832 + 0.26;
+      vec2 c = C + vec2(cos(ang) * 0.27 * S * 1.2, sin(ang) * 0.27 * S);
+      vec2 h = vec2(0.052, 0.042) * S;
+      s3 += 0.85 * screen(p, c, h, 2.0, 1.0, mod(floor(t * 0.6 + float(i)), 2.0), 10.0 + float(i));
+      vec2 dir = normalize(C - c);
+      vec2 A = c + dir * 0.06 * S;
+      vec2 B = C - dir * 0.05 * S;
+      s3 += 0.22 * hair(seg(p, A, B), 0.0024);
+      s3 += 0.9 * packet(p, A, B, fract(t * 0.35 + float(i) * 0.17), 0.006);
+    }
+    s3 += 0.22 * exp(-length(p - C) / (0.4 * S));
+    light += w2 * s3;
+  }
+
+  light += 0.04 + 0.04 * q.x;
+  float tint = 0.92 + 0.16 * hash(id + 3.0);
+  light *= tint;
+  light = light * (1.0 - 0.28 * exp(-(1.0 - fu) / 0.3)) + exp(-fu / 0.025) * light * 0.7;
+  float corner = length((q - vec2(0.0, 1.0)) * vec2(1.0, 1.25));
+  light *= mix(0.22, 1.0, smoothstep(0.25, 0.85, corner));
+  light *= mix(0.55, 1.0, smoothstep(0.1, 0.45, q.x));
+
+  vec3 deep = w0 * vec3(0.20, 0.10, 0.0) + w1 * vec3(0.20, 0.02, 0.17) + w2 * vec3(0.03, 0.06, 0.30);
+  vec3 mid3 = w0 * vec3(1.0, 0.62, 0.06) + w1 * vec3(0.92, 0.26, 0.74) + w2 * vec3(0.08, 0.38, 0.96);
+  vec3 hot  = w0 * vec3(1.0, 0.90, 0.56) + w1 * vec3(1.0, 0.77, 0.95) + w2 * vec3(0.82, 0.91, 1.0);
+  vec3 col = ramp(light, deep, mid3, hot);
+  col += (hash(dot(gl_FragCoord.xy, vec2(1.0, 113.0)) + fract(t)) - 0.5) / 255.0 * 2.0;
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
 function compile(gl: WebGLRenderingContext, type: number, src: string) {
   const s = gl.createShader(type)
   if (!s) return null
@@ -450,7 +888,7 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null
 }
 
-export type StageLightVariant = 'glass' | 'network' | 'infra'
+export type StageLightVariant = 'glass' | 'network' | 'infra' | 'build' | 'rise' | 'shop'
 
 export function StageLight({ u, variant = 'glass' }: { u: number; variant?: StageLightVariant }) {
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -467,7 +905,7 @@ export function StageLight({ u, variant = 'glass' }: { u: number; variant?: Stag
     const gl = el.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' })
     if (!gl) return
     const vs = compile(gl, gl.VERTEX_SHADER, VERT)
-    const fs = compile(gl, gl.FRAGMENT_SHADER, variant === 'network' ? NETWORK : variant === 'infra' ? INFRA : FRAG)
+    const fs = compile(gl, gl.FRAGMENT_SHADER, variant === 'network' ? NETWORK : variant === 'infra' ? INFRA : variant === 'build' ? BUILD : variant === 'rise' ? RISE : variant === 'shop' ? SHOP : FRAG)
     const prog = gl.createProgram()
     if (!vs || !fs || !prog) return
     gl.attachShader(prog, vs)

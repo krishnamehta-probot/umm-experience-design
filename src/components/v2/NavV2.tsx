@@ -23,6 +23,7 @@ const PAGES = [
   { href: '/cloud-data', label: 'Cloud & Data' },
   { href: '/digital-engineering', label: 'Digital Engineering' },
   { href: '/integrated-growth', label: 'Integrated Growth & Strategy' },
+  { href: '/ux-digital-commerce', label: 'UX & Digital Commerce' },
 ]
 
 export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {

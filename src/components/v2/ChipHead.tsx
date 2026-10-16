@@ -120,7 +120,7 @@ export function ChipHead({
   lineRecipe?: number
   /** ScrollTrigger start for the reveal. */
   start?: string
-  as?: 'h2' | 'h1'
+  as?: 'h2' | 'h1' | 'h3'
   id?: string
   className?: string
 }) {

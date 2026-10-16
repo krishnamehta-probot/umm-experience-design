@@ -1,0 +1,477 @@
+/* ============================================================================
+   INTEGRATED GROWTH · GENSIFY AND SEARCH, ADS & AI DISCOVERY (GrowthExtras)
+   ----------------------------------------------------------------------------
+   Prefix gx-. Gensify: one wide card in citrus fading to lilac, its
+   production line lit step by step. Discovery: four cards, each opening on
+   a small picture of its place on the page (drawn in CSS). Tokens only.
+   ========================================================================== */
+
+/* --- Gensify ---------------------------------------------------------------- */
+
+.gx-gen {
+  padding-top: 0;
+  background: var(--umm-paper);
+}
+
+.gx-gen__card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(1.4rem, 3vw, 2.5rem);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--umm-citrus) 34%, var(--umm-paper)),
+    color-mix(in srgb, var(--umm-lilac) 55%, var(--umm-paper))
+  );
+  color: var(--umm-ink);
+}
+
+@media (min-width: 900px) {
+  .gx-gen__card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.gx-gen__main,
+.gx-gen__side {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.gx-gen__step,
+.gx-gen__label {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.gx-gen__title {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.25rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.gx-gen__body {
+  margin: 0;
+  max-width: 48ch;
+  line-height: 1.55;
+}
+
+.gx-gen__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gx-gen__tags li {
+  padding: 5px 11px;
+  border: 1px solid rgb(16 14 20 / 0.2);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+}
+
+/* the production line: the brief lights each step in turn */
+.gx-gen__flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gx-gen__flow li {
+  padding: 9px 14px;
+  border: 1px solid rgb(16 14 20 / 0.28);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.5);
+  font-size: 0.875rem;
+  animation: gx-light calc(var(--n) * 0.9s) calc(var(--i) * 0.9s) linear infinite;
+}
+
+@keyframes gx-light {
+  0%,
+  18%,
+  100% {
+    background: rgb(255 255 255 / 0.5);
+    color: var(--umm-ink);
+  }
+  3%,
+  14% {
+    background: var(--umm-ink);
+    color: var(--umm-paper);
+  }
+}
+
+.gx-gen__note {
+  margin: 0;
+  max-width: 44ch;
+  line-height: 1.55;
+}
+
+.gx-gen__more {
+  border-top: 1px solid rgb(16 14 20 / 0.15);
+  padding-top: 12px;
+}
+
+.gx-gen__more summary {
+  font-weight: var(--umm-weight-medium);
+  cursor: pointer;
+}
+
+.gx-gen__more ul {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding-left: 1.1rem;
+}
+
+.gx-gen__scope {
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  color: var(--umm-ink-soft);
+}
+
+.gx-gen__cta,
+.gx-disc__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+
+.gx-gen__cta {
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+  text-decoration: none;
+}
+
+.gx-gen__cta svg,
+.gx-disc__cta svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- Search, ads & AI discovery -------------------------------------------- */
+
+.gx-disc {
+  background: var(--umm-paper);
+}
+
+.gx-disc__head .cx-lead {
+  max-width: 52ch;
+}
+
+.gx-disc__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 800px) {
+  .gx-disc__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.gx-disc__card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(1.25rem, 2.4vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--umm-tone) 70%, var(--umm-line));
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: color-mix(in srgb, var(--umm-tone) 26%, var(--umm-paper));
+}
+
+.gx-disc__label {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.gx-disc__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.gx-disc__body {
+  margin: 0;
+  color: var(--umm-ink-soft);
+  line-height: 1.55;
+}
+
+.gx-disc__points {
+  display: grid;
+  gap: 8px;
+  margin: 2px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.gx-disc__points li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.gx-disc__points li::before {
+  content: '';
+  position: absolute;
+  top: 0.55em;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.gx-disc__note {
+  max-width: 90ch;
+  margin: clamp(1rem, 2vw, 1.5rem) 0 0;
+  font-size: 0.875rem;
+  color: var(--umm-ink-soft);
+}
+
+/* --- the little places --------------------------------------------------------- */
+
+.gx-place {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgb(16 14 20 / 0.12);
+  border-radius: 16px;
+  background: var(--umm-paper);
+  box-shadow: 0 14px 30px -24px rgb(16 14 20 / 0.5);
+}
+
+.gx-place i,
+.gx-place b {
+  display: block;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--umm-veil);
+}
+
+.gx-place b {
+  width: 46%;
+  height: 9px;
+  background: var(--umm-ink);
+}
+
+.gx-place__bar {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border: 1.5px solid rgb(16 14 20 / 0.2);
+  border-radius: 999px;
+}
+
+.gx-place .gx-place__glass {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  background: none;
+}
+
+.gx-place__hit,
+.gx-place__row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+/* the result that is the brand: lit in the card's colour */
+.gx-place__hit {
+  position: relative;
+  background: color-mix(in srgb, var(--umm-tone) 55%, var(--umm-paper));
+  animation: gx-rise 3.2s var(--umm-ease-out) infinite;
+}
+
+.gx-place__hit i {
+  background: rgb(16 14 20 / 0.16);
+}
+
+.gx-place__hit i:last-child {
+  width: 70%;
+}
+
+.gx-place__row b {
+  width: 34%;
+  background: rgb(16 14 20 / 0.25);
+}
+
+/* a sponsored result's pill */
+.gx-place__hit em {
+  width: 28px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--umm-ink);
+}
+
+@keyframes gx-rise {
+  0%,
+  100% {
+    transform: none;
+  }
+  12% {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -10px rgb(16 14 20 / 0.5);
+  }
+  30% {
+    transform: none;
+  }
+}
+
+/* the answer box */
+.gx-place--aeo {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+
+.gx-place__q {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  font-family: var(--umm-font-display);
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-paper);
+}
+
+.gx-place__answer {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-left: 3px solid var(--umm-ink);
+  border-radius: 4px 12px 12px 4px;
+  background: color-mix(in srgb, var(--umm-tone) 55%, var(--umm-paper));
+}
+
+.gx-place__answer i {
+  background: rgb(16 14 20 / 0.16);
+}
+
+.gx-place__answer i:last-child {
+  width: 60%;
+}
+
+/* the AI answer, citing its source */
+.gx-place__ask {
+  justify-self: end;
+  width: 46%;
+  padding: 9px 12px;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--umm-veil);
+}
+
+.gx-place__reply {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: color-mix(in srgb, var(--umm-tone) 55%, var(--umm-paper));
+}
+
+.gx-place__spark {
+  width: 18px;
+  height: 18px;
+  background: var(--umm-ink);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: gx-turn 8s linear infinite;
+}
+
+@keyframes gx-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gx-place__lines {
+  display: grid;
+  gap: 6px;
+}
+
+.gx-place__lines i {
+  background: rgb(16 14 20 / 0.16);
+}
+
+.gx-place__lines i:last-child {
+  width: 55%;
+}
+
+.gx-place__cite {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--umm-ink);
+  font-size: 0.6875rem;
+  font-weight: var(--umm-weight-semibold);
+  color: var(--umm-paper);
+  animation: gx-cite 3.2s var(--umm-ease-out) infinite;
+}
+
+@keyframes gx-cite {
+  0%,
+  100% {
+    transform: none;
+  }
+  10% {
+    transform: scale(1.25);
+  }
+  22% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gx-gen__flow li,
+  .gx-place__hit,
+  .gx-place__spark,
+  .gx-place__cite {
+    animation: none;
+  }
+}

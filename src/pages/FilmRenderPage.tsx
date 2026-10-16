@@ -4,13 +4,15 @@ import { AiFilm } from '@/components/ai/AiFilm'
 import { CloudFilm } from '@/components/cloud/CloudFilm'
 import { EngFilm } from '@/components/eng/EngFilm'
 import { GrowthFilm } from '@/components/growth/GrowthFilm'
+import { UxFilm } from '@/components/ux/UxFilm'
 /* the upright frame's layout (data-tall) lives with the phone styles */
 import '@/styles/v2-phone.css'
 
 /**
  * A film alone on its frame, nothing else on the page: the CX page's (/film),
  * the AI page's (/film?film=ai), or the Cloud & Data, Digital Engineering
- * and Integrated Growth pages' (/film?film=cloud, eng, growth), wide 1920 x 1080 or, with &cut=tall, upright
+ * Integrated Growth and UX & Digital Commerce pages' (/film?film=cloud, eng,
+ * growth, ux), wide 1920 x 1080 or, with &cut=tall, upright
  * 1080 x 1920 for phones. scripts/render-film.mjs opens this, steps the
  * film's timeline frame by frame through window.__film, screenshots each
  * frame and encodes them to the MP4s the pages play. Not linked from
@@ -23,6 +25,7 @@ export function FilmRenderPage() {
   const cloud = which === 'cloud'
   const eng = which === 'eng'
   const growth = which === 'growth'
+  const ux = which === 'ux'
   const tall = q.get('cut') === 'tall'
 
   useEffect(() => {
@@ -37,5 +40,6 @@ export function FilmRenderPage() {
   if (cloud) return <CloudFilm mode="render" tall={tall} />
   if (eng) return <EngFilm mode="render" tall={tall} />
   if (growth) return <GrowthFilm mode="render" tall={tall} />
+  if (ux) return <UxFilm mode="render" tall={tall} />
   return <ProofFilm mode="render" tall={tall} />
 }

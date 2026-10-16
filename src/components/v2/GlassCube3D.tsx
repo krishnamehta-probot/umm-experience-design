@@ -244,12 +244,51 @@ function arrowGeometry() {
   return geometry
 }
 
+/** The UX & Digital Commerce page's object: a shopping bag, as a slab of
+ *  glass: a rounded body with its handle arching over the top, the handle's
+ *  opening cut through. */
+function bagGeometry() {
+  const W = 0.74
+  const TOP = 0.42
+  const BOT = -0.82
+  const R = 0.14
+  const H_OUT = 0.44
+  const H_IN = 0.28
+  const shape = new THREE.Shape()
+  shape.moveTo(-W + R, BOT)
+  shape.lineTo(W - R, BOT)
+  shape.quadraticCurveTo(W, BOT, W, BOT + R)
+  shape.lineTo(W, TOP - R)
+  shape.quadraticCurveTo(W, TOP, W - R, TOP)
+  shape.lineTo(H_OUT, TOP)
+  shape.absarc(0, TOP, H_OUT, 0, Math.PI, false)
+  shape.lineTo(-W + R, TOP)
+  shape.quadraticCurveTo(-W, TOP, -W, TOP - R)
+  shape.lineTo(-W, BOT + R)
+  shape.quadraticCurveTo(-W, BOT, -W + R, BOT)
+  const hole = new THREE.Path()
+  hole.moveTo(H_IN, TOP + 0.02)
+  hole.absarc(0, TOP + 0.02, H_IN, 0, Math.PI, false)
+  hole.lineTo(H_IN, TOP + 0.02)
+  shape.holes.push(hole)
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.42,
+    bevelEnabled: true,
+    bevelThickness: 0.18,
+    bevelSize: 0.08,
+    bevelSegments: 14,
+    curveSegments: 48,
+  })
+  geometry.center()
+  return geometry
+}
+
 export default function GlassCube3D({
   coveredBy,
   shape = 'cube',
 }: {
   coveredBy?: string
-  shape?: 'cube' | 'sparkle' | 'cloud' | 'gear' | 'arrow'
+  shape?: 'cube' | 'sparkle' | 'cloud' | 'gear' | 'arrow' | 'bag'
 }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -297,7 +336,9 @@ export default function GlassCube3D({
             ? gearGeometry()
             : shape === 'arrow'
               ? arrowGeometry()
-              : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
+              : shape === 'bag'
+                ? bagGeometry()
+                : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
       new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         metalness: 0,
@@ -318,6 +359,7 @@ export default function GlassCube3D({
     if (shape === 'cloud') cube.scale.setScalar(0.86)
     if (shape === 'gear') cube.scale.setScalar(0.9)
     if (shape === 'arrow') cube.scale.setScalar(0.88)
+    if (shape === 'bag') cube.scale.setScalar(0.92)
     scene.add(cube)
 
     const resize = () => {

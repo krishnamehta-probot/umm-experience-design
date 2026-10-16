@@ -5,7 +5,8 @@ import type { ServiceMark } from '@/content/cxUiDesign'
 /* ============================================================================
    DIGITAL ENGINEERING — PAGE CONTENT
 
-   Word for word from Krish's Digital Engineering content doc, 15 Oct 2026:
+   Word for word from Krish's Digital Engineering content doc (15 Oct 2026,
+   updated 16 Oct: the hero, the industries, the factory, the tools, FAQ 07):
    https://docs.google.com/document/d/1LwRv6AyBh1siHmtEDmb9kMCLxKWzP37m5QsauWcftO0
    Visual reference: https://umm-digital-engineering.ai-umm.chatgpt.site
 
@@ -25,7 +26,7 @@ export const nav = [
   { id: 'work', label: 'Work' },
   { id: 'services', label: 'Services' },
   { id: 'stages', label: 'Your stage' },
-  { id: 'release', label: 'How we release' },
+  { id: 'factory', label: 'Our factory' },
   { id: 'process', label: 'Our process' },
 ]
 
@@ -33,12 +34,13 @@ export const nav = [
 
 export const hero = {
   eyebrow: 'Digital Engineering',
-  lines: ['Build what’s next.', 'Make it work.'],
-  accent: 'Keep it moving.',
+  lines: ['Expert engineers.', 'AI agents.'],
+  accent: 'One delivery system.',
   tail: '',
-  lead: 'Your next product needs more than a launch. It needs a foundation your business can build on. UMM engineers web and mobile applications, connects systems and modernises platforms so your teams can deliver, adapt and grow.',
+  lead: 'From product requirements to production, UMM combines engineering expertise with AI-powered execution. Build new applications, modernize complex platforms, and connect the systems your business depends on.',
   primaryCta: 'Discuss your engineering project',
-  secondaryCta: 'See our work',
+  secondaryCta: 'Explore our engineering factory',
+  secondaryHref: '#factory',
 }
 
 /** From product to platform: the capabilities, on the ribbon */
@@ -65,7 +67,7 @@ export const why = {
     { name: 'Monitoring', x: 60, y: 84, r: 8, tone: 'citrus' as Tone },
     { name: 'CMS', x: 88, y: 78, r: -10, tone: 'coral' as Tone },
   ],
-  lead: 'A new feature should not mean rebuilding the platform. A new market should not multiply manual work. Good engineering creates room for the business to move.',
+  lead: 'AI expands what teams can build. Strong engineering turns that capacity into dependable software. We connect architecture, agent-assisted execution, and human review so progress reaches production.',
   pairs: [
     {
       title: 'Make change easier to deliver.',
@@ -115,7 +117,7 @@ export const film = {
       type: 'Enterprise & offline software',
       title: 'Pricing operations, online and offline.',
       chip: 'and offline.',
-      body: 'A pricing platform combining a React web application with an Electron desktop app, enterprise authentication and controlled data synchronisation.',
+      body: 'A pricing platform combining a React web application with an Electron desktop app, enterprise authentication and controlled data synchronization.',
       short: 'A React web app and an Electron desktop app, kept in sync.',
       href: 'https://umm.digital/casestudies/mohawk-pricefx/',
       tone: 'coral' as Tone,
@@ -144,7 +146,7 @@ export const services = {
   line1: 'The capability to build.',
   line2: 'The discipline to keep improving.',
   accent: 'keep improving.',
-  lead: 'From a focused product release to a wider platform programme.',
+  lead: 'From a focused product release to a wider platform program.',
   scope: SCOPE,
   includesLabel: 'What the work can include',
   hint: "See what's included",
@@ -166,15 +168,15 @@ export const services = {
       tone: 'sky' as Tone,
     },
     {
-      step: 'Modernise',
-      title: 'Platform architecture & modernisation',
+      step: 'Modernize',
+      title: 'Platform architecture & modernization',
       body: 'Understand what to retain, refactor or replace. Design a practical path from current constraints to a platform that supports your next priorities.',
       tags: ['Architecture', 'Refactoring', 'Migration'],
       more: '',
       includes: [
         'Architecture and dependency assessment',
         'Modular application and platform design',
-        'Legacy refactoring and modernisation planning',
+        'Legacy refactoring and modernization planning',
         'Phased migration and continuity planning',
       ],
       mark: 'interface' as ServiceMark,
@@ -219,8 +221,8 @@ export const services = {
       includes: [
         'Unit, integration and end-to-end testing',
         'Performance and load testing',
-        'Threat modelling and access-control review',
-        'Release criteria and defect prioritisation',
+        'Threat modeling and access-control review',
+        'Release criteria and defect prioritization',
       ],
       mark: 'data' as ServiceMark,
       tone: 'lilac' as Tone,
@@ -228,17 +230,45 @@ export const services = {
     {
       step: 'Operate',
       title: 'Reliability & continuous improvement',
-      body: 'Keep performance, failures and operating costs visible. Turn live evidence into a prioritised plan for a healthier platform.',
-      tags: ['Monitoring', 'Reliability', 'Optimisation'],
+      body: 'Keep performance, failures and operating costs visible. Turn live evidence into a prioritized plan for a healthier platform.',
+      tags: ['Monitoring', 'Reliability', 'Optimization'],
       more: '',
       includes: [
         'Monitoring, logging and alerting',
-        'Performance and resource optimisation',
+        'Performance and resource optimization',
         'Incident response and recovery planning',
         'Ongoing maintenance and improvement backlog',
       ],
       mark: 'brand' as ServiceMark,
       tone: 'coral' as Tone,
+    },
+  ],
+}
+
+/* ── 4b · Engineering in context ─────────────────────────────────────────── */
+
+export const industries = {
+  eyebrow: 'Engineering in context',
+  line1: 'Built around the way',
+  line2: 'your industry works.',
+  items: [
+    {
+      sector: 'Property & Living',
+      title: 'Connected operations',
+      body: 'Resident applications, booking journeys, service requests, and operational platforms.',
+      tone: 'sky' as Tone,
+    },
+    {
+      sector: 'Manufacturing & Distribution',
+      title: 'Connected commercial systems',
+      body: 'Pricing workflows, enterprise integrations, and applications that support work across environments.',
+      tone: 'sun' as Tone,
+    },
+    {
+      sector: 'Digital products & services',
+      title: 'Platforms built to evolve',
+      body: 'Customer portals, web and mobile products, and content platforms that teams can manage.',
+      tone: 'blossom' as Tone,
     },
   ],
 }
@@ -266,139 +296,143 @@ export const stages = {
       flow: ['Assess', 'Connect', 'Strengthen'],
       title: 'Help your platform catch up with your growth.',
       body: 'Resolve the bottlenecks behind slow releases, disconnected tools and increasing support effort. We strengthen the platform while keeping the next business priority in view.',
-      services: ['Platform modernisation', 'Systems integration', 'Delivery automation'],
+      services: ['Platform modernization', 'Systems integration', 'Delivery automation'],
       cta: { label: 'Discuss your next stage', href: 'https://umm.digital/contact/' },
       tone: 'sun' as Tone,
     },
     {
       tab: 'Enterprises',
-      flow: ['Map', 'Modernise', 'Govern'],
+      flow: ['Map', 'Modernize', 'Govern'],
       title: 'Move complex systems forward. One considered change at a time.',
-      body: 'Plan around existing dependencies, data and operating responsibilities. We support phased modernisation, enterprise applications and integrations with clear release and ownership arrangements.',
+      body: 'Plan around existing dependencies, data and operating responsibilities. We support phased modernization, enterprise applications and integrations with clear release and ownership arrangements.',
       services: ['Enterprise applications', 'Phased migration', 'Reliability and governance'],
-      cta: { label: 'Discuss your engineering programme', href: 'https://umm.digital/contact/' },
+      cta: { label: 'Discuss your engineering program', href: 'https://umm.digital/contact/' },
       tone: 'blossom' as Tone,
     },
   ],
 }
 
-/* ── 6 · From commit to customer (new section) ────────────────────────────── */
+/* ── 6 · Inside our engineering factory ──────────────────────────────────── */
 
-export type GateState = 'done' | 'pass' | 'staged' | 'watch' | 'fail' | 'hold' | 'idle' | 'alert'
-
-export type ReleaseScenario = {
-  id: 'pass' | 'fail' | 'live'
-  label: string
-  /** each gate's status word and state, in gate order */
-  gates: { status: string; state: GateState }[]
-  statusLabel: string
-  outcome: 'go' | 'stop'
+export type FactoryStage = {
+  name: string
   title: string
   body: string
-  see: string
+  direct: string
+  assist: string
+  gate: string
+  artifact: string
 }
 
-export const release: {
+export const factory: {
   chip: string
   line1: string
   line2: string
   accent: string
   lead: string
-  demo: {
+  intro: string
+  board: {
     label: string
-    heading: string
-    context: string
-    scenariosLabel: string
-    from: string
-    to: string
-    gates: { name: string; body: string }[]
-    seeLabel: string
-    disclaimer: string
+    eyebrow: string
+    tag: string
+    contextLabel: string
+    context: { tool: string; role: string }[]
+    directLabel: string
+    assistLabel: string
+    gateLabel: string
+    artifactLabel: string
+    loop: string
+    next: string
   }
-  scenarios: ReleaseScenario[]
-  principles: { title: string; body: string }[]
+  stages: FactoryStage[]
+  principles: { step: string; title: string; body: string }[]
 } = {
-  chip: 'From commit to customer',
-  line1: 'A release is more than',
-  line2: 'a deploy button.',
-  accent: 'deploy button.',
-  lead: 'See how release controls respond when the conditions change.',
-  demo: {
-    label: 'Interactive release example',
-    heading: 'Release / Customer portal',
-    context: 'Illustrative engineering example',
-    scenariosLabel: 'Choose a release scenario',
-    from: 'v2.4',
-    to: 'v2.5',
-    gates: [
-      { name: 'Review', body: 'Code and dependencies checked.' },
-      { name: 'Test', body: 'Agreed release checks evaluated.' },
-      { name: 'Roll out', body: 'Introduce the change in stages.' },
-      { name: 'Monitor', body: 'Watch for unexpected behaviour.' },
+  chip: 'Inside our engineering factory',
+  line1: 'Human judgment.',
+  line2: 'AI-powered momentum.',
+  accent: 'AI-powered momentum.',
+  lead: 'A connected delivery model. From intent to production.',
+  intro:
+    'Our factory model connects requirements, design, code, and operations in one delivery workflow. Engineers set direction and own decisions. AI agents assist the work across the lifecycle, with checks and review built into each stage.',
+  board: {
+    label: 'Interactive engineering workflow',
+    eyebrow: 'UMM / Engineering system',
+    tag: 'Explore the delivery workflow',
+    contextLabel: 'Shared context',
+    context: [
+      { tool: 'Jira', role: 'Requirements' },
+      { tool: 'Figma', role: 'Product design' },
+      { tool: 'GitHub', role: 'Code and history' },
     ],
-    seeLabel: 'What your team can see',
-    disclaimer:
-      'Illustrates release decisions, not a live deployment. Controls and rollback plans are agreed for each system.',
+    directLabel: 'Engineers direct',
+    assistLabel: 'Agents assist',
+    gateLabel: 'Review gate',
+    artifactLabel: 'Delivery artifact',
+    loop: 'Production feedback returns to the backlog.',
+    next: 'Next',
   },
-  scenarios: [
+  stages: [
     {
-      id: 'pass',
-      label: 'Checks pass',
-      gates: [
-        { status: 'Complete', state: 'done' },
-        { status: 'Passed', state: 'pass' },
-        { status: 'Staged', state: 'staged' },
-        { status: 'Monitoring', state: 'watch' },
-      ],
-      statusLabel: 'Controlled release',
-      outcome: 'go',
-      title: 'Ready to introduce the change.',
-      body: 'The agreed checks pass. Release to a limited audience, monitor the result and expand only when the release criteria remain satisfied.',
-      see: 'Test results, release history and the signals needed to decide whether to continue.',
+      name: 'Define',
+      title: 'Start with shared intent.',
+      body: 'Translate the business goal into a delivery brief that people and agents can work from.',
+      direct: 'Define priorities, architecture boundaries, and acceptance criteria.',
+      assist: 'Organize requirements, explore repository context, and draft scoped tasks.',
+      gate: 'The team agrees the scope and confirms the dependencies.',
+      artifact: 'An approved delivery brief',
     },
     {
-      id: 'fail',
-      label: 'A test fails',
-      gates: [
-        { status: 'Complete', state: 'done' },
-        { status: 'Failed', state: 'fail' },
-        { status: 'On hold', state: 'hold' },
-        { status: 'Not started', state: 'idle' },
-      ],
-      statusLabel: 'Release paused',
-      outcome: 'stop',
-      title: 'Catch the problem before customers do.',
-      body: 'An integration test fails. The release stays on hold while the team investigates, corrects the change and runs the required checks again. The existing version continues serving customers.',
-      see: 'The failing test, the affected change and a clear owner for the correction.',
+      name: 'Build',
+      title: 'Multiply execution. Keep direction.',
+      body: 'Move scoped implementation tasks forward in parallel, grounded in the same product and technical context.',
+      direct: 'Set implementation direction, resolve trade-offs, and review proposed changes.',
+      assist: 'Assist coding, integration, documentation, and preparation of pull requests.',
+      gate: 'Code review confirms the change meets the intended design.',
+      artifact: 'Reviewed implementation changes',
     },
     {
-      id: 'live',
-      label: 'An issue appears live',
-      gates: [
-        { status: 'Complete', state: 'done' },
-        { status: 'Passed', state: 'pass' },
-        { status: 'Expansion paused', state: 'hold' },
-        { status: 'Issue detected', state: 'alert' },
-      ],
-      statusLabel: 'Recovery decision',
-      outcome: 'stop',
-      title: 'Stop expansion. Follow the recovery plan.',
-      body: 'Monitoring identifies an unexpected issue in the limited rollout. Pause expansion, assess the impact and use the agreed recovery path: rollback where safe, or a controlled fix forward when data or dependencies prevent it.',
-      see: 'The alert, affected release, recovery owner and checks needed to confirm service health.',
+      name: 'Validate',
+      title: 'Make quality part of the workflow.',
+      body: 'Bring evidence to every release decision, from functional behavior to access and performance.',
+      direct: 'Define test coverage, assess findings, and resolve release-blocking issues.',
+      assist: 'Draft test cases, execute configured checks, and summarize failures for investigation.',
+      gate: 'Required checks pass and unresolved risks are reviewed.',
+      artifact: 'Test evidence and release readiness',
+    },
+    {
+      name: 'Release',
+      title: 'Ship with a clear decision trail.',
+      body: 'Introduce approved changes through a controlled pipeline with a recovery plan.',
+      direct: 'Approve the release, define rollout boundaries, and own recovery decisions.',
+      assist: 'Assist release preparation, deployment checks, and post-release validation.',
+      gate: 'An authorized engineer approves the production change.',
+      artifact: 'A verified, controlled release',
+    },
+    {
+      name: 'Evolve',
+      title: 'Let production inform what comes next.',
+      body: 'Connect operational evidence to the next delivery cycle so improvements address real needs.',
+      direct: 'Prioritize improvements, assess impact, and direct incident response.',
+      assist: 'Summarize monitoring signals, assist investigation, and propose follow-up tasks.',
+      gate: 'The team validates findings before remediation or backlog changes.',
+      artifact: 'An evidence-led improvement backlog',
     },
   ],
   principles: [
     {
-      title: 'Change in smaller steps.',
-      body: 'Limit the scope of each release so it is easier to review, test and troubleshoot.',
+      step: 'Capacity',
+      title: 'Work moves in parallel.',
+      body: 'Break down delivery into scoped tasks that engineers and agents can progress together.',
     },
     {
-      title: 'Make failure visible.',
-      body: 'Use meaningful checks and monitoring to show where a release needs attention.',
+      step: 'Accountability',
+      title: 'Expertise stays in control.',
+      body: 'Engineers own architecture, review evidence, and approve consequential changes.',
     },
     {
-      title: 'Prepare a recovery path.',
-      body: 'Agree how to stop, roll back or fix forward, including the implications for data and dependencies.',
+      step: 'Continuity',
+      title: 'Context travels with the work.',
+      body: 'Requirements, decisions, tests, and production signals inform each next step.',
     },
   ],
 }
@@ -406,31 +440,26 @@ export const release: {
 /* ── 6b · Tools follow the requirement (the tools wheel) ──────────────────── */
 
 export const tools = {
-  chip: 'Tools follow the requirement',
-  line1: 'Built around your stack.',
-  line2: 'Chosen for your next step.',
-  accent: 'your next step.',
-  lead: 'We assess your current environment, team capability and operating needs before selecting frameworks, infrastructure and integration patterns.',
+  chip: 'Connected to your engineering stack',
+  line1: 'The tools you use.',
+  line2: 'A more connected way to deliver.',
+  accent: 'connected way to deliver.',
+  lead: 'We select technologies around your product, existing systems, and operating needs. The factory model works within your delivery practices, including Agile.',
   groups: [
     {
-      label: 'Application development',
+      label: 'APPLICATIONS',
       tone: 'sky' as Tone,
-      items: ['React', 'Angular', 'Node.js', 'Spring Boot'],
+      items: ['React', 'Angular', 'JavaScript', 'Node.js', 'Spring Boot'],
     },
     {
-      label: 'Integration and data',
+      label: 'CONTEXT & COLLABORATION',
       tone: 'sun' as Tone,
-      items: ['REST APIs', 'Event-driven integration', 'Data validation', 'System connectors'],
+      items: ['Jira', 'Figma', 'GitHub'],
     },
     {
-      label: 'Build and release',
+      label: 'INTEGRATION & DELIVERY',
       tone: 'blossom' as Tone,
-      items: ['CI/CD pipelines', 'Infrastructure as code', 'Staged releases', 'Security checks'],
-    },
-    {
-      label: 'Quality and operations',
-      tone: 'citrus' as Tone,
-      items: ['Automated testing', 'Application monitoring', 'Performance testing', 'Incident response'],
+      items: ['REST APIs', 'CI/CD', 'Infrastructure as code'],
     },
   ],
 }
@@ -458,7 +487,7 @@ export const process = {
     },
     {
       title: 'Build & integrate',
-      body: 'Develop the application and connect it to the systems it depends on.',
+      body: 'Engineers guide agent-assisted implementation, connect systems, and review changes throughout delivery.',
       get: 'Working software',
     },
     {
@@ -468,7 +497,7 @@ export const process = {
     },
     {
       title: 'Operate & evolve',
-      body: 'Monitor, maintain and prioritise improvements using operational feedback.',
+      body: 'Monitor, maintain and prioritize improvements using operational feedback.',
       get: 'An improvement roadmap',
     },
   ],
@@ -483,7 +512,7 @@ export const engagement: {
   href: 'https://umm.digital/contact/',
   items: [
     { title: 'Technical assessment', body: 'Understand the system and agree the next priorities.', tone: 'sky' as Tone },
-    { title: 'Defined project', body: 'Deliver a product, integration or modernisation scope.', tone: 'sun' as Tone },
+    { title: 'Defined project', body: 'Deliver a product, integration or modernization scope.', tone: 'sun' as Tone },
     { title: 'Embedded engineering', body: 'Add specialist support alongside your existing team.', tone: 'blossom' as Tone },
     { title: 'Ongoing platform support', body: 'Maintain, monitor and improve after release.', tone: 'citrus' as Tone },
   ],
@@ -493,7 +522,7 @@ export const engagement: {
 
 export const faq = [
   {
-    question: 'Can you build a new product and modernise an existing one?',
+    question: 'Can you build a new product and modernize an existing one?',
     answer:
       'Yes. We support new web and mobile products as well as existing platforms. The starting point is an assessment of your goals, dependencies and delivery constraints.',
   },
@@ -520,7 +549,12 @@ export const faq = [
   {
     question: 'What happens after launch?',
     answer:
-      'We agree the support and ownership model before release. Depending on the engagement, this can include monitoring, maintenance, incident response and a prioritised improvement backlog.',
+      'We agree the support and ownership model before release. Depending on the engagement, this can include monitoring, maintenance, incident response and a prioritized improvement backlog.',
+  },
+  {
+    question: 'How do AI agents fit into your engineering process?',
+    answer:
+      'Engineers define scope, architecture, and acceptance criteria. AI agents assist tasks such as implementation, test generation, and documentation. Our team reviews outputs and approves releases. Agent access and automation are scoped to the project and environment.',
   },
 ]
 

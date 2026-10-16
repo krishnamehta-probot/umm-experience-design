@@ -1558,6 +1558,17 @@ html.cx-v2 body {
   background: #1a0606;
 }
 
+/* the UX & Digital Commerce film (UxFilm): Coco & Coir, their soil and lime */
+.cx-f-proj--cocoandcoir {
+  background: #121a06;
+}
+
+.cx-f-proj--cocoandcoir .cx-f-proj__glow {
+  background:
+    radial-gradient(50% 60% at 78% 55%, rgb(190 200 40 / 0.6), transparent 70%),
+    radial-gradient(35% 45% at 10% 100%, rgb(150 90 40 / 0.5), transparent 70%);
+}
+
 /* Penny: their navy, with the yellow of their buttons */
 .cx-f-proj--penny .cx-f-proj__glow {
   background:
@@ -1829,13 +1840,15 @@ html.cx-v2 body {
    them (wide frame; the tall one has room) */
 .cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__h,
 .cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-end__h,
-.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
+.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__h,
+.cx-film[data-cut='ux'] .cx-film__frame:not([data-tall]) .cx-f-end__h {
   max-width: 1040px;
 }
 
 .cx-film[data-cut='cloud'] .cx-film__frame:not([data-tall]) .cx-f-end__cards,
 .cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-end__cards,
-.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__cards {
+.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-end__cards,
+.cx-film[data-cut='ux'] .cx-film__frame:not([data-tall]) .cx-f-end__cards {
   top: 400px;
 }
 
@@ -4427,6 +4440,17 @@ html.cx-v2 body {
   font-size: clamp(1.05rem, 1.7vw, 1.6rem);
   font-weight: var(--umm-weight-medium);
   letter-spacing: -0.02em;
+}
+
+/* a group's role in the workflow (Growth), as a last, quieter row */
+.cx-kit__tiles li.cx-kit__about {
+  background: color-mix(in oklab, var(--p0) 45%, var(--umm-paper));
+  font-family: var(--umm-font-body);
+  font-size: clamp(0.875rem, 1vw, 1rem);
+  font-weight: var(--umm-weight-regular);
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--umm-ink-soft);
 }
 
 .cx-kit__body .cx-kit__tiles li {

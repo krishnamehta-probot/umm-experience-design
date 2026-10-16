@@ -11,6 +11,11 @@
   background: var(--umm-paper);
 }
 
+.cx-ind__label {
+  margin: 0;
+  font: inherit;
+}
+
 .cx-ind__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

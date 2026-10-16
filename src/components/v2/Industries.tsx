@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 import type { Tone } from '../primitives'
-import { ChipHead, withAccent } from './ChipHead'
+import { ChipHead, Eyebrow, withAccent } from './ChipHead'
 import '@/styles/industries.css'
 
 /* ============================================================================
@@ -16,8 +16,9 @@ import '@/styles/industries.css'
 
 export type IndustriesContent = {
   eyebrow: string
-  line1: string
-  line2: string
+  /** the headline; a band without one carries its eyebrow alone */
+  line1?: string
+  line2?: string
   items: { sector?: string; title?: string; body: string; tone: Tone }[]
 }
 
@@ -37,14 +38,20 @@ export function Industries({
     <section className="umm-section cx-ind" aria-labelledby="cx-ind-title">
       <div className="umm-container">
         <div className="cx-head cx-head--tight">
-          <ChipHead
-            id="cx-ind-title"
-            line1={content.line1}
-            line2={withAccent(content.line2, content.line2)}
-            chip={content.eyebrow}
-            tone={tone}
-            lineRecipe={1}
-          />
+          {content.line1 && content.line2 ? (
+            <ChipHead
+              id="cx-ind-title"
+              line1={content.line1}
+              line2={withAccent(content.line2, content.line2)}
+              chip={content.eyebrow}
+              tone={tone}
+              lineRecipe={1}
+            />
+          ) : (
+            <h2 className="cx-ind__label" id="cx-ind-title">
+              <Eyebrow>{content.eyebrow}</Eyebrow>
+            </h2>
+          )}
         </div>
         <ul className="cx-ind__grid" style={{ ['--n' as string]: n }}>
           {content.items.map((item, i) => {

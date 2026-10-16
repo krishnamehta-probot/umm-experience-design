@@ -1,0 +1,47 @@
+/* ============================================================================
+   UX & DIGITAL COMMERCE · THE COMMERCE FLAVOUR (components/ux/flavour.tsx)
+   ----------------------------------------------------------------------------
+   This page's half of the flavour (the shared rules are flavour.css): the
+   faint columns of a layout grid behind the white sections, a cursor for
+   the section labels' mark, "Live" on the roadmap, a product grid behind
+   the closing band, and a bag that drops onto a service card as it is
+   pointed at. The drawing carries the ink and citrus values.
+   ========================================================================== */
+
+html.ux-flavour {
+  --fl-ground: linear-gradient(90deg, rgb(16 14 20 / 0.045) 1px, transparent 1px);
+  --fl-ground-size: 80px 100%;
+  --fl-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 2.5 19 11l-6.2 1.6L9.4 19z' fill='black' stroke='black' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --fl-today: 'Live';
+  --fl-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='320 0 420 440'%3E%3Crect x='380' y='40' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='390' y='50' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='390' y='118' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='390' y='130' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='492' y='40' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='502' y='50' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='502' y='118' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='502' y='130' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='604' y='40' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='614' y='50' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='614' y='118' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='614' y='130' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='380' y='170' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='390' y='180' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='390' y='248' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='390' y='260' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='492' y='170' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='502' y='180' width='72' height='58' rx='8' fill='%23f0ff70'%3E%3Canimate attributeName='opacity' values='1;.35;1' dur='2.4s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='502' y='248' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='502' y='260' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='604' y='170' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='614' y='180' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='614' y='248' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='614' y='260' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='380' y='300' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='390' y='310' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='390' y='378' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='390' y='390' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='492' y='300' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='502' y='310' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='502' y='378' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='502' y='390' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='604' y='300' width='92' height='112' rx='12' fill='%231a1720' stroke='%233a3644' stroke-width='1.4'/%3E%3Crect x='614' y='310' width='72' height='58' rx='8' fill='%232a2731'/%3E%3Crect x='614' y='378' width='50' height='6' rx='3' fill='%233a3644'/%3E%3Crect x='614' y='390' width='30' height='6' rx='3' fill='%233a3644'/%3E%3Cpath d='M556 220l20 11.5-8.6 2.2-4.8 9.8z' fill='%23f6f6f8' stroke='%23100e14' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* --- the service cards: a bag drops on as one is pointed at ---------------- */
+
+html.ux-flavour .cx-svc::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  right: 18px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 8h14l-1 12H6z' fill='black'/%3E%3Cpath d='M9 8V6.5a3 3 0 0 1 6 0V8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / 16px no-repeat,
+    var(--umm-citrus);
+  box-shadow:
+    0 0 0 2px var(--umm-ink),
+    0 10px 20px -10px rgb(16 14 20 / 0.6);
+  transform: translateY(-10px) scale(0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1),
+    opacity 0.25s var(--umm-ease-out);
+}
+
+html.ux-flavour .cx-svc:hover::after {
+  transform: none;
+  opacity: 1;
+}

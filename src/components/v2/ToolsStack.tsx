@@ -7,7 +7,11 @@ import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { tools as cxTools } from '@/content/cxUiDesign'
 
 /* the note is optional: a plan can leave it out */
-export type ToolsContent = Omit<typeof cxTools, 'note'> & { note?: string }
+/** `note`: a line under the toolkit; a group's `about`: a line under its tools */
+export type ToolsContent = Omit<typeof cxTools, 'note' | 'groups'> & {
+  note?: string
+  groups: ((typeof cxTools)['groups'][number] & { about?: string })[]
+}
 
 /* ============================================================================
    6b · THE SYSTEMS YOU ALREADY HAVE — the tools wheel
@@ -134,6 +138,11 @@ function Tiles({ group, on }: { group: Group; on: boolean }) {
           <span>{t}</span>
         </li>
       ))}
+      {group.about ? (
+        <li className="cx-kit__about" style={{ ['--i' as string]: n, ['--t' as string]: '100%' } as CSSProperties}>
+          {group.about}
+        </li>
+      ) : null}
     </ul>
   )
 }

@@ -1,0 +1,718 @@
+/* ============================================================================
+   INTEGRATED GROWTH · THE GROWTH SYSTEM (GrowthSystem)
+   ----------------------------------------------------------------------------
+   Prefix gs__. The heading is the shared cd-arch__ one (cloud-arch.css). An
+   ink board: the brief, signals → the engine → channels, the measurement
+   loop and the safeguards; under it the four workflows, then the marketing
+   factory. What a workflow uses is lit; the rest dims. Labels are Mosvita
+   in tracked capitals. Tokens only.
+   ========================================================================== */
+
+.gs__board {
+  --gs-line: var(--umm-ink-line-strong);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1rem, 2vw, 1.5rem);
+  padding: clamp(1.1rem, 2.6vw, 2.25rem);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+  box-shadow: 0 40px 80px -48px rgb(16 14 20 / 0.6);
+}
+
+.gs__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--umm-ink-paper-soft);
+}
+
+.gs__label--bright {
+  color: var(--umm-ink-paper);
+}
+
+.gs__label--ink {
+  color: var(--umm-ink-soft);
+}
+
+.gs__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.gs__live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  animation: gs-live 2.4s ease-out infinite;
+}
+
+@keyframes gs-live {
+  0% {
+    box-shadow: 0 0 0 0 rgb(240 255 112 / 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px rgb(240 255 112 / 0);
+  }
+}
+
+/* --- the brief --------------------------------------------------------------- */
+
+.gs__direction {
+  display: grid;
+  gap: 10px 32px;
+  align-items: center;
+  padding: clamp(1rem, 2vw, 1.4rem) clamp(1rem, 2.2vw, 1.6rem);
+  border: 1px solid var(--gs-line);
+  border-radius: 18px;
+  background: var(--umm-ink-raise);
+}
+
+.gs__direction-title {
+  margin: 6px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.3rem, 1.9vw, 1.7rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+}
+
+.gs__direction-items {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--umm-ink-paper-soft);
+}
+
+@media (min-width: 900px) {
+  .gs__direction {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}
+
+/* --- signals → engine → channels ---------------------------------------------- */
+
+.gs__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.gs__col,
+.gs__engine {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.gs__nodes,
+.gs__modules {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gs__node {
+  padding: 14px 16px;
+  border: 1px solid var(--gs-line);
+  border-radius: 14px;
+  background: var(--umm-ink-raise);
+  transition:
+    border-color 0.45s var(--umm-ease-out),
+    opacity 0.45s var(--umm-ease-out),
+    box-shadow 0.45s var(--umm-ease-out);
+}
+
+.gs__node-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: 1.0625rem;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.gs__node-body {
+  margin: 5px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--umm-ink-paper-soft);
+}
+
+/* what the chosen workflow uses: ringed in citrus; the rest steps back */
+.gs__node[data-on='false'] {
+  opacity: 0.55;
+}
+
+.gs__node[data-on='true'] {
+  border-color: var(--umm-citrus);
+  box-shadow: 0 0 0 3px rgb(240 255 112 / 0.12);
+}
+
+/* the engine: a pale card, the heart of the board */
+.gs__engine {
+  padding: clamp(14px, 1.6vw, 20px);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--umm-citrus) 22%, var(--umm-paper));
+  color: var(--umm-ink);
+}
+
+.gs__engine .gs__label {
+  color: var(--umm-ink-soft);
+}
+
+.gs__engine-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.25rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.gs__engine-sub {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--umm-ink-soft);
+}
+
+.gs__modules {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 6px;
+}
+
+.gs__module {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--umm-paper) 70%, transparent);
+  transition:
+    border-color 0.45s var(--umm-ease-out),
+    background-color 0.45s var(--umm-ease-out),
+    box-shadow 0.45s var(--umm-ease-out);
+}
+
+.gs__module svg {
+  color: var(--umm-ink-soft);
+}
+
+.gs__module .gs__node-body {
+  color: var(--umm-ink-soft);
+}
+
+.gs__module[data-on='true'] {
+  border-color: var(--umm-ink);
+  background: var(--umm-paper);
+  box-shadow: 0 12px 24px -16px rgb(16 14 20 / 0.55);
+}
+
+.gs__module[data-on='true'] svg {
+  color: var(--umm-ink);
+  animation: gs-pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes gs-pop {
+  from {
+    transform: scale(0.5) rotate(-20deg);
+  }
+}
+
+.gs__guard {
+  margin: 4px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid rgb(16 14 20 / 0.14);
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+/* a wire between columns, data running along it */
+.gs__wire {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+}
+
+.gs__wire-line {
+  position: relative;
+  width: 1px;
+  height: 30px;
+  background: var(--gs-line);
+  overflow: hidden;
+}
+
+.gs__wire-line i {
+  position: absolute;
+  left: -2px;
+  top: -10px;
+  width: 5px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--umm-citrus);
+  animation: gs-down 1.8s linear infinite;
+}
+
+.gs__wire-line i:nth-child(2) {
+  animation-delay: -0.9s;
+  background: var(--umm-sun);
+}
+
+@keyframes gs-down {
+  to {
+    top: 100%;
+  }
+}
+
+/* what connects a column to the engine, under it */
+.gs__link {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--umm-ink-paper-soft);
+}
+
+.gs__link::after {
+  content: ' →';
+}
+
+@media (min-width: 1000px) {
+  .gs__row {
+    grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1.35fr) 56px minmax(0, 1fr);
+    align-items: center;
+    gap: 0;
+  }
+
+  .gs__wire-line {
+    width: 100%;
+    height: 1px;
+  }
+
+  .gs__wire-line i {
+    top: -2px;
+    left: -10px;
+    width: 8px;
+    height: 5px;
+    animation-name: gs-across;
+  }
+
+  @keyframes gs-across {
+    to {
+      left: 100%;
+    }
+  }
+}
+
+/* --- responses return as intelligence ---------------------------------------- */
+
+.gs__measure {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px 18px;
+  padding: clamp(1rem, 2vw, 1.4rem) clamp(1rem, 2.2vw, 1.6rem);
+  border-radius: 18px;
+  background: var(--umm-lilac);
+  color: var(--umm-ink);
+}
+
+.gs__measure .gs__label {
+  color: var(--umm-ink-soft);
+}
+
+.gs__measure-icon svg {
+  width: 30px;
+  height: 30px;
+  animation: gs-turn 6s linear infinite reverse;
+}
+
+@keyframes gs-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gs__measure-title {
+  margin: 4px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+}
+
+.gs__chain {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.gs__loop {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid rgb(16 14 20 / 0.3);
+  border-radius: 12px;
+  font-size: 0.8125rem;
+}
+
+@media (min-width: 900px) {
+  .gs__measure {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .gs__loop {
+    grid-column: auto;
+    max-width: 22ch;
+  }
+}
+
+.gs__across {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding-top: clamp(0.75rem, 1.6vw, 1.1rem);
+  border-top: 1px solid var(--gs-line);
+}
+
+.gs__across ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gs__across li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+}
+
+.gs__across svg {
+  width: 16px;
+  height: 16px;
+  color: var(--umm-citrus);
+}
+
+/* --- follow a workflow -------------------------------------------------------- */
+
+.gs__follow {
+  margin-top: clamp(1.75rem, 3.6vw, 2.75rem);
+}
+
+.gs__follow-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 24px;
+  margin-bottom: 14px;
+}
+
+.gs__follow-label {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-label);
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.gs__follow-lead {
+  margin: 0;
+  color: var(--umm-ink-soft);
+}
+
+.gs__picks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 700px) {
+  .gs__picks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.gs__pick {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 16px 18px;
+  margin: 0;
+  border: 1px solid var(--umm-line);
+  border-radius: 14px;
+  background: var(--umm-paper);
+  font: inherit;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  text-align: left;
+  color: var(--umm-ink);
+  cursor: pointer;
+  transition:
+    background-color 0.3s var(--umm-ease-out),
+    border-color 0.3s var(--umm-ease-out);
+}
+
+.gs__pick:hover {
+  border-color: var(--umm-hairline);
+}
+
+.gs__pick[aria-selected='true'] {
+  border-color: var(--umm-ink);
+  background: var(--umm-tone);
+}
+
+.gs__pick-num {
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.1em;
+  color: var(--umm-ink-soft);
+}
+
+.gs__pick:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 3px;
+}
+
+.gs__detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem) 0;
+  border-bottom: 1px solid var(--umm-line);
+  animation: gs-in 0.5s var(--umm-ease-out) both;
+}
+
+@keyframes gs-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.gs__detail-intro,
+.gs__detail-side {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.gs__detail-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.35rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.gs__detail-body {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--umm-ink-soft);
+}
+
+/* what the workflow does: its steps, lit one after another */
+.gs__does {
+  display: grid;
+  gap: 0;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.gs__does li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 12px;
+  padding: 0 0 14px;
+  line-height: 1.45;
+  animation: gs-step 0.5s calc(var(--i) * 0.35s + 0.15s) var(--umm-ease-out) both;
+}
+
+/* the line joining the steps */
+.gs__does li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: -2px;
+  left: 8px;
+  width: 2px;
+  background: var(--umm-line);
+}
+
+.gs__does-dot {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+  background: var(--umm-tone);
+}
+
+.gs__does li:last-child .gs__does-dot {
+  background: var(--umm-ink);
+}
+
+@keyframes gs-step {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+.gs__controls {
+  margin: 0;
+  line-height: 1.55;
+}
+
+@media (min-width: 900px) {
+  .gs__detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .gs__detail-side {
+    padding-left: clamp(1.5rem, 3vw, 2.5rem);
+    border-left: 1px solid var(--umm-line);
+  }
+}
+
+/* --- the marketing factory ------------------------------------------------------ */
+
+.gs__factory {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.gs__factory-head {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.gs__factory-head .cx-lead {
+  margin: 0;
+  max-width: 44ch;
+}
+
+.gs__steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .gs__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.gs__step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  border: 1px solid var(--umm-line);
+  border-radius: 18px;
+  background: var(--umm-paper);
+  overflow: hidden;
+}
+
+/* the work travelling the four: each card's top lights in turn */
+.gs__step::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--umm-tone);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: gs-travel 6s calc(var(--i) * 1.5s) linear infinite;
+}
+
+@keyframes gs-travel {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  22% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  32%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.gs__step-title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.2rem, 1.6vw, 1.4rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.gs__step-body {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+@media (min-width: 1000px) {
+  .gs__factory {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs__live,
+  .gs__wire-line i,
+  .gs__module[data-on='true'] svg,
+  .gs__measure-icon svg,
+  .gs__detail,
+  .gs__does li,
+  .gs__step::before {
+    animation: none;
+  }
+
+  .gs__wire-line i {
+    display: none;
+  }
+}

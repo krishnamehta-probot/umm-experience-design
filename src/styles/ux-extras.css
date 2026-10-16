@@ -1,0 +1,343 @@
+/* ============================================================================
+   UX & DIGITAL COMMERCE · AI MOMENTS AND THE NEXT PLATFORM (UxExtras)
+   ----------------------------------------------------------------------------
+   Prefix ux-. Three pastel cards, each opening on a small wordless scene
+   drawn in CSS; then three platform cards on white. Tokens only.
+   ========================================================================== */
+
+.ux-ai {
+  padding-top: 0;
+  background: var(--umm-paper);
+}
+
+.ux-ai__grid,
+.ux-plat__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .ux-ai__grid,
+  .ux-plat__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ux-ai__card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: color-mix(in srgb, var(--umm-tone) 42%, var(--umm-paper));
+}
+
+.ux-ai__step,
+.ux-plat__label {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.ux-ai__title,
+.ux-plat__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.ux-ai__body,
+.ux-plat__body {
+  margin: 0;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* --- the little scenes --------------------------------------------------------- */
+
+.ux-scene {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  height: 132px;
+  margin-bottom: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--umm-paper);
+  box-shadow: 0 14px 30px -24px rgb(16 14 20 / 0.5);
+  overflow: hidden;
+}
+
+.ux-scene i {
+  display: block;
+}
+
+/* search: a query typed, the right products appearing */
+.ux-scene__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1.5px solid rgb(16 14 20 / 0.2);
+  border-radius: 999px;
+}
+
+.ux-scene .ux-scene__glass {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 50%;
+}
+
+.ux-scene .ux-scene__typed {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--umm-ink);
+  animation: ux-type 4s steps(12) infinite;
+}
+
+@keyframes ux-type {
+  0% {
+    width: 0;
+  }
+  35%,
+  100% {
+    width: 62%;
+  }
+}
+
+.ux-scene__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ux-scene__grid i {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--umm-tone) 70%, var(--umm-paper));
+  animation: ux-show 4s calc(1.4s + var(--k) * 0.25s) var(--umm-ease-out) infinite both;
+}
+
+@keyframes ux-show {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  10%,
+  70% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* catalog: attributes tagged, checked before publishing */
+.ux-scene--catalog {
+  grid-template-columns: 80px minmax(0, 1fr);
+  align-items: center;
+}
+
+.ux-scene__thumb {
+  height: 100%;
+  min-height: 80px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--umm-tone) 80%, var(--umm-paper));
+}
+
+.ux-scene__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ux-scene__tags i {
+  width: calc(36px + var(--k) * 9px);
+  height: 18px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 999px;
+  animation: ux-pop 4s calc(var(--k) * 0.35s) cubic-bezier(0.3, 1.6, 0.5, 1) infinite both;
+}
+
+@keyframes ux-pop {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  8%,
+  78% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ux-scene__ok {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+  animation: ux-pop 4s 1.6s cubic-bezier(0.3, 1.6, 0.5, 1) infinite both;
+}
+
+.ux-scene__ok svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* content: a product page writing itself, recommendations beside it */
+.ux-scene--content {
+  grid-template-columns: minmax(0, 1fr) 56px;
+}
+
+.ux-scene__page {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.ux-scene__page .ux-scene__thumb {
+  min-height: 0;
+}
+
+.ux-scene__lines {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.ux-scene__lines i {
+  height: 7px;
+  border-radius: 4px;
+  background: rgb(16 14 20 / 0.2);
+  transform-origin: left;
+  animation: ux-write 4s calc(var(--k) * 0.4s) var(--umm-ease-out) infinite both;
+}
+
+.ux-scene__lines i:first-child {
+  height: 10px;
+  background: var(--umm-ink);
+}
+
+.ux-scene__lines i:last-child {
+  width: 60%;
+}
+
+@keyframes ux-write {
+  0%,
+  100% {
+    transform: scaleX(0);
+  }
+  14%,
+  80% {
+    transform: scaleX(1);
+  }
+}
+
+.ux-scene__recs {
+  display: grid;
+  gap: 8px;
+}
+
+.ux-scene__recs i {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--umm-tone) 70%, var(--umm-paper));
+  animation: ux-show 4s calc(1.4s + var(--k) * 0.3s) var(--umm-ease-out) infinite both;
+}
+
+/* --- platforms ------------------------------------------------------------------ */
+
+.ux-plat {
+  background: var(--umm-paper);
+}
+
+.ux-plat__head .cx-lead {
+  max-width: 52ch;
+}
+
+.ux-plat__card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(1.25rem, 2.2vw, 1.85rem);
+  border: 1px solid var(--umm-line);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-paper);
+  transition:
+    border-color 0.3s var(--umm-ease-out),
+    transform 0.3s var(--umm-ease-out);
+}
+
+.ux-plat__card:hover {
+  border-color: var(--umm-ink);
+  transform: translateY(-3px);
+}
+
+.ux-plat__mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+}
+
+.ux-plat__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  margin-top: 4px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+
+.ux-plat__cta svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ux-plat__note {
+  margin: clamp(1rem, 2vw, 1.5rem) 0 0;
+  font-size: 0.875rem;
+  color: var(--umm-ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-scene i,
+  .ux-scene__ok {
+    animation: none;
+  }
+}

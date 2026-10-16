@@ -1,0 +1,558 @@
+/* ============================================================================
+   DIGITAL ENGINEERING · THE ENGINEERING FACTORY (EngineeringFactory)
+   ----------------------------------------------------------------------------
+   Prefix ef__. The heading, rule cards and lead are the shared cd-arch__
+   ones (cloud-arch.css). An ink board: the shared context, the delivery
+   line with the work item riding it, the chosen stage's detail, the loop
+   and the Next button. Labels are Mosvita in tracked capitals. Tokens only.
+   ========================================================================== */
+
+.ef__intro {
+  max-width: 64ch;
+  margin: 0 0 clamp(1.25rem, 2.6vw, 2rem);
+}
+
+.ef__board {
+  --ef-line: var(--umm-ink-line-strong);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.1rem, 2.2vw, 1.6rem);
+  padding: clamp(1.1rem, 2.6vw, 2.25rem);
+  border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
+  background: var(--umm-ink);
+  background-image:
+    linear-gradient(rgb(246 246 248 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(246 246 248 / 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--umm-ink-paper);
+  box-shadow: 0 40px 80px -48px rgb(16 14 20 / 0.6);
+}
+
+.ef__label,
+.ef__eyebrow {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ef__label--tone {
+  color: var(--tone);
+}
+
+.ef__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.ef__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--umm-ink-paper);
+}
+
+.ef__live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  animation: ef-live 2.4s ease-out infinite;
+}
+
+@keyframes ef-live {
+  0% {
+    box-shadow: 0 0 0 0 rgb(240 255 112 / 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px rgb(240 255 112 / 0);
+  }
+}
+
+/* --- the shared context ---------------------------------------------------- */
+
+.ef__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+}
+
+.ef__context ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ef__context li {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--ef-line);
+  border-radius: 12px;
+  background: var(--umm-ink-raise);
+  font-size: 0.8125rem;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ef__context strong {
+  font-family: var(--umm-font-display);
+  font-size: 1rem;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink-paper);
+}
+
+/* --- the delivery line ------------------------------------------------------ */
+
+.ef__line {
+  display: grid;
+  gap: 12px;
+}
+
+.ef__stages {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--ef-line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ef__stages li + li {
+  border-left: 1px solid var(--ef-line);
+}
+
+.ef__stage {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: 108px;
+  padding: 16px 18px;
+  margin: 0;
+  border: 0;
+  background: var(--umm-ink-raise);
+  font: inherit;
+  text-align: left;
+  color: var(--umm-ink-paper);
+  cursor: pointer;
+  transition:
+    background-color 0.35s var(--umm-ease-out),
+    color 0.35s var(--umm-ease-out);
+}
+
+.ef__stage:hover {
+  background: color-mix(in srgb, var(--umm-ink-raise) 80%, var(--umm-ink-paper));
+}
+
+.ef__stage-num {
+  font-size: var(--umm-text-micro);
+  letter-spacing: 0.1em;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ef__stage-name {
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+/* the chosen stage: lit in its pastel, with an ink underline */
+.ef__stage[aria-selected='true'] {
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+}
+
+.ef__stage[aria-selected='true'] .ef__stage-num {
+  color: var(--umm-ink-soft);
+}
+
+.ef__stage::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: var(--umm-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--umm-ease-out);
+}
+
+.ef__stage[aria-selected='true']::after {
+  transform: scaleX(1);
+}
+
+/* a stage the work has passed: stamped done */
+.ef__stamp {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  color: var(--umm-ink);
+  opacity: 0;
+  transform: scale(0.4) rotate(-30deg);
+  transition:
+    opacity 0.3s var(--umm-ease-out),
+    transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.ef__stamp svg {
+  width: 15px;
+  height: 15px;
+}
+
+.ef__stage[data-done] .ef__stamp {
+  opacity: 1;
+  transform: none;
+}
+
+.ef__stage:focus-visible,
+.ef__next:focus-visible {
+  outline: 2px solid var(--umm-sky);
+  outline-offset: -3px;
+}
+
+/* the rail under the stages, and the work item riding it */
+.ef__rail {
+  position: relative;
+  height: 44px;
+}
+
+.ef__belt {
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--ef-line) 0 10px, transparent 10px 16px);
+  animation: ef-belt 1.2s linear infinite;
+}
+
+@keyframes ef-belt {
+  to {
+    background-position: 16px 0;
+  }
+}
+
+.ef__item {
+  position: absolute;
+  top: 50%;
+  left: calc((var(--at) + 0.5) / var(--n) * 100%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(260px, 46%);
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+  font-size: 0.8125rem;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* centred on its stage, but kept inside the rail at either end */
+  translate: calc(var(--at) / (var(--n) - 1) * -100%) -50%;
+  box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.6);
+  transition:
+    left 0.7s cubic-bezier(0.65, 0, 0.25, 1),
+    translate 0.7s cubic-bezier(0.65, 0, 0.25, 1),
+    background-color 0.5s var(--umm-ease-out);
+}
+
+.ef__item i {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--umm-ink);
+  border-radius: 3px;
+}
+
+/* after Evolve, the work rides back to Define along the loop */
+.ef__item[data-lap] {
+  animation: ef-return 0.9s cubic-bezier(0.65, 0, 0.25, 1) both;
+}
+
+@keyframes ef-return {
+  from {
+    left: calc((var(--n) - 0.5) / var(--n) * 100%);
+    translate: -100% -50%;
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.25;
+    translate: -50% 40%;
+  }
+  to {
+    left: calc(0.5 / var(--n) * 100%);
+    translate: 0 -50%;
+    opacity: 1;
+  }
+}
+
+/* --- the chosen stage ------------------------------------------------------- */
+
+.ef__panel {
+  padding-top: clamp(0.5rem, 1.4vw, 1rem);
+  border-top: 1px solid var(--ef-line);
+}
+
+.ef__detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.25rem, 2.6vw, 2.25rem);
+  animation: ef-in 0.5s var(--umm-ease-out) both;
+}
+
+@keyframes ef-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.ef__intent {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.ef__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.ef__body {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ef__artifact {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid var(--umm-citrus);
+}
+
+.ef__artifact .ef__label {
+  color: var(--umm-citrus);
+}
+
+.ef__artifact p {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: 1.125rem;
+  font-weight: var(--umm-weight-medium);
+}
+
+.ef__roles {
+  display: grid;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ef__roles li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--ef-line);
+}
+
+.ef__roles li:first-child {
+  padding-top: 0;
+}
+
+.ef__roles p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.ef__role-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--umm-lilac) 22%, var(--umm-ink-raise));
+  color: var(--umm-lilac);
+}
+
+.ef__role-icon--agent {
+  background: color-mix(in srgb, var(--umm-citrus) 14%, var(--umm-ink-raise));
+  color: var(--umm-citrus);
+}
+
+.ef__role-icon--agent svg {
+  animation: ef-turn 14s linear infinite;
+}
+
+@keyframes ef-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the review gate: a framed box, its shield stamped as the stage opens */
+.ef__gate {
+  margin-top: 14px;
+  padding: 16px !important;
+  border: 1px solid var(--ef-line);
+  border-radius: 14px;
+}
+
+.ef__role-icon--gate {
+  background: color-mix(in srgb, var(--umm-sky) 18%, var(--umm-ink-raise));
+  color: var(--umm-sky);
+  animation: ef-stamp 0.6s 0.25s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes ef-stamp {
+  from {
+    transform: scale(0.4) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .ef__detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+}
+
+/* --- the foot: the loop and Next -------------------------------------------- */
+
+.ef__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding-top: clamp(0.75rem, 1.6vw, 1.1rem);
+  border-top: 1px solid var(--ef-line);
+}
+
+.ef__loop {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.4s var(--umm-ease-out);
+}
+
+.ef__loop svg {
+  color: var(--umm-lilac);
+}
+
+.ef__loop[data-on] {
+  color: var(--umm-ink-paper);
+}
+
+.ef__loop[data-on] svg {
+  animation: ef-turn 3s linear infinite reverse;
+}
+
+.ef__next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--umm-citrus);
+  font: inherit;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  cursor: pointer;
+  transition: transform 0.3s var(--umm-ease-out);
+}
+
+.ef__next svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s var(--umm-ease-out);
+}
+
+.ef__next:hover svg {
+  transform: translateX(3px);
+}
+
+.ef__next:focus-visible {
+  outline-color: var(--umm-paper);
+  outline-offset: 3px;
+}
+
+/* --- phones: the line scrolls sideways, the rail rests ---------------------- */
+
+@media (max-width: 899px) {
+  .ef__stages {
+    grid-template-columns: repeat(var(--n, 5), minmax(132px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .ef__stages::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ef__stages li {
+    scroll-snap-align: start;
+  }
+
+  .ef__stage {
+    min-height: 92px;
+  }
+
+  .ef__rail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef__live,
+  .ef__belt,
+  .ef__item[data-lap],
+  .ef__role-icon--agent svg,
+  .ef__role-icon--gate,
+  .ef__loop[data-on] svg,
+  .ef__detail {
+    animation: none;
+  }
+
+  .ef__item {
+    transition: none;
+  }
+}

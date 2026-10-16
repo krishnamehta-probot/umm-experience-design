@@ -16,6 +16,9 @@ const AiAutomationPage = lazy(() =>
 const CloudDataPage = lazy(() => import('./pages/CloudDataPage').then((m) => ({ default: m.CloudDataPage })))
 const EngineeringPage = lazy(() => import('./pages/EngineeringPage').then((m) => ({ default: m.EngineeringPage })))
 const GrowthPage = lazy(() => import('./pages/GrowthPage').then((m) => ({ default: m.GrowthPage })))
+const UxCommercePage = lazy(() =>
+  import('./pages/UxCommercePage').then((m) => ({ default: m.UxCommercePage })),
+)
 const FilmRenderPage = lazy(() =>
   import('./pages/FilmRenderPage').then((m) => ({ default: m.FilmRenderPage })),
 )
@@ -34,6 +37,7 @@ const FilmRenderPage = lazy(() =>
  *   /cloud-data  the Cloud & Data service page, on v2's design
  *   /digital-engineering  the Digital Engineering service page
  *   /integrated-growth  the Integrated Growth & Strategy service page
+ *   /ux-digital-commerce  the UX & Digital Commerce service page
  *   /home        the umm.digital homepage hero, with an options dock that
  *                switches between its three versions (ASCII, print,
  *                particles) and every option of each; /home-ascii, -print
@@ -76,6 +80,13 @@ export function App() {
     return (
       <Suspense fallback={null}>
         <GrowthPage />
+      </Suspense>
+    )
+  }
+  if (path === '/ux-digital-commerce') {
+    return (
+      <Suspense fallback={null}>
+        <UxCommercePage />
       </Suspense>
     )
   }

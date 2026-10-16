@@ -2,7 +2,7 @@
    Export a service page's film to MP4
 
      npm run dev            (in another terminal)
-     node scripts/render-film.mjs [out.mp4] [--film cx|ai|cloud|eng|growth] [--tall] [--web]
+     node scripts/render-film.mjs [out.mp4] [--film cx|ai|cloud|eng|growth|ux] [--tall] [--web]
                                   [--fps 30] [--url http://localhost:5173]
 
    The pages play these files (useFilmVideo), so after changing a film,
@@ -18,6 +18,8 @@
      node scripts/render-film.mjs public/film/eng-tall.mp4 --film eng --tall --web
      node scripts/render-film.mjs public/film/growth-wide.mp4 --film growth --web
      node scripts/render-film.mjs public/film/growth-tall.mp4 --film growth --tall --web
+     node scripts/render-film.mjs public/film/ux-wide.mp4 --film ux --web
+     node scripts/render-film.mjs public/film/ux-tall.mp4 --film ux --tall --web
 
    Opens /film (the film alone on its 1920 x 1080 frame, or 1080 x 1920
    with --tall, the cut upright phones get), steps its GSAP
