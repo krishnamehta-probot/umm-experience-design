@@ -193,7 +193,6 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
                       onClick={() => goTo(i)}
                     >
                       <span className="cf__station-num">{num(i)}</span>
-                      <span className="cf__station-name">{s.name}</span>
                     </button>
                   </li>
                 ))}

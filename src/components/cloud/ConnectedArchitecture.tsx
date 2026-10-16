@@ -198,7 +198,6 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
                       onClick={() => goTo(i)}
                     >
                       <span className="cf__station-num">{num(i)}</span>
-                      <span className="cf__station-name">{s.name}</span>
                     </button>
                   </li>
                 ))}

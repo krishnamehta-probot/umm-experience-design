@@ -4515,8 +4515,15 @@ html.cx-v2 body {
   letter-spacing: -0.02em;
 }
 
-/* a group's role in the workflow (Growth), as a last, quieter row */
+/* a group's role in the workflow (Growth), as a last, quieter row: sized
+   to its words, the tools sharing the rest, so it is never cut */
+.cx-kit__tiles:has(> .cx-kit__about) {
+  grid-auto-rows: auto;
+  grid-template-rows: repeat(var(--n), minmax(0, 1fr)) auto;
+}
+
 .cx-kit__tiles li.cx-kit__about {
+  padding-block: 12px;
   background: color-mix(in oklab, var(--p0) 45%, var(--umm-paper));
   font-family: var(--umm-font-body);
   font-size: clamp(0.875rem, 1vw, 1rem);

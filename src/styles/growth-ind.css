@@ -1,0 +1,504 @@
+/* ============================================================================
+   INTEGRATED GROWTH · THE BUSINESS MODELS' SCENES (growth/art.tsx)
+
+   Short loops, as Cloud's (cloud-ind.css holds the shared tile, confetti,
+   flecks): a thing arrives with a small overshoot, confetti pops, it
+   settles, round again. Transforms only, on groups with no transform of
+   their own.
+   ========================================================================== */
+
+.gr-ind * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ── B2B & SaaS ───────────────────────────────────────────────────────────── */
+
+.gr-ind--b2b {
+  --loop: 4.4s;
+}
+
+.gr-ind__lead {
+  animation: gr-lead var(--loop) ease-in infinite;
+  animation-delay: calc(var(--i) * 0.25s);
+}
+
+@keyframes gr-lead {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  8% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(0, 14px);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 14px);
+  }
+}
+
+/* the qualified one comes out of the funnel and down to the hands */
+.gr-ind__lead--won {
+  animation-name: gr-lead-won;
+}
+
+@keyframes gr-lead-won {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  8% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  36% {
+    opacity: 1;
+    transform: translateY(40px);
+  }
+  42%,
+  100% {
+    opacity: 0;
+    transform: translateY(44px);
+  }
+}
+
+.gr-ind__left {
+  animation: gr-left var(--loop) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.gr-ind__right {
+  animation: gr-right var(--loop) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes gr-left {
+  0%,
+  12% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(50px);
+  }
+  44% {
+    transform: translateX(46px);
+  }
+  70% {
+    transform: translateX(46px);
+  }
+  92%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes gr-right {
+  0%,
+  12% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(-50px);
+  }
+  44% {
+    transform: translateX(-46px);
+  }
+  70% {
+    transform: translateX(-46px);
+  }
+  92%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.gr-ind__burst--bump {
+  animation-name: gr-burst-bump;
+}
+
+@keyframes gr-burst-bump {
+  0%,
+  39% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  58%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.gr-ind__won {
+  animation: gr-pop var(--loop) cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+  --from: 42%;
+}
+
+@keyframes gr-pop {
+  0%,
+  42% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.4);
+  }
+  52%,
+  84% {
+    opacity: 1;
+    transform: none;
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* ── Retail & commerce ───────────────────────────────────────────────────── */
+
+.gr-ind--retail {
+  --loop: 4.6s;
+}
+
+.gr-ind__product {
+  animation: gr-product var(--loop) cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes gr-product {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  6% {
+    opacity: 1;
+  }
+  24%,
+  30% {
+    transform: translateY(0);
+  }
+  42% {
+    opacity: 1;
+    transform: translateY(26px);
+  }
+  44%,
+  100% {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+}
+
+.gr-ind__drop-hand {
+  animation: gr-drop-hand var(--loop) cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes gr-drop-hand {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  6% {
+    opacity: 1;
+  }
+  24%,
+  32% {
+    transform: translateY(0);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(-56px);
+  }
+  56%,
+  100% {
+    opacity: 0;
+    transform: translateY(-56px);
+  }
+}
+
+/* the bag takes it with a bounce */
+.gr-ind__bag {
+  transform-origin: bottom center;
+  animation: gr-bag var(--loop) ease-out infinite;
+}
+
+@keyframes gr-bag {
+  0%,
+  40% {
+    transform: none;
+  }
+  44% {
+    transform: scale(1.08, 0.9);
+  }
+  50% {
+    transform: scale(0.96, 1.05);
+  }
+  56%,
+  100% {
+    transform: none;
+  }
+}
+
+.gr-ind__burst--bag {
+  animation-name: gr-burst-bag;
+}
+
+@keyframes gr-burst-bag {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  48% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.gr-ind__again {
+  animation: gr-again var(--loop) cubic-bezier(0.3, 1.4, 0.5, 1) infinite;
+}
+
+@keyframes gr-again {
+  0%,
+  52% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-120deg);
+  }
+  64% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  86% {
+    opacity: 1;
+    transform: rotate(-360deg);
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: rotate(-360deg);
+  }
+}
+
+/* ── Education ───────────────────────────────────────────────────────────── */
+
+.gr-ind--edu {
+  --loop: 5s;
+}
+
+/* the pencil goes to each box in turn, then away */
+.gr-ind__writer {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: gr-writer var(--loop) cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+
+@keyframes gr-writer {
+  0% {
+    transform: translate(150px, 100px);
+  }
+  10%,
+  18% {
+    transform: translate(47px, 47px);
+  }
+  26%,
+  34% {
+    transform: translate(47px, 63px);
+  }
+  42%,
+  50% {
+    transform: translate(47px, 79px);
+  }
+  62%,
+  100% {
+    transform: translate(150px, 110px);
+  }
+}
+
+.gr-ind__tick {
+  stroke-dasharray: 14;
+  stroke-dashoffset: 14;
+  animation: gr-tick var(--loop) linear infinite;
+  animation-delay: calc(var(--i) * 0.8s);
+}
+
+@keyframes gr-tick {
+  0%,
+  13% {
+    stroke-dashoffset: 14;
+  }
+  18%,
+  92% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 14;
+  }
+}
+
+.gr-ind__cap {
+  animation: gr-cap var(--loop) cubic-bezier(0.3, 1.5, 0.5, 1) infinite;
+}
+
+@keyframes gr-cap {
+  0%,
+  56% {
+    opacity: 0;
+    transform: translateY(-20px) rotate(-14deg);
+  }
+  66%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.gr-ind__mail {
+  animation: gr-mail var(--loop) ease-out infinite;
+}
+
+@keyframes gr-mail {
+  0%,
+  66% {
+    opacity: 0;
+    transform: translate(-30px, 20px) scale(0.6);
+  }
+  74% {
+    opacity: 1;
+    transform: translate(-10px, 6px) scale(0.9);
+  }
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(10px, -6px);
+  }
+}
+
+/* ── Life sciences & technology ─────────────────────────────────────────── */
+
+.gr-ind--sci {
+  --loop: 4.8s;
+}
+
+.gr-ind__flask {
+  transform-origin: 30% 100%;
+  animation: gr-swirl 2.4s ease-in-out infinite;
+}
+
+@keyframes gr-swirl {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.gr-ind__liquid {
+  fill: var(--umm-tone, var(--umm-citrus));
+  stroke: none;
+}
+
+.gr-ind__bubble {
+  animation: gr-bubble 1.8s ease-in infinite;
+  animation-delay: calc(var(--i) * 0.5s);
+}
+
+@keyframes gr-bubble {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1.2);
+  }
+}
+
+.gr-ind__trend {
+  stroke-width: 2;
+  stroke-dasharray: 50;
+  animation: gr-trend var(--loop) ease-out infinite;
+}
+
+@keyframes gr-trend {
+  0%,
+  10% {
+    stroke-dashoffset: 50;
+  }
+  44%,
+  92% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 50;
+  }
+}
+
+.gr-ind__stamp {
+  animation: gr-stamp var(--loop) cubic-bezier(0.5, 0, 0.5, 1.6) infinite;
+}
+
+@keyframes gr-stamp {
+  0%,
+  46% {
+    opacity: 0;
+    transform: scale(1.8) rotate(-20deg);
+  }
+  56%,
+  92% {
+    opacity: 1;
+    transform: rotate(-8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-8deg);
+  }
+}
+
+.gr-ind__burst--stamp {
+  animation-name: gr-burst-stamp;
+}
+
+@keyframes gr-burst-stamp {
+  0%,
+  54% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gr-ind * {
+    animation: none !important;
+  }
+}

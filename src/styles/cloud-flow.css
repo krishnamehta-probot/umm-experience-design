@@ -228,14 +228,6 @@
   color: var(--umm-ink-paper);
 }
 
-.cf__station-name {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-}
-
 .cf__station:focus-visible {
   outline: 2px solid var(--umm-sky);
   outline-offset: 2px;

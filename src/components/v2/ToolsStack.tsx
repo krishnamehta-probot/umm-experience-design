@@ -129,7 +129,14 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
 function Tiles({ group, on }: { group: Group; on: boolean }) {
   const n = group.items.length
   return (
-    <ul className="cx-kit__tiles" data-ramp={group.tone} data-on={on} aria-hidden={!on} inert={!on}>
+    <ul
+      className="cx-kit__tiles"
+      data-ramp={group.tone}
+      data-on={on}
+      aria-hidden={!on}
+      inert={!on}
+      style={{ ['--n' as string]: n } as CSSProperties}
+    >
       {group.items.map((t, j) => (
         <li
           key={t}
