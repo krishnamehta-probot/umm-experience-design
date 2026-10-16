@@ -14,7 +14,19 @@
   overflow: hidden;
 }
 
-.cd-ind :is(.cd-ind__drop, .cd-ind__lift, .cd-ind__card, .cd-ind__crate, .cd-ind__take, .cd-ind__hold, .cd-ind__ping, .cd-ind__burst, .cd-ind__smoke circle, .cd-ind__sig) {
+.cd-ind
+  :is(
+    .cd-ind__drop,
+    .cd-ind__lift,
+    .cd-ind__card,
+    .cd-ind__crate,
+    .cd-ind__take,
+    .cd-ind__hold,
+    .cd-ind__ping,
+    .cd-ind__burst,
+    .cd-ind__smoke circle,
+    .cd-ind__sig
+  ) {
   transform-box: fill-box;
   transform-origin: center;
 }
