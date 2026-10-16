@@ -3,18 +3,26 @@
    ----------------------------------------------------------------------------
    Prefix ep__. 16 Oct, Krish: each service page's thinking section should
    show something its service would recognise, so the engineering factory is
-   told as a pull request history in a code tool's window. The heading, lead
-   and rule cards are the shared cd-arch__ ones (cloud-arch.css).
+   told as a pull request history in a code tool's window. Later on 16 Oct he
+   asked for it to be finished properly: more crafted, more premium. So the
+   board is now one lit window, built like a real developer tool, and the git
+   graph is its star. The heading, lead and rule cards are the shared cd-arch__
+   ones (cloud-arch.css).
 
-   The ink board: a window bar (the repo), the shared context as connected
-   integrations, then the log. The log is a lane holding the git graph (an
-   SVG drawn from the measured rows; the scroll lights it through a clip and
-   draws the loop back up) and the five stages as pull request cards, every
-   word in the page's flow. A card lit by the reading line ticks its check
-   and marks its file merged. The cards are two columns (the PR beside its
-   people) when the list is wide enough, one column otherwise. On a phone
-   the lane narrows and stays at the cards' left. Labels are Mosvita in
-   tracked capitals. Tokens only.
+   The window (the ink stage): its light follows the commit being read and
+   takes that stage's tone. The chrome: a title bar (traffic lights, the repo
+   in a pill, the tag with a live dot) over a toolbar holding the shared
+   context as connected integrations (a tone tile, the name, the role, a
+   synced dot; no boxes). The history: a lane holding the git graph (an SVG
+   drawn from the measured rows; the scroll lights it through a clip and a pen
+   rides its front) and the five stages as commit rows split by hairlines.
+   The row being read lifts onto a raised card. Inside a row, hairlines make a
+   cross: the PR on the left, who worked it on the right, the review gate and
+   the artifact underneath. Its check spins, then ticks; its artifact lands.
+
+   Five type styles inside the board: title (the commit message), body (the
+   description), item (artifact, tools, loop), small (people, gate) and label
+   (Mosvita in tracked capitals). Tokens only; no outlines on containers.
    ========================================================================== */
 
 .ep__intro {
@@ -22,175 +30,271 @@
   margin: 0 0 clamp(1.25rem, 2.6vw, 2rem);
 }
 
+/* --- the window ------------------------------------------------------------- */
+
 .ep__board {
-  --ep-line: var(--umm-ink-line-strong);
-  --ep-pad: clamp(14px, 2.4vw, 30px);
-  --ep-lane: 84px;
-  --ep-gap: clamp(10px, 1.6vw, 18px);
+  --ep-px: clamp(18px, 2.6vw, 40px);
+  --ep-lane: 128px;
+  --ep-gap: clamp(16px, 2vw, 26px);
+  --ep-cg: clamp(24px, 3vw, 48px);
+  --ep-text: calc(var(--ep-px) + var(--ep-lane) + var(--ep-gap));
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
-  border: 1px solid var(--umm-ink-line);
   border-radius: var(--cx-r-card, clamp(22px, 2.2vw, 32px));
-  background: var(--umm-ink);
+  background:
+    radial-gradient(50% 40% at 0% 0%, rgb(255 255 255 / 0.05), transparent 70%),
+    var(--umm-ink);
   color: var(--umm-ink-paper);
-  box-shadow: 0 40px 80px -48px rgb(16 14 20 / 0.6);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 24px 40px -24px rgb(16 14 20 / 0.45),
+    0 60px 90px -50px rgb(16 14 20 / 0.6);
+}
+
+/* the stage light, behind the commit being read (the .cx-fix__glow recipe).
+   A pastel at low strength on ink reads as grey haze (citrus and sun turn
+   olive), so the light is a lamp, not a wash: a hot core on the commit and a
+   quick falloff that only grazes the text. Its white heart (::after) is what
+   makes it read as light. Dim until a row is being read. */
+.ep__glow {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: min(520px, 140%);
+  aspect-ratio: 1;
+  background: var(--tone);
+  -webkit-mask-image: radial-gradient(
+    closest-side,
+    #000 0%,
+    rgb(0 0 0 / 0.62) 10%,
+    rgb(0 0 0 / 0.24) 30%,
+    rgb(0 0 0 / 0.08) 56%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    closest-side,
+    #000 0%,
+    rgb(0 0 0 / 0.62) 10%,
+    rgb(0 0 0 / 0.24) 30%,
+    rgb(0 0 0 / 0.08) 56%,
+    transparent 100%
+  );
+  opacity: 0.32;
+  filter: saturate(1.7);
+  pointer-events: none;
+  transform: translate(calc(var(--ep-px) + var(--ep-gx) - 50%), calc(var(--ep-gy) - 50%));
+  transition:
+    transform 1s var(--umm-ease-in-out),
+    opacity 0.8s var(--umm-ease-out),
+    background-color 0.8s var(--umm-ease-out);
+}
+
+.ep__glow::after {
+  content: '';
+  position: absolute;
+  inset: 41%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 100%);
+}
+
+.ep__board[data-reading] .ep__glow {
+  opacity: 0.78;
 }
 
 .ep__label {
+  margin: 0;
   font-family: var(--umm-font-display);
   font-size: var(--umm-text-micro);
   font-weight: var(--umm-weight-medium);
+  font-variant-numeric: tabular-nums;
   letter-spacing: var(--umm-tracking-label);
   line-height: 1.3;
   text-transform: uppercase;
   color: var(--umm-ink-paper-soft);
 }
 
-.ep__label--tone {
-  color: var(--tone);
+/* --- the chrome: title bar and toolbar ------------------------------------- */
+
+.ep__chrome {
+  position: relative;
+  z-index: 2;
+  border-bottom: 1px solid var(--umm-ink-line);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.01)),
+    var(--umm-ink-raise);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
-/* --- the window bar -------------------------------------------------------- */
-
 .ep__bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 10px 18px;
-  padding: 13px var(--ep-pad);
-  border-bottom: 1px solid var(--umm-ink-line);
-  background: var(--umm-ink-raise);
+  gap: 10px 16px;
+  padding: 12px var(--ep-px);
 }
 
 .ep__lights {
   display: inline-flex;
-  gap: 7px;
+  gap: 8px;
 }
 
 .ep__lights i {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--umm-coral);
+  background:
+    radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.55), transparent 55%),
+    var(--umm-coral);
+  box-shadow: inset 0 0 0 0.5px rgb(16 14 20 / 0.35);
 }
 
 .ep__lights i:nth-child(2) {
-  background: var(--umm-sun);
+  background-color: var(--umm-sun);
 }
 
 .ep__lights i:nth-child(3) {
-  background: var(--umm-citrus);
+  background-color: var(--umm-citrus);
 }
 
 .ep__repo,
 .ep__tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   font-family: var(--umm-font-display);
-  font-size: var(--umm-text-label);
+  font-size: var(--umm-text-micro);
   font-weight: var(--umm-weight-medium);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--umm-tracking-label);
   line-height: 1.3;
   text-transform: uppercase;
 }
 
-.ep__repo svg {
-  flex: none;
-  color: var(--umm-ink-paper-soft);
+.ep__repo {
+  justify-self: center;
+  padding: 7px 18px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  color: var(--umm-ink-paper);
+  text-align: center;
 }
 
 .ep__tag {
-  margin-left: auto;
-  padding: 6px 12px 6px 9px;
-  border: 1px solid var(--ep-line);
-  border-radius: 999px;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--umm-ink-paper-soft);
+  text-align: right;
 }
 
-.ep__tag svg {
+.ep__live {
   flex: none;
-  width: 16px;
-  height: 16px;
-  color: var(--umm-blossom);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--umm-blossom);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--umm-blossom) 20%, transparent),
+    0 0 12px color-mix(in srgb, var(--umm-blossom) 70%, transparent);
 }
 
-/* --- the shared context, as connected integrations ------------------------ */
-
+/* the shared context, as the window's connected integrations */
 .ep__context {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 18px;
-  padding: 14px var(--ep-pad);
-  border-bottom: 1px solid var(--umm-ink-line);
+  gap: 12px clamp(20px, 2.8vw, 40px);
+  padding: 13px var(--ep-px) 15px;
+  border-top: 1px solid var(--umm-ink-line);
 }
 
 .ep__context ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px clamp(20px, 2.8vw, 40px);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .ep__context li {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 12px 7px 8px;
-  border: 1px solid var(--ep-line);
-  border-radius: 12px;
-  background: var(--umm-ink-raise);
-  font-size: 0.8125rem;
-  color: var(--umm-ink-paper-soft);
+  gap: 11px;
 }
 
-.ep__context strong {
+.ep__tool {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 0.4) 0%, rgb(255 255 255 / 0) 45%),
+    linear-gradient(160deg, var(--tone) 40%, color-mix(in oklab, var(--tone) 78%, var(--umm-ink)) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.22),
+    0 8px 16px -8px rgb(0 0 0 / 0.7);
+}
+
+.ep__tool svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--umm-ink);
+  stroke: var(--umm-ink);
+  stroke-width: 0;
+}
+
+.ep__tool svg path {
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.ep__tool-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 9px;
+}
+
+.ep__tool-text strong {
   font-family: var(--umm-font-display);
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
   color: var(--umm-ink-paper);
 }
 
-.ep__tool-mark {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--umm-sky) 16%, var(--umm-ink));
-  color: var(--umm-sky);
+.ep__tool-text span {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--umm-ink-paper-soft);
 }
 
-.ep__tool-mark svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* connected: a quiet citrus pip */
-.ep__linked {
+.ep__synced {
+  flex: none;
   width: 6px;
   height: 6px;
-  margin-left: 2px;
   border-radius: 50%;
   background: var(--umm-citrus);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--umm-citrus) 18%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--umm-citrus) 16%, transparent);
 }
 
-/* --- the log: the lane and the cards ------------------------------------- */
+/* --- the history: the lane and the rows ----------------------------------- */
 
 .ep__log {
   position: relative;
-  padding: var(--ep-pad) var(--ep-pad) calc(var(--ep-pad) + 10px)
-    calc(var(--ep-pad) + var(--ep-lane) + var(--ep-gap));
+  z-index: 1;
+  padding-top: clamp(26px, 3vw, 44px);
 }
 
 .ep__lane {
   position: absolute;
+  z-index: 2;
   top: 0;
   bottom: 0;
-  left: var(--ep-pad);
+  left: var(--ep-px);
   width: var(--ep-lane);
   pointer-events: none;
 }
@@ -207,60 +311,76 @@
 }
 
 .ep__track path {
-  stroke: var(--umm-ink-line-strong);
-  stroke-width: 2;
+  stroke: rgb(255 255 255 / 0.1);
+  stroke-width: 3;
 }
 
+.ep__track path:first-child {
+  stroke: rgb(255 255 255 / 0.2);
+}
+
+/* the loop's way back up is not drawn until the loop climbs it (a line
+   down the whole window beside the text read as a ruler or a column rule) */
 .ep__track .ep__track-loop {
-  stroke-dasharray: 2 6;
+  stroke: none;
 }
 
 .ep__lit path {
-  stroke-width: 2.5;
+  stroke-width: 3;
 }
 
-.ep__lit-feature {
+.ep__lit .ep__lit-main {
+  stroke: var(--umm-ink-paper);
+}
+
+.ep__lit .ep__lit-par {
   stroke: var(--umm-sky);
 }
 
-.ep__lit-main {
-  stroke: var(--umm-citrus);
-}
-
-.ep__lit-evolve {
+.ep__lit .ep__lit-evolve {
   stroke: var(--umm-coral);
 }
 
 .ep__graph .ep__lit-loop {
   stroke: var(--umm-lilac);
-  stroke-width: 2.5;
+  stroke-width: 3;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
 }
 
 .ep__graph .ep__arrow {
-  stroke: var(--umm-ink-line-strong);
-  stroke-width: 2.5;
-  transition: stroke 0.4s var(--umm-ease-out);
-}
-
-.ep__graph .ep__arrow[data-on] {
   stroke: var(--umm-lilac);
+  stroke-width: 2.5;
+  opacity: 0;
+  transition: opacity 0.4s var(--umm-ease-out);
 }
 
-/* a commit: dark until its card is reached, then its stage's tone */
-.ep__dot,
+.ep__board[data-looped] .ep__arrow {
+  opacity: 1;
+}
+
+.ep__graph .ep__pen {
+  stroke: none;
+}
+
+/* a commit: hollow until the line reaches it, then its stage's tone, lit */
 .ep__halo,
-.ep__core,
-.ep__loop-dot {
+.ep__pulse,
+.ep__burst,
+.ep__dot,
+.ep__mini {
   transform-box: fill-box;
   transform-origin: center;
 }
 
+.ep__ring {
+  fill: var(--umm-ink);
+}
+
 .ep__dot {
   fill: var(--umm-ink);
-  stroke: var(--umm-ink-line-strong);
-  stroke-width: 2.5;
+  stroke: rgb(255 255 255 / 0.32);
+  stroke-width: 2;
   transition:
     fill 0.35s var(--umm-ease-out),
     stroke 0.35s var(--umm-ease-out),
@@ -270,52 +390,137 @@
 .ep__halo {
   fill: var(--tone);
   opacity: 0;
-  transform: scale(0.4);
-  transition:
-    opacity 0.4s var(--umm-ease-out),
-    transform 0.6s var(--umm-ease-out);
-}
-
-.ep__core {
-  fill: var(--umm-ink-line-strong);
+  transition: opacity 0.45s var(--umm-ease-out);
 }
 
 .ep__commit[data-on] .ep__dot {
   fill: var(--tone);
   stroke: var(--tone);
-  transform: scale(1.12);
+  transform: scale(1.08);
 }
 
 .ep__commit[data-on] .ep__halo {
-  opacity: 0.22;
-  transform: scale(1);
+  opacity: 0.6;
 }
 
-.ep__commit[data-on] .ep__core {
-  fill: var(--umm-ink);
+/* the commit being read: one slow pulse ring, the section's only loop
+   (the cx-path-ring recipe) */
+.ep__commit[data-active] .ep__halo {
+  opacity: 0.95;
 }
 
-/* the merge commit sits a touch larger, ringed */
-.ep__commit[data-merge] .ep__dot {
-  stroke-width: 3.5;
+.ep__pulse {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 1.5;
+  opacity: 0;
 }
 
-.ep__loop-dot {
-  fill: var(--umm-ink);
-  stroke: var(--umm-ink-line-strong);
-  stroke-width: 2;
+.ep__commit[data-active] .ep__pulse {
+  animation: ep-pulse 2.2s ease-out infinite;
+}
+
+@keyframes ep-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+/* the merge into main: a ring, and a burst as the branch lands */
+.ep__merge-ring {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.22);
+  stroke-width: 1.5;
   transition: stroke 0.4s var(--umm-ease-out);
 }
 
-.ep__loop-dot[data-on] {
-  stroke: var(--umm-lilac);
+.ep__commit[data-on] .ep__merge-ring {
+  stroke: var(--tone);
 }
 
-/* --- a pull request -------------------------------------------------------- */
+.ep__burst {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 2;
+  opacity: 0;
+}
+
+.ep__commit[data-on] .ep__burst {
+  animation: ep-burst 1.5s cubic-bezier(0.25, 0.6, 0.35, 1) both;
+}
+
+.ep__commit[data-on] .ep__burst--late {
+  animation-delay: 0.22s;
+}
+
+/* the merge commit takes the branch with a spring */
+.ep__commit[data-merge][data-on] .ep__dot {
+  animation: ep-pop 0.8s var(--umm-ease-spring) both;
+}
+
+@keyframes ep-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  12% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.6);
+  }
+}
+
+@keyframes ep-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+/* Build's parallel commits */
+.ep__mini {
+  fill: var(--umm-ink);
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 2;
+  transition:
+    fill 0.35s var(--umm-ease-out),
+    stroke 0.35s var(--umm-ease-out);
+}
+
+.ep__mini[data-on] {
+  fill: var(--umm-sky);
+  stroke: var(--umm-ink);
+}
+
+/* the pen: the front of the drawing */
+.ep__head {
+  transition: opacity 0.3s var(--umm-ease-out);
+}
+
+.ep__head-glow {
+  fill: var(--umm-ink-paper);
+  opacity: 0.75;
+}
+
+.ep__head-core {
+  fill: var(--umm-ink-paper);
+}
+
+/* --- a commit row ------------------------------------------------------------ */
 
 .ep__prs {
-  display: grid;
-  gap: clamp(14px, 1.8vw, 20px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -323,337 +528,788 @@
 }
 
 .ep__pr {
+  position: relative;
+  padding: clamp(24px, 2.6vw, 34px) var(--ep-px) clamp(26px, 2.8vw, 36px) var(--ep-text);
+}
+
+/* the raised card under the row being read (the on-ink card recipe) */
+.ep__pr::before {
+  content: '';
+  position: absolute;
+  inset: 6px clamp(8px, 1vw, 14px);
+  border-radius: clamp(16px, 1.6vw, 22px);
+  background:
+    radial-gradient(70% 90% at 0% 0%, color-mix(in srgb, var(--tone) 10%, transparent), transparent 70%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.055), rgb(255 255 255 / 0.03));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 30px 60px -34px rgb(0 0 0 / 0.7);
+  opacity: 0;
+  transition: opacity 0.45s var(--umm-ease-out);
+}
+
+.ep__pr[data-active]::before {
+  opacity: 1;
+}
+
+/* the hairline between rows, from the text column across */
+.ep__pr + .ep__pr::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--ep-text);
+  right: var(--ep-px);
+  height: 1px;
+  background: var(--umm-ink-line);
+  transition: opacity 0.35s var(--umm-ease-out);
+}
+
+.ep__pr[data-active]::after,
+.ep__pr[data-active] + .ep__pr::after {
+  opacity: 0;
+}
+
+.ep__pr-in {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas:
-    'head'
-    'title'
-    'desc'
-    'people'
-    'checks'
-    'file';
-  gap: 14px;
-  padding: clamp(16px, 2vw, 26px);
-  border: 1px solid var(--ep-line);
-  border-radius: 18px;
-  background: var(--umm-ink-raise);
-  transition: border-color 0.5s var(--umm-ease-out);
 }
 
-.ep__pr[data-on] {
-  border-color: color-mix(in srgb, var(--tone) 38%, var(--umm-ink-line-strong));
-}
-
-.ep__pr-head {
-  grid-area: head;
+.ep__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-}
-
-.ep__pr-mark {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--tone) 16%, var(--umm-ink));
-  color: var(--tone);
-}
-
-.ep__pr-mark svg {
-  width: 18px;
-  height: 18px;
-}
-
-.ep__title {
-  grid-area: title;
-  margin: 0;
+  gap: 6px 12px;
+  margin: 0 0 12px;
   font-family: var(--umm-font-display);
-  font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+  font-size: var(--umm-text-micro);
   font-weight: var(--umm-weight-medium);
-  letter-spacing: -0.03em;
-  line-height: 1.08;
-  text-wrap: balance;
-}
-
-.ep__desc {
-  grid-area: desc;
-  margin: 0;
-  max-width: 52ch;
-  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--umm-tracking-label);
+  line-height: 1.3;
+  text-transform: uppercase;
   color: var(--umm-ink-paper-soft);
 }
 
-/* who directs and who assists, as the PR's people */
-.ep__people {
-  grid-area: people;
-  display: grid;
-  align-content: start;
-  gap: 14px;
+.ep__stage {
+  color: var(--umm-ink-paper);
+  transition:
+    color 0.4s var(--umm-ease-out),
+    text-shadow 0.4s var(--umm-ease-out);
+}
+
+.ep__pr[data-active] .ep__stage {
+  color: var(--tone);
+  text-shadow: 0 0 34px color-mix(in srgb, var(--tone) 55%, transparent);
+}
+
+.ep__hash {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.ep__hash::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 12px 0 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.3);
+  vertical-align: middle;
+}
+
+/* the release's version tag: cut, with a spring, as the branch merges */
+.ep__vtag {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--umm-ink-paper-soft);
+  transition:
+    background-color 0.35s var(--umm-ease-out),
+    color 0.35s var(--umm-ease-out),
+    transform 0.5s var(--umm-ease-spring);
+}
+
+.ep__pr[data-on] .ep__vtag {
+  background: var(--umm-sun);
+  color: var(--umm-ink);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--umm-sun) 40%, transparent);
+  animation: ep-cut 0.6s var(--umm-ease-spring) 0.15s both;
+}
+
+@keyframes ep-cut {
+  0% {
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ep__title {
   margin: 0;
-  padding: 14px 0 0;
-  border-top: 1px solid var(--umm-ink-line);
-  list-style: none;
+  max-width: 24ch;
+  font-family: var(--umm-font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-wrap: balance;
+  color: var(--umm-ink-paper);
+  opacity: 0.42;
+  transition:
+    opacity 0.4s var(--umm-ease-out),
+    text-shadow 0.4s var(--umm-ease-out);
 }
 
-.ep__people li {
+.ep__pr[data-on] .ep__title {
+  opacity: 1;
+}
+
+.ep__pr[data-active] .ep__title {
+  text-shadow: 0 0 28px rgb(255 255 255 / 0.25);
+}
+
+.ep__desc {
+  margin: 12px 0 0;
+  max-width: 52ch;
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  line-height: 1.55;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.4s var(--umm-ease-out);
+}
+
+/* the row being read is lit: its sentences turn from soft to paper (never
+   dimmer than --umm-ink-paper-soft at full opacity elsewhere) */
+.ep__pr[data-active] .ep__desc,
+.ep__pr[data-active] .ep__people dd,
+.ep__pr[data-active] .ep__gate-text {
+  color: var(--umm-ink-paper);
+}
+
+/* who worked the row */
+.ep__people {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 12px;
+  gap: 16px;
+  margin: 20px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--umm-ink-line);
 }
 
-.ep__people p {
-  margin: 5px 0 0;
+.ep__people dt {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ep__people dd {
+  margin: 7px 0 0;
+  max-width: 48ch;
   font-size: 0.9375rem;
   line-height: 1.5;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.4s var(--umm-ease-out);
 }
 
 .ep__avatar {
-  display: grid;
+  display: inline-grid;
+  flex: none;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--umm-lilac) 22%, var(--umm-ink));
-  color: var(--umm-lilac);
+  background: radial-gradient(
+    circle at 32% 28%,
+    var(--umm-paper) 0%,
+    var(--umm-lilac) 40%,
+    color-mix(in oklab, var(--umm-lilac) 55%, var(--umm-ink)) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.2),
+    0 3px 6px -2px rgb(0 0 0 / 0.6);
 }
 
-.ep__avatar--agent {
-  background: color-mix(in srgb, var(--umm-citrus) 14%, var(--umm-ink));
-  color: var(--umm-citrus);
+.ep__avatar[data-agent] {
+  background: radial-gradient(
+    circle at 32% 28%,
+    var(--umm-paper) 0%,
+    var(--umm-citrus) 42%,
+    color-mix(in oklab, var(--umm-citrus) 50%, var(--umm-ink)) 100%
+  );
 }
 
 .ep__avatar svg {
-  width: 18px;
-  height: 18px;
+  width: 10px;
+  height: 10px;
+  fill: var(--umm-ink);
 }
 
-/* the review gate, as the required check */
-.ep__checks {
-  grid-area: checks;
-  overflow: hidden;
-  border: 1px solid var(--ep-line);
-  border-radius: 14px;
-  background: var(--umm-ink);
-}
-
-.ep__checks-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--umm-ink-line);
-}
-
-.ep__checks-head svg {
-  width: 16px;
-  height: 16px;
-  color: var(--umm-sky);
-}
-
-.ep__check {
+/* the review gate: the row's required check */
+.ep__gate {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 26px minmax(0, 1fr);
   align-items: start;
-  gap: 12px;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--umm-ink-line);
+}
+
+.ep__gate .ep__label {
+  margin-bottom: 5px;
+}
+
+.ep__gate-text {
   margin: 0;
-  padding: 13px 14px;
+  max-width: 48ch;
   font-size: 0.9375rem;
   line-height: 1.5;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.4s var(--umm-ease-out);
 }
 
 .ep__tick {
   position: relative;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  margin-top: 0.5px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  color: var(--umm-ink);
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.22);
+  transition:
+    background-color 0.35s var(--umm-ease-out),
+    box-shadow 0.35s var(--umm-ease-out),
+    transform 0.35s var(--umm-ease-out);
 }
 
-/* pending: a turning dashed ring in sun */
-.ep__tick::before {
-  content: '';
+/* the run: an arc that turns while the check runs */
+.ep__tick i {
   position: absolute;
   inset: 0;
-  border: 2px dashed var(--umm-sun);
+  border: 2px solid transparent;
+  border-top-color: var(--tone);
+  border-right-color: var(--tone);
   border-radius: 50%;
-  animation: ep-turn 3s linear infinite;
-  transition:
-    border-color 0.3s var(--umm-ease-out) 0.25s,
-    background-color 0.3s var(--umm-ease-out) 0.25s;
+  opacity: 0;
 }
 
 .ep__tick svg {
   position: relative;
   width: 16px;
   height: 16px;
-}
-
-.ep__tick-mark {
-  stroke: currentColor;
-  stroke-width: 2.6;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 0.4s var(--umm-ease-out) 0.45s;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.4s var(--umm-ease-out);
 }
 
-.ep__pr[data-on] .ep__tick::before {
-  border-style: solid;
-  border-color: var(--umm-citrus);
-  background-color: var(--umm-citrus);
-  animation: none;
+.ep__pr[data-on] .ep__tick i {
+  animation: ep-run 0.9s linear both;
 }
 
-.ep__pr[data-on] .ep__tick-mark {
+.ep__pr[data-on] .ep__tick {
+  background: var(--tone);
+  box-shadow:
+    inset 0 0 0 1.5px var(--umm-ink),
+    0 0 18px color-mix(in srgb, var(--tone) 45%, transparent);
+  transform: rotate(-8deg);
+  transition-delay: 0.85s;
+}
+
+.ep__pr[data-on] .ep__tick svg {
   stroke-dashoffset: 0;
+  transition-delay: 0.95s;
 }
 
-@keyframes ep-turn {
-  to {
-    transform: rotate(360deg);
+@keyframes ep-run {
+  0% {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(640deg);
   }
 }
 
-/* the delivery artifact, as the file it merges */
+/* the delivery artifact: the file the row lands */
 .ep__file {
-  grid-area: file;
   display: grid;
-  justify-items: start;
-  gap: 8px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-areas:
+    'doc text'
+    'doc viz';
+  align-items: start;
+  gap: 10px 14px;
+  margin-top: 18px;
 }
 
-.ep__chip {
+.ep__file > div {
+  grid-area: text;
+}
+
+.ep__file .ep__label {
+  margin-bottom: 5px;
+}
+
+.ep__file-name {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: 1.0625rem;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--umm-ink-paper);
+}
+
+.ep__doc {
+  grid-area: doc;
+  width: 24px;
+  height: 28px;
+  overflow: visible;
+  filter: drop-shadow(0 6px 6px rgb(0 0 0 / 0.45));
+}
+
+.ep__doc-body {
+  fill: rgb(255 255 255 / 0.08);
+  stroke: var(--umm-ink-line-strong);
+  stroke-width: 1.2;
+  transition:
+    fill 0.4s var(--umm-ease-out),
+    stroke 0.4s var(--umm-ease-out);
+}
+
+.ep__doc-fold {
+  fill: rgb(255 255 255 / 0.14);
+  transition: fill 0.4s var(--umm-ease-out);
+}
+
+.ep__doc-hole {
+  fill: var(--umm-ink);
+}
+
+.ep__doc-line {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transition: stroke 0.4s var(--umm-ease-out);
+}
+
+.ep__pr[data-on] .ep__doc-body {
+  fill: var(--tone);
+  stroke: color-mix(in oklab, var(--tone) 70%, var(--umm-ink));
+  transition-delay: 1.05s;
+}
+
+.ep__pr[data-on] .ep__doc-fold {
+  fill: color-mix(in oklab, var(--tone) 72%, var(--umm-ink));
+  transition-delay: 1.05s;
+}
+
+.ep__pr[data-on] .ep__doc-line {
+  stroke: rgb(16 14 20 / 0.5);
+  transition-delay: 1.05s;
+}
+
+/* each artifact's readout (illustration only). It is not there until the
+   row's check has passed, then it lands (grey blocks at rest read as an
+   empty state) */
+.ep__viz {
+  grid-area: viz;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  max-width: 100%;
-  margin: 0;
-  padding: 9px 12px;
-  border: 1px solid var(--ep-line);
-  border-radius: 10px;
-  background: var(--umm-ink);
-  font-family: var(--umm-font-display);
-  font-size: 1rem;
-  font-weight: var(--umm-weight-medium);
-  line-height: 1.3;
-  transition: border-color 0.4s var(--umm-ease-out) 0.7s;
+  gap: 8px;
+  min-height: 18px;
+  opacity: 0;
+  translate: 0 6px;
+  transition:
+    opacity 0.45s var(--umm-ease-out),
+    translate 0.45s var(--umm-ease-out);
 }
 
-.ep__chip > svg {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  color: var(--umm-ink-paper-soft);
-  transition: color 0.4s var(--umm-ease-out) 0.7s;
+.ep__pr[data-on] .ep__viz {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 1.05s;
 }
 
-.ep__pr[data-on] .ep__chip {
-  border-color: color-mix(in srgb, var(--umm-citrus) 45%, var(--umm-ink-line-strong));
-}
-
-.ep__pr[data-on] .ep__chip > svg {
-  color: var(--umm-citrus);
-}
-
-/* the diff stat: five small blocks that fill as the file merges */
-.ep__diff {
-  display: inline-flex;
-  flex: none;
-  gap: 2px;
-  margin-left: 4px;
-}
-
-.ep__diff i {
-  width: 7px;
-  height: 7px;
+.ep__viz i {
+  display: block;
   border-radius: 2px;
-  background: var(--umm-ink-line-strong);
+  background: rgb(255 255 255 / 0.12);
   transition: background-color 0.3s var(--umm-ease-out);
 }
 
-.ep__pr[data-on] .ep__diff i:nth-child(-n + 3) {
+.ep__add,
+.ep__del {
+  font-family: var(--umm-font-display);
+  font-size: var(--umm-text-micro);
+  font-weight: var(--umm-weight-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--umm-ink-paper-soft);
+  transition: color 0.3s var(--umm-ease-out);
+}
+
+.ep__blocks {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.ep__blocks i {
+  width: 8px;
+  height: 8px;
+}
+
+.ep__pr[data-on] .ep__add {
+  color: var(--umm-citrus);
+  transition-delay: 1.15s;
+}
+
+.ep__pr[data-on] .ep__del {
+  color: var(--umm-coral);
+  transition-delay: 1.15s;
+}
+
+.ep__pr[data-on] .ep__blocks i[data-k='add'] {
   background: var(--umm-citrus);
 }
 
-.ep__pr[data-on] .ep__diff i:nth-child(4) {
+.ep__pr[data-on] .ep__blocks i[data-k='del'] {
   background: var(--umm-coral);
 }
 
-.ep__pr[data-on] .ep__diff i:nth-child(1) {
-  transition-delay: 0.75s;
-}
-.ep__pr[data-on] .ep__diff i:nth-child(2) {
-  transition-delay: 0.82s;
-}
-.ep__pr[data-on] .ep__diff i:nth-child(3) {
-  transition-delay: 0.89s;
-}
-.ep__pr[data-on] .ep__diff i:nth-child(4) {
-  transition-delay: 0.96s;
+/* Validate's readout: the check suite, as a matrix of runs that pass in
+   order */
+.ep__viz--tests {
+  display: inline-grid;
+  grid-template-rows: repeat(2, 6px);
+  grid-auto-flow: column;
+  grid-auto-columns: 6px;
+  gap: 2px;
 }
 
-/* a wide list: the PR on the left, its people in a side column */
-@container ep-list (min-width: 700px) {
-  .ep__pr {
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto 1fr;
+.ep__viz--tests i {
+  width: 6px;
+  height: 6px;
+  border-radius: 1.5px;
+}
+
+.ep__pr[data-on] .ep__viz.ep__viz--tests i:nth-child(n) {
+  background: var(--umm-citrus);
+  transition-delay: calc(1.15s + var(--k) * 45ms);
+}
+
+.ep__viz--roll {
+  gap: 3px;
+}
+
+.ep__viz--roll i {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.ep__viz--roll i:nth-child(1) {
+  width: 6px;
+}
+
+.ep__viz--roll i:nth-child(2) {
+  width: 12px;
+}
+
+.ep__viz--roll i:nth-child(3) {
+  width: 22px;
+}
+
+.ep__viz--roll i:nth-child(4) {
+  width: 38px;
+}
+
+.ep__pr[data-on] .ep__viz--roll i {
+  background: var(--umm-sun);
+}
+
+/* the readouts fill in a stagger, once the check has passed */
+.ep__pr[data-on] .ep__viz i:nth-child(1) {
+  transition-delay: 1.15s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(2) {
+  transition-delay: 1.22s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(3) {
+  transition-delay: 1.29s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(4) {
+  transition-delay: 1.36s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(5) {
+  transition-delay: 1.43s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(6) {
+  transition-delay: 1.5s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(7) {
+  transition-delay: 1.57s;
+}
+.ep__pr[data-on] .ep__viz i:nth-child(8) {
+  transition-delay: 1.64s;
+}
+
+/* Evolve's readout: the production signal, coming back */
+.ep__viz--signal svg {
+  display: block;
+  width: 96px;
+  height: 26px;
+  overflow: visible;
+}
+
+.ep__signal-area {
+  fill: var(--umm-coral);
+  opacity: 0;
+  transition: opacity 0.6s var(--umm-ease-out);
+}
+
+.ep__signal-line {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.22);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.ep__pr[data-on] .ep__signal-area {
+  opacity: 0.18;
+  transition-delay: 1.3s;
+}
+
+.ep__pr[data-on] .ep__signal-line {
+  stroke: var(--umm-coral);
+  animation: ep-signal 1.1s var(--umm-ease-out) 1.1s both;
+}
+
+@keyframes ep-signal {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- the loop: production feedback returning ------------------------------- */
+
+.ep__loop {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: clamp(20px, 2.4vw, 28px) var(--ep-px) clamp(38px, 4vw, 56px) var(--ep-text);
+}
+
+/* the same hairline as between rows, gone while the last row is raised (its
+   card is the edge then; both together read as a double line) */
+.ep__loop::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--ep-text);
+  right: var(--ep-px);
+  height: 1px;
+  background: var(--umm-ink-line);
+  transition: opacity 0.35s var(--umm-ease-out);
+}
+
+.ep__prs:has(> .ep__pr:last-child[data-active]) + .ep__loop::before {
+  opacity: 0;
+}
+
+.ep__loop-text {
+  font-family: var(--umm-font-display);
+  font-size: 1.0625rem;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--umm-ink-paper-soft);
+  transition:
+    color 0.45s var(--umm-ease-out),
+    text-shadow 0.45s var(--umm-ease-out);
+}
+
+.ep__loop[data-on] .ep__loop-text {
+  color: var(--umm-lilac);
+  text-shadow: 0 0 34px color-mix(in srgb, var(--umm-lilac) 55%, transparent);
+}
+
+/* --- a wide row: the PR on the left, who worked it on the right, the gate
+   and the artifact underneath, split by a cross of hairlines -------------- */
+
+@container ep-list (min-width: 640px) {
+  .ep__people {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .ep__people > div:first-child {
+    padding-right: var(--ep-cg);
+  }
+
+  .ep__people > div + div {
+    padding-left: var(--ep-cg);
+    border-left: 1px solid var(--umm-ink-line);
+  }
+
+  .ep__pr-in {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
-      'head   people'
-      'title  people'
-      'desc   people'
-      'checks people'
-      'file   people';
-    column-gap: clamp(22px, 3vw, 40px);
+      'meta   meta'
+      'title  title'
+      'desc   desc'
+      'people people'
+      'gate   file';
+  }
+
+  .ep__meta {
+    grid-area: meta;
+  }
+
+  .ep__title {
+    grid-area: title;
+  }
+
+  .ep__desc {
+    grid-area: desc;
   }
 
   .ep__people {
+    grid-area: people;
+  }
+
+  .ep__gate {
+    grid-area: gate;
+    padding-right: var(--ep-cg);
+  }
+
+  .ep__file {
+    grid-area: file;
+    margin-top: 20px;
+    padding: 18px 0 0 var(--ep-cg);
+    border-top: 1px solid var(--umm-ink-line);
+    border-left: 1px solid var(--umm-ink-line);
+  }
+}
+
+@container ep-list (min-width: 900px) {
+  .ep__pr-in {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      'meta  people'
+      'title people'
+      'desc  people'
+      'gate  file';
+  }
+
+  .ep__meta,
+  .ep__title,
+  .ep__desc,
+  .ep__gate {
+    padding-right: var(--ep-cg);
+  }
+
+  .ep__desc {
+    margin-top: 14px;
+    padding-bottom: 26px;
+  }
+
+  .ep__people {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
     gap: 20px;
-    padding: 2px 0 0 clamp(18px, 2.4vw, 30px);
+    margin: 0;
+    padding: 2px 0 26px var(--ep-cg);
     border-top: 0;
     border-left: 1px solid var(--umm-ink-line);
   }
 
-  .ep__checks {
-    margin-top: 4px;
+  .ep__people > div:first-child,
+  .ep__people > div + div {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .ep__gate,
+  .ep__file {
+    margin-top: 0;
+    padding-top: 20px;
+  }
+
+  .ep__file {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    grid-template-areas: 'doc text viz';
+  }
+
+  .ep__viz {
+    align-self: end;
+    margin-bottom: 3px;
   }
 }
 
-/* the loop row: production feedback returning */
-.ep__loop {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  padding: 22px 0 6px;
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  color: var(--umm-ink-paper-soft);
-  transition: color 0.4s var(--umm-ease-out);
+/* --- tablets and phones ------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .ep__board {
+    --ep-lane: 96px;
+  }
 }
 
-.ep__loop svg {
-  flex: none;
-  color: var(--umm-lilac);
+/* tablets: the repo pill steps left so the tag keeps its line at the right */
+@media (max-width: 900px) {
+  .ep__bar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .ep__repo {
+    justify-self: start;
+  }
 }
 
-.ep__loop[data-on] {
-  color: var(--umm-ink-paper);
-}
+/* phones: the tag drops under the lights and the repo */
+@media (max-width: 640px) {
+  .ep__bar {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
 
-/* --- phones ---------------------------------------------------------------- */
+  .ep__tag {
+    grid-column: 1 / -1;
+    justify-self: start;
+    text-align: left;
+  }
+}
 
 @media (max-width: 640px) {
   .ep__board {
-    --ep-pad: 12px;
-    --ep-lane: 38px;
-    --ep-gap: 8px;
+    --ep-px: 14px;
+    --ep-lane: 26px;
+    --ep-gap: 10px;
   }
 
   .ep__bar,
@@ -661,36 +1317,97 @@
     padding-inline: 16px;
   }
 
-  .ep__tag {
-    margin-left: 0;
+  .ep__repo {
+    padding: 6px 12px;
+  }
+
+  /* the integrations as a settings list: one row each, the synced dots in
+     a column at the right */
+  .ep__context ul {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .ep__synced {
+    margin-left: auto;
   }
 
   .ep__pr {
-    padding: 16px 14px;
+    padding-block: 22px 24px;
+  }
+
+  .ep__pr::before {
+    inset: 4px 6px;
     border-radius: 16px;
   }
 
-  .ep__dot {
+  .ep__title {
+    font-size: 1.5rem;
+  }
+
+  .ep__track path,
+  .ep__lit path,
+  .ep__graph .ep__lit-loop {
     stroke-width: 2;
+  }
+
+  .ep__graph .ep__arrow {
+    stroke-width: 2;
+  }
+
+  .ep__dot,
+  .ep__mini {
+    stroke-width: 1.5;
+  }
+
+  .ep__merge-ring {
+    stroke-width: 1.2;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ep__tick::before {
-    animation: none;
-  }
-
+  .ep__glow,
   .ep__dot,
   .ep__halo,
-  .ep__pr,
-  .ep__tick::before,
-  .ep__tick-mark,
-  .ep__chip,
-  .ep__chip > svg,
-  .ep__diff i,
-  .ep__loop,
-  .ep__graph .ep__arrow,
-  .ep__loop-dot {
+  .ep__mini,
+  .ep__merge-ring,
+  .ep__head,
+  .ep__pr::before,
+  .ep__pr::after,
+  .ep__stage,
+  .ep__title,
+  .ep__tick,
+  .ep__tick svg,
+  .ep__doc-body,
+  .ep__doc-fold,
+  .ep__doc-line,
+  .ep__viz,
+  .ep__viz i,
+  .ep__desc,
+  .ep__people dd,
+  .ep__gate-text,
+  .ep__loop::before,
+  .ep__add,
+  .ep__del,
+  .ep__signal-area,
+  .ep__loop-text,
+  .ep__vtag,
+  .ep__graph .ep__arrow {
     transition: none !important;
+  }
+
+  .ep__tick i,
+  .ep__burst,
+  .ep__commit[data-active] .ep__pulse,
+  .ep__commit[data-merge][data-on] .ep__dot,
+  .ep__pr[data-on] .ep__vtag,
+  .ep__pr[data-on] .ep__signal-line {
+    animation: none !important;
+  }
+
+  .ep__pr[data-on] .ep__tick i,
+  .ep__burst {
+    opacity: 0;
   }
 }

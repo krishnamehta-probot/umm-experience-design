@@ -1,46 +1,53 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 /* ============================================================================
    INTEGRATED GROWTH · THE GROWTH CURVE'S DRAWING (GrowthSystem's)
 
-   16 Oct, Krish's approved concept: the growth system as one large chart.
-   This hook measures the cards' pins inside the chart (.gc__plot) and draws
-   the chart's lines through them, then draws them in as the reader scrolls:
-   stroke-dashoffset from how far the reader is through the section, once
-   per animation frame from a passive listener. Scrolling stays native.
+   16 Oct, Krish's approved concept: the growth system as one chart. Later
+   the same day he asked for the execution to be lifted to a premium grade:
+   one confident curve, a live tip that leads the reader, numbers that roll,
+   the four workflows as ribbons, the chart reading as one designed piece.
 
-   Wide (the four columns): the system's line climbs from the axis through
-   the four pins, each card further right and up, to the top-right of the
-   plot; the four workflows fan off the axis below, each line rising to
-   the pin over its card. Narrow (the stacked cards): the line is a rail
-   down the cards' left edge that splits into four lanes, one to each
-   workflow. A pin lights (data-on on its card) when its line reaches it.
-   With reduced motion everything is drawn and lit from the start.
+   This hook draws the chart (.gc__plot) and runs it from the reader's place:
+   once per animation frame from passive listeners, scrolling native.
+
+     - the system's curve climbs through its four pins: on a tall window the
+       chart is held (sticky) above the four stage rows and the curve's tip
+       sits on the row being read; on a short one it draws as the chart
+       crosses the screen
+     - each pin lights (tone, pop, one pulse, its number rolling) as the
+       line reaches it, and its stage row ticks as it is read
+     - then the four workflows rise as four ribbons, each from its own point
+       on the baseline, one as its card is read; the one chosen in the
+       legend (or the one being read) is drawn in ink and its card lifts
+     - the held chart lets go as the last workflow card reaches it: from
+       there it rides up just above that card, so the last words never pass
+       under it and it needs no empty slot to land in
+
+   Only transform, stroke-dashoffset, opacity and a clip rect change per
+   frame; the drawing's geometry is measured on resize. With reduced motion
+   everything is drawn and lit from the start.
    ========================================================================== */
-
-/** the width at which the chart takes its four columns (growth-curve.css) */
-export const GC_WIDE = '(min-width: 1200px)'
 
 type Pt = { x: number; y: number }
 
-type Series = {
-  /** the ribbon and the ink line, the same path */
-  lines: SVGPathElement[]
-  area: SVGPathElement | null
-  head: SVGCircleElement | null
-  len: number
-  /** length → height down the plot, for the stacked cards */
-  samples: { l: number; y: number }[]
-  pins: { li: HTMLElement; at: number }[]
-  /** the list whose place on screen runs the line (wide) */
-  run: HTMLElement
-  delay: number
-  /** the head stays at the end of the line once drawn */
-  keepHead: boolean
-}
+/** the system's curve as fractions of the plot (x across, y up from the
+ *  baseline): its start, the four pins, its end at the top right */
+const MAIN_X = [0, 0.125, 0.375, 0.625, 0.875, 0.985]
+const MAIN_Y = [0.04, 0.085, 0.2, 0.43, 0.75, 0.93]
+/** the four workflows: each from its own point on the baseline to its own
+ *  height at the right, the first the highest, so they never cross */
+const FLOW_X = [0.03, 0.105, 0.18, 0.255]
+const FLOW_Y = [0.64, 0.5, 0.37, 0.25]
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v))
 const f = (n: number) => n.toFixed(1)
+const flag = (el: Element | null | undefined, key: string, on: boolean) => {
+  if (!el) return
+  const d = (el as HTMLElement).dataset
+  if (on && d[key] === undefined) d[key] = ''
+  else if (!on && d[key] !== undefined) delete d[key]
+}
 
 /** A monotone curve through points left to right (Fritsch–Butland slopes),
  *  so the line never dips between two pins: its pieces, the first a move. */
@@ -65,211 +72,286 @@ function monotone(p: Pt[]): string[] {
   return d
 }
 
-export function useGrowthCurve(plotRef: RefObject<HTMLDivElement | null>) {
+/** where the line is, given anchors (a screen height, a length) in order
+ *  down the page and the reading line's height */
+function through(a: { at: number; l: number }[], r: number) {
+  if (r <= a[0].at) return a[0].l
+  for (let i = 0; i < a.length - 1; i++) {
+    if (r < a[i + 1].at) {
+      const span = a[i + 1].at - a[i].at
+      return a[i].l + (a[i + 1].l - a[i].l) * (span > 0 ? (r - a[i].at) / span : 1)
+    }
+  }
+  return a[a.length - 1].l
+}
+
+export function useGrowthCurve(runRef: RefObject<HTMLDivElement | null>, pick: number | null) {
+  const pickRef = useRef(pick)
+  const kickRef = useRef<() => void>(() => {})
+
   useEffect(() => {
-    const plot = plotRef.current
-    if (!plot) return
-    const svg = plot.querySelector<SVGSVGElement>('.gc__svg')
-    const scratch = plot.querySelector<SVGPathElement>('[data-gc="scratch"]')
-    const rise = plot.querySelector<SVGLinearGradientElement>('#gc-rise')
-    if (!svg || !scratch) return
-    const wide = window.matchMedia(GC_WIDE)
+    pickRef.current = pick
+    kickRef.current()
+  }, [pick])
+
+  useEffect(() => {
+    const run = runRef.current
+    if (!run) return
+    const one = <T extends Element>(s: string) => run.querySelector<T>(s)
+    const all = <T extends Element>(s: string) => [...run.querySelectorAll<T>(s)]
+    const plot = one<HTMLElement>('.gc__plot')
+    const svg = one<SVGSVGElement>('.gc__svg')
+    const scratch = one<SVGPathElement>('[data-gc="scratch"]')
+    const lines = all<SVGPathElement>('[data-gc="line"]')
+    const line = lines[lines.length - 1]
+    const band = one<SVGPathElement>('[data-gc="band"]')
+    const under = one<SVGPathElement>('[data-gc="under"]')
+    const ghost = one<SVGPathElement>('[data-gc="ghost"]')
+    const area = one<SVGPathElement>('[data-gc="area"]')
+    const clip = one<SVGRectElement>('[data-gc="clip"]')
+    const grid = one<SVGPathElement>('[data-gc="grid"]')
+    const base = one<SVGPathElement>('[data-gc="base"]')
+    const tip = one<HTMLElement>('.gc__tip')
+    const glow = one<HTMLElement>('.gc__glow')
+    const readout = one<HTMLElement>('.gc__readout')
+    const wfHead = one<HTMLElement>('.gc__wf')
+    const dir = one<HTMLElement>('.gc__direction')
+    if (!plot || !svg || !scratch || !line || !ghost || !area || !clip || !grid || !base || !tip || !glow) return
+
+    const holds = all<HTMLElement>('[data-gc-hold]')
+    const pins = all<HTMLElement>('.gc__pin')
+    const drops = all<SVGPathElement>('[data-gc="drop"]')
+    const xs = all<HTMLElement>('.gc__x')
+    const stages = all<HTMLElement>('[data-gc-stage]')
+    const flows = all<HTMLElement>('[data-gc-flow]')
+    const series = all<SVGGElement>('[data-gc-series]').map((g) => ({
+      g,
+      paths: [...g.querySelectorAll<SVGPathElement>('path')],
+      end: g.querySelector<SVGCircleElement>('circle'),
+      grad: g.querySelector<SVGLinearGradientElement>('linearGradient'),
+      tone: g.style.getPropertyValue('--tone') || 'var(--umm-sun)',
+      len: 0,
+      cur: 0,
+    }))
     const still = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const all = <T extends Element>(sel: string) => [...plot.querySelectorAll<T>(sel)]
-    const one = <T extends Element>(sel: string) => plot.querySelector<T>(sel)
-    const setD = (key: string, d: string) =>
-      all<SVGPathElement>(`[data-gc="${key}"]`).forEach((el) => el.setAttribute('d', d))
+
+    let len = 0
+    let cur = 0
+    let pinLen: number[] = []
+    let hold: HTMLElement | null = null
+    let holdTop = 0
+    let holdH = 0
+    /** how far the held chart has been lifted to ride above the last card */
+    let shift = 0
+    let raf = 0
+    let ready = false
+
     const lengthOf = (d: string) => {
       scratch.setAttribute('d', d)
       return scratch.getTotalLength()
     }
 
-    let series: Series[] = []
-    let cols = false
-    let frame = 0
-
     const layout = () => {
-      const box = plot.getBoundingClientRect()
-      const w = box.width
-      const h = box.height
+      const w = plot.clientWidth
+      const h = plot.clientHeight
       if (!w || !h) return
       svg.setAttribute('viewBox', `0 0 ${f(w)} ${f(h)}`)
-      cols = wide.matches
-      const at = (el: Element): Pt => {
-        const b = el.getBoundingClientRect()
-        return { x: b.left - box.left + b.width / 2, y: b.top - box.top + b.height / 2 }
-      }
-      const mainLis = all<HTMLElement>('[data-gc-pin="main"]')
-      const flowLis = all<HTMLElement>('[data-gc-pin="flow"]')
-      const dot = (li: HTMLElement) => at(li.querySelector('.gc__dot') ?? li)
-      const P = mainLis.map(dot)
-      const E = flowLis.map(dot)
-      const sysRun = one<HTMLElement>('[data-gc-run="main"]')
-      const flowRun = one<HTMLElement>('[data-gc-run="flows"]')
-      if (!sysRun || !flowRun || P.length < 1 || E.length < 1) return
-      const base = h - 1
+      /* room at the top for the tip's rings; the baseline is the plot's foot */
+      const top = Math.min(18, h * 0.08)
+      const X = (u: number) => u * w
+      const Y = (v: number) => h - v * (h - top)
 
-      let mainD: string
-      let mainPts: Pt[]
-      let pieces: string[] = []
-      const flowDs: string[] = []
-      const areaDs: string[] = []
+      const pts = MAIN_X.map((x, i) => ({ x: X(x), y: Y(MAIN_Y[i]) }))
+      const pieces = monotone(pts)
+      const d = pieces.join(' ')
+      const end = pts[pts.length - 1]
+      const shape = `${d} L${f(end.x)} ${f(h)} L${f(pts[0].x)} ${f(h)} Z`
+      lines.forEach((el) => el.setAttribute('d', d))
+      ghost.setAttribute('d', d)
+      band?.setAttribute('d', d)
+      area.setAttribute('d', shape)
+      under?.setAttribute('d', shape)
+      len = line.getTotalLength()
+      pinLen = pins.map((_, i) => lengthOf(pieces.slice(0, i + 2).join(' ')))
+      lines.forEach((el) => (el.style.strokeDasharray = `${f(len)} ${f(len + 40)}`))
+      clip.setAttribute('height', f(h + 120))
 
-      if (cols) {
-        const ax = 10
-        const T = { x: w - 14, y: 20 }
-        mainPts = [{ x: ax, y: P[0].y + 30 }, ...P, T]
-        pieces = monotone(mainPts)
-        mainD = pieces.join(' ')
-        /* the fan: from the axis beside the first workflow, each line up
-           steeply, then easing towards its own level and its card */
-        const O = { x: ax, y: E[0].y + 58 }
-        E.forEach((e) => {
-          const dx = e.x - O.x
-          const up = O.y - e.y
-          const d = `M${f(O.x)} ${f(O.y)} C${f(O.x + dx * 0.03)} ${f(e.y + up * 0.3)} ${f(O.x + dx * 0.42)} ${f(e.y + up * 0.05)} ${f(e.x)} ${f(e.y)}`
-          flowDs.push(d)
-          areaDs.push(`${d} V${f(O.y)} H${f(O.x)} Z`)
-        })
-        setD('axis', `M${ax} 8 V${f(base)} H${f(w)}`)
-        setD('guides', P.map((p) => `M${ax} ${f(p.y)} H${f(p.x - 24)}`).join(' '))
-        setD('target', `M${ax} ${f(T.y)} H${f(w)}`)
-        let ticks = ''
-        for (let y = 32; y < base - 8; y += 24) ticks += `M${ax} ${y} h5 `
-        for (let x = ax + 48; x < w - 4; x += 48) ticks += `M${x} ${f(base)} v-5 `
-        setD('ticks', ticks)
-        rise?.setAttribute('x1', '0')
-        rise?.setAttribute('y1', '0')
-        rise?.setAttribute('x2', f(w))
-        rise?.setAttribute('y2', '0')
-      } else {
-        /* the rail down the cards' left edge, splitting into four lanes */
-        const rx = P[0].x
-        const B = { x: rx, y: flowRun.getBoundingClientRect().top - box.top - 6 }
-        mainPts = [{ x: rx, y: 0 }, ...P, B]
-        mainD = `M${f(rx)} 0 V${f(B.y)}`
-        E.forEach((e, k) => {
-          const lx = rx + (k - (E.length - 1) / 2) * 6
-          flowDs.push(
-            `M${f(B.x)} ${f(B.y)} C${f(B.x)} ${f(B.y + 14)} ${f(lx)} ${f(B.y + 10)} ${f(lx)} ${f(B.y + 26)}` +
-              ` V${f(e.y - 26)} C${f(lx)} ${f(e.y - 10)} ${f(e.x)} ${f(e.y - 14)} ${f(e.x)} ${f(e.y)}`,
-          )
-          areaDs.push('')
-        })
-        setD('axis', `M0 ${f(base)} H${f(w)}`)
-        setD('guides', '')
-        setD('target', '')
-        let ticks = ''
-        for (let x = 24; x < w - 4; x += 40) ticks += `M${x} ${f(base)} v-5 `
-        setD('ticks', ticks)
-        rise?.setAttribute('x1', '0')
-        rise?.setAttribute('y1', '0')
-        rise?.setAttribute('x2', '0')
-        rise?.setAttribute('y2', f(h))
-      }
+      /* three quiet guides; where the chart's title sits in the plot's top
+         left (wide), a guide starts after it rather than running under it */
+      const pr = plot.getBoundingClientRect()
+      const dr = dir && getComputedStyle(dir).position === 'absolute' ? dir.getBoundingClientRect() : null
+      grid.setAttribute(
+        'd',
+        [0.25, 0.5, 0.75]
+          .map((k) => {
+            const y = h * k
+            const x0 = dr && y < dr.bottom - pr.top + 10 ? Math.min(w, dr.right - pr.left + 28) : 0
+            return `M${f(x0)} ${f(y)} H${f(w)}`
+          })
+          .join(' '),
+      )
+      base.setAttribute('d', `M0 ${f(h - 0.5)} H${f(w)}`)
 
-      /* how far along its line each pin sits */
-      const pinsAt = (pts: Pt[], lis: HTMLElement[]) =>
-        lis.map((li, i) => ({
-          li,
-          at: cols ? lengthOf(pieces.slice(0, i + 2).join(' ')) : pts[i + 1].y,
-        }))
+      pins.forEach((pin, i) => {
+        const p = pts[i + 1]
+        pin.style.setProperty('--x', `${f(p.x)}px`)
+        pin.style.setProperty('--y', `${f(p.y)}px`)
+        drops[i]?.setAttribute('d', `M${f(p.x)} ${f(p.y + pin.offsetHeight / 2 + 4)} V${f(h)}`)
+        xs[i]?.style.setProperty('--x', `${f(p.x)}px`)
+      })
 
-      const build = (key: string, d: string, run: HTMLElement, delay: number, keepHead: boolean) => {
-        setD(key, d)
-        const lines = all<SVGPathElement>(`[data-gc="${key}"]`)
-        const len = lines[0]?.getTotalLength() ?? 0
-        const samples: { l: number; y: number }[] = []
-        if (!cols && lines[0]) {
-          const n = Math.max(2, Math.ceil(len / 8))
-          for (let i = 0; i <= n; i++) {
-            const l = (len * i) / n
-            samples.push({ l, y: lines[0].getPointAtLength(l).y })
-          }
-        }
-        lines.forEach((el) => (el.style.strokeDasharray = `${f(len)} ${f(len + 40)}`))
-        return { lines, len, samples, run, delay, keepHead }
-      }
+      series.forEach((s, k) => {
+        const a = { x: X(FLOW_X[k]), y: h }
+        const b = { x: X(MAIN_X[MAIN_X.length - 1]), y: Y(FLOW_Y[k]) }
+        const dx = b.x - a.x
+        const sd = `M${f(a.x)} ${f(a.y)} C${f(a.x + dx * 0.55)} ${f(a.y)} ${f(b.x - dx * 0.2)} ${f(b.y + (h - b.y) * 0.22)} ${f(b.x)} ${f(b.y)}`
+        s.paths.forEach((el) => el.setAttribute('d', sd))
+        s.len = s.paths[0]?.getTotalLength() ?? 0
+        s.paths.forEach((el) => (el.style.strokeDasharray = `${f(s.len)} ${f(s.len + 40)}`))
+        s.grad?.setAttribute('x1', f(a.x))
+        s.grad?.setAttribute('x2', f(b.x))
+        s.end?.setAttribute('cx', f(b.x))
+        s.end?.setAttribute('cy', f(b.y))
+      })
 
-      const main = build('main', mainD, sysRun, 0, true)
-      series = [
-        {
-          ...main,
-          area: null,
-          head: one<SVGCircleElement>('[data-gc="head-main"]'),
-          pins: pinsAt(mainPts, mainLis),
-        },
-        ...flowDs.map((d, k) => {
-          const s = build(`flow${k}`, d, flowRun, k * 0.08, false)
-          const area = one<SVGPathElement>(`[data-gc="area${k}"]`)
-          area?.setAttribute('d', areaDs[k])
-          return {
-            ...s,
-            area,
-            head: one<SVGCircleElement>(`[data-gc="head${k}"]`),
-            pins: [{ li: flowLis[k], at: s.len }],
-          }
-        }),
-      ]
-      draw()
+      /* the held element, if the window lets the chart be held */
+      holds.forEach((el) => (el.style.transform = ''))
+      shift = 0
+      hold = holds.find((el) => getComputedStyle(el).position === 'sticky') ?? null
+      holdTop = hold ? parseFloat(getComputedStyle(hold).top) || 0 : 0
+      holdH = hold ? hold.offsetHeight : 0
+      run.style.setProperty('--gc-hold', `${holdH}px`)
+
+      if (!ready) {
+        /* the first frame starts where the reader already is */
+        ready = true
+        frame(true)
+      } else kick()
     }
 
-    const draw = () => {
-      frame = 0
+    const frame = (snap = false) => {
+      raf = 0
+      if (!len) return
       const vh = window.innerHeight
-      const top = plot.getBoundingClientRect().top
-      const runs = new Map<HTMLElement, number>()
-      for (const s of series) {
-        let p = 1
-        if (!still.matches) {
-          if (cols) {
-            if (!runs.has(s.run)) runs.set(s.run, s.run.getBoundingClientRect().top)
-            const t = (vh * 0.85 - (runs.get(s.run) ?? 0)) / (vh * 0.5)
-            p = clamp((t - s.delay) / (1 - s.delay))
-          } else {
-            /* the reading line, down the plot */
-            const y = vh * 0.68 - top
-            const sm = s.samples
-            if (!sm.length || y <= sm[0].y) p = 0
-            else if (y >= sm[sm.length - 1].y) p = 1
-            else {
-              let lo = 0
-              let hi = sm.length - 1
-              while (hi - lo > 1) {
-                const mid = (lo + hi) >> 1
-                if (sm[mid].y < y) lo = mid
-                else hi = mid
-              }
-              const a = sm[lo]
-              const b = sm[hi]
-              const k = b.y === a.y ? 1 : (y - a.y) / (b.y - a.y)
-              p = (a.l + (b.l - a.l) * k) / s.len
-            }
-          }
-        }
-        const drawn = s.len * p
-        for (const el of s.lines) {
-          el.style.strokeDashoffset = f(s.len - drawn)
-          el.style.visibility = p > 0 ? 'visible' : 'hidden'
-        }
-        if (s.area) s.area.style.opacity = String(p)
-        if (s.head && s.lines[0]) {
-          const pt = s.lines[0].getPointAtLength(drawn)
-          s.head.setAttribute('cx', f(pt.x))
-          s.head.setAttribute('cy', f(pt.y))
-          s.head.style.opacity = p > 0 && (p < 1 || s.keepHead) ? '1' : '0'
-        }
-        for (const pin of s.pins) {
-          /* lit as the line meets the badge's edge */
-          if (drawn >= pin.at - 16) pin.li.dataset.on = ''
-          else delete pin.li.dataset.on
+      const reduce = still.matches
+      /* the reading line: just under the held chart, or low on the screen */
+      const r = hold ? holdTop + holdH + (vh - holdTop - holdH) * 0.3 : vh * 0.6
+      const sb = stages.map((el) => el.getBoundingClientRect())
+      const ft = flows.map((el) => el.getBoundingClientRect().top)
+      const wfTop = wfHead ? wfHead.getBoundingClientRect().top : Infinity
+
+      let mainT = len
+      const flowT: number[] = series.map(() => 1)
+      if (!reduce && hold && sb.length === pinLen.length) {
+        mainT = through(
+          [
+            { at: sb[0].top - 260, l: 0 },
+            ...sb.map((b, i) => ({ at: b.top, l: pinLen[i] })),
+            { at: sb[sb.length - 1].top + sb[sb.length - 1].height * 0.75, l: len },
+          ],
+          r,
+        )
+        series.forEach((_, k) => (flowT[k] = clamp((r - (ft[k] ?? 0) + 160) / 340)))
+      } else if (!reduce) {
+        const t = clamp((vh * 0.92 - plot.getBoundingClientRect().top) / (vh * 0.62))
+        mainT = len * clamp(t / 0.7)
+        series.forEach((_, k) => (flowT[k] = clamp((t - 0.7 - k * 0.05) / 0.18)))
+      }
+
+      /* ease towards the reader's place: a soft follow, not a jump */
+      const k0 = reduce || snap ? 1 : 0.2
+      let moving = false
+      cur += (mainT - cur) * k0
+      if (Math.abs(mainT - cur) < 0.4) cur = mainT
+      else moving = true
+      series.forEach((s, k) => {
+        const t = flowT[k] * s.len
+        s.cur += (t - s.cur) * k0
+        if (Math.abs(t - s.cur) < 0.4) s.cur = t
+        else moving = true
+      })
+
+      /* the held chart lets go at the last card: it stays just above it,
+         riding up with it, so that card is read whole and nothing rests
+         under the chart (only transform changes) */
+      if (hold && ft.length) {
+        const natural = hold.getBoundingClientRect().top - shift
+        const lift = Math.min(0, ft[ft.length - 1] - 16 - holdH - natural)
+        if (Math.abs(lift - shift) > 0.25) {
+          shift = lift
+          hold.style.transform = shift ? `translate3d(0, ${f(shift)}px, 0)` : ''
         }
       }
+
+      /* the system's line, its light and its tip */
+      lines.forEach((el) => (el.style.strokeDashoffset = f(len - cur)))
+      const p = line.getPointAtLength(cur)
+      /* the clip rect starts 40px left of the plot, so it ends at the tip */
+      clip.setAttribute('width', f(Math.max(0, p.x + 41)))
+      tip.style.transform = `translate3d(${f(p.x)}px, ${f(p.y)}px, 0)`
+
+      let lit = 0
+      pins.forEach((pin, i) => {
+        const on = cur >= pinLen[i] - 4
+        if (on) lit = i + 1
+        flag(pin, 'on', on)
+        flag(drops[i], 'on', on)
+        flag(xs[i], 'on', on)
+      })
+
+      /* the stage rows: ticked once read */
+      let now = -1
+      sb.forEach((b, i) => {
+        if (b.top <= r) now = i
+        flag(stages[i], 'on', reduce || b.top <= r)
+      })
+      stages.forEach((el, i) => flag(el, 'now', i === now))
+
+      /* the workflows' ribbons */
+      series.forEach((s) => {
+        s.paths.forEach((el) => (el.style.strokeDashoffset = f(s.len - s.cur)))
+        flag(s.g, 'drawn', s.cur > 0.5)
+        flag(s.end, 'on', s.len > 0 && s.cur >= s.len - 1)
+      })
+
+      const flowsPhase = hold || reduce ? r >= wfTop : flowT[0] > 0
+      run.dataset.phase = flowsPhase ? 'flows' : 'system'
+      let reading = -1
+      ft.forEach((t, k) => {
+        if (t <= r) reading = k
+      })
+      const em = pickRef.current ?? (flowsPhase && reading >= 0 ? reading : null)
+      series.forEach((s, k) => flag(s.g, 'em', em === k))
+      flows.forEach((el, k) => flag(el, 'em', em === k))
+      flag(run, 'em', em !== null)
+
+      /* the light follows the reading: the curve's head, then the chosen
+         workflow's head in its own tone */
+      let g = p
+      let tone = 'var(--umm-sun)'
+      if (flowsPhase && em !== null && series[em]?.paths[0]) {
+        const s = series[em]
+        g = s.paths[0].getPointAtLength(s.cur)
+        tone = s.tone
+      }
+      glow.style.transform = `translate3d(${f(g.x)}px, ${f(g.y)}px, 0)`
+      run.style.setProperty('--gc-glow', tone)
+
+      /* the readout under the chart on narrow screens: where the line is */
+      if (readout) {
+        const slot = flowsPhase ? (em !== null ? 4 + em : -1) : Math.max(0, lit - 1)
+        if (slot >= 0) readout.style.setProperty('--i', String(slot))
+        flag(readout, 'off', slot < 0)
+      }
+
+      if (moving) raf = requestAnimationFrame(() => frame())
     }
 
-    const tick = () => {
-      if (!frame) frame = requestAnimationFrame(draw)
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(() => frame())
     }
+    kickRef.current = kick
+
     let pending = 0
     const relayout = () => {
       cancelAnimationFrame(pending)
@@ -279,19 +361,19 @@ export function useGrowthCurve(plotRef: RefObject<HTMLDivElement | null>) {
     layout()
     const ro = new ResizeObserver(relayout)
     ro.observe(plot)
+    holds.forEach((el) => ro.observe(el))
     document.fonts?.ready.then(relayout)
-    window.addEventListener('scroll', tick, { passive: true })
-    window.addEventListener('resize', tick, { passive: true })
-    wide.addEventListener('change', relayout)
-    still.addEventListener('change', tick)
+    window.addEventListener('scroll', kick, { passive: true })
+    window.addEventListener('resize', relayout, { passive: true })
+    still.addEventListener('change', kick)
     return () => {
       ro.disconnect()
-      cancelAnimationFrame(frame)
+      cancelAnimationFrame(raf)
       cancelAnimationFrame(pending)
-      window.removeEventListener('scroll', tick)
-      window.removeEventListener('resize', tick)
-      wide.removeEventListener('change', relayout)
-      still.removeEventListener('change', tick)
+      kickRef.current = () => {}
+      window.removeEventListener('scroll', kick)
+      window.removeEventListener('resize', relayout)
+      still.removeEventListener('change', kick)
     }
-  }, [plotRef])
+  }, [runRef])
 }

@@ -17,87 +17,34 @@ import '@/styles/growth-curve.css'
    marketing factory.
 
    16 Oct, late, Krish: the four service pages' thinking sections looked
-   alike (the same ink board, the same held picture beside cards). Each now
-   gets a picture of its own service. Growth's, his approved concept, is
-   the growth curve: one large chart on a light chart-paper board.
+   alike. Growth's own picture, his approved concept, is the growth curve.
+   Later the same day: the idea was right but the execution was not ("can
+   be 100% more customized and premium"). Rebuilt as one designed chart:
 
-     - the commercial direction heads the chart, its target line across
-       the top of the plot
-     - a line climbs from the axis to the top right as you scroll (drawn
-       by growthCurve.ts), through four pins: customer signals, the growth
-       engine, channel activation, measurement and feedback, each card
-       hanging from its pin, each further right and up
-     - each pin lights with a pulse when the line reaches it, its step
-       number rolling up to its own
-     - the four workflows fan off the axis below as four rising lines, a
-       multi-line chart with its legend (the workflows' names: choose one
-       to see its line), each line ending in its workflow's card
-     - what holds across the architecture is the chart's baseline
+     - the hero is a chart card on the paper board: the commercial
+       direction as its title, a single ink curve over a sun gradient, a
+       glowing live tip, four pins on the curve and the four stages along
+       its axis. On a tall window it is held (sticky) above the stage rows,
+       so the tip sits on the row being read; at the last card it lets go
+       and rides up above it, so it never rests over a word. Static on
+       short windows.
+     - the four stages are quiet rows (the CX row: tick, number, title,
+       0.45 to 1), what links each on under its title, their details as
+       hairline columns, the growth engine as the board's one pastel tile
+     - the four workflows rise as ribbons from four points on the baseline,
+       one as its card is read; the legend (segmented pills) picks one, its
+       ribbon drawn in ink and its card lifted
+     - across the architecture is the board's baseline
 
-   All of it in the page's flow, nothing held. On a phone or tablet the
-   cards stack full width and the line is a rail down their left edge,
-   splitting into four lanes for the workflows. Then the factory.
+   On a phone or tablet the chart is a frosted strip held at the top (under
+   a third of the screen), its caption naming where the line is; the rows
+   and cards run full width under it. Then the factory, as it was.
    ========================================================================== */
 
-const ICON = {
-  width: 22,
-  height: 22,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.7,
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
-  'aria-hidden': true,
-} as const
-
-const MODULE_ICONS = [
-  // audience: rings
-  <svg {...ICON} key="a">
-    <circle cx="12" cy="12" r="8" />
-    <circle cx="12" cy="12" r="4" />
-    <circle cx="12" cy="12" r=".6" />
-  </svg>,
-  // creative: a spark
-  <svg {...ICON} key="c">
-    <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4" />
-  </svg>,
-  // journey: two ways
-  <svg {...ICON} key="j">
-    <path d="M4 8h14l-3-3M20 16H6l3 3" />
-  </svg>,
-  // experiment: up and to the right
-  <svg {...ICON} key="e">
-    <path d="M6 18 18 6M9 6h9v9" />
-  </svg>,
-]
-
-const Loop = () => (
-  <svg {...ICON}>
-    <path d="M4 12a8 8 0 1 0 2.4-5.7" />
-    <path d="M4 4v4.5h4.5" />
-  </svg>
-)
-const Check = () => (
-  <svg {...ICON}>
-    <path d="M5 12.5l4.2 4.2L19 7" />
-  </svg>
-)
-const Arrow = () => (
-  <svg {...ICON}>
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-)
-const Rise = () => (
-  <svg {...ICON}>
-    <path d="M4 18 10 12l3.5 3.5L20 8" />
-    <path d="M14.5 8H20v5.5" />
-  </svg>
-)
-
-/** the system's four pins, and the workflows' four series */
-const POINT_TONES: Tone[] = ['sun', 'citrus', 'coral', 'sky']
-const SERIES_TONES: Tone[] = ['citrus', 'sun', 'coral', 'blossom']
+/** the system's light, and the workflows' four ribbons (the page tone and
+ *  three support tones) */
+const PAGE_TONE: Tone = 'sun'
+const SERIES_TONES: Tone[] = ['citrus', 'sky', 'coral', 'sun']
 /** the factory's four, as they were */
 const FACTORY_TONES: Tone[] = ['citrus', 'sun', 'sky', 'blossom']
 
@@ -110,59 +57,55 @@ const split = (label: string) => {
 const num = (i: number) => String(i + 1).padStart(2, '0')
 const tone = (t: Tone) => ({ ['--tone' as string]: `var(--umm-${t})` }) as CSSProperties
 
-/** The pin on the line: the step number, its last digit rolling up from 0
- *  as the line reaches it. The number is read in the card's heading. */
-function Pin({ n }: { n: number }) {
-  return (
-    <span className="gc__pin" aria-hidden="true">
-      <span className="gc__dot">
-        <span>{n < 10 ? '0' : Math.floor(n / 10)}</span>
-        <span className="gc__roll">
-          <span className="gc__digits" style={{ ['--n' as string]: n % 10 } as CSSProperties}>
-            {Array.from({ length: (n % 10) + 1 }, (_, d) => (
-              <span key={d}>{d}</span>
-            ))}
-          </span>
-        </span>
-      </span>
-    </span>
-  )
-}
+const Check = () => (
+  <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+    <path d="M5 10.5 8.5 14 15 6.5" />
+  </svg>
+)
 
 export function GrowthSystem({ content = content0 }: { content?: typeof content0 }) {
   const { board, workflows, factory } = content
-  const plotRef = useRef<HTMLDivElement>(null)
+  const runRef = useRef<HTMLDivElement>(null)
   const [pick, setPick] = useState<number | null>(null)
-  useGrowthCurve(plotRef)
+  useGrowthCurve(runRef, pick)
 
-  /** a card on the system's line */
-  const point = (i: number, label: string, body: ReactNode) => {
-    const [n, name] = split(label)
-    return (
-      <li className="gc__point" data-gc-pin="main" style={tone(POINT_TONES[i])}>
-        <Pin n={Number(n) || i + 1} />
-        <div className="gc__card">
-          <h3 className="gc__name">
-            <span className="umm-sr-only">{n} </span>
-            {name}
-          </h3>
-          {body}
-        </div>
-      </li>
-    )
-  }
+  const stages = [board.signals.label, board.engine.label, board.channels.label, board.measure.label].map(split)
 
   /** a list of a part's sources or channels */
   const nodes = (list: { title: string; body: string }[]) => (
     <ul className="gc__nodes">
       {list.map((n) => (
         <li key={n.title}>
-          <span className="gc__node-title">{n.title}</span>
-          <span className="gc__node-sub">{n.body}</span>
+          <span className="gc__item">{n.title}</span>
+          <span className="gc__small">{n.body}</span>
         </li>
       ))}
     </ul>
   )
+
+  /** a stage row: tick, number and title (and what links it on, under the
+   *  title), then what the stage holds */
+  const stage = (i: number, body: ReactNode, side?: ReactNode) => {
+    const [n, name] = stages[i]
+    return (
+      <li className="gc__stage" data-gc-stage="" style={tone(PAGE_TONE)}>
+        <div className="gc__stage-head">
+          <span className="gc__tick" aria-hidden="true">
+            <Check />
+          </span>
+          <span className="gc__n" aria-hidden="true">
+            {n}
+          </span>
+          <h3 className="gc__stage-title">
+            <span className="umm-sr-only">{n} </span>
+            {name}
+          </h3>
+        </div>
+        {side ? <div className="gc__stage-side">{side}</div> : null}
+        <div className="gc__stage-body">{body}</div>
+      </li>
+    )
+  }
 
   return (
     <section className="umm-section cd-arch gc" id="growth" aria-labelledby="gs-title">
@@ -181,139 +124,153 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
 
       <div className="umm-container">
         <div className="gc__board" role="group" aria-label={board.label}>
-          <div className="gc__top">
-            <span className="gc__eyebrow">
-              <span className="gc__live" aria-hidden="true" />
-              {board.eyebrow}
-            </span>
-            <span className="gc__mono">{board.tag}</span>
-          </div>
+          <div className="gc__run" ref={runRef} data-phase="system">
+            {/* the hero: the chart card, held above the rows on a tall window */}
+            <div className="gc__chart" data-gc-hold="">
+              <div className="gc__top">
+                <span className="gc__eyebrow">
+                  <span className="gc__live" aria-hidden="true" />
+                  {board.eyebrow}
+                </span>
+                <span className="gc__label">{board.tag}</span>
+              </div>
 
-          {/* the commercial direction: what the chart is climbing towards */}
-          <div className="gc__direction">
-            <span className="gc__dir-icon">
-              <Rise />
-            </span>
-            <div className="gc__dir-head">
-              <span className="gc__mono">{board.direction.label}</span>
-              <p className="gc__dir-title">{board.direction.title}</p>
+              {/* the commercial direction: the chart's title, what it climbs towards */}
+              <div className="gc__direction">
+                <p className="gc__label">{board.direction.label}</p>
+                <p className="gc__dir-title">{board.direction.title}</p>
+                <ul className="gc__pills">
+                  {board.direction.items.map((d) => (
+                    <li key={d}>{d}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="gc__strip" data-gc-hold="">
+                <div className="gc__plot" aria-hidden="true">
+                  <span className="gc__glow" />
+                  <svg className="gc__svg" focusable="false">
+                    <defs>
+                      <linearGradient id="gc-fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" className="gc__stop" style={{ stopOpacity: 0.62 }} />
+                        <stop offset="0.55" className="gc__stop" style={{ stopOpacity: 0.2 }} />
+                        <stop offset="1" className="gc__stop" style={{ stopOpacity: 0 }} />
+                      </linearGradient>
+                      <clipPath id="gc-clip">
+                        <rect data-gc="clip" x="-40" y="-60" width="0" height="0" />
+                      </clipPath>
+                      <clipPath id="gc-under">
+                        <path data-gc="under" />
+                      </clipPath>
+                      <filter id="gc-soft" x="-10%" y="-60%" width="120%" height="220%">
+                        <feGaussianBlur stdDeviation="12" />
+                      </filter>
+                    </defs>
+                    <path className="gc__grid" data-gc="grid" />
+                    {stages.map(([n]) => (
+                      <path key={n} className="gc__drop" data-gc="drop" />
+                    ))}
+                    <path className="gc__base" data-gc="base" />
+                    {/* the light under the line: a gradient, and a soft band hugging the curve */}
+                    <g className="gc__lit" clipPath="url(#gc-clip)">
+                      <path className="gc__area" data-gc="area" fill="url(#gc-fill)" />
+                      <g clipPath="url(#gc-under)">
+                        <path className="gc__band" data-gc="band" filter="url(#gc-soft)" />
+                      </g>
+                    </g>
+                    <path className="gc__ghost" data-gc="ghost" />
+                    {workflows.map((w, k) => (
+                      <g key={w.id} className="gc__series" data-gc-series="" style={tone(SERIES_TONES[k])}>
+                        <linearGradient id={`gc-rib${k}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0" className="gc__rib-stop" style={{ stopOpacity: 0 }} />
+                          <stop offset="0.45" className="gc__rib-stop" style={{ stopOpacity: 0.55 }} />
+                          <stop offset="1" className="gc__rib-stop" style={{ stopOpacity: 1 }} />
+                        </linearGradient>
+                        <path className="gc__ribbon" stroke={`url(#gc-rib${k})`} />
+                        <path className="gc__core" />
+                        <circle className="gc__end" r="4.5" />
+                      </g>
+                    ))}
+                    <path className="gc__halo" data-gc="line" />
+                    <path className="gc__line" data-gc="line" />
+                    <path data-gc="scratch" fill="none" stroke="none" />
+                  </svg>
+
+                  {/* the pins on the curve: their real number dim, rolling over as lit */}
+                  {stages.map(([n]) => (
+                    <span key={n} className="gc__pin">
+                      <span className="gc__pin-n">
+                        <span>{n}</span>
+                        <span>{n}</span>
+                      </span>
+                    </span>
+                  ))}
+                  <span className="gc__tip" />
+                </div>
+
+                {/* the axis: the four stages under their pins (wide) */}
+                <div className="gc__axis" aria-hidden="true">
+                  {stages.map(([n, name]) => (
+                    <span key={n} className="gc__x">
+                      <b>{n}</b>
+                      {name}
+                    </span>
+                  ))}
+                </div>
+
+                {/* the caption under the strip (narrow): where the line is */}
+                <div className="gc__readout" aria-hidden="true">
+                  <span className="gc__roll">
+                    {stages.map(([n, name]) => (
+                      <span key={n}>
+                        <b>{n}</b>
+                        {name}
+                      </span>
+                    ))}
+                    {workflows.map((w, k) => (
+                      <span key={w.id} style={tone(SERIES_TONES[k])}>
+                        <i />
+                        {w.label}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              </div>
             </div>
-            <ul className="gc__dir-items">
-              {board.direction.items.map((d) => (
-                <li key={d}>{d}</li>
-              ))}
-            </ul>
-          </div>
 
-          <div className="gc__plot" ref={plotRef} data-focus={pick !== null || undefined}>
-            <svg className="gc__svg" aria-hidden="true" focusable="false">
-              <defs>
-                <linearGradient id="gc-rise" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" style={{ stopColor: 'var(--umm-sun)' }} />
-                  <stop offset="0.55" style={{ stopColor: 'var(--umm-citrus)' }} />
-                  <stop offset="1" style={{ stopColor: 'var(--umm-coral)' }} />
-                </linearGradient>
-                {SERIES_TONES.map((t, k) => (
-                  <linearGradient key={t} id={`gc-area${k}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" style={{ stopColor: `var(--umm-${t})`, stopOpacity: 0.55 }} />
-                    <stop offset="0.7" style={{ stopColor: `var(--umm-${t})`, stopOpacity: 0 }} />
-                  </linearGradient>
-                ))}
-              </defs>
-              <path className="gc__ticks" data-gc="ticks" />
-              <path className="gc__axis" data-gc="axis" />
-              <path className="gc__guides" data-gc="guides" />
-              <path className="gc__target" data-gc="target" />
-              {[...workflows.keys()].reverse().map((k) => (
-                <path
-                  key={k}
-                  className="gc__area"
-                  data-gc={`area${k}`}
-                  data-picked={pick === k || undefined}
-                  fill={`url(#gc-area${k})`}
-                />
-              ))}
-              {workflows.map((w, k) => (
-                <g
-                  key={w.id}
-                  className="gc__series"
-                  data-picked={pick === k || undefined}
-                  style={tone(SERIES_TONES[k])}
-                >
-                  <path className="gc__ribbon" data-gc={`flow${k}`} />
-                  <path className="gc__ink" data-gc={`flow${k}`} />
-                  <circle className="gc__head" data-gc={`head${k}`} r="4" />
-                </g>
-              ))}
-              <g className="gc__main">
-                <path className="gc__ribbon" data-gc="main" />
-                <path className="gc__ink" data-gc="main" />
-                <circle className="gc__head gc__head--main" data-gc="head-main" r="5.5" />
-              </g>
-              <path data-gc="scratch" fill="none" stroke="none" />
-            </svg>
+            {/* the system: four stages, read in turn as the curve climbs */}
+            <ol className="gc__stages">
+              {stage(0, nodes(board.signals.nodes), <p className="gc__link">{board.signals.link}</p>)}
 
-            {/* the system: four points up the curve */}
-            <ol className="gc__system" data-gc-run="main">
-              {point(
-                0,
-                board.signals.label,
-                <>
-                  {nodes(board.signals.nodes)}
-                  <p className="gc__link">
-                    <Arrow />
-                    {board.signals.link}
-                  </p>
-                </>,
-              )}
-
-              {point(
+              {stage(
                 1,
-                board.engine.label,
                 <>
-                  <div className="gc__engine">
-                    <p className="gc__big">{board.engine.title}</p>
-                    <p className="gc__sub">{board.engine.sub}</p>
-                  </div>
                   <ul className="gc__mods">
-                    {board.engine.modules.map((m, i) => (
+                    {board.engine.modules.map((m) => (
                       <li key={m.title}>
-                        <span className="gc__mod-icon">{MODULE_ICONS[i]}</span>
-                        <span>
-                          <span className="gc__node-title">{m.title}</span>
-                          <span className="gc__node-sub">{m.body}</span>
-                        </span>
+                        <span className="gc__item">{m.title}</span>
+                        <span className="gc__small">{m.body}</span>
                       </li>
                     ))}
                   </ul>
-                  <ul className="gc__checks">
+                  <ul className="gc__chips">
                     {board.engine.guard.map((g) => (
-                      <li key={g}>
-                        <Check />
-                        {g}
-                      </li>
+                      <li key={g}>{g}</li>
                     ))}
                   </ul>
                 </>,
+                <div className="gc__engine">
+                  <p className="gc__engine-title">{board.engine.title}</p>
+                  <p className="gc__engine-sub">{board.engine.sub}</p>
+                </div>,
               )}
 
-              {point(
-                2,
-                board.channels.label,
-                <>
-                  {nodes(board.channels.nodes)}
-                  <p className="gc__link">
-                    <Arrow />
-                    {board.channels.link}
-                  </p>
-                </>,
-              )}
+              {stage(2, nodes(board.channels.nodes), <p className="gc__link">{board.channels.link}</p>)}
 
-              {point(
+              {stage(
                 3,
-                board.measure.label,
                 <>
-                  <p className="gc__big">{board.measure.title}</p>
+                  <p className="gc__headline">{board.measure.title}</p>
                   <p className="gc__chain">
                     {board.measure.chain.map((c, i) => (
                       <span key={c}>
@@ -322,78 +279,81 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
                       </span>
                     ))}
                   </p>
-                  <p className="gc__link">
-                    <Loop />
-                    {board.measure.loop}
-                  </p>
                 </>,
+                <p className="gc__link">{board.measure.loop}</p>,
               )}
-
-              {/* the workflows' heading, and the chart's legend */}
-              <li className="gc__legend-wrap">
-                <p className="gc__follow">{content.workflowsLabel}</p>
-                <p className="gc__follow-lead">{content.workflowsLead}</p>
-                <ul className="gc__legend">
-                  {workflows.map((w, k) => (
-                    <li key={w.id} style={tone(SERIES_TONES[k])}>
-                      <button
-                        type="button"
-                        className="gc__key"
-                        aria-pressed={pick === k}
-                        onClick={() => setPick((p) => (p === k ? null : k))}
-                      >
-                        <span className="gc__swatch" aria-hidden="true" />
-                        {w.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </li>
             </ol>
 
-            {/* the workflows: four lines off the axis, each to its card */}
-            <ol className="gc__flows" data-gc-run="flows">
+            {/* the workflows: the heading and the chart's legend */}
+            <div className="gc__wf">
+              <div className="gc__wf-copy">
+                <h3 className="gc__wf-title">{content.workflowsLabel}</h3>
+                <p className="gc__small" id="gc-wf-lead">
+                  {content.workflowsLead}
+                </p>
+              </div>
+              <ul className="gc__legend" aria-describedby="gc-wf-lead">
+                {workflows.map((w, k) => (
+                  <li key={w.id} style={tone(SERIES_TONES[k])}>
+                    <button
+                      type="button"
+                      className="gc__key"
+                      aria-pressed={pick === k}
+                      onClick={() => setPick((p) => (p === k ? null : k))}
+                    >
+                      {w.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* the four workflows, each a card its ribbon rises to */}
+            <ol className="gc__flows">
               {workflows.map((w, k) => (
                 <li
                   key={w.id}
                   className="gc__flow"
-                  data-gc-pin="flow"
+                  data-gc-flow=""
                   data-picked={pick === k || undefined}
                   style={tone(SERIES_TONES[k])}
                 >
-                  <Pin n={5 + k} />
-                  <div className="gc__card">
-                    <span className="gc__mono">{w.eyebrow}</span>
-                    <h3 className="gc__name gc__name--flow">
-                      <span className="umm-sr-only">{num(4 + k)} </span>
-                      {w.title}
-                    </h3>
-                    <p className="gc__body">{w.body}</p>
-                    <div className="gc__part">
-                      <span className="gc__mono">{content.doesLabel}</span>
-                      <ol className="gc__does">
-                        {w.does.map((d) => (
-                          <li key={d}>{d}</li>
-                        ))}
-                      </ol>
-                    </div>
-                    <div className="gc__part">
-                      <span className="gc__mono">{content.controlsLabel}</span>
-                      <p className="gc__controls">{w.controls}</p>
-                    </div>
+                  <div className="gc__flow-head">
+                    <p className="gc__label gc__eyebrow-dot">{w.eyebrow}</p>
+                    <h4 className="gc__flow-title">{w.title}</h4>
+                    <p className="gc__small">{w.body}</p>
+                  </div>
+                  <div className="gc__spec">
+                    <p className="gc__label">{content.doesLabel}</p>
+                    <ol className="gc__does">
+                      {w.does.map((d, i) => (
+                        <li key={d}>
+                          <span className="gc__n" aria-hidden="true">
+                            {num(i)}
+                          </span>
+                          <span>{d}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div className="gc__spec">
+                    <p className="gc__label">{content.controlsLabel}</p>
+                    <p className="gc__small">{w.controls}</p>
                   </div>
                 </li>
               ))}
             </ol>
           </div>
 
-          {/* across the architecture: the chart's baseline */}
+          {/* across the architecture: the board's baseline */}
           <div className="gc__across">
-            <span className="gc__mono">{board.across.label}</span>
-            <ul className="gc__checks gc__checks--across">
+            <p className="gc__label">{board.across.label}</p>
+            <ul className="gc__assure" style={tone(PAGE_TONE)}>
               {board.across.items.map((a) => (
                 <li key={a}>
-                  <Check />
+                  <span className="gc__tick" data-done="" aria-hidden="true">
+                    <Check />
+                  </span>
                   {a}
                 </li>
               ))}

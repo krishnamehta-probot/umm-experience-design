@@ -1,691 +1,773 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import type { Tone } from '@/components/primitives'
 
 /* ============================================================================
-   UX & DIGITAL COMMERCE · THE SHOPPER'S PHONE (CommerceArchitecture's picture)
+   UX & DIGITAL COMMERCE · THE SHOPPER'S PHONE (CommerceArchitecture's hero)
 
-   16 Oct, Krish: make the thinking section something directly relatable to
-   the service, and unlike the other pages' boards. The picture is a phone,
-   held beside the cards, its shop changing with the card being read. Every
-   screen is drawn from shapes (blocks, bars, pills, buttons): no words but
-   the ones the cards already carry, and none at all inside the phone.
+   16 Oct, Krish: the thinking section should be something directly relatable
+   to the service. 16 Oct, later: the idea is right but the execution was a
+   wireframe (grey bars, flat silhouettes); make it "100% more customized and
+   premium". So the phone is now drawn to the CX checkout phone's standard
+   (Principles.tsx, approved): a titanium handset, an island, side buttons,
+   glass, and a real shop inside it, with words, prices and products drawn as
+   shaded pastel objects on studio sweeps. As on the CX phone, the demo
+   details inside the device (product names, prices, dates, the order
+   number) are illustrative; the content file's own words name each screen's
+   parts (the channels, "Semantic search", "Products and pricing", "ERP",
+   "Contract pricing", "Order approvals", "Plans and entitlements" ...).
 
-     experience     the storefront: a banner, categories, a product grid
-     ai             AI search: typing, the assistant thinking, suggestions,
-                    personalized picks lit
-     services       cart and checkout: items, price lines, pay pressed
-     operations     order tracking: a parcel on its route, steps advancing
-     retail         a product page, its heart popping
-     b2b            a bulk quote: price tiers, quantity steppers
-     subscriptions  a plan picked, auto-renew switched on, the monthly cycle
-     bookings       a calendar, a day and a slot picked
+     experience     the storefront, on its four channels
+     ai             a natural-language search, the AI's read of it, matches
+     services       checkout, grouped by the four commerce services
+     operations     the order on its way, each step from the system behind it
+     retail         a product page; the colour changes, the vase with it
+     b2b            a bulk order: contract tiers, quantities, an approval
+     subscriptions  a plan picked, auto-renew on, what the plan includes
+     bookings       a session, a day and a time
 
-   Under it, beside it on the board, a receipt prints a line for each card
-   read so far, the card's own name.
+   Every screen is laid out all the time, so the one sliding in is complete
+   on its first frame. Each one's small moment (a selection moving, a switch
+   turning on, a stamp) plays once it has arrived ([data-pos='now']), from a
+   believable "before" to the element's own style, which is the finished
+   state: reduced motion just shows that.
 
-   Each screen's small motion starts when it slides in (ux-phone.css), and
-   its resting state is the finished one, for reduced motion.
+   Beside the phone, a thermal receipt prints a line for each card read.
    ========================================================================== */
 
 export type PhoneStep = { focus: string; tone: Tone; name: string }
 
 const v = (o: Record<string, string | number>) => o as CSSProperties
+const tone = (t: Tone) => v({ '--t': `var(--umm-${t})` })
 
-/* --- the pieces a shop is drawn from -------------------------------------- */
+/* --- glyphs, iOS-weight strokes ------------------------------------------- */
 
-const P: Record<string, ReactNode> = {
+const G: Record<string, ReactNode> = {
+  back: <path d="M15 4.5 7.5 12l7.5 7.5" />,
+  next: <path d="M9 4.5 16.5 12 9 19.5" />,
   search: (
     <>
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="M16 16l4.5 4.5" />
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m15.5 15.5 5 5" />
     </>
   ),
   bag: (
     <>
-      <path d="M5 8h14l-1.2 12H6.2z" />
-      <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+      <path d="M5 8.5h14l-1.1 11.2a1.6 1.6 0 0 1-1.6 1.4H7.7a1.6 1.6 0 0 1-1.6-1.4z" />
+      <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" />
     </>
   ),
-  back: <path d="M15 5l-7 7 7 7" />,
-  next: <path d="M9 5l7 7-7 7" />,
+  heart: <path d="M12 20s-7.6-4.6-7.6-10.3A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.6 2.5C19.6 15.4 12 20 12 20z" />,
+  spark: <path d="M12 2.8l2 6.1 6.2 2.1-6.2 2.1-2 6.1-2-6.1-6.2-2.1 6.2-2.1z" />,
+  check: <path d="M5 12.5l4.4 4.4L19 7.4" />,
   plus: <path d="M12 5v14M5 12h14" />,
   minus: <path d="M5 12h14" />,
-  check: <path d="M5 12.5l4.2 4.2L19 7" />,
-  lock: (
-    <>
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </>
-  ),
-  spark: <path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z" />,
-  heart: <path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z" />,
-  star: <path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" />,
-  truck: (
-    <>
-      <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" />
-      <circle cx="7" cy="17.5" r="1.8" />
-      <circle cx="17" cy="17.5" r="1.8" />
-    </>
-  ),
+  home: <path d="M4 11.2 12 4.5l8 6.7V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" />,
   user: (
     <>
-      <circle cx="12" cy="9" r="3.5" />
-      <path d="M5 20a7 7 0 0 1 14 0" />
-    </>
-  ),
-  cal: (
-    <>
-      <rect x="4" y="6" width="16" height="14" rx="2" />
-      <path d="M4 10h16M9 4v4M15 4v4" />
+      <circle cx="12" cy="8.5" r="3.8" />
+      <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" />
     </>
   ),
 }
 
-const I = ({ n, k }: { n: keyof typeof P; k?: string }) => (
-  <svg viewBox="0 0 24 24" className="up__i" data-k={k}>
-    {P[n]}
+const Glyph = ({ n, k }: { n: keyof typeof G; k?: string }) => (
+  <svg viewBox="0 0 24 24" className="up__g" data-n={n} data-k={k}>
+    {G[n]}
   </svg>
 )
 
-/** a line of text, drawn as a bar: w is its width in %, k its ink */
-const B = ({ w, k }: { w: number; k?: 'ink' | 'paper' | 'bold' }) => (
-  <i className="up__bar" data-k={k} style={v({ '--w': `${w}%` })} />
-)
+/* --- products, drawn ---------------------------------------------------------
+   A pastel object with a cylindrical body, a highlight, a lid or a rim, and a
+   contact shadow; size is its box in px, every part is in em of it. */
 
-/** a product photo: a pastel ground with an object on it */
-const Img = ({ tone, s, size }: { tone: Tone; s: number; size?: 'sm' }) => (
-  <span className="up__img" data-umm-tone={tone} data-size={size}>
-    <i className="up__obj" data-s={s} />
+type Kind = 'vase' | 'mug' | 'jar' | 'bottle' | 'bowl' | 'pot'
+
+const Thing = ({ kind, t, size, k }: { kind: Kind; t: Tone; size: number; k?: string }) => (
+  <span className="up__thing" data-kind={kind} data-k={k} style={v({ '--t': `var(--umm-${t})`, '--z': `${size}px` })}>
+    <i className="up__t-floor" />
+    <i className="up__t-body" />
+    <i className="up__t-top" />
+    <i className="up__t-part" />
   </span>
 )
 
-/** the app bar: the shop's mark or a back button, the bag or a profile */
-const Top = ({
-  back,
-  end = 'bag',
-  children,
-}: {
-  back?: boolean
-  end?: 'bag' | 'user' | 'none'
-  children?: ReactNode
-}) => (
-  <div className="up__top">
-    {back ? (
-      <span className="up__btn">
-        <I n="back" />
-      </span>
-    ) : (
-      <i className="up__logo" />
-    )}
-    <span className="up__top-mid">{children}</span>
-    {end === 'bag' && (
-      <span className="up__btn up__bag">
-        <I n="bag" />
-        <i className="up__badge" />
-      </span>
-    )}
-    {end === 'user' && (
-      <span className="up__btn up__avatar">
-        <I n="user" />
-      </span>
-    )}
-  </div>
-)
-
-/** a quantity stepper: minus, the count as a bar, plus */
-const Qty = ({ live }: { live?: boolean }) => (
-  <span className="up__qty" data-live={live || undefined}>
-    <I n="minus" />
-    <i className="up__qty-n" />
-    <span className="up__qty-plus">
-      <I n="plus" />
-    </span>
+/** a studio shot: the object on a sweep tinted by its ground */
+const Shot = ({ kind, t, ground, size, k }: { kind: Kind; t: Tone; ground?: Tone; size: number; k?: string }) => (
+  <span className="up__shot" style={tone(ground ?? t)} data-k={k}>
+    <Thing kind={kind} t={t} size={size} />
   </span>
 )
 
-/** a line in a cart or a quote: photo, name, detail, stepper */
-const Line = ({ tone, s, i, live }: { tone: Tone; s: number; i: number; live?: boolean }) => (
-  <li className="up__line" style={v({ '--i': i })}>
-    <Img tone={tone} s={s} size="sm" />
-    <span className="up__col">
-      <B w={84} k="ink" />
-      <B w={52} />
-      <B w={30} k="bold" />
-    </span>
-    <Qty live={live} />
-  </li>
-)
-
-/** price lines and their total */
-const Sum = () => (
-  <div className="up__sum">
-    <span>
-      <B w={34} />
-      <B w={14} />
-    </span>
-    <span>
-      <B w={26} />
-      <B w={11} />
-    </span>
-    <span className="up__total">
-      <B w={24} k="bold" />
-      <B w={18} k="bold" />
-    </span>
-  </div>
-)
-
-/** a row in a list: an icon or a face, two lines, a chevron */
-const Row = ({ icon, face, w = [64, 42] }: { icon?: keyof typeof P; face?: Tone; w?: number[] }) => (
-  <div className="up__row">
-    {face ? (
-      <span className="up__btn up__face" data-umm-tone={face}>
-        <I n="user" />
-      </span>
-    ) : (
-      icon && (
-        <span className="up__btn">
-          <I n={icon} />
-        </span>
-      )
-    )}
-    <span className="up__col">
-      <B w={w[0]} k="ink" />
-      <B w={w[1]} />
-    </span>
-    <I n="next" />
-  </div>
-)
-
-/** delivery or plan options, one picked */
-const Options = ({ n, pick }: { n: number; pick: number }) => (
-  <div className="up__plans">
-    {Array.from({ length: n }, (_, i) => (
-      <div key={i} className="up__plan" data-pick={i === pick || undefined}>
-        <i className="up__radio" />
-        <span className="up__col">
-          <B w={[58, 46, 64][i % 3]} k="ink" />
-          <B w={[84, 70, 76][i % 3]} />
-        </span>
-        <B w={[22, 18, 24][i % 3]} k="bold" />
-      </div>
+const Stars = () => (
+  <span className="up__stars">
+    {[0, 1, 2, 3, 4].map((i) => (
+      <svg key={i} viewBox="0 0 24 24">
+        <path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" />
+      </svg>
     ))}
+  </span>
+)
+
+/** the back control, with where it goes */
+const Nav = ({ back, end }: { back: string; end?: ReactNode }) => (
+  <div className="up__nav">
+    <span className="up__back">
+      <Glyph n="back" />
+      {back}
+    </span>
+    {end}
   </div>
 )
 
-/* --- the eight screens --------------------------------------------------------- */
+/* --- 01 · the storefront ------------------------------------------------------ */
 
-const STORE: [Tone, number][] = [
-  ['sky', 0],
-  ['sun', 1],
-  ['citrus', 2],
-  ['coral', 3],
+const STORE: { kind: Kind; t: Tone; ground: Tone; name: string; price: string }[] = [
+  { kind: 'vase', t: 'sky', ground: 'sky', name: 'Dune vase', price: '$64' },
+  { kind: 'mug', t: 'sun', ground: 'sun', name: 'Tide mug', price: '$24' },
+  { kind: 'bottle', t: 'coral', ground: 'coral', name: 'Glow serum', price: '$38' },
+  { kind: 'jar', t: 'citrus', ground: 'citrus', name: 'Fig candle', price: '$32' },
 ]
 
-const Store = () => (
-  <>
-    <Top>
-      <span className="up__btn">
-        <I n="search" />
-      </span>
-    </Top>
-    <div className="up__banner" data-umm-tone="blossom">
-      <span className="up__col">
-        <B w={78} k="ink" />
-        <B w={52} k="ink" />
-        <i className="up__pill" />
-      </span>
-      <i className="up__sun" />
-    </div>
-    <div className="up__cats">
-      {[0, 1, 2, 3].map((i) => (
-        <i key={i} className="up__cat" data-on={i === 0 || undefined} />
-      ))}
-    </div>
-    <div className="up__grid">
-      {STORE.map(([tone, s], i) => (
-        <div key={i} className="up__tile" style={v({ '--i': i })}>
-          <Img tone={tone} s={s} />
-          {i === 1 && (
-            <span className="up__add">
-              <I n="plus" k="plus" />
-              <I n="check" k="check" />
-            </span>
-          )}
-          <B w={82} />
-          <B w={36} k="ink" />
-        </div>
-      ))}
-    </div>
-  </>
-)
-
-const Search = () => (
-  <>
-    <div className="up__search">
-      <span className="up__btn">
-        <I n="back" />
-      </span>
-      <span className="up__field">
-        <I n="spark" k="spark" />
-        <i className="up__typed" />
-        <i className="up__caret" />
-      </span>
-    </div>
-    <div className="up__answer">
-      <span className="up__think">
-        <i />
-        <i />
-        <i />
-      </span>
-      <ul className="up__sugs">
-        {[64, 46, 72, 54].map((w, i) => (
-          <li key={i} style={v({ '--i': i })}>
-            <I n="search" />
-            <B w={w} />
-          </li>
-        ))}
-      </ul>
-    </div>
-    <div className="up__picks-head">
-      <I n="spark" k="spark" />
-      <B w={40} k="ink" />
-    </div>
-    <div className="up__grid up__grid--picks">
-      {(
-        [
-          ['lilac', 3, true],
-          ['sky', 1, false],
-          ['sun', 0, false],
-          ['blossom', 2, true],
-        ] as [Tone, number, boolean][]
-      ).map(([tone, s, hit], i) => (
-        <div key={i} className="up__tile" data-hit={hit || undefined} style={v({ '--i': i })}>
-          <Img tone={tone} s={s} />
-          {hit && (
-            <span className="up__glint">
-              <I n="spark" />
-            </span>
-          )}
-          <B w={78} />
-          <B w={34} k="ink" />
-        </div>
-      ))}
-    </div>
-  </>
-)
-
-const Checkout = () => (
-  <>
-    <Top back end="none">
-      <B w={44} k="ink" />
-    </Top>
-    <ul className="up__lines">
-      <Line tone="sky" s={0} i={0} />
-      <Line tone="sun" s={1} i={1} />
-      <Line tone="coral" s={3} i={2} />
-      <Line tone="citrus" s={2} i={3} />
-    </ul>
-    <Options n={2} pick={0} />
-    <Sum />
-    <div className="up__method">
-      <i className="up__card" />
-      <span className="up__col">
-        <B w={60} k="ink" />
-        <B w={38} />
-      </span>
-      <I n="next" />
-    </div>
-    <span className="up__pay">
-      <span className="up__pay-label">
-        <I n="lock" />
-        <B w={34} k="paper" />
-      </span>
-      <span className="up__pay-done">
-        <I n="check" />
-      </span>
-      <i className="up__tap" />
-    </span>
-  </>
-)
-
-const Track = () => (
-  <>
-    <Top back end="none">
-      <B w={48} k="ink" />
-    </Top>
-    <div className="up__map">
-      <svg viewBox="0 0 200 140" preserveAspectRatio="xMidYMid slice">
-        <g className="up__blocks">
-          <rect x="6" y="6" width="58" height="34" rx="6" />
-          <rect x="80" y="6" width="54" height="34" rx="6" />
-          <rect x="150" y="56" width="44" height="48" rx="6" />
-          <rect x="6" y="56" width="58" height="48" rx="6" />
-          <rect x="80" y="56" width="54" height="48" rx="6" />
-        </g>
-        <path className="up__road" d="M0 48h200M0 116h200M72 0v140M142 0v140" />
-        <path className="up__route" d="M28 116H72V48H142V26" />
-        <circle className="up__from" cx="28" cy="116" r="5" />
-        <g className="up__pin" transform="translate(142 26)">
-          <path d="M0 0c-6-7-9-11-9-15a9 9 0 0 1 18 0c0 4-3 8-9 15z" />
-          <circle cx="0" cy="-15" r="3.2" />
-        </g>
-        <g className="up__parcel">
-          <rect x="-8" y="-8" width="16" height="16" rx="3.5" />
-          <path d="M-8 -2h16M0 -8v6" />
-        </g>
-      </svg>
-    </div>
-    <div className="up__eta">
-      <span className="up__eta-icon">
-        <I n="truck" />
-      </span>
-      <span className="up__col">
-        <B w={70} k="ink" />
-        <B w={46} />
-      </span>
-    </div>
-    <ol className="up__track">
-      {[0, 1, 2, 3].map((i) => (
-        <li key={i} data-k={i < 2 ? 'done' : i === 2 ? 'now' : undefined} style={v({ '--i': i })}>
-          <i className="up__dot">
-            <I n="check" />
-          </i>
-          <span className="up__col">
-            <B w={[58, 70, 50, 62][i]} k="ink" />
-            <B w={[34, 28, 40, 30][i]} />
+function Store({ channels }: { channels: string[] }) {
+  return (
+    <>
+      <div className="up__appbar">
+        <span className="up__mark" />
+        <b>Discover</b>
+        <span className="up__round">
+          <Glyph n="search" />
+        </span>
+        <span className="up__round">
+          <Glyph n="bag" />
+          <em className="up__badge">
+            <span>1</span>
+            <span>2</span>
+          </em>
+        </span>
+      </div>
+      <div className="up__channels">
+        {channels.map((c, i) => (
+          <span key={c} data-k={i === 0 ? 'was' : i === 1 ? 'on' : undefined}>
+            {c}
           </span>
-        </li>
-      ))}
-    </ol>
-    <Row face="sun" w={[56, 38]} />
-    <span className="up__cta" data-k="line">
-      <B w={34} k="ink" />
-    </span>
-  </>
-)
-
-const Product = () => (
-  <>
-    <div className="up__gallery" data-umm-tone="coral">
-      <span className="up__btn">
-        <I n="back" />
-      </span>
-      <span className="up__heart">
-        <I n="heart" />
-        <span className="up__burst">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <i key={i} style={v({ '--a': `${i * 60}deg` })} />
-          ))}
-        </span>
-      </span>
-      <i className="up__vase" />
-      <span className="up__dots">
-        <i data-on />
-        <i />
-        <i />
-      </span>
-    </div>
-    <span className="up__col">
-      <B w={74} k="ink" />
-      <B w={48} />
-    </span>
-    <div className="up__rate">
-      <span className="up__stars">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <I key={i} n="star" />
         ))}
-      </span>
-      <B w={22} k="bold" />
-    </div>
-    <div className="up__swatches">
-      {(['coral', 'sky', 'citrus', 'lilac'] as Tone[]).map((t, i) => (
-        <i key={t} data-umm-tone={t} data-on={i === 0 || undefined} />
-      ))}
-    </div>
-    <div className="up__sizes">
-      {[0, 1, 2, 3, 4].map((i) => (
-        <i key={i} data-on={i === 2 || undefined} />
-      ))}
-    </div>
-    <ul className="up__info">
-      {(['truck', 'check'] as const).map((n, i) => (
-        <li key={n}>
-          <I n={n} />
-          <span className="up__col">
-            <B w={[66, 54][i]} k="ink" />
-            <B w={[44, 62][i]} />
+      </div>
+      <div className="up__banner" style={tone('blossom')}>
+        <span className="up__banner-copy">
+          <small>New season</small>
+          <b>Ceramics for slow mornings</b>
+          <em>Shop now</em>
+        </span>
+        <span className="up__banner-art">
+          <Thing kind="vase" t="sky" size={92} />
+          <Thing kind="bowl" t="sun" size={62} />
+        </span>
+      </div>
+      <div className="up__sec">
+        <b>Picked for you</b>
+        <span>See all</span>
+      </div>
+      <div className="up__grid">
+        {STORE.map((p, i) => (
+          <div key={p.name} className="up__tile">
+            <Shot kind={p.kind} t={p.t} ground={p.ground} size={74} />
+            {i === 1 && (
+              <span className="up__add">
+                <Glyph n="plus" />
+                <Glyph n="check" />
+              </span>
+            )}
+            <b>{p.name}</b>
+            <span>{p.price}</span>
+          </div>
+        ))}
+      </div>
+      <div className="up__tabs">
+        {(['home', 'search', 'heart', 'user'] as const).map((n, i) => (
+          <span key={n} data-on={i === 0 || undefined}>
+            <Glyph n={n} />
           </span>
-          <I n="next" />
-        </li>
-      ))}
-    </ul>
-    <Row face="blossom" w={[48, 80]} />
-    <span className="up__cta">
-      <I n="bag" />
-      <B w={30} k="paper" />
-    </span>
-  </>
-)
-
-const Quote = () => (
-  <>
-    <Top back end="user">
-      <B w={42} k="ink" />
-    </Top>
-    <div className="up__tiers">
-      <i className="up__tier-mark" />
-      {[0, 1, 2].map((i) => (
-        <span key={i} className="up__tier">
-          <B w={56} />
-          <B w={38} k="ink" />
-        </span>
-      ))}
-    </div>
-    <ul className="up__lines">
-      <Line tone="sky" s={2} i={0} live />
-      <Line tone="lilac" s={1} i={1} />
-      <Line tone="citrus" s={0} i={2} />
-      <Line tone="sun" s={3} i={3} />
-    </ul>
-    <Sum />
-    <div className="up__approve">
-      <span className="up__btn up__avatar">
-        <I n="user" />
-      </span>
-      <span className="up__col">
-        <B w={62} k="ink" />
-        <B w={40} />
-      </span>
-      <span className="up__stamp">
-        <I n="check" />
-      </span>
-    </div>
-    <Row icon="cal" w={[54, 36]} />
-    <span className="up__cta" data-k="line">
-      <B w={36} k="ink" />
-    </span>
-  </>
-)
-
-const Plans = () => (
-  <>
-    <Top back end="none">
-      <B w={44} k="ink" />
-    </Top>
-    <Options n={3} pick={1} />
-    <div className="up__toggle-row">
-      <span className="up__col">
-        <B w={56} k="ink" />
-        <B w={80} />
-      </span>
-      <i className="up__switch">
-        <i />
-      </i>
-    </div>
-    <div className="up__cycle">
-      <svg viewBox="0 0 80 80" className="up__ring">
-        <circle className="up__ring-track" cx="40" cy="40" r="30" />
-        <circle className="up__ring-arc" cx="40" cy="40" r="30" pathLength="100" />
-        <g className="up__ring-orbit">
-          <circle cx="40" cy="10" r="5" />
-        </g>
-      </svg>
-      <span className="up__ring-mid">
-        <I n="cal" />
-      </span>
-      <span className="up__col">
-        <B w={72} k="ink" />
-        <B w={50} />
-        <span className="up__months">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <i key={i} style={v({ '--i': i })} />
-          ))}
-        </span>
-      </span>
-    </div>
-    <div className="up__method">
-      <i className="up__card" />
-      <span className="up__col">
-        <B w={60} k="ink" />
-        <B w={38} />
-      </span>
-      <I n="next" />
-    </div>
-    <Row icon="user" w={[50, 66]} />
-    <span className="up__cta">
-      <B w={34} k="paper" />
-    </span>
-  </>
-)
-
-/* the month: days before the 1st left blank, the past and the full days
-   greyed, one day picked */
-const DAYS = Array.from({ length: 35 }, (_, i) => {
-  if (i < 2 || i > 31) return 'blank'
-  if (i < 9 || [12, 13, 20, 26].includes(i)) return 'off'
-  return i === 17 ? 'pick' : 'open'
-})
-
-const Calendar = () => (
-  <>
-    <Top back end="none">
-      <B w={40} k="ink" />
-    </Top>
-    <div className="up__row">
-      <Img tone="sun" s={2} size="sm" />
-      <span className="up__col">
-        <B w={72} k="ink" />
-        <B w={46} />
-      </span>
-      <B w={16} k="bold" />
-    </div>
-    <div className="up__people">
-      {(['coral', 'sky', 'citrus', 'lilac'] as Tone[]).map((t, i) => (
-        <span key={t} className="up__btn up__face" data-umm-tone={t} data-on={i === 1 || undefined}>
-          <I n="user" />
-        </span>
-      ))}
-      <B w={26} k="ink" />
-    </div>
-    <div className="up__month">
-      <I n="back" />
-      <B w={34} k="ink" />
-      <I n="next" />
-    </div>
-    <div className="up__cal">
-      {Array.from({ length: 7 }, (_, i) => (
-        <i key={`w${i}`} className="up__wd" />
-      ))}
-      {DAYS.map((k, i) => (
-        <i key={i} className="up__day" data-k={k} style={v({ '--r': Math.floor(i / 7) })} />
-      ))}
-    </div>
-    <div className="up__slots">
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className="up__slot" data-pick={i === 4 || undefined} data-off={i === 2 || undefined}>
-          <B w={58} k="ink" />
-        </span>
-      ))}
-    </div>
-    <span className="up__cta">
-      <I n="check" />
-      <B w={30} k="paper" />
-    </span>
-  </>
-)
-
-const SCREENS: Record<string, () => ReactNode> = {
-  experience: Store,
-  ai: Search,
-  services: Checkout,
-  operations: Track,
-  retail: Product,
-  b2b: Quote,
-  subscriptions: Plans,
-  bookings: Calendar,
+        ))}
+      </div>
+    </>
+  )
 }
 
-/* --- the phone ------------------------------------------------------------------ */
+/* --- 02 · AI search ------------------------------------------------------------ */
 
-export function ShopPhone({ steps, at }: { steps: PhoneStep[]; at: number }) {
+function Search({ items }: { items: string[] }) {
+  const [semantic, recs, enrich, segments] = items
   return (
-    <div className="up__phone" aria-hidden="true">
-      <div className="up__screen">
-        <i className="up__notch" />
-        <span className="up__status">
-          <i className="up__clock" />
-          <span className="up__signal">
-            <i />
-            <i />
-            <i />
-          </span>
-          <i className="up__battery" />
+    <>
+      <div className="up__searchbar">
+        <span className="up__back">
+          <Glyph n="back" />
         </span>
-        {steps.map((s, i) => {
-          const Screen = SCREENS[s.focus]
-          return (
-            <div
-              key={s.focus}
-              className="up__app"
-              data-screen={s.focus}
-              data-pos={i < at ? 'past' : i > at ? 'next' : 'now'}
-            >
-              {Screen && <Screen />}
-            </div>
-          )
-        })}
-        <i className="up__home" />
+        <span className="up__field">
+          <Glyph n="spark" />
+          <span>a gift for a tea lover under $40</span>
+        </span>
+      </div>
+      <div className="up__ai">
+        <span className="up__ai-tag">
+          <Glyph n="spark" />
+          {semantic}
+        </span>
+        <p>Mugs, teapots and loose-leaf sets under $40, ready to gift.</p>
+        <span className="up__filters">
+          <i data-on>Under $40</i>
+          <i>Gift wrap</i>
+          <i>Ceramic</i>
+        </span>
+      </div>
+      <div className="up__sec">
+        <b>{recs}</b>
+        <span>For you</span>
+      </div>
+      <div className="up__results">
+        <div className="up__result" data-top>
+          <Shot kind="mug" t="sky" size={70} />
+          <em className="up__match">98% match</em>
+          <b>Tide mug</b>
+          <span>$24.00</span>
+        </div>
+        <div className="up__result">
+          <Shot kind="jar" t="sun" size={70} />
+          <em className="up__match">91% match</em>
+          <b>Chamomile tin</b>
+          <span>$18.00</span>
+        </div>
+      </div>
+      <div className="up__group">
+        <div className="up__row">
+          <span className="up__row-k">{enrich}</span>
+          <span className="up__row-v">Stoneware · 350 ml</span>
+        </div>
+        <div className="up__row">
+          <span className="up__row-k">{segments}</span>
+          <span className="up__row-v">Tea lovers</span>
+        </div>
+      </div>
+    </>
+  )
+}
+
+/* --- 03 · checkout, grouped by the commerce services -------------------------- */
+
+function Checkout({ groups }: { groups: string[] }) {
+  const [pricing, access, transactions, lifecycle] = groups
+  return (
+    <>
+      <Nav back="Bag" />
+      <b className="up__h">Checkout</b>
+      <span className="up__glabel">{pricing}</span>
+      <div className="up__group">
+        <div className="up__item">
+          <Shot kind="vase" t="sky" size={38} />
+          <span className="up__item-name">
+            <b>Dune vase</b>
+            <small>Sky · Qty 1</small>
+          </span>
+          <b>$64.00</b>
+        </div>
+        <div className="up__item">
+          <Shot kind="mug" t="sun" size={38} />
+          <span className="up__item-name">
+            <b>Tide mug</b>
+            <small>Sun · Qty 2</small>
+          </span>
+          <b>$48.00</b>
+        </div>
+        <div className="up__row up__row--sm">
+          <span className="up__row-k">Member price</span>
+          <em className="up__pill">−$8.00</em>
+        </div>
+      </div>
+      <span className="up__glabel">{access}</span>
+      <div className="up__group">
+        <div className="up__row">
+          <span className="up__avatar" style={tone('blossom')}>
+            SP
+          </span>
+          <span className="up__row-k">Sam Patel</span>
+          <em className="up__pill" data-k="quiet">
+            Signed in
+          </em>
+        </div>
+      </div>
+      <span className="up__glabel">{transactions}</span>
+      <div className="up__group">
+        <div className="up__row">
+          <span className="up__cardmark" />
+          <span className="up__row-k">Card •••• 4242</span>
+          <Glyph n="next" k="chev" />
+        </div>
+      </div>
+      <span className="up__glabel">{lifecycle}</span>
+      <div className="up__group">
+        <div className="up__row">
+          <span className="up__row-k">Delivery</span>
+          <span className="up__row-v">Thu 22 Oct</span>
+          <Glyph n="next" k="chev" />
+        </div>
+      </div>
+      <div className="up__dock">
+        <span className="up__cta up__pay">
+          <span>Pay $104.00</span>
+          <span>
+            <Glyph n="check" />
+            Paid
+          </span>
+        </span>
+      </div>
+    </>
+  )
+}
+
+/* --- 04 · the order on its way ------------------------------------------------ */
+
+function Track({ systems }: { systems: string[] }) {
+  const [erp, warehouse, info, crm, analytics] = systems
+  const steps: [string, string | null, string][] = [
+    ['Order confirmed', erp, 'done'],
+    ['Packed and shipped', warehouse, 'done'],
+    ['Out for delivery', crm, 'now'],
+    ['Delivered', null, 'next'],
+  ]
+  return (
+    <>
+      <Nav back="Orders" end={<span className="up__nav-r">#4821</span>} />
+      <b className="up__h">Arriving today</b>
+      <span className="up__sub">Between 2 and 4 pm</span>
+      <div className="up__map">
+        <svg viewBox="0 0 248 116" preserveAspectRatio="xMidYMid slice">
+          <rect className="up__map-ground" width="248" height="116" />
+          <path className="up__map-water" d="M176 0h72v116h-38c-6-22 2-40-14-58S176 22 176 0z" />
+          <rect className="up__map-park" x="14" y="66" width="62" height="40" rx="8" />
+          <g className="up__map-blocks">
+            <rect x="14" y="10" width="62" height="42" rx="5" />
+            <rect x="90" y="10" width="58" height="42" rx="5" />
+            <rect x="90" y="66" width="58" height="40" rx="5" />
+          </g>
+          <path className="up__map-road" d="M0 59h190M83 0v116M156 0v116" />
+          <path className="up__map-ahead" d="M156 40V32h24" />
+          <path className="up__map-route" d="M40 59H156V40" pathLength="100" />
+          <circle className="up__map-from" cx="40" cy="59" r="4.5" />
+          <g className="up__map-pin" transform="translate(186 34)">
+            <path d="M0 0c-7-8-10-12-10-17a10 10 0 0 1 20 0c0 5-3 9-10 17z" />
+            <circle cx="0" cy="-17" r="3.6" />
+          </g>
+          <g className="up__map-van">
+            <circle r="11" className="up__map-halo" />
+            <circle r="7.5" />
+            <path d="M-3.2 -2.6h4.2v4.6h-4.2zM1 -0.8h1.8l1.4 1.4v1.4H1z" />
+          </g>
+        </svg>
+      </div>
+      <ol className="up__timeline">
+        {steps.map(([label, from, k]) => (
+          <li key={label} data-k={k}>
+            <i>
+              <Glyph n="check" />
+            </i>
+            <b>{label}</b>
+            {from && <small>{from}</small>}
+          </li>
+        ))}
+      </ol>
+      <div className="up__group">
+        <div className="up__row">
+          <span className="up__row-k">{info}</span>
+          <span className="up__row-v">Care guide</span>
+          <Glyph n="next" k="chev" />
+        </div>
+        <div className="up__row">
+          <span className="up__row-k">{analytics}</span>
+          <Stars />
+        </div>
+      </div>
+    </>
+  )
+}
+
+/* --- 05 · a product page ---------------------------------------------------------- */
+
+function Product() {
+  return (
+    <>
+      <div className="up__gallery" style={tone('blossom')}>
+        <span className="up__glass" data-at="l">
+          <Glyph n="back" />
+        </span>
+        <span className="up__glass up__fav" data-at="r">
+          <Glyph n="heart" />
+        </span>
+        <span className="up__hero">
+          <Thing kind="vase" t="sky" size={176} k="was" />
+          <Thing kind="vase" t="blossom" size={176} k="now" />
+        </span>
+        <span className="up__dots">
+          <i data-on />
+          <i />
+          <i />
+          <i />
+        </span>
+      </div>
+      <div className="up__pdp">
+        <div className="up__pdp-head">
+          <b>Dune vase</b>
+          <b>$64.00</b>
+        </div>
+        <span className="up__rating">
+          <Stars />
+          4.8 · 212 reviews
+        </span>
+        <div className="up__opt">
+          <span className="up__opt-name">
+            Colour
+            <b>
+              <span>Sky</span>
+              <span>Blush</span>
+            </b>
+          </span>
+          <span className="up__swatches">
+            {(['sky', 'blossom', 'sun', 'citrus'] as Tone[]).map((t, i) => (
+              <i key={t} style={tone(t)} data-k={i === 0 ? 'was' : i === 1 ? 'on' : undefined} />
+            ))}
+          </span>
+        </div>
+        <span className="up__stock">
+          <i />
+          In stock · ships tomorrow
+        </span>
+        <p className="up__blurb">Handmade stoneware, 24 cm. Holds dried or fresh stems.</p>
+      </div>
+      <div className="up__dock" data-k="row">
+        <span className="up__round" data-k="line">
+          <Glyph n="heart" />
+        </span>
+        <span className="up__cta">Add to bag · $64.00</span>
+      </div>
+    </>
+  )
+}
+
+/* --- 06 · a bulk order ---------------------------------------------------------- */
+
+function Quote({ pricing, approvals }: { pricing: string; approvals: string }) {
+  const lines: { kind: Kind; t: Tone; name: string; sku: string; qty: string; was?: string }[] = [
+    { kind: 'mug', t: 'sky', name: 'Tide mug', sku: 'TM-350 · $10.90', qty: '120', was: '48' },
+    { kind: 'jar', t: 'sun', name: 'Chamomile tin', sku: 'CT-080 · $6.20', qty: '80' },
+    { kind: 'bowl', t: 'citrus', name: 'Shore bowl', sku: 'SB-160 · $14.50', qty: '60' },
+  ]
+  return (
+    <>
+      <Nav
+        back="Quotes"
+        end={
+          <span className="up__acct">
+            <i style={tone('sky')}>S</i>
+            Studio 14
+          </span>
+        }
+      />
+      <b className="up__h">Bulk order</b>
+      <span className="up__glabel">{pricing}</span>
+      <div className="up__tiers">
+        <span data-k="was">
+          <small>1–49</small>
+          <b>$12.40</b>
+        </span>
+        <span data-k="on">
+          <small>50–199</small>
+          <b>$10.90</b>
+        </span>
+        <span>
+          <small>200+</small>
+          <b>$9.60</b>
+        </span>
+      </div>
+      <div className="up__group">
+        {lines.map((l) => (
+          <div key={l.name} className="up__item" data-k="qty">
+            <Shot kind={l.kind} t={l.t} size={36} />
+            <span className="up__item-name">
+              <b>{l.name}</b>
+              <small>{l.sku}</small>
+            </span>
+            <span className="up__stepper">
+              <Glyph n="minus" />
+              <b>
+                {l.was ? (
+                  <>
+                    <span>{l.was}</span>
+                    <span>{l.qty}</span>
+                  </>
+                ) : (
+                  l.qty
+                )}
+              </b>
+              <Glyph n="plus" />
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="up__group">
+        <div className="up__row up__row--tall">
+          <span className="up__item-name">
+            <b>{approvals}</b>
+            <small className="up__who">
+              <i className="up__avatar" style={tone('sun')}>
+                JR
+              </i>
+              Jo Rivera · Finance
+            </small>
+          </span>
+          <em className="up__stamp">
+            <span>Pending</span>
+            <span>
+              <Glyph n="check" />
+              Approved
+            </span>
+          </em>
+        </div>
+      </div>
+      <div className="up__dock">
+        <span className="up__cta">Place order · $2,674.00</span>
+      </div>
+    </>
+  )
+}
+
+/* --- 07 · a plan --------------------------------------------------------------------- */
+
+function Plans({ entitlements }: { entitlements: string }) {
+  const plans: [string, string, string, string?][] = [
+    ['Monthly', 'Every 4 weeks', '$18', 'was'],
+    ['Every 2 months', 'Most chosen', '$16', 'on'],
+    ['Quarterly', 'Every 12 weeks', '$15'],
+  ]
+  return (
+    <>
+      <Nav back="Account" />
+      <b className="up__h">Your plan</b>
+      <div className="up__plans">
+        {plans.map(([name, note, price, k]) => (
+          <div key={name} className="up__plan" data-k={k}>
+            <i className="up__radio" />
+            <span className="up__item-name">
+              <b>{name}</b>
+              <small>{note}</small>
+            </span>
+            <b>
+              {price}
+              <small> / delivery</small>
+            </b>
+          </div>
+        ))}
+      </div>
+      <span className="up__glabel">{entitlements}</span>
+      <div className="up__group">
+        {['Free delivery', 'Member prices', 'Pause or skip any time'].map((x) => (
+          <div key={x} className="up__row up__row--sm">
+            <i className="up__ok">
+              <Glyph n="check" />
+            </i>
+            <span className="up__row-k">{x}</span>
+          </div>
+        ))}
+      </div>
+      <div className="up__group">
+        <div className="up__row up__row--tall">
+          <span className="up__item-name">
+            <b>Auto-renew</b>
+            <small>Next on 14 Dec</small>
+          </span>
+          <i className="up__switch" />
+        </div>
+      </div>
+      <div className="up__dock">
+        <span className="up__cta">Save plan</span>
+      </div>
+    </>
+  )
+}
+
+/* --- 08 · a booking ---------------------------------------------------------------- */
+
+/* October 2026: the 1st is a Thursday; today is the 16th; the 20th and 27th
+   are full; the 23rd is picked */
+const DAYS = Array.from({ length: 35 }, (_, i) => {
+  const d = i - 2
+  if (d < 1 || d > 31) return { d: 0, k: 'blank' }
+  if (d < 16) return { d, k: 'past' }
+  if (d === 16) return { d, k: 'today' }
+  if (d === 20 || d === 27) return { d, k: 'full' }
+  if (d === 23) return { d, k: 'pick' }
+  return { d, k: d === 21 ? 'was' : 'open' }
+})
+
+function Booking() {
+  return (
+    <>
+      <Nav back="Services" />
+      <b className="up__h">Book a session</b>
+      <div className="up__group">
+        <div className="up__item">
+          <Shot kind="pot" t="coral" ground="citrus" size={40} />
+          <span className="up__item-name">
+            <b>Pottery workshop</b>
+            <small>2 hours · $45</small>
+          </span>
+          <Glyph n="next" k="chev" />
+        </div>
+      </div>
+      <div className="up__cal">
+        <div className="up__cal-head">
+          <b>October 2026</b>
+          <span>
+            <Glyph n="back" />
+            <Glyph n="next" />
+          </span>
+        </div>
+        <div className="up__cal-grid">
+          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+            <small key={i}>{d}</small>
+          ))}
+          {DAYS.map(({ d, k }, i) => (
+            <span key={i} data-k={k}>
+              {d || ''}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="up__slots">
+        <span>10:00</span>
+        <span data-k="was">12:30</span>
+        <span data-k="on">15:00</span>
+        <span data-k="off">17:30</span>
+      </div>
+      <div className="up__dock">
+        <span className="up__cta">Confirm · Fri 23 Oct, 15:00</span>
+      </div>
+    </>
+  )
+}
+
+/* --- the phone ------------------------------------------------------------------------ */
+
+export type PhoneWords = {
+  channels: string[]
+  ai: string[]
+  services: string[]
+  operations: string[]
+  pricing: string
+  approvals: string
+  entitlements: string
+}
+
+export function ShopPhone({ steps, at, words }: { steps: PhoneStep[]; at: number; words: PhoneWords }) {
+  const screens: Record<string, ReactNode> = {
+    experience: <Store channels={words.channels} />,
+    ai: <Search items={words.ai} />,
+    services: <Checkout groups={words.services} />,
+    operations: <Track systems={words.operations} />,
+    retail: <Product />,
+    b2b: <Quote pricing={words.pricing} approvals={words.approvals} />,
+    subscriptions: <Plans entitlements={words.entitlements} />,
+    bookings: <Booking />,
+  }
+  /* which way the screens slide: on, or back when the reader scrolls up */
+  const was = useRef(at)
+  const dir = at >= was.current ? 'on' : 'back'
+  useEffect(() => {
+    was.current = at
+  }, [at])
+  return (
+    <div className="up__phone" aria-hidden="true" data-dir={dir}>
+      <span className="up__key" data-k="action" />
+      <span className="up__key" data-k="up" />
+      <span className="up__key" data-k="down" />
+      <span className="up__key" data-k="power" />
+      <div className="up__screen">
+        {steps.map((s, i) => (
+          <div
+            key={s.focus}
+            className="up__app"
+            data-screen={s.focus}
+            data-pos={i < at ? 'past' : i > at ? 'next' : 'now'}
+          >
+            {screens[s.focus]}
+          </div>
+        ))}
+        <div className="up__status">
+          <span>9:41</span>
+          <span className="up__sys">
+            <svg viewBox="0 0 18 12">
+              <rect x="0" y="8" width="3" height="4" rx="1" />
+              <rect x="5" y="5.5" width="3" height="6.5" rx="1" />
+              <rect x="10" y="3" width="3" height="9" rx="1" />
+              <rect x="15" y="0" width="3" height="12" rx="1" />
+            </svg>
+            <svg viewBox="0 0 16 12">
+              <path d="M8 11.2 5.6 8.7a3.4 3.4 0 0 1 4.8 0L8 11.2Z" />
+              <path d="M3.4 6.5a6.5 6.5 0 0 1 9.2 0l-1.3 1.3a4.6 4.6 0 0 0-6.6 0L3.4 6.5Z" />
+              <path d="M1.2 4.3a9.6 9.6 0 0 1 13.6 0l-1.3 1.3a7.7 7.7 0 0 0-11 0L1.2 4.3Z" />
+            </svg>
+            <span className="up__batt">
+              <i />
+            </span>
+          </span>
+        </div>
+        <span className="up__island" />
+        <span className="up__homebar" />
       </div>
     </div>
   )
 }
 
-/* --- the receipt ---------------------------------------------------------------- */
+/* --- the receipt ---------------------------------------------------------------------- */
 
-export function Receipt({ steps, at }: { steps: PhoneStep[]; at: number }) {
+export function Receipt({
+  steps,
+  at,
+  label,
+  footer,
+}: {
+  steps: PhoneStep[]
+  at: number
+  label: string
+  footer: string
+}) {
+  const n = (i: number) => String(i + 1).padStart(2, '0')
   return (
     <div className="up__receipt" aria-hidden="true">
-      <div className="up__paper">
-        <div className="up__r-head">
-          <i className="up__r-mark" />
-          <i className="up__r-bar" style={v({ '--w': '64%' })} />
-          <i className="up__r-bar" style={v({ '--w': '42%' })} />
+      <div className="up__slip">
+        <div className="up__slip-head">
+          <i className="up__slip-mark" />
+          <b>{label}</b>
+          <span>16 Oct 2026 · 9:41</span>
+          <span>Order #4821</span>
         </div>
-        <ol className="up__r-lines">
-          {steps.slice(0, at + 1).map((s) => (
-            <li key={s.focus} style={v({ '--tone': `var(--umm-${s.tone})` })}>
-              <i className="up__r-dot" />
-              <span>{s.name}</span>
-              <I n="check" />
+        <ol className="up__slip-lines">
+          {steps.slice(0, at + 1).map((s, i) => (
+            <li key={s.focus} style={tone(s.tone)} data-last={i === at || undefined}>
+              <span>
+                <b>{s.name}</b>
+                <small>{n(i)}</small>
+                <i>
+                  <Glyph n="check" />
+                </i>
+              </span>
             </li>
           ))}
         </ol>
-        <div className="up__r-foot">
-          <span className="up__r-total">
-            <i className="up__r-bar" data-k="ink" style={v({ '--w': '38%' })} />
-            <i className="up__r-bar" data-k="ink" style={v({ '--w': '22%' })} />
+        <div className="up__slip-foot">
+          <span className="up__slip-total">
+            <b>{n(at)}</b> / {n(steps.length - 1)}
           </span>
           <i className="up__barcode" />
+          <span>{footer}</span>
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
-import { useReadingStep } from '@/lib/useReadingStep'
 import { commerce as commerce0 } from '@/content/uxCommerce'
 import { Receipt, ShopPhone, type PhoneStep } from './ShopPhone'
 import '@/styles/cloud-arch.css'
@@ -15,53 +14,31 @@ import '@/styles/ux-phone.css'
    personalization, commerce services, business operations), then four
    business models, then three principles.
 
-   16 Oct, Krish: the four service pages' thinking sections had grown alike
-   (the same ink board, a diagram, numbered stations). This one is now the
-   shopper's phone: a paper board washed in blossom, a drawn phone held
-   beside the cards (ShopPhone, ux-phone.css), its shop changing with the
-   card being read, and a receipt printing a line for each card read so
-   far. It reads as a product, not a diagram, so there are no stations.
+   16 Oct, Krish: the four service pages' thinking sections had grown alike;
+   this one became the shopper's phone. 16 Oct, later: "idea wise it's fine,
+   quality wise it can be a lot better ... more customized and premium". So:
+
+     - the phone is the one rich object: a rendered handset with a real shop
+       in it (ShopPhone), standing in a white display case with a light in
+       the pastel of the card being read, a thermal receipt tucked behind it
+       printing a line per card
+     - the case is held (sticky) on the left on wide screens, the cards pass
+       on the right; on phones and tablets it becomes a frosted strip at the
+       top: the top of the phone, where you are, the card's name
+     - the cards are quiet: no boxes until one is read, which lifts as a
+       white card with its tone dot lit; everything else is type, hairlines
+       and plain chips
 
      01–04  the layers: storefront, AI search, checkout, order tracking
-     05–08  the business models: a product page, a bulk quote, a plan
-            switched on, a booking
+     05–08  the business models: a product page, a bulk order, a plan,
+            a booking
 
-   Every word sits in the cards, in the page's flow. Wide screens hold the
-   phone beside them; phones and tablets hold a small one over them; short
-   windows don't hold it at all. What holds across the architecture closes
-   the board. Then the principles.
+   Every word is in the cards, in the page's flow; the phone and receipt only
+   repeat them (aria-hidden). Short windows don't hold the case at all.
    ========================================================================== */
 
-const ICON = {
-  width: 18,
-  height: 18,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.8,
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
-  'aria-hidden': true,
-} as const
-
-const Loop = () => (
-  <svg {...ICON} data-spin>
-    <path d="M4 12a8 8 0 1 0 2.4-5.7" />
-    <path d="M4 4v4.5h4.5" />
-  </svg>
-)
-const Check = () => (
-  <svg {...ICON}>
-    <path d="M5 12.5l4.2 4.2L19 7" />
-  </svg>
-)
-const Arrow = () => (
-  <svg {...ICON}>
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-)
-
-const TONES: Tone[] = ['coral', 'sky', 'blossom', 'sun']
+/* the light per card: the page's blossom, then three supports, in turn */
+const LIGHT: Tone[] = ['blossom', 'sky', 'sun', 'citrus']
 const RULE_TONES: Tone[] = ['coral', 'sky', 'citrus']
 
 /** "01 Experience" → ["01", "Experience"] */
@@ -70,23 +47,120 @@ const split = (label: string) => {
   return m ? [m[1], m[2]] : ['', label]
 }
 
-const tone = (t: Tone) => ({ ['--tone' as string]: `var(--umm-${t})` }) as CSSProperties
+const num = (i: number) => String(i + 1).padStart(2, '0')
+const toned = (t: Tone) => ({ ['--umm-tone' as string]: `var(--umm-${t})` }) as CSSProperties
+
+/**
+ * Which card is being read, and how far through it: the last card whose top
+ * has passed the reading line (mid-screen beside the case; under the strip on
+ * a phone). The fraction runs the case's meter as a CSS variable, written
+ * once a frame, so React only hears about a new card.
+ */
+function useShopReading() {
+  const [at, setAt] = useState(0)
+  const holdRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const cards = useRef<(HTMLElement | null)[]>([])
+
+  useEffect(() => {
+    let raf = 0
+    const measure = () => {
+      raf = 0
+      const hold = holdRef.current
+      if (!hold) return
+      const vh = window.innerHeight
+      const strip = window.innerWidth < 1000 && vh > 560
+      const held = hold.getBoundingClientRect()
+      const line = strip ? Math.max(held.bottom, 0) + (vh - Math.max(held.bottom, 0)) * 0.3 : vh * 0.5
+      const tops = cards.current.map((c) => (c ? c.getBoundingClientRect().top : Infinity))
+      let now = 0
+      tops.forEach((t, i) => {
+        if (t < line) now = i
+      })
+      const last = cards.current[cards.current.length - 1]
+      const end = tops[now + 1] ?? (last ? last.getBoundingClientRect().bottom : tops[now] + 1)
+      const p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
+      stageRef.current?.style.setProperty('--p', p.toFixed(3))
+      setAt((was) => (was === now ? was : now))
+    }
+    const queue = () => {
+      if (!raf) raf = requestAnimationFrame(measure)
+    }
+    measure()
+    window.addEventListener('scroll', queue, { passive: true })
+    window.addEventListener('resize', queue)
+    return () => {
+      window.removeEventListener('scroll', queue)
+      window.removeEventListener('resize', queue)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  const cardRef = (i: number) => (el: HTMLElement | null) => {
+    cards.current[i] = el
+  }
+  return { at, holdRef, stageRef, cardRef }
+}
+
+/**
+ * The phone and receipt are drawn at a fixed size (the rig) and scaled to the
+ * slot. The slot's CSS says how: --rig-w and --rig-h are the drawing, --fit is
+ * "contain" in the case and "width" in the strip, where the phone is cropped.
+ */
+function useFit() {
+  const slotRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const el = slotRef.current
+    if (!el) return
+    const fit = () => {
+      const cs = getComputedStyle(el)
+      const w = parseFloat(cs.getPropertyValue('--rig-w')) || 300
+      const h = parseFloat(cs.getPropertyValue('--rig-h')) || 620
+      const byWidth = cs.getPropertyValue('--fit').trim() === 'width'
+      const s = byWidth ? el.clientWidth / w : Math.min(el.clientWidth / w, el.clientHeight / h, 1)
+      el.style.setProperty('--s', String(Math.max(0.3, Math.round(s * 1000) / 1000)))
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    window.addEventListener('resize', fit)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', fit)
+    }
+  }, [])
+  return slotRef
+}
 
 export function CommerceArchitecture({ content = commerce0 }: { content?: typeof commerce0 }) {
   const { board, models, principles } = content
-  const { at, holdRef, cardRef } = useReadingStep()
+  const { at, holdRef, stageRef, cardRef } = useShopReading()
+  const slotRef = useFit()
 
   /* the eight cards, in order: the layers, then the business models */
   const steps: PhoneStep[] = [
-    { focus: 'experience', tone: 'coral', name: split(board.experience.label)[1] },
-    { focus: 'ai', tone: 'lilac', name: split(board.ai.label)[1] },
-    { focus: 'services', tone: 'sky', name: split(board.services.label)[1] },
-    { focus: 'operations', tone: 'citrus', name: split(board.operations.label)[1] },
-    ...models.map((m, i) => ({ focus: m.id, tone: TONES[i], name: m.label })),
+    { focus: 'experience', tone: LIGHT[0], name: split(board.experience.label)[1] },
+    { focus: 'ai', tone: LIGHT[1], name: split(board.ai.label)[1] },
+    { focus: 'services', tone: LIGHT[2], name: split(board.services.label)[1] },
+    { focus: 'operations', tone: LIGHT[3], name: split(board.operations.label)[1] },
+    ...models.map((m, i) => ({ focus: m.id, tone: LIGHT[i % LIGHT.length], name: m.label })),
   ]
-  const num = (i: number) => String(i + 1).padStart(2, '0')
+  const now = steps[at]
 
-  /** a card, with its tone, lit while it is read */
+  /* the content's own words, for the parts of the shop they name */
+  const words = {
+    channels: board.experience.items,
+    ai: board.ai.items,
+    services: board.services.items.map((s) => s.title),
+    operations: board.operations.items,
+    pricing: models[1]?.connects[1] ?? '',
+    approvals: models[1]?.connects[2] ?? '',
+    entitlements: models[2]?.connects[0] ?? '',
+  }
+  /* "… Every layer connected." closes the receipt */
+  const footer = content.lead.split(/(?<=\.)\s+/).pop() ?? ''
+
+  /** a card, lit while it is read */
   const card = (i: number, body: ReactNode) => (
     <li
       key={steps[i].focus}
@@ -94,36 +168,39 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
       data-on={i === at || undefined}
       data-read={i < at || undefined}
       ref={cardRef(i)}
-      style={tone(steps[i].tone)}
+      style={toned(steps[i].tone)}
     >
       {body}
     </li>
   )
 
-  /** a layer: its number, its name */
-  const head = (label: string) => {
-    const [n, name] = split(label)
-    return (
-      <>
-        <span className="up__tag">
-          <i aria-hidden="true" />
-          {n}
-        </span>
-        <h3 className="up__title">{name}</h3>
-      </>
-    )
-  }
+  /** the card's number and, for a model, its eyebrow */
+  const meta = (i: number, eyebrow?: string) => (
+    <p className="up__meta">
+      <i className="up__dot" aria-hidden="true" />
+      <span>{num(i)}</span>
+      {eyebrow && <span className="up__meta-sep">{eyebrow}</span>}
+    </p>
+  )
 
-  /** a connector, named: where the order goes next */
-  const link = (text: string, icon: ReactNode = <Arrow />) => (
-    <p className="up__link">
-      <span className="up__link-icon">{icon}</span>
+  /** where the order goes next, under a layer */
+  const link = (text: string, loop?: boolean) => (
+    <p className="up__link" data-k={loop ? 'loop' : undefined}>
+      <i aria-hidden="true" />
       {text}
     </p>
   )
 
+  const chips = (items: string[], inline?: boolean) => (
+    <ul className="up__chips" data-k={inline ? 'inline' : undefined}>
+      {items.map((x) => (
+        <li key={x}>{x}</li>
+      ))}
+    </ul>
+  )
+
   return (
-    <section className="umm-section cd-arch uc" id="commerce" aria-labelledby="uc-title">
+    <section className="umm-section cd-arch uc up" id="commerce" aria-labelledby="uc-title">
       <div className="umm-container cd-arch__head">
         <AiHead
           id="uc-title"
@@ -139,18 +216,37 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
 
       <div className="umm-container">
         <div className="up__board" role="group" aria-label={board.label}>
-          <p className="up__eyebrow">
-            <span className="up__live" aria-hidden="true" />
-            {board.label}
-          </p>
-
           <div className="up__story">
-            {/* the phone, held while the cards pass */}
-            <div className="up__hold" ref={holdRef} style={tone(steps[at].tone)}>
-              <div className="up__stage">
-                <i className="up__glow" aria-hidden="true" />
-                <ShopPhone steps={steps} at={at} />
-                <Receipt steps={steps} at={at} />
+            {/* the display case: held while the cards pass */}
+            <div className="up__hold" ref={holdRef}>
+              <div className="up__stage" ref={stageRef} style={toned(now.tone)}>
+                <div className="up__chrome">
+                  <p className="up__caselabel">
+                    <i aria-hidden="true" />
+                    {board.label}
+                  </p>
+                  <div className="up__progress" aria-hidden="true">
+                    <span className="up__meter">
+                      {steps.map((s, i) => (
+                        <i key={s.focus} data-k={i < at ? 'done' : i === at ? 'now' : undefined} />
+                      ))}
+                    </span>
+                    <span className="up__count">
+                      <b>{num(at)}</b> / {num(steps.length - 1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="up__slot" ref={slotRef}>
+                  <i className="up__glow" aria-hidden="true" />
+                  <div className="up__rig">
+                    <Receipt steps={steps} at={at} label={board.label} footer={footer} />
+                    <ShopPhone steps={steps} at={at} words={words} />
+                  </div>
+                </div>
+                <p className="up__now" aria-hidden="true">
+                  <i />
+                  <span key={now.focus}>{now.name}</span>
+                </p>
               </div>
             </div>
 
@@ -159,12 +255,9 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
               {card(
                 0,
                 <>
-                  {head(board.experience.label)}
-                  <ul className="up__chips">
-                    {board.experience.items.map((x) => (
-                      <li key={x}>{x}</li>
-                    ))}
-                  </ul>
+                  {meta(0)}
+                  <h3 className="up__title">{split(board.experience.label)[1]}</h3>
+                  {chips(board.experience.items)}
                   {link(board.experience.link)}
                 </>,
               )}
@@ -172,13 +265,10 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
               {card(
                 1,
                 <>
-                  {head(board.ai.label)}
+                  {meta(1)}
+                  <h3 className="up__title">{split(board.ai.label)[1]}</h3>
                   <p className="up__lede">{board.ai.title}</p>
-                  <ul className="up__chips">
-                    {board.ai.items.map((x) => (
-                      <li key={x}>{x}</li>
-                    ))}
-                  </ul>
+                  {chips(board.ai.items)}
                   {link(board.ai.link)}
                 </>,
               )}
@@ -186,7 +276,8 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
               {card(
                 2,
                 <>
-                  {head(board.services.label)}
+                  {meta(2)}
+                  <h3 className="up__title">{split(board.services.label)[1]}</h3>
                   <p className="up__body">{board.services.note}</p>
                   <ul className="up__svcs">
                     {board.services.items.map((s) => (
@@ -203,19 +294,16 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
               {card(
                 3,
                 <>
-                  {head(board.operations.label)}
-                  <ul className="up__chips">
-                    {board.operations.items.map((x) => (
-                      <li key={x}>{x}</li>
-                    ))}
-                  </ul>
-                  {link(board.operations.loop, <Loop />)}
+                  {meta(3)}
+                  <h3 className="up__title">{split(board.operations.label)[1]}</h3>
+                  {chips(board.operations.items, true)}
+                  {link(board.operations.loop, true)}
                 </>,
               )}
 
               {/* the business models, under their heading */}
               <li className="up__divider">
-                <p className="up__mono">{content.modelsEyebrow}</p>
+                <p className="up__divider-eyebrow">{content.modelsEyebrow}</p>
                 <p className="up__divider-title">{content.modelsTitle}</p>
               </li>
 
@@ -223,26 +311,27 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
                 card(
                   4 + k,
                   <>
-                    <span className="up__tag">
-                      <i aria-hidden="true" />
-                      {num(4 + k)} / {m.eyebrow}
-                    </span>
+                    {meta(4 + k, m.eyebrow)}
                     <h3 className="up__title">{m.title}</h3>
                     <p className="up__body">{m.body}</p>
-                    <div className="up__part">
-                      <span className="up__mono">{content.aiLabel}</span>
-                      <p>{m.ai}</p>
-                    </div>
-                    <div className="up__part">
-                      <span className="up__mono">{content.connectsLabel}</span>
-                      <ol className="up__chain">
-                        {m.connects.map((c, j) => (
-                          <li key={c} style={{ ['--i' as string]: j } as CSSProperties}>
-                            {c}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
+                    <dl className="up__spec">
+                      <div>
+                        <dt>{content.aiLabel}</dt>
+                        <dd>{m.ai}</dd>
+                      </div>
+                      <div>
+                        <dt>{content.connectsLabel}</dt>
+                        <dd>
+                          <ol className="up__chain">
+                            {m.connects.map((c, j) => (
+                              <li key={c} style={{ ['--i' as string]: j } as CSSProperties}>
+                                <span>{c}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </dd>
+                      </div>
+                    </dl>
                   </>,
                 ),
               )}
@@ -250,19 +339,7 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
           </div>
 
           {/* across the architecture */}
-          <div className="up__across">
-            <span className="up__mono">{board.across.label}</span>
-            <ul className="up__checks">
-              {board.across.items.map((a) => (
-                <li key={a}>
-                  <span className="up__check">
-                    <Check />
-                  </span>
-                  {a}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Across label={board.across.label} items={board.across.items} />
         </div>
 
         <ol className="cd-arch__rules">
@@ -278,5 +355,36 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
         </ol>
       </div>
     </section>
+  )
+}
+
+/** What holds across the architecture: one hairline row, each item ticked as
+ *  the row comes into view (the CX tick). */
+function Across({ label, items }: { label: string; items: string[] }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [seen, setSeen] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setSeen(true), { threshold: 0.6 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <div className="up__across" ref={ref} data-seen={seen || undefined}>
+      <p className="up__across-label">{label}</p>
+      <ul className="up__checks">
+        {items.map((a, i) => (
+          <li key={a} style={{ ...toned(LIGHT[i % LIGHT.length]), ['--i' as string]: i } as CSSProperties}>
+            <span className="up__tick" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M5 10.5 8.5 14 15 6.5" />
+              </svg>
+            </span>
+            {a}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

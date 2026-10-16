@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactNode, Ref } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
 import { architecture } from '@/content/cloudData'
@@ -15,167 +15,131 @@ import '@/styles/cloud-pipe.css'
 
    16 Oct, Krish: the four service pages' thinking sections looked alike, so
    each now shows something its service would recognise. Cloud & Data's is a
-   data pipeline (cloud-pipe.css), on a light board where the others are ink.
-   No picture beside the cards: one pipe runs down the board, and the cards
-   hang off it at joints, left and right on a wide screen, all to the right
-   of it on a phone or tablet, where the pipe keeps a lane at the board's
-   left edge.
+   data pipeline the reader's scroll fills.
 
-     the intelligence layer   the sensor head the pipe hangs from, reading
-                              the flow
-     your existing systems    pour in at the top, one inlet per system
-     the connected platform   a tank that fills as the water passes it
-     what it enables          branches off as outlets, one per outcome
-     engineer oversight       a valve, with a gauge whose needle swings
-     the three workflows      three taps at the bottom, each pouring into
-                              its card
+   16 Oct, later: the idea stays, the execution goes premium. The pipe is
+   the one rich object on a quiet white board: a glass tube with real depth,
+   lit sky-to-lilac liquid with slow motes of data in it, and a glowing
+   front that follows the reader with a soft sky light around it. The cards
+   around it are quiet: large titles, hairline rows, no boxes in boxes.
 
-   The pipe fills with the reader's scroll (usePipeFlow): flowing dashes and
-   packets of data run down it as far as the water has reached, and each
-   card lights, its joint filling and its badge taking its tone, as the
-   water reaches it. Scrolling stays native, nothing pins, and every word is
-   in the page's flow. Reduced motion: the pipe is full and still. Then the
-   disclaimer and the principles.
+     the intelligence layer   a glass orb the pipe hangs from
+     your existing systems    pour in, one inlet per system
+     the connected platform   a glass reservoir that fills, wave and all
+     what it enables          branches off, one outlet per outcome
+     engineer oversight       a valve on the pipe, and a gauge whose
+                              needle swings as the water reaches it
+     the three workflows      three taps off a manifold, each pouring into
+                              its card (on a phone, one branch each)
+
+   On a wide screen the pipe runs down the middle and the cards hang left
+   and right, each starting part way down the one before it. On a phone or
+   tablet the pipe keeps a 24px lane at the board's left edge.
+
+   The level is the reader's (usePipeFlow). Scrolling stays native, nothing
+   pins, and every word is in the page's flow. Reduced motion: the pipe is
+   full and still. Then the disclaimer and the principles.
    ========================================================================== */
 
-const ICON = {
-  width: 22,
-  height: 22,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.7,
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
-  'aria-hidden': true,
-} as const
-
-const Spark = () => (
-  <svg {...ICON}>
-    <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4" />
-  </svg>
-)
-const Apps = () => (
-  <svg {...ICON}>
-    <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
-    <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
-    <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
-    <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
-  </svg>
-)
-const Data = () => (
-  <svg {...ICON}>
-    <ellipse cx="12" cy="6" rx="7" ry="3" />
-    <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
-    <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
-  </svg>
-)
-const Code = () => (
-  <svg {...ICON}>
-    <path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13" />
-  </svg>
-)
-const Cloud = () => (
-  <svg {...ICON}>
-    <path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.4 9.1 4.75 4.75 0 0 0 7 18.5z" />
-  </svg>
-)
-const Stack = () => (
-  <svg {...ICON}>
-    <rect x="4" y="4.5" width="16" height="4.5" rx="1.2" />
-    <rect x="4" y="10" width="16" height="4.5" rx="1.2" />
-    <rect x="4" y="15.5" width="16" height="4.5" rx="1.2" />
-  </svg>
-)
-const Pulse = () => (
-  <svg {...ICON}>
-    <path d="M3 12h4l2.5-6 5 12 2.5-6h4" />
-  </svg>
-)
-const Loop = () => (
-  <svg {...ICON}>
-    <path d="M4 12a8 8 0 1 0 2.4-5.7" />
-    <path d="M4 4v4.5h4.5" />
-  </svg>
-)
-const Check = () => (
-  <svg {...ICON}>
-    <path d="M5 12.5l4.2 4.2L19 7" />
-  </svg>
-)
-const Arrow = () => (
-  <svg {...ICON}>
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-)
-
-/** the oversight valve's hand wheel */
-const Wheel = () => (
-  <svg viewBox="0 0 32 32" aria-hidden="true">
-    <circle cx="16" cy="16" r="12.5" />
-    <path d="M16 3.5v25M3.5 16h25" />
-    <circle cx="16" cy="16" r="3.2" />
-  </svg>
-)
-
-/** the oversight gauge: a dial whose needle swings once the water reaches it */
-const Gauge = () => (
-  <svg className="cp__gauge" viewBox="0 0 72 44" aria-hidden="true">
-    <path className="cp__gauge-face" d="M6 38a30 30 0 0 1 60 0z" />
-    <path className="cp__gauge-band" d="M50.5 15.5A30 30 0 0 1 66 38" />
-    <path
-      className="cp__gauge-ticks"
-      d="M10.2 38h4M13.9 23.4l3.4 2.1M24 12.6l2 3.5M36 8.5v4M48 12.6l-2 3.5M58.1 23.4l-3.4 2.1M61.8 38h-4"
-    />
-    <path className="cp__gauge-arc" d="M6 38a30 30 0 0 1 60 0" />
-    <g className="cp__needle">
-      <path d="M36 38 36 14" />
-    </g>
-    <circle className="cp__gauge-hub" cx="36" cy="38" r="3.6" />
-  </svg>
-)
-
-const SYSTEM_ICON = [Apps, Data, Code]
 const OUT_TONE: Tone[] = ['sky', 'citrus', 'blossom']
 const RULE_TONE: Tone[] = ['sky', 'citrus', 'blossom']
-const PACKETS = 8
+const PACKETS = 12
+
+/** the anchors, in the order the water reaches them */
+const AT = { systems: 0, platform: 3, outcomes: 4, oversight: 7, flows: 8 } as const
+
+/** the reservoir's wave: a long run of 48px swells, slid along as it fills */
+const WAVE = (() => {
+  let d = 'M0 7'
+  for (let x = 0; x < 1536; x += 48) d += ' q12 -5 24 0 t24 0'
+  return d
+})()
+
+const tone = (t: Tone) => ({ ['--tone' as string]: `var(--umm-${t})` }) as CSSProperties
+const nth = (k: number) => ({ ['--k' as string]: k }) as CSSProperties
+const num = (i: number) => String(i + 1).padStart(2, '0')
+
+/** a branch of glass from the pipe to a card: its collar on the pipe, its
+ *  flange on the card's edge, and the liquid that fills it once reached */
+function Port({
+  at,
+  on,
+  flow,
+  kind = 'card',
+  children,
+}: {
+  at: (el: HTMLElement | null) => void
+  on: boolean
+  flow: 'in' | 'out'
+  kind?: 'card' | 'row' | 'through'
+  children?: ReactNode
+}) {
+  return (
+    <span className="cp__port" data-kind={kind} data-flow={flow} data-on={on || undefined} ref={at} aria-hidden="true">
+      <span className="cp__branch" />
+      <span className="cp__flange" />
+      {children ?? <span className="cp__collar" />}
+    </span>
+  )
+}
+
+/** the oversight gauge: a paper face under glass, a sky track, a citrus
+ *  band where the reading should sit, and an ink needle that swings into it */
+const Gauge = () => (
+  <span className="cp__gauge" aria-hidden="true">
+    <span className="cp__gauge-face">
+      <svg viewBox="0 0 80 80">
+        <path className="cp__gauge-track" d="M15.75 54 A28 28 0 1 1 64.25 54" />
+        <path className="cp__gauge-zone" d="M54 15.75 A28 28 0 0 1 67.58 44.86" />
+        <g className="cp__needle">
+          <path d="M40 15 L42.2 40 L40 47 L37.8 40 Z" />
+        </g>
+        <circle className="cp__gauge-hub" cx="40" cy="40" r="4.2" />
+        <circle className="cp__gauge-pin" cx="40" cy="40" r="1.4" />
+      </svg>
+    </span>
+  </span>
+)
 
 export function ConnectedArchitecture({ content = architecture }: { content?: typeof architecture }) {
   const { board, workflows, principles } = content
-  const { runRef, tankRef, anchorRef, isLit } = usePipeFlow()
-  const num = (i: number) => String(i + 1).padStart(2, '0')
-  const tone = (t: Tone) => ({ ['--tone' as string]: `var(--umm-${t})` }) as CSSProperties
+  const { runRef, originRef, tankRef, anchorRef, isLit, last } = usePipeFlow()
 
-  /** a card on the pipe, lit once the water reaches its joint */
-  const stage = (i: number, side: 'l' | 'r', t: Tone, kind: string, body: ReactNode) => (
+  /** a card is lit once the water reaches its first joint, and is where
+   *  the reader is while the water's front is between its joints */
+  const card = (
+    first: number,
+    end: number,
+    side: 'l' | 'r',
+    t: Tone,
+    kind: string,
+    body: ReactNode,
+    ref?: Ref<HTMLLIElement>,
+  ) => (
     <li
       key={kind}
       className={`cp__card cp__card--${kind}`}
       data-side={side}
-      data-on={isLit(i) || undefined}
-      ref={kind === 'platform' ? tankRef : undefined}
+      data-on={isLit(first) || undefined}
+      data-now={(last >= first && last <= end) || undefined}
+      ref={ref}
       style={tone(t)}
     >
       {body}
     </li>
   )
 
-  /** the card's number, in a badge that takes its tone when lit */
-  const badge = (i: number) => (
-    <span className="cp__badge" aria-hidden="true">
-      {num(i)}
-    </span>
-  )
-
-  /** a plain joint: a stub of pipe from the pipe to the card's side */
-  const joint = (i: number, extra?: ReactNode) => (
-    <span className="cp__joint" ref={anchorRef(i)} aria-hidden="true">
-      <span className="cp__stub" />
+  const head = (i: number, title: ReactNode, extra?: ReactNode) => (
+    <div className="cp__head">
+      <span className="cp__label cp__num" aria-hidden="true">
+        {num(i)}
+      </span>
+      <h3 className="cp__title">{title}</h3>
       {extra}
-    </span>
+    </div>
   )
 
-  const wfLit = workflows.some((_, k) => isLit(4 + k))
+  const flowing = workflows.some((_, k) => isLit(AT.flows + k))
 
   return (
     <section className="umm-section cd-arch cp" id="architecture" aria-labelledby="cf-title">
@@ -193,176 +157,166 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
       </div>
 
       <div className="umm-container">
-        <div className="cp__board" role="group" aria-label={board.label}>
-          <div className="cp__top">
-            <span className="cp__eyebrow">
-              <span className="cp__live" aria-hidden="true" />
-              {board.eyebrow}
-            </span>
-            <span className="cp__mono">{board.tag}</span>
-          </div>
+        <div className="cp__board" ref={runRef} role="group" aria-label={board.label}>
+          {/* the light that travels with the water's front */}
+          <span className="cp__light" aria-hidden="true">
+            <span className="cp__aura" />
+          </span>
 
-          {/* the intelligence layer: the sensor head the pipe hangs from */}
-          <div className="cp__sensor">
-            <span className="cp__lens" aria-hidden="true">
-              <Spark />
-            </span>
-            <div className="cp__sensor-text">
-              <span className="cp__mono">{board.layerEyebrow}</span>
-              <p className="cp__sensor-title">{board.layerTitle}</p>
-              <p className="cp__sensor-note">{board.layerNote}</p>
-              <p className="cp__mono cp__sensor-assist">{board.assist}</p>
-            </div>
-          </div>
-
-          <div className="cp__run" ref={runRef}>
-            {/* the pipe, its water and the packets riding it */}
-            <div className="cp__pipe" aria-hidden="true">
-              <span className="cp__collar" />
-              <span className="cp__water">
-                <span className="cp__stream" />
+          {/* the pipe: glass, its liquid, the motes riding it, its front */}
+          <span className="cp__pipe" aria-hidden="true">
+            <span className="cp__halo" />
+            <span className="cp__tube">
+              <span className="cp__liquid">
                 {Array.from({ length: PACKETS }, (_, k) => (
-                  <span key={k} className="cp__packet" style={{ ['--k' as string]: k } as CSSProperties} />
+                  <i key={k} className="cp__mote" style={nth(k)} />
                 ))}
               </span>
-              <span className="cp__front" />
+              <span className="cp__shine" />
+            </span>
+            <span className="cp__front" />
+          </span>
+
+          <div className="cp__top">
+            <span className="cp__label cp__eyebrow">
+              <span className="cp__dot" aria-hidden="true" />
+              {board.eyebrow}
+            </span>
+            <span className="cp__label">{board.tag}</span>
+          </div>
+
+          <div className="cp__run">
+            {/* the intelligence layer: the orb the pipe hangs from */}
+            <div className="cp__source">
+              <div className="cp__source-name">
+                <p className="cp__label">{board.layerEyebrow}</p>
+                <h3 className="cp__title cp__title--lit">{board.layerTitle}</h3>
+              </div>
+              <span className="cp__orb" ref={originRef} aria-hidden="true">
+                <span className="cp__orb-core" />
+                <svg className="cp__orb-mark" viewBox="0 0 24 24">
+                  <path d="M12 4.5v15M4.5 12h15M6.7 6.7l10.6 10.6M17.3 6.7 6.7 17.3" />
+                </svg>
+              </span>
+              <div className="cp__source-note">
+                <p className="cp__body">{board.layerNote}</p>
+                <p className="cp__label">{board.assist}</p>
+              </div>
             </div>
 
             <ol className="cp__stages">
-              {stage(
-                0,
+              {card(
+                AT.systems,
+                AT.platform - 1,
                 'l',
                 'sky',
                 'systems',
                 <>
-                  <div className="cp__head">
-                    {badge(0)}
-                    <h3 className="cp__title">{board.systemsLabel}</h3>
-                  </div>
-                  <ul className="cp__list">
-                    {board.systems.map((s, k) => {
-                      const Icon = SYSTEM_ICON[k]
-                      return (
-                        <li key={s.title} className="cp__node">
-                          {/* each system pours in through its own inlet */}
-                          <span className="cp__inlet" ref={k === 0 ? anchorRef(0) : undefined} aria-hidden="true">
-                            <span className="cp__drop" style={{ ['--k' as string]: k } as CSSProperties} />
-                          </span>
-                          <span className="cp__node-icon">
-                            <Icon />
-                          </span>
-                          <span>
-                            <span className="cp__node-title">{s.title}</span>
-                            <span className="cp__node-sub">{s.items}</span>
-                          </span>
-                        </li>
-                      )
-                    })}
+                  {head(0, board.systemsLabel)}
+                  <ul className="cp__rows">
+                    {board.systems.map((s, k) => (
+                      <li key={s.title} className="cp__row cp__row--split">
+                        <Port at={anchorRef(AT.systems + k)} on={isLit(AT.systems + k)} flow="in" kind="row" />
+                        <span className="cp__item">{s.title}</span>
+                        <span className="cp__small">{s.items}</span>
+                      </li>
+                    ))}
                   </ul>
-                  <p className="cp__link">
-                    <Arrow />
-                    {board.systemsLink}
-                  </p>
+                  <p className="cp__label cp__via">{board.systemsLink}</p>
                 </>,
               )}
 
-              {stage(
-                1,
+              {card(
+                AT.platform,
+                AT.outcomes - 1,
                 'r',
                 'lilac',
                 'platform',
                 <>
-                  {joint(1)}
-                  {/* the tank: its water rises as the pipe's passes it */}
-                  <span className="cp__tank" aria-hidden="true">
-                    <span className="cp__tank-water">
-                      <span className="cp__wave" />
+                  {head(1, board.platformLabel)}
+                  {/* the reservoir: glass, filling as the reader passes it */}
+                  <div className="cp__tank">
+                    <Port at={anchorRef(AT.platform)} on={isLit(AT.platform)} flow="out" kind="through" />
+                    <span className="cp__tank-glass" aria-hidden="true">
+                      <span className="cp__tank-liquid">
+                        <svg className="cp__wave" viewBox="0 0 1536 14" width="1536" height="14">
+                          <path className="cp__wave-body" d={`${WAVE} V14 H0 Z`} />
+                          <path className="cp__wave-line" d={WAVE} />
+                        </svg>
+                        <span className="cp__caustics" />
+                      </span>
+                      <span className="cp__tank-shine" />
                     </span>
-                    <span className="cp__marks" />
-                  </span>
-                  <div className="cp__head">
-                    {badge(1)}
-                    <h3 className="cp__title">{board.platformLabel}</h3>
+                    <p className="cp__label cp__tank-text">{board.movement}</p>
+                    <p className="cp__label cp__tank-text">{board.providers.join(' · ')}</p>
                   </div>
-                  <p className="cp__move">{board.movement}</p>
-                  <div className="cp__pair">
-                    <div className="cp__box">
-                      <Cloud />
-                      <span className="cp__node-title">{board.runtime.title}</span>
-                      <span className="cp__node-sub">{board.runtime.body}</span>
-                    </div>
-                    <div className="cp__box">
-                      <Stack />
-                      <span className="cp__node-title">{board.data.title}</span>
-                      <span className="cp__node-sub">{board.data.body}</span>
-                    </div>
-                  </div>
-                  <div className="cp__box cp__box--row">
-                    <Pulse />
-                    <span>
-                      <span className="cp__node-title">{board.observe.title}</span>
-                      <span className="cp__node-sub">{board.observe.items}</span>
-                    </span>
-                  </div>
-                  <p className="cp__providers">{board.providers.join(' · ')}</p>
+                  <ul className="cp__rows">
+                    {[board.runtime, board.data].map((r) => (
+                      <li key={r.title} className="cp__row cp__row--split">
+                        <span className="cp__item">{r.title}</span>
+                        <span className="cp__small">{r.body}</span>
+                      </li>
+                    ))}
+                    <li className="cp__row cp__row--split">
+                      <span className="cp__item">{board.observe.title}</span>
+                      <span className="cp__small">{board.observe.items}</span>
+                    </li>
+                  </ul>
                 </>,
+                tankRef,
               )}
 
-              {stage(
-                2,
+              {card(
+                AT.outcomes,
+                AT.oversight - 1,
                 'l',
-                'blossom',
+                'sky',
                 'outcomes',
                 <>
-                  <div className="cp__head">
-                    {badge(2)}
-                    <h3 className="cp__title">{board.outcomesLabel}</h3>
-                  </div>
-                  <p className="cp__link">
-                    <Arrow />
-                    {board.outcomesLink}
-                  </p>
-                  <ol className="cp__list">
+                  {head(2, board.outcomesLabel)}
+                  <p className="cp__label cp__via">{board.outcomesLink}</p>
+                  <ol className="cp__rows">
                     {board.outcomes.map((o, k) => (
-                      <li key={o} className="cp__outcome" data-umm-tone={OUT_TONE[k]}>
-                        {/* each outcome branches off through its own outlet */}
-                        <span className="cp__outlet" ref={k === 0 ? anchorRef(2) : undefined} aria-hidden="true">
-                          <span className="cp__drop" style={{ ['--k' as string]: k } as CSSProperties} />
-                        </span>
-                        <span className="cp__mono">{num(k)}</span>
-                        <span>{o}</span>
+                      <li
+                        key={o}
+                        className="cp__row cp__row--dot"
+                        data-umm-tone={OUT_TONE[k]}
+                        data-on={isLit(AT.outcomes + k) || undefined}
+                      >
+                        <Port at={anchorRef(AT.outcomes + k)} on={isLit(AT.outcomes + k)} flow="out" kind="row" />
+                        <span className="cp__pip" aria-hidden="true" />
+                        <span className="cp__item">{o}</span>
                       </li>
                     ))}
                   </ol>
-                  <p className="cp__loop">
-                    <Loop />
-                    {board.loop}
-                  </p>
+                  <p className="cp__body cp__loop">{board.loop}</p>
                 </>,
               )}
 
-              {stage(
-                3,
+              {card(
+                AT.oversight,
+                AT.flows - 1,
                 'r',
                 'citrus',
                 'oversight',
                 <>
-                  {joint(
-                    3,
+                  <Port at={anchorRef(AT.oversight)} on={isLit(AT.oversight)} flow="out">
+                    {/* the valve: in line on the pipe, its lever turning to open */}
                     <span className="cp__valve">
-                      <Wheel />
-                    </span>,
-                  )}
-                  <div className="cp__head">
-                    {badge(3)}
-                    <h3 className="cp__title">{board.oversightLabel}</h3>
-                    <Gauge />
-                  </div>
+                      <i className="cp__lever" />
+                      <i className="cp__led" />
+                    </span>
+                  </Port>
+                  {head(3, board.oversightLabel, <Gauge />)}
                   <ul className="cp__checks">
-                    {board.oversight.map((o) => (
-                      <li key={o}>
-                        <Check />
-                        {o}
+                    {board.oversight.map((o, k) => (
+                      <li key={o} style={nth(k)}>
+                        <span className="cp__tick" aria-hidden="true">
+                          <svg viewBox="0 0 16 16">
+                            <path d="M3.6 8.4 6.7 11.4 12.4 4.8" />
+                          </svg>
+                        </span>
+                        <span className="cp__item">{o}</span>
                       </li>
                     ))}
                   </ul>
@@ -370,48 +324,59 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
               )}
             </ol>
 
-            {/* the three workflows: three taps at the bottom of the pipe */}
-            <ol className="cp__flows" data-on={wfLit || undefined}>
+            {/* the three workflows: three taps off a manifold */}
+            <ol className="cp__flows" data-on={flowing || undefined}>
               {workflows.map((w, k) =>
-                stage(
-                  4 + k,
+                card(
+                  AT.flows + k,
+                  AT.flows + k,
                   'r',
                   OUT_TONE[k],
                   w.id,
                   <>
-                    <span className="cp__tap" aria-hidden="true">
-                      <span className="cp__feed" ref={anchorRef(4 + k)} />
-                      <span className="cp__handle" />
-                      <span className="cp__spout" />
-                      <span className="cp__pour" style={{ ['--k' as string]: k } as CSSProperties}>
-                        <i />
-                        <i />
-                        <i />
+                    <span
+                      className="cp__tap"
+                      ref={anchorRef(AT.flows + k)}
+                      data-on={isLit(AT.flows + k) || undefined}
+                      style={nth(k)}
+                      aria-hidden="true"
+                    >
+                      <span className="cp__branch" />
+                      <span className="cp__flange" />
+                      <span className="cp__collar" />
+                      <span className="cp__feed" />
+                      <span className="cp__faucet">
+                        <i className="cp__handle" />
                       </span>
+                      <span className="cp__spout" />
+                      <span className="cp__pour" />
+                      <span className="cp__splash" />
                     </span>
-                    <div className="cp__head">
-                      {badge(4 + k)}
-                      <span className="cp__plate">{w.label}</span>
+                    <div className="cp__head cp__head--flow">
+                      <span className="cp__label cp__num" aria-hidden="true">
+                        {num(4 + k)}
+                      </span>
+                      <span className="cp__tag">{w.label}</span>
                     </div>
-                    <span className="cp__mono">{w.eyebrow}</span>
+                    <p className="cp__label">{w.eyebrow}</p>
                     <h3 className="cp__title">{w.title}</h3>
                     <p className="cp__body">{w.body}</p>
-                    <dl className="cp__facts">
+                    <dl className="cp__spec">
                       <div>
-                        <dt className="cp__mono">{board.aiLabel}</dt>
-                        <dd>{w.ai}</dd>
+                        <dt className="cp__label">{board.aiLabel}</dt>
+                        <dd className="cp__small">{w.ai}</dd>
                       </div>
                       <div>
-                        <dt className="cp__mono">{board.decisionLabel}</dt>
-                        <dd>{w.decision}</dd>
+                        <dt className="cp__label">{board.decisionLabel}</dt>
+                        <dd className="cp__small">{w.decision}</dd>
                       </div>
                       <div>
-                        <dt className="cp__mono">{board.evidenceLabel}</dt>
-                        <dd>{w.evidence.join(' · ')}</dd>
+                        <dt className="cp__label">{board.evidenceLabel}</dt>
+                        <dd className="cp__small">{w.evidence.join(' · ')}</dd>
                       </div>
                       <div>
-                        <dt className="cp__mono">{board.outcomeLabel}</dt>
-                        <dd>{w.outcome}</dd>
+                        <dt className="cp__label">{board.outcomeLabel}</dt>
+                        <dd className="cp__item">{w.outcome}</dd>
                       </div>
                     </dl>
                   </>,
