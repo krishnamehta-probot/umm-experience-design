@@ -9,14 +9,8 @@
    Phones on their side and reduced motion keep the stacked fallback.
    ========================================================================== */
 
-/* the scrollbar is gone on both pages; the "to the top" button replaces it */
-html.cx-v2 {
-  scrollbar-width: none;
-}
-
-html.cx-v2::-webkit-scrollbar {
-  display: none;
-}
+/* The scrollbar is back (Krish, 16 Oct): the browser's own, unstyled, as on
+   umm.digital. The "to the top" button stays beside it. */
 
 /* Stacked fallback (phones on their side, reduced motion): only the chosen
    stage's flow. The shared `.cx-stages .cx-path { display: grid }` comes

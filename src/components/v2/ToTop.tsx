@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 /* ============================================================================
    TO THE TOP — the round button bottom right
 
-   Krish, 13 Oct: the scrollbar is gone on both v2 pages (v2-phone.css); this
-   takes its place. It appears once the reader is past the first screen and
+   Krish, 13 Oct: it took the hidden scrollbar's place; the scrollbar came
+   back on 16 Oct and the button stays. It appears once the reader is past the first screen and
    glides back to the top. The ring round it fills with the page as it
    scrolls, so it still says how far down the page you are.
    ========================================================================== */

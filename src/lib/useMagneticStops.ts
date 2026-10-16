@@ -100,8 +100,15 @@ export function useMagneticStops(
       tween = requestAnimationFrame(step)
     }
 
+    /** The stop the page last settled or glided to (-1: none since it entered). */
+    let rest = -1
+    /** Which way the reader last moved the page: 1 down, -1 up. */
+    let moved = 0
+    let lastY = window.scrollY
+
     glide.current = (s: number) => {
       const { top, travel } = geometry()
+      rest = s
       glideTo(top + travel * stopAnchor(s, stops))
     }
 
@@ -110,8 +117,22 @@ export function useMagneticStops(
       if (travel <= 0) return
       const p = (window.scrollY - top) / travel
       // Free on the way in and out: only between the first and last stop.
-      if (p <= stopAnchor(0, stops) || p >= stopAnchor(stops - 1, stops)) return
-      glideTo(top + travel * stopAnchor(Math.round(p * stops - 0.5), stops))
+      if (p <= stopAnchor(0, stops) || p >= stopAnchor(stops - 1, stops)) {
+        rest = -1
+        return
+      }
+      let to = Math.round(p * stops - 0.5)
+      /* A move shorter than half a lane (one wheel notch, a short drag) left
+         the stop it came from as the nearest, and settling there undid it:
+         a mouse turned a notch at a time never got past a section's first
+         stop (16 Oct). So once the reader has moved off the stop they rest
+         on, the page carries on to the next stop the way they were going. */
+      const off = p - stopAnchor(rest, stops)
+      if (to === rest && Math.sign(off) === moved && Math.abs(off) * stops > 0.04) {
+        to = Math.min(stops - 1, Math.max(0, rest + moved))
+      }
+      rest = to
+      glideTo(top + travel * stopAnchor(to, stops))
     }
 
     /* A finger resting on the screen sends no scroll, but it still holds
@@ -121,6 +142,9 @@ export function useMagneticStops(
        the wait. */
     let touching = false
     const onScroll = () => {
+      const y = window.scrollY
+      if (!gliding && y !== lastY) moved = Math.sign(y - lastY)
+      lastY = y
       if (gliding) return
       window.clearTimeout(idle)
       if (!touching) idle = window.setTimeout(settle, 160 * pace)
