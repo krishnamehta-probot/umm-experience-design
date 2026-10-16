@@ -9,14 +9,15 @@ import '@/styles/ux-flavour.css'
    changes, from here, the shared flavour.css and ux-flavour.css, under
    html.flavour and html.ux-flavour:
 
-     - the faint columns of a layout grid behind the white sections
      - every section label's mark is a cursor
      - the stages' picture is the store growing (StageLight "shop")
-     - a bag drops onto a service card as it is pointed at
      - the roadmap's "Today" is "Live"
-     - the closing band has a product grid behind it
 
    A trial: set UX_FLAVOUR to false and the page is plain.
+
+   16 Oct, evening, Krish: the background patterns, the closing band's
+   drawing and the service cards' extras are gone, so every page sits on
+   CX's plain ground. Keep it simple for now.
    ========================================================================== */
 
 export const UX_FLAVOUR = true

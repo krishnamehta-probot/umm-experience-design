@@ -11,15 +11,16 @@ import '@/styles/cloud-flavour.css'
    here, the shared flavour.css and cloud-flavour.css, under html.flavour
    and html.cloud-flavour:
 
-     - a blueprint dot grid behind the white sections
      - every section label's mark is a small cloud
      - the stages' picture is infrastructure that grows (StageLight "infra")
-     - the service cards carry connector ports, as nodes on a diagram
      - the roadmap reads as a deployment pipeline: "Today" is "Deploy",
        with a status light, and the open stage's bar streams
-     - the closing band has a network of nodes behind it, its lights blinking
 
    It was a trial: set CLOUD_FLAVOUR to false and the page is as it was.
+
+   16 Oct, evening, Krish: the background patterns, the closing band's
+   drawing and the service cards' extras are gone, so every page sits on
+   CX's plain ground. Keep it simple for now.
    ========================================================================== */
 
 export const CLOUD_FLAVOUR = true

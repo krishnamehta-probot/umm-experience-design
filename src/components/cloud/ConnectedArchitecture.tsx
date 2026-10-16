@@ -1,57 +1,34 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
-import { useReducedMotion } from '@/lib/useReducedMotion'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
-import { architecture, type ArchWorkflow } from '@/content/cloudData'
-import { CloudScene } from './CloudScene'
+import { architecture } from '@/content/cloudData'
+import { CloudScene, type SceneFocus } from './CloudScene'
 import '@/styles/cloud-arch.css'
-import '@/styles/cloud-net.css'
-import '@/styles/cloud-story.css'
+import '@/styles/cloud-flow.css'
 
 /* ============================================================================
    CLOUD & DATA · THE THINKING BEHIND THE INFRASTRUCTURE
 
-   16 Oct, the doc's second version: one connected architecture instead of
-   the three scenarios. An ink board, as the closing band is ink: the
-   intelligence layer (AI orchestration) across the top; your existing
-   systems, the connected platform and what it enables in a row under it,
-   joined by connectors that carry data; the feedback loop back up; the
-   engineer oversight along the foot.
+   16 Oct, the doc's second version: one connected architecture, with three
+   workflow views (Cloud provisioning, Data migration, Cloud operations)
+   and three principles.
 
-   Three workflow views (Cloud provisioning, Data migration, Cloud
-   operations), chosen from the pills on the intelligence layer or the tabs
-   under the board: each lights its part of the board and shows its path,
-   what AI supports, the engineer's decision, the evidence and the outcome.
-   Reset architecture goes back to Cloud provisioning. It does not pin; a
-   reader clicks through it. Then the three principles as rule cards.
+   16 Oct, evening, Krish: the engineering factory works, this should too,
+   all of it. So it is built as the factory is: one ink board, the
+   intelligence layer across its top, then a picture that holds still
+   (CloudScene) beside seven cards in the page's flow (over them on a
+   phone), every word of them on screen as the reader scrolls:
 
-   16 Oct, Krish: make it interactive, and never fit it to the screen so
-   all of it shows on any device. So it stays in the page's flow, and:
-     - every part of the board is a way in: tap a system, a platform box,
-       an outcome or the loop and its view opens (hover previews it on the
-       board with a mouse)
-     - when a view opens, its path lights in order, systems to platform to
-       outcome and back up the loop
-     - until the reader touches it, the views turn on their own while the
-       board is on screen, the chosen tab filling as the next comes
-     - a light follows the pointer over the ink
+     01–04  the architecture: your existing systems, the connected
+            platform, what it enables (and the loop), engineer oversight
+     05–07  the three workflows: path, what AI supports, the engineer's
+            decision, evidence, outcome
 
-   Later the same day, Krish: scroll-led, as the engineering factory. The
-   three views became cards in the page's flow, under the board; beside
-   them (over them on a phone) a picture of the data's journey holds still
-   (CloudScene), lighting the route of the view being read with packets
-   running it. Its tabs scroll to their card. Reading a card sets the view
-   on the board too.
+   The card being read lights its part of the picture, packets of data
+   running into it or along its route. The stations under the picture
+   scroll to their card. Where the window is too short to hold the
+   picture still, it sits above the cards. Then the principles.
    ========================================================================== */
-
-const TONE: Tone[] = ['sky', 'citrus', 'blossom']
-
-/** What each view lights on the board. */
-const LIT: Record<ArchWorkflow['id'], { systems: number; parts: string[]; outcome: number }> = {
-  provisioning: { systems: 2, parts: ['runtime'], outcome: 0 },
-  migration: { systems: 1, parts: ['movement', 'data'], outcome: 1 },
-  operations: { systems: 0, parts: ['observe', 'loop'], outcome: 2 },
-}
 
 const ICON = {
   width: 22,
@@ -118,96 +95,53 @@ const Check = () => (
     <path d="M5 12.5l4.2 4.2L19 7" />
   </svg>
 )
+const Arrow = () => (
+  <svg {...ICON}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+)
 
 const SYSTEM_ICON = [Apps, Data, Code]
-
-/** how long each view holds while the views turn on their own */
-const TURN_MS = 7000
-
-/** The view a part of the board belongs to. */
-const VIEW_OF = {
-  system: (i: number) => (Object.keys(LIT) as ArchWorkflow['id'][]).find((k) => LIT[k].systems === i),
-  part: (part: string) => (Object.keys(LIT) as ArchWorkflow['id'][]).find((k) => LIT[k].parts.includes(part)),
-  outcome: (i: number) => (Object.keys(LIT) as ArchWorkflow['id'][]).find((k) => LIT[k].outcome === i),
-}
-
-/** A connector between two columns: its label and an arrow, with data
- *  travelling along it. */
-function Link({ label, lit }: { label: string; lit: boolean }) {
-  return (
-    <div className="cd-net__link" data-on={lit}>
-      <span className="cd-net__link-label">{label}</span>
-      <span className="cd-net__wire" aria-hidden="true">
-        <i />
-        <i />
-      </span>
-    </div>
-  )
-}
+const OUT_TONE: Tone[] = ['sky', 'citrus', 'blossom']
+const RULE_TONE: Tone[] = ['sky', 'citrus', 'blossom']
 
 export function ConnectedArchitecture({ content = architecture }: { content?: typeof architecture }) {
   const { board, workflows, principles } = content
-  const [pick, setPick] = useState(0)
-  /** the view a hovered part previews on the board */
-  const [peek, setPeek] = useState<number | null>(null)
-  /** turning on its own until the reader takes over */
-  const [auto, setAuto] = useState(true)
-  const [seen, setSeen] = useState(false)
-  const reduced = useReducedMotion()
-  const boardRef = useRef<HTMLDivElement>(null)
-  const wf = workflows[pick]
-  const shown = workflows[peek ?? pick]
-  const lit = LIT[shown.id]
-  const on = (part: string) => lit.parts.includes(part)
-  const turning = auto && seen && !reduced
 
-  /* turn only while the board is on screen */
-  useEffect(() => {
-    const el = boardRef.current
-    if (!el) return
-    const io = new IntersectionObserver(([e]) => setSeen(e.isIntersecting), {
-      threshold: 0.35,
-    })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
+  /* the seven cards, in order: the architecture's four, the workflows */
+  const steps: { focus: SceneFocus; tone: Tone; name: string }[] = [
+    { focus: 'systems', tone: 'sky', name: board.systemsLabel },
+    { focus: 'platform', tone: 'lilac', name: board.platformLabel },
+    { focus: 'outcomes', tone: 'blossom', name: board.outcomesLabel },
+    { focus: 'oversight', tone: 'citrus', name: board.oversightLabel },
+    ...workflows.map((w, i) => ({ focus: w.id as SceneFocus, tone: OUT_TONE[i], name: w.label })),
+  ]
 
-  useEffect(() => {
-    if (!turning) return
-    const t = window.setTimeout(() => setPick((p) => (p + 1) % workflows.length), TURN_MS)
-    return () => window.clearTimeout(t)
-  }, [turning, pick, workflows.length])
-
-  /* reading a card sets its view: the card whose middle the reading line
-     (mid-screen, or under the held picture on a phone) has passed */
-  const storyRef = useRef<HTMLDivElement>(null)
+  const [at, setAt] = useState(0)
   const holdRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLLIElement | null)[]>([])
+
+  /* the card being read: the last whose top the reading line (mid-screen,
+     or a little under the held picture on a phone) has passed */
   useEffect(() => {
     let raf = 0
     const measure = () => {
       raf = 0
-      const story = storyRef.current
       const hold = holdRef.current
-      if (!story || !hold) return
+      if (!hold) return
       const vh = window.innerHeight
-      const box = story.getBoundingClientRect()
       const held = hold.getBoundingClientRect()
       const line = window.innerWidth < 1000 ? held.bottom + (vh - held.bottom) * 0.35 : vh * 0.5
-      if (box.top > line || box.bottom < line) return
-      let at = 0
+      let now = 0
       cardRefs.current.forEach((c, i) => {
-        if (!c) return
-        const r = c.getBoundingClientRect()
-        if (r.top < line) at = i
+        if (c && c.getBoundingClientRect().top < line) now = i
       })
-      setAuto(false)
-      setPeek(null)
-      setPick((p) => (p === at ? p : at))
+      setAt((p) => (p === now ? p : now))
     }
     const queue = () => {
       if (!raf) raf = requestAnimationFrame(measure)
     }
+    measure()
     window.addEventListener('scroll', queue, { passive: true })
     window.addEventListener('resize', queue)
     return () => {
@@ -216,38 +150,30 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
       if (raf) cancelAnimationFrame(raf)
     }
   }, [])
-  const readCard = (i: number) => cardRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
-  /** the reader chose: the views stop turning */
-  const choose = (i: number) => {
-    setAuto(false)
-    setPeek(null)
-    setPick(i)
-  }
-  const indexOf = (id?: ArchWorkflow['id']) => (id ? workflows.findIndex((w) => w.id === id) : -1)
-  /** handlers that make a part of the board open its view */
-  const way = (id?: ArchWorkflow['id']) => {
-    const i = indexOf(id)
-    if (i < 0) return {}
-    return {
-      'data-way': true,
-      onClick: () => choose(i),
-      onPointerEnter: (e: PointerEvent) => e.pointerType === 'mouse' && setPeek(i),
-      onPointerLeave: () => setPeek(null),
-    }
-  }
-  /** the light that follows the pointer over the ink */
-  const follow = (e: PointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
-    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
-  }
+  const goTo = (i: number) => cardRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const num = (i: number) => String(i + 1).padStart(2, '0')
+
+  /** a card, with its tone, lit while it is read */
+  const card = (i: number, body: ReactNode) => (
+    <li
+      key={steps[i].focus}
+      className="cf__step"
+      data-on={i === at || undefined}
+      ref={(el) => {
+        cardRefs.current[i] = el
+      }}
+      style={{ ['--tone' as string]: `var(--umm-${steps[i].tone})` } as CSSProperties}
+    >
+      {body}
+    </li>
+  )
 
   return (
-    <section className="umm-section cd-arch cd-net" id="architecture" aria-labelledby="cd-net-title">
+    <section className="umm-section cd-arch cf" id="architecture" aria-labelledby="cf-title">
       <div className="umm-container cd-arch__head">
         <AiHead
-          id="cd-net-title"
+          id="cf-title"
           chip={content.chip}
           line1={content.line1}
           line2={content.line2}
@@ -259,224 +185,200 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
       </div>
 
       <div className="umm-container">
-        <div
-          className="cd-net__board"
-          ref={boardRef}
-          data-umm-theme="ink"
-          data-flow={shown.id}
-          role="group"
-          aria-label={board.label}
-          onPointerMove={follow}
-        >
-          <div className="cd-net__top">
-            <span className="cd-net__eyebrow">
-              <span className="cd-net__live" aria-hidden="true" />
+        <div className="cf__board" data-umm-theme="ink" role="group" aria-label={board.label}>
+          <div className="cf__top">
+            <span className="cf__eyebrow">
+              <span className="cf__live" aria-hidden="true" />
               {board.eyebrow}
             </span>
-            <span className="cd-net__tag">{board.tag}</span>
+            <span className="cf__mono">{board.tag}</span>
           </div>
 
-          {/* the intelligence layer */}
-          <div className="cd-net__layer">
-            <span className="cd-net__layer-icon">
+          {/* the intelligence layer, over everything */}
+          <div className="cf__layer">
+            <span className="cf__layer-icon">
               <Spark />
             </span>
-            <div className="cd-net__layer-text">
-              <span className="cd-net__mono">{board.layerEyebrow}</span>
-              <p className="cd-net__layer-title">{board.layerTitle}</p>
+            <div>
+              <span className="cf__mono">{board.layerEyebrow}</span>
+              <p className="cf__layer-title">{board.layerTitle}</p>
             </div>
-            <div className="cd-net__layer-side">
-              <div className="cd-net__pills">
-                {workflows.map((w, i) => (
-                  <button
-                    key={w.id}
-                    type="button"
-                    className="cd-net__pill"
-                    aria-pressed={i === pick}
-
-                    onClick={() => choose(i)}
-                  >
-                    {w.short}
-                  </button>
-                ))}
-              </div>
-              <p className="cd-net__layer-note">{board.layerNote}</p>
+            <div className="cf__layer-side">
+              <p>{board.layerNote}</p>
+              <p className="cf__mono">{board.assist}</p>
             </div>
           </div>
 
-          <div className="cd-net__assist" aria-hidden="true">
-            <span className="cd-net__mono">{board.assist}</span>
-            <span className="cd-net__drop">
-              <i />
-            </span>
-          </div>
-
-          {/* systems → platform → outcomes */}
-          <div className="cd-net__row">
-            <div className="cd-net__col">
-              <span className="cd-net__mono cd-net__col-label">{board.systemsLabel}</span>
-              <ul className="cd-net__list">
-                {board.systems.map((s, i) => {
-                  const Icon = SYSTEM_ICON[i]
-                  return (
-                    <li key={s.title} className="cd-net__node" data-on={lit.systems === i} {...way(VIEW_OF.system(i))}>
-                      <span className="cd-net__node-icon">
-                        <Icon />
-                      </span>
-                      <span>
-                        <span className="cd-net__node-title">{s.title}</span>
-                        <span className="cd-net__node-sub">{s.items}</span>
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-
-            <Link label={board.systemsLink} lit />
-
-            <div className="cd-net__platform">
-              <span className="cd-net__mono cd-net__col-label">{board.platformLabel}</span>
-              <p className="cd-net__move" data-on={on('movement')} {...way(VIEW_OF.part('movement'))}>
-                {board.movement}
-              </p>
-              <div className="cd-net__pair">
-                <div className="cd-net__box" data-on={on('runtime')} {...way(VIEW_OF.part('runtime'))}>
-                  <Cloud />
-                  <p className="cd-net__box-title">{board.runtime.title}</p>
-                  <p className="cd-net__box-body">{board.runtime.body}</p>
-                </div>
-                <div className="cd-net__box" data-on={on('data')} {...way(VIEW_OF.part('data'))}>
-                  <Stack />
-                  <p className="cd-net__box-title">{board.data.title}</p>
-                  <p className="cd-net__box-body">{board.data.body}</p>
-                </div>
-              </div>
-              <div className="cd-net__observe" data-on={on('observe')} {...way(VIEW_OF.part('observe'))}>
-                <Pulse />
-                <span>
-                  <span className="cd-net__box-title">{board.observe.title}</span>
-                  <span className="cd-net__box-body">{board.observe.items}</span>
-                </span>
-              </div>
-              <p className="cd-net__providers">{board.providers.join(' · ')}</p>
-            </div>
-
-            <Link label={board.outcomesLink} lit />
-
-            <div className="cd-net__col">
-              <span className="cd-net__mono cd-net__col-label">{board.outcomesLabel}</span>
-              <ol className="cd-net__list">
-                {board.outcomes.map((o, i) => (
-                  <li
-                    key={o}
-                    className="cd-net__outcome"
-                    data-on={lit.outcome === i}
-                    data-umm-tone={TONE[i]}
-                    {...way(VIEW_OF.outcome(i))}
-                  >
-                    <span className="cd-net__mono">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="cd-net__outcome-text">{o}</span>
+          <div className="cf__story">
+            {/* the picture, held still while the cards pass */}
+            <div
+              className="cf__hold"
+              ref={holdRef}
+              style={{ ['--tone' as string]: `var(--umm-${steps[at].tone})` } as CSSProperties}
+            >
+              <CloudScene focus={steps[at].focus} />
+              <ol className="cf__stations" aria-label={board.label}>
+                {steps.map((s, i) => (
+                  <li key={s.focus} data-umm-tone={s.tone}>
+                    <button
+                      type="button"
+                      className="cf__station"
+                      aria-current={i === at ? 'step' : undefined}
+                      data-done={i < at || undefined}
+                      aria-label={s.name}
+                      onClick={() => goTo(i)}
+                    >
+                      <span className="cf__station-num">{num(i)}</span>
+                      <span className="cf__station-name">{s.name}</span>
+                    </button>
                   </li>
                 ))}
               </ol>
+              <p className="cf__now" aria-hidden="true">
+                <span>{num(at)}</span> {steps[at].name}
+              </p>
             </div>
-          </div>
 
-          <p className="cd-net__loop" data-on={on('loop')} {...way(VIEW_OF.part('loop'))}>
-            <Loop />
-            {board.loop}
-          </p>
+            {/* the cards, in the page's flow */}
+            <ol className="cf__steps">
+              {card(
+                0,
+                <>
+                  <span className="cf__label">{num(0)}</span>
+                  <h3 className="cf__title">{board.systemsLabel}</h3>
+                  <ul className="cf__list">
+                    {board.systems.map((s, i) => {
+                      const Icon = SYSTEM_ICON[i]
+                      return (
+                        <li key={s.title} className="cf__node">
+                          <span className="cf__node-icon">
+                            <Icon />
+                          </span>
+                          <span>
+                            <span className="cf__node-title">{s.title}</span>
+                            <span className="cf__node-sub">{s.items}</span>
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  <p className="cf__link">
+                    <Arrow />
+                    {board.systemsLink}
+                  </p>
+                </>,
+              )}
 
-          <div className="cd-net__oversight">
-            <span className="cd-net__mono">{board.oversightLabel}</span>
-            <ul>
-              {board.oversight.map((o) => (
-                <li key={o}>
-                  <Check />
-                  {o}
-                </li>
-              ))}
-            </ul>
+              {card(
+                1,
+                <>
+                  <span className="cf__label">{num(1)}</span>
+                  <h3 className="cf__title">{board.platformLabel}</h3>
+                  <div className="cf__platform">
+                    <p className="cf__move">{board.movement}</p>
+                    <div className="cf__pair">
+                      <div className="cf__box">
+                        <Cloud />
+                        <span className="cf__node-title">{board.runtime.title}</span>
+                        <span className="cf__node-sub">{board.runtime.body}</span>
+                      </div>
+                      <div className="cf__box">
+                        <Stack />
+                        <span className="cf__node-title">{board.data.title}</span>
+                        <span className="cf__node-sub">{board.data.body}</span>
+                      </div>
+                    </div>
+                    <div className="cf__box cf__box--row">
+                      <Pulse />
+                      <span>
+                        <span className="cf__node-title">{board.observe.title}</span>
+                        <span className="cf__node-sub">{board.observe.items}</span>
+                      </span>
+                    </div>
+                    <p className="cf__providers">{board.providers.join(' · ')}</p>
+                  </div>
+                </>,
+              )}
+
+              {card(
+                2,
+                <>
+                  <span className="cf__label">{num(2)}</span>
+                  <h3 className="cf__title">{board.outcomesLabel}</h3>
+                  <p className="cf__link">
+                    <Arrow />
+                    {board.outcomesLink}
+                  </p>
+                  <ol className="cf__list">
+                    {board.outcomes.map((o, i) => (
+                      <li key={o} className="cf__outcome" data-umm-tone={OUT_TONE[i]}>
+                        <span className="cf__mono">{num(i)}</span>
+                        <span>{o}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="cf__loop">
+                    <Loop />
+                    {board.loop}
+                  </p>
+                </>,
+              )}
+
+              {card(
+                3,
+                <>
+                  <span className="cf__label">{num(3)}</span>
+                  <h3 className="cf__title">{board.oversightLabel}</h3>
+                  <ul className="cf__checks">
+                    {board.oversight.map((o) => (
+                      <li key={o}>
+                        <Check />
+                        {o}
+                      </li>
+                    ))}
+                  </ul>
+                </>,
+              )}
+
+              {workflows.map((w, k) =>
+                card(
+                  4 + k,
+                  <>
+                    <span className="cf__label">
+                      {num(4 + k)} / {w.eyebrow}
+                    </span>
+                    <h3 className="cf__title">{w.title}</h3>
+                    <p className="cf__body">{w.body}</p>
+                    <dl className="cf__facts">
+                      <div>
+                        <dt className="cf__mono">{board.aiLabel}</dt>
+                        <dd>{w.ai}</dd>
+                      </div>
+                      <div>
+                        <dt className="cf__mono">{board.decisionLabel}</dt>
+                        <dd>{w.decision}</dd>
+                      </div>
+                      <div>
+                        <dt className="cf__mono">{board.evidenceLabel}</dt>
+                        <dd>{w.evidence.join(' · ')}</dd>
+                      </div>
+                      <div>
+                        <dt className="cf__mono">{board.outcomeLabel}</dt>
+                        <dd>{w.outcome}</dd>
+                      </div>
+                    </dl>
+                  </>,
+                ),
+              )}
+            </ol>
           </div>
         </div>
 
-        {/* the workflow views: the journey held still, the cards passing */}
-        <div className="cd-story" ref={storyRef}>
-          <div className="cd-story__hold" ref={holdRef}>
-            <CloudScene flow={wf.id} tone={TONE[pick]} />
-            <div className="cd-net__tabs" role="group" aria-label={board.workflowsLabel}>
-              {workflows.map((w, i) => (
-                <button
-                  key={w.id}
-                  type="button"
-                  className="cd-net__tab"
-                  aria-current={i === pick ? 'step' : undefined}
-                  data-umm-tone={TONE[i]}
-                  data-turning={turning && i === pick ? 'true' : undefined}
-                  style={{ ['--turn' as string]: `${TURN_MS}ms` } as CSSProperties}
-                  onClick={() => {
-                    choose(i)
-                    readCard(i)
-                  }}
-                >
-                  <span className="cd-net__mono">{String(i + 1).padStart(2, '0')}</span>
-                  {w.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <ol className="cd-story__cards">
-            {workflows.map((w, i) => (
-              <li
-                key={w.id}
-                className="cd-story__card"
-                data-on={i === pick || undefined}
-                ref={(el) => {
-                  cardRefs.current[i] = el
-                }}
-                style={{ ['--tone' as string]: `var(--umm-${TONE[i]})` } as CSSProperties}
-              >
-                <div className="cd-net__path">
-                  <span className="cd-net__mono">{w.eyebrow}</span>
-                  <h3 className="cd-net__title">{w.title}</h3>
-                  <p className="cd-net__body">{w.body}</p>
-                </div>
-                <dl className="cd-net__facts">
-                  <div>
-                    <dt className="cd-net__mono">{board.aiLabel}</dt>
-                    <dd>{w.ai}</dd>
-                  </div>
-                  <div>
-                    <dt className="cd-net__mono">{board.decisionLabel}</dt>
-                    <dd>{w.decision}</dd>
-                  </div>
-                  <div>
-                    <dt className="cd-net__mono">{board.evidenceLabel}</dt>
-                    <dd>{w.evidence.join(' · ')}</dd>
-                  </div>
-                  <div>
-                    <dt className="cd-net__mono">{board.outcomeLabel}</dt>
-                    <dd>{w.outcome}</dd>
-                  </div>
-                </dl>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div className="cd-net__foot">
-          <p className="cd-arch__note">{board.disclaimer}</p>
-          <button type="button" className="cd-arch__reset" onClick={() => choose(0)} disabled={pick === 0}>
-            <Loop />
-            {board.reset}
-          </button>
-        </div>
+        <p className="cd-arch__note cf__note">{board.disclaimer}</p>
 
         <ol className="cd-arch__rules">
           {principles.map((p, i) => (
-            <li key={p.title} className="cd-arch__rule" data-umm-tone={TONE[i]}>
+            <li key={p.title} className="cd-arch__rule" data-umm-tone={RULE_TONE[i]}>
               <span className="cd-arch__rule-tag">
                 {String(i + 1).padStart(2, '0')} / {p.step}
               </span>

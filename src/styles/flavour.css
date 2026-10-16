@@ -7,22 +7,16 @@
    sets html.flavour plus its own class (html.cloud-flavour, ...), and its
    own sheet fills in these variables:
 
-     --fl-ground, --fl-ground-size   the pattern behind the white sections
      --fl-mark                       the section labels' mark (a mask image)
      --fl-today                      the roadmap's "today" label
-     --fl-close                      the drawing behind the closing band
 
-   and dresses anything else of its own (the service cards, the line). The
-   rules every flavour shares are here. Tokens only.
+   The rules every flavour shares are here. Tokens only.
+
+   16 Oct, evening, Krish: the new pages should sit on the same plain
+   ground as CX and AI, so the patterns behind the white sections, the
+   drawings behind the closing band and the service cards' extras (ports,
+   corners, the bag) are gone. Keep it simple for now.
    ========================================================================== */
-
-/* --- the pattern behind the white sections -------------------------------- */
-
-html.flavour :is(.cx-svcs, .cx-ind, .cx-stages, .cd-arch, .cx-kit, .cx-plan, .cx-finale) {
-  background-image: var(--fl-ground, none);
-  background-size: var(--fl-ground-size, 24px 24px);
-  background-position: center top;
-}
 
 /* --- the section labels' mark ----------------------------------------------- */
 
@@ -90,28 +84,6 @@ html.flavour .cx-plan__today b::after {
 @keyframes fl-blink {
   50% {
     opacity: 0.3;
-  }
-}
-
-/* --- the drawing behind the closing band ------------------------------------ */
-
-html.flavour .cx-close::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  width: min(62%, 760px);
-  background: var(--fl-close, none) right center / contain no-repeat;
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-@media (max-width: 899px) {
-  html.flavour .cx-close::after {
-    width: 100%;
-    opacity: 0.2;
   }
 }
 

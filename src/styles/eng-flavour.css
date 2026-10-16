@@ -1,48 +1,13 @@
 /* ============================================================================
    DIGITAL ENGINEERING · THE ENGINEERING FLAVOUR (components/eng/flavour.tsx)
    ----------------------------------------------------------------------------
-   This page's half of the flavour (the shared rules are flavour.css): faint
-   graph paper behind the white sections, code brackets for the section
-   labels' mark, "Release" on the roadmap, a commit graph behind the closing
-   band, and selection corners on the service cards. The drawing carries
-   the ink and citrus values.
+   This page's half of the flavour (the shared rules are flavour.css): code
+   brackets for the section labels' mark and "Release" on the roadmap. Its
+   ground pattern, closing drawing and service card extras went on 16 Oct,
+   to match CX and AI.
    ========================================================================== */
 
 html.eng-flavour {
-  --fl-ground:
-    linear-gradient(rgb(16 14 20 / 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(16 14 20 / 0.045) 1px, transparent 1px);
-  --fl-ground-size: 32px 32px;
   --fl-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 6 2.5 12 8 18M16 6l5.5 6-5.5 6M14 3.5l-4 17' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --fl-today: 'Release';
-  --fl-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='320 0 420 440'%3E%3Cg fill='none' stroke='%233a3644' stroke-width='1.6'%3E%3Cpath d='M470 10V430'/%3E%3Cpath d='M470 70C470 110 560 100 560 140V230C560 270 470 260 470 300'/%3E%3Cpath d='M560 170C560 200 650 190 650 220V330C650 370 470 360 470 400'/%3E%3Cpath d='M470 330C470 350 560 345 560 365V410'/%3E%3C/g%3E%3Ccircle cx='470' cy='40' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='470' cy='70' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='560' cy='140' r='6' fill='%23f0ff70'%3E%3Canimate attributeName='opacity' values='1;.3;1' dur='2.0s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='560' cy='190' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='470' cy='180' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='650' cy='250' r='6' fill='%23f0ff70'%3E%3Canimate attributeName='opacity' values='1;.3;1' dur='2.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='650' cy='290' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='470' cy='300' r='6' fill='%23f0ff70'%3E%3Canimate attributeName='opacity' values='1;.3;1' dur='2.2s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='470' cy='240' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='560' cy='390' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3Ccircle cx='470' cy='400' r='6' fill='%23f0ff70'%3E%3Canimate attributeName='opacity' values='1;.3;1' dur='2.6s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='470' cy='120' r='5.5' fill='%23100e14' stroke='%23a9a9b4' stroke-width='1.6'/%3E%3C/svg%3E");
-}
-
-/* --- the service cards: selection corners, as in an editor ---------------- */
-
-html.eng-flavour .cx-svc::after {
-  --c: var(--umm-ink);
-  content: '';
-  position: absolute;
-  inset: -7px;
-  z-index: 2;
-  background:
-    linear-gradient(var(--c), var(--c)) top left / 16px 2px no-repeat,
-    linear-gradient(var(--c), var(--c)) top left / 2px 16px no-repeat,
-    linear-gradient(var(--c), var(--c)) top right / 16px 2px no-repeat,
-    linear-gradient(var(--c), var(--c)) top right / 2px 16px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom left / 16px 2px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom left / 2px 16px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom right / 16px 2px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom right / 2px 16px no-repeat;
-  opacity: 0.22;
-  pointer-events: none;
-  transition:
-    opacity 0.3s var(--umm-ease-out),
-    inset 0.3s var(--umm-ease-out);
-}
-
-html.eng-flavour .cx-svc:hover::after {
-  inset: -10px;
-  opacity: 0.9;
 }

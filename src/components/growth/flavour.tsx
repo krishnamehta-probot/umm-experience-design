@@ -10,13 +10,15 @@ import '@/styles/growth-flavour.css'
    What changes, from here, the shared flavour.css and growth-flavour.css,
    under html.flavour and html.growth-flavour:
 
-     - the faint rules of a chart behind the white sections
      - every section label's mark is a rising trend
      - the stages' picture is growth taking shape (StageLight "rise")
      - the roadmap's "Today" is "Now"
-     - the closing band has a chart climbing behind it
 
    A trial: set GROWTH_FLAVOUR to false and the page is as it was.
+
+   16 Oct, evening, Krish: the background patterns, the closing band's
+   drawing and the service cards' extras are gone, so every page sits on
+   CX's plain ground. Keep it simple for now.
    ========================================================================== */
 
 export const GROWTH_FLAVOUR = true
