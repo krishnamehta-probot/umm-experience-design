@@ -5,9 +5,9 @@ import { film } from '@/content/engineering'
    DIGITAL ENGINEERING · SELECTED WORK — the CX film, with this page's projects
 
    The same player, timing, cuts and last frame as the CX page's film
-   (ProofFilm), on QCare, Mohawk PriceFx and Penny. QCare and Mohawk play
-   their screen flows (as on the Cloud & Data page); Penny plays its live
-   homepage scrolling. The page plays the exports, film/eng-wide.mp4 and
+   (ProofFilm), on Penny, Mohawk PriceFx and QCare (that order, Krish 17 Oct).
+   Penny plays its live homepage scrolling; Mohawk and QCare play their
+   screen flows (as on the Cloud & Data page). The page plays the exports, film/eng-wide.mp4 and
    film/eng-tall.mp4 (scripts/render-film.mjs --film eng).
    ========================================================================== */
 

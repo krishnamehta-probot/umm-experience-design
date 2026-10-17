@@ -1422,6 +1422,19 @@ html.cx-v2 body {
   height: 220px;
 }
 
+/* 17 Oct, Krish: Engineering's title, "The engineering behind", runs the
+   frame's width, so the citrus star sat under "The" and the blossom flower
+   touched "behind". Both lift into the corners above it (wide frame). */
+.cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-intro__shape--0 {
+  left: 100px;
+  top: 30px;
+}
+
+.cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-intro__shape--1 {
+  right: 110px;
+  top: 20px;
+}
+
 .cx-f-eyebrow,
 .cx-f-end__eyebrow,
 .cx-f-proj__meta,

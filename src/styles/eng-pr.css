@@ -25,6 +25,19 @@
    (Mosvita in tracked capitals). Tokens only; no outlines on containers.
    ========================================================================== */
 
+/* 17 Oct, Krish: one column, read down. The heading, its line under it
+   (not beside it, as the shared head sets it), then the paragraph. */
+.ep .cd-arch__head {
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: clamp(0.75rem, 1.4vw, 1.1rem);
+}
+
+.ep .cd-arch__lead {
+  justify-self: start;
+  max-width: 64ch;
+  margin-bottom: 0;
+}
+
 .ep__intro {
   max-width: 64ch;
   margin: 0 0 clamp(1.25rem, 2.6vw, 2rem);
