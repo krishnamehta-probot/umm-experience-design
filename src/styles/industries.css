@@ -101,3 +101,10 @@
   line-height: 1.55;
 }
 
+/* the drawings rest while the band is off screen (Industries sets data-live
+   while it is in view, or always without IntersectionObserver) */
+.cx-ind:not([data-live]) .cx-ind__art *,
+.cx-ind:not([data-live]) .cx-ind__art *::before,
+.cx-ind:not([data-live]) .cx-ind__art *::after {
+  animation-play-state: paused !important;
+}

@@ -1294,3 +1294,15 @@
     transition: none !important;
   }
 }
+
+/* --- the hero's glass object on phones (17 Oct review) ----------------------------
+   This page's headline is two long lines, so the shared spot beside a short
+   first line (v2.css) lands on the headline's end. Here the object drops to
+   the open space beside the round call to action, under the headline. */
+@media (max-width: 900px) {
+  html.growth-page .cx-hero__cube {
+    top: calc(clamp(104px, 17vh, 230px) + 21vw);
+    right: calc(var(--umm-gutter, 20px) + 64px);
+    width: 20vw;
+  }
+}
