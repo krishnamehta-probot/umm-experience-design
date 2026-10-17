@@ -1147,9 +1147,15 @@
 }
 
 @media (min-width: 1200px) and (min-height: 700px) {
+  /* held: a band of the board's paper above it, so rows passing under the
+     chart never show in the gap between it and the top of the screen */
   .gc__chart {
     position: sticky;
     top: 14px;
+    box-shadow:
+      0 0 0 1px rgb(16 14 20 / 0.06),
+      0 24px 48px -30px rgb(16 14 20 / 0.42),
+      0 -16px 0 6px var(--umm-paper);
   }
 }
 
@@ -1191,6 +1197,10 @@
   .gc__strip {
     position: sticky;
     top: 8px;
+    box-shadow:
+      0 0 0 1px rgb(16 14 20 / 0.06),
+      0 18px 36px -22px rgb(16 14 20 / 0.35),
+      0 -12px 0 4px var(--umm-paper);
   }
 }
 
