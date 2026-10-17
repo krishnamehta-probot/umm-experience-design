@@ -482,22 +482,22 @@ export const tools = {
   lead: 'We assess your workloads, existing estate and team capability before choosing platforms and services. Architecture decisions should account for operation, cost and future change.',
   groups: [
     {
-      label: 'CLOUD PLATFORMS',
+      label: 'Cloud Platforms',
       tone: 'sky' as Tone,
       items: ['AWS', 'Microsoft Azure', 'Google Cloud'],
     },
     {
-      label: 'DATA ENGINEERING',
+      label: 'Data Engineering',
       tone: 'citrus' as Tone,
       items: ['Apache Spark', 'Airflow', 'Databricks', 'Snowflake'],
     },
     {
-      label: 'ANALYTICS & REPORTING',
+      label: 'Analytics & Reporting',
       tone: 'blossom' as Tone,
       items: ['Power BI', 'Tableau', 'Looker', 'Grafana'],
     },
     {
-      label: 'PLATFORM OPERATIONS',
+      label: 'Platform Operations',
       tone: 'sun' as Tone,
       items: ['Terraform', 'Docker', 'Kubernetes', 'GitLab CI/CD'],
     },

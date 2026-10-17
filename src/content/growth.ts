@@ -615,25 +615,25 @@ export const tools = {
   lead: 'We select and connect platforms around your current stack, permissions, and growth priorities. Each tool has a defined role in the workflow.',
   groups: [
     {
-      label: 'AI & CREATIVE PRODUCTION',
+      label: 'AI & Creative Production',
       tone: 'blossom' as Tone,
       items: ['OpenAI', 'Gemini', 'Higgsfield', 'Veo'],
       about: 'Research, drafting, creative exploration, and image or video production.',
     },
     {
-      label: 'DEMAND & DISTRIBUTION',
+      label: 'Demand & Distribution',
       tone: 'sun' as Tone,
       items: ['Google Ads', 'Meta', 'LinkedIn', 'Semrush'],
       about: 'Paid search and social, SEO research, competitor insights, and campaign planning.',
     },
     {
-      label: 'CUSTOMER & WORKFLOWS',
+      label: 'Customer & Workflows',
       tone: 'sky' as Tone,
       items: ['HubSpot', 'Salesforce', 'n8n', 'Make'],
       about: 'Customer context, lifecycle communication, routing, and platform connections.',
     },
     {
-      label: 'MEASUREMENT & LEARNING',
+      label: 'Measurement & Learning',
       tone: 'citrus' as Tone,
       items: ['Search Console', 'GA4', 'Looker Studio', 'Power BI'],
       about: 'Organic search performance, conversion measurement, CRM outcomes, and AI visibility review.',

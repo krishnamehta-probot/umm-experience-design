@@ -447,17 +447,17 @@ export const tools = {
   lead: 'We select technologies around your product, existing systems, and operating needs. The factory model works within your delivery practices, including Agile.',
   groups: [
     {
-      label: 'APPLICATIONS',
+      label: 'Applications',
       tone: 'sky' as Tone,
       items: ['React', 'Angular', 'JavaScript', 'Node.js', 'Spring Boot'],
     },
     {
-      label: 'CONTEXT & COLLABORATION',
+      label: 'Context & Collaboration',
       tone: 'sun' as Tone,
       items: ['Jira', 'Figma', 'GitHub'],
     },
     {
-      label: 'INTEGRATION & DELIVERY',
+      label: 'Integration & Delivery',
       tone: 'blossom' as Tone,
       items: ['REST APIs', 'CI/CD', 'Infrastructure as code'],
     },
