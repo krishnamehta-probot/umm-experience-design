@@ -36,6 +36,8 @@
   justify-self: start;
   max-width: 64ch;
   margin-bottom: 0;
+  /* a step darker than the paragraph under it (Krish, 17 Oct) */
+  color: color-mix(in srgb, var(--umm-ink) 55%, var(--umm-ink-soft));
 }
 
 .ep__intro {
