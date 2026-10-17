@@ -235,7 +235,7 @@ export function useGrowthCurve(runRef: RefObject<HTMLDivElement | null>, pick: n
       const vh = window.innerHeight
       const reduce = still.matches
       /* the reading line: just under the held chart, or low on the screen */
-      const r = hold ? holdTop + holdH + (vh - holdTop - holdH) * 0.3 : vh * 0.6
+      const r = hold ? holdTop + holdH + (vh - holdTop - holdH) * 0.45 : vh * 0.6
       const sb = stages.map((el) => el.getBoundingClientRect())
       const ft = flows.map((el) => el.getBoundingClientRect().top)
       const wfTop = wfHead ? wfHead.getBoundingClientRect().top : Infinity
