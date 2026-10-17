@@ -38,7 +38,8 @@ import '@/styles/cloud-pipe.css'
 
    The level is the reader's (usePipeFlow). Scrolling stays native, nothing
    pins, and every word is in the page's flow. Reduced motion: the pipe is
-   full and still. Then the disclaimer and the principles.
+   full and still. Then the principles (17 Oct, Krish: the
+   illustrative-architecture note under the board is removed).
    ========================================================================== */
 
 const OUT_TONE: Tone[] = ['sky', 'citrus', 'blossom']
@@ -385,8 +386,6 @@ export function ConnectedArchitecture({ content = architecture }: { content?: ty
             </ol>
           </div>
         </div>
-
-        <p className="cd-arch__note cp__note">{board.disclaimer}</p>
 
         <ol className="cd-arch__rules">
           {principles.map((p, i) => (

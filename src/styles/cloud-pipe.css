@@ -1546,15 +1546,6 @@
   }
 }
 
-/* --- under the board ---------------------------------------------------------------- */
-
-.cp__note {
-  max-width: 70ch;
-  margin-top: 14px;
-  font-size: 0.75rem;
-  color: var(--umm-ink-quiet);
-}
-
 /* --- reduced motion: the pipe full, nothing moving ------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
