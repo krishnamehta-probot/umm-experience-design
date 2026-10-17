@@ -1,0 +1,495 @@
+/* ============================================================================
+   INTEGRATED GROWTH · THE GENSIFY STAGE (GensifyStage)
+   ----------------------------------------------------------------------------
+   17 Oct, Krish: the seventh service shows the six "in Gen-Z mode". Prefix
+   gx-. A paper strip across the top of the Gensify card holding the six
+   services as tiles (six in a row, 3 x 2 on a phone). Each tile carries two
+   looks, one over the other, and --gz (0 or 1, set by the timeline while
+   the tile is edge-on) says which shows:
+
+     calm   the service card in small: its tone, its number, its name
+     Gen-Z  a sticker: a punchier take on the tone, a thick ink outline, a
+            hard ink shadow, its name on a pill, doodles round it
+
+   Behind them the board turns holographic (the brand pastels in a band)
+   as the wand passes. Motion is GSAP (GensifyStage.tsx); this file draws
+   both states and, for reduced motion, holds the Gen-Z one still.
+   Brand tokens only; "punchier" is the tone's own chroma raised.
+   ========================================================================== */
+
+.gx-stage {
+  /* the wand's size; the track it rides is the stage plus room for it */
+  --ww: clamp(66px, 7.4vw, 108px);
+  --r-tile: clamp(12px, 1.3vw, 18px);
+  --ink-w: clamp(2px, 0.22vw, 3px);
+  --drop: clamp(3px, 0.4vw, 6px);
+  --sd: clamp(22px, 2.6vw, 38px);
+  /* the punchier tones the doodles fill with */
+  --gx-sun: var(--umm-sun);
+  --gx-citrus: var(--umm-citrus);
+  --gx-blossom: var(--umm-blossom);
+  --gx-sky: var(--umm-sky);
+  --gx-coral: var(--umm-coral);
+  position: relative;
+  grid-column: 1 / -1;
+  overflow: hidden;
+  padding: clamp(24px, 2.6vw, 36px) clamp(16px, 2vw, 30px) clamp(30px, 3vw, 42px);
+  border: 1.5px solid var(--umm-ink);
+  border-radius: calc(var(--cx-r-card, 28px) - 8px);
+  background: var(--umm-paper);
+  isolation: isolate;
+}
+
+@supports (color: oklch(from red l c h)) {
+  .gx-stage {
+    --gx-sun: oklch(from var(--umm-sun) calc(l - 0.06) calc(c * 1.9) h);
+    --gx-citrus: oklch(from var(--umm-citrus) calc(l - 0.04) calc(c * 1.5) h);
+    --gx-blossom: oklch(from var(--umm-blossom) calc(l - 0.1) calc(c * 2) h);
+    --gx-sky: oklch(from var(--umm-sky) calc(l - 0.1) calc(c * 2.6) h);
+    --gx-coral: oklch(from var(--umm-coral) calc(l - 0.08) calc(c * 2) h);
+  }
+}
+
+/* the holographic board, slid in behind the wand; its leading edge fades */
+.gx-stage__holo,
+.gx-stage__track {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(100% + var(--ww) * 1.7);
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.gx-stage__holo {
+  z-index: 0;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0 18%,
+      color-mix(in srgb, var(--umm-paper) 55%, transparent) 24%,
+      transparent 30% 58%,
+      color-mix(in srgb, var(--umm-paper) 45%, transparent) 64%,
+      transparent 70%
+    ),
+    linear-gradient(
+      100deg,
+      var(--umm-sky) 0%,
+      var(--umm-blossom) 18%,
+      var(--umm-sun) 36%,
+      var(--umm-citrus) 52%,
+      var(--umm-lilac) 70%,
+      var(--umm-coral) 86%,
+      var(--umm-sky) 100%
+    );
+  -webkit-mask-image: linear-gradient(90deg, black calc(100% - var(--ww) * 1.7), transparent calc(100% - var(--ww) * 0.5));
+  mask-image: linear-gradient(90deg, black calc(100% - var(--ww) * 1.7), transparent calc(100% - var(--ww) * 0.5));
+}
+
+.gx-stage__track {
+  z-index: 4;
+}
+
+.gx-wand {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--ww) * 0.25);
+  width: var(--ww);
+  height: var(--ww);
+  margin-top: calc(var(--ww) * -0.5);
+}
+
+.gx-wand__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gx-wand__stick {
+  stroke: var(--umm-ink);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.gx-wand__band {
+  stroke: var(--umm-paper);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+
+.gx-wand__shadow {
+  fill: var(--umm-ink);
+  stroke: var(--umm-ink);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+}
+
+.gx-wand__star {
+  fill: var(--gx-sun);
+  stroke: var(--umm-ink);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+}
+
+.gx-wand__spark {
+  fill: var(--umm-paper);
+  stroke: var(--umm-ink);
+  stroke-width: 7;
+  stroke-linejoin: round;
+}
+
+/* the dust the wand leaves */
+.gx-trail {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.gx-trail > span {
+  position: absolute;
+  width: calc(var(--sd) * var(--s) * 0.8);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  transform: scale(0);
+  --fill: var(--umm-paper);
+}
+
+.gx-trail > span:nth-child(3n + 1) {
+  --fill: var(--gx-sun);
+}
+
+.gx-trail > span:nth-child(3n + 2) {
+  --fill: var(--gx-blossom);
+}
+
+/* --- the tiles ------------------------------------------------------------- */
+
+.gx-stage__tiles {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(22px, 5vw, 30px) clamp(10px, 3vw, 16px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 720px) {
+  .gx-stage__tiles {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: clamp(12px, 1.4vw, 20px);
+  }
+}
+
+.gx-tile {
+  --gz: 0;
+  position: relative;
+  aspect-ratio: 1 / 1.02;
+  color: var(--umm-ink);
+}
+
+@media (min-width: 720px) {
+  .gx-tile {
+    aspect-ratio: 1 / 0.9;
+  }
+}
+
+.gx-tile__body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: clamp(7px, 0.8vw, 12px) clamp(8px, 0.9vw, 13px);
+}
+
+.gx-tile__calm,
+.gx-tile__pop {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-tile);
+}
+
+/* calm: the card in small */
+.gx-tile__calm {
+  background: var(--umm-tone);
+  opacity: calc(1 - var(--gz));
+}
+
+/* Gen-Z: the sticker */
+.gx-tile__pop {
+  overflow: hidden;
+  border: var(--ink-w) solid var(--umm-ink);
+  background: var(--umm-tone);
+  box-shadow: var(--drop) var(--drop) 0 var(--umm-ink);
+  opacity: var(--gz);
+}
+
+@supports (color: oklch(from red l c h)) {
+  .gx-tile__pop {
+    background: oklch(from var(--umm-tone) calc(l - 0.07) calc(c * 2.2) h);
+  }
+  .gx-tile[data-umm-tone='citrus'] .gx-tile__pop {
+    background: oklch(from var(--umm-tone) calc(l - 0.03) calc(c * 1.5) h);
+  }
+}
+
+/* a gloss of the pastels that runs across the sticker once it lands */
+.gx-tile__sheen {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 55%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--umm-sky) 70%, transparent) 30%,
+    color-mix(in srgb, var(--umm-paper) 85%, transparent) 50%,
+    color-mix(in srgb, var(--umm-blossom) 70%, transparent) 70%,
+    transparent
+  );
+  transform: translateX(-170%) skewX(-16deg);
+}
+
+.gx-tile__no,
+.gx-tile__name {
+  position: relative;
+  font-family: var(--umm-font-display);
+  font-size: clamp(0.5625rem, 0.75vw, 0.6875rem);
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  opacity: calc(1 - var(--gz));
+}
+
+.gx-tile__no {
+  color: color-mix(in srgb, var(--umm-ink) 60%, transparent);
+}
+
+.gx-tile__name {
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+/* the scene: wider than the tile's padding box, as the drawings sit well
+   inside their own frame */
+.gx-tile__mark.umm-lottie {
+  position: relative;
+  align-self: center;
+  width: 124%;
+  max-width: none;
+  aspect-ratio: 2 / 1;
+  margin: 0 -12%;
+  justify-self: auto;
+  transform: scale(calc(1 + var(--gz) * 0.08));
+  filter: saturate(calc(1 + var(--gz) * 0.5))
+    drop-shadow(calc(var(--gz) * 1.5px) 0 0 var(--umm-paper))
+    drop-shadow(calc(var(--gz) * -1.5px) 0 0 var(--umm-paper))
+    drop-shadow(0 calc(var(--gz) * 1.5px) 0 var(--umm-paper))
+    drop-shadow(0 calc(var(--gz) * -1.5px) 0 var(--umm-paper));
+}
+
+/* the name, on a pill stuck over the sticker's foot */
+.gx-tile__tag {
+  position: absolute;
+  bottom: calc(var(--sd) * -0.42);
+  left: 50%;
+  z-index: 2;
+  padding: 0.28em 0.8em 0.32em;
+  border: var(--ink-w) solid var(--umm-ink);
+  border-radius: 999px;
+  background: var(--umm-paper);
+  box-shadow: calc(var(--drop) * 0.6) calc(var(--drop) * 0.6) 0 var(--umm-ink);
+  font-family: var(--umm-font-display);
+  font-size: clamp(0.6875rem, 0.95vw, 0.875rem);
+  font-weight: var(--umm-weight-bold);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
+  opacity: var(--gz);
+  transform: translateX(-50%) rotate(calc(var(--tilt) * -0.8));
+}
+
+/* the pop as a tile lands: ink dashes flung out from its edges */
+.gx-tile__burst {
+  position: absolute;
+  inset: -16px;
+  width: calc(100% + 32px);
+  height: calc(100% + 32px);
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gx-tile__burst path {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* --- the doodles ---------------------------------------------------------- */
+
+.gx-sticker {
+  position: absolute;
+  z-index: 3;
+  width: var(--sd);
+  height: var(--sd);
+  transform: scale(0);
+}
+
+.gx-sticker[data-kind='squiggle'] {
+  width: calc(var(--sd) * 1.5);
+  height: calc(var(--sd) * 0.75);
+}
+
+.gx-sticker[data-spot='tl'] {
+  top: calc(var(--sd) * -0.42);
+  left: calc(var(--sd) * -0.36);
+}
+
+.gx-sticker[data-spot='tr'] {
+  top: calc(var(--sd) * -0.42);
+  right: calc(var(--sd) * -0.36);
+}
+
+.gx-sticker[data-spot='bl'] {
+  bottom: calc(var(--sd) * -0.1);
+  left: calc(var(--sd) * -0.4);
+}
+
+.gx-sticker[data-spot='br'] {
+  bottom: calc(var(--sd) * -0.1);
+  right: calc(var(--sd) * -0.4);
+}
+
+.gx-sticker[data-fill='sun'] {
+  --fill: var(--gx-sun);
+}
+.gx-sticker[data-fill='citrus'] {
+  --fill: var(--gx-citrus);
+}
+.gx-sticker[data-fill='blossom'] {
+  --fill: var(--gx-blossom);
+}
+.gx-sticker[data-fill='sky'] {
+  --fill: var(--gx-sky);
+}
+.gx-sticker[data-fill='coral'] {
+  --fill: var(--gx-coral);
+}
+.gx-sticker[data-fill='paper'] {
+  --fill: var(--umm-paper);
+}
+
+.gx-sticker .gx-doodle {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* while on screen the doodles keep a little life */
+.gx-stage[data-live] .gx-sticker .gx-doodle {
+  animation: gx-wiggle 1.5s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -0.37s);
+}
+
+.gx-stage[data-live] .gx-sticker[data-kind='sparkle'] .gx-doodle {
+  animation-name: gx-twinkle;
+  animation-duration: 0.9s;
+}
+
+@keyframes gx-wiggle {
+  from {
+    transform: rotate(-9deg);
+  }
+  to {
+    transform: rotate(9deg);
+  }
+}
+
+@keyframes gx-twinkle {
+  from {
+    transform: scale(0.8) rotate(0deg);
+  }
+  to {
+    transform: scale(1.12) rotate(20deg);
+  }
+}
+
+/* --- the doodles' drawing, shared with the discovery pictures -------------- */
+
+.gx-doodle__fill {
+  fill: var(--fill, var(--umm-paper));
+  stroke: var(--umm-ink);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+}
+
+.gx-doodle--sparkle .gx-doodle__fill {
+  stroke-width: 2.4;
+}
+
+.gx-doodle__dot {
+  fill: var(--umm-ink);
+}
+
+.gx-doodle__line {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.gx-doodle__under,
+.gx-doodle__over {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gx-doodle__under {
+  stroke: var(--umm-ink);
+  stroke-width: 9;
+}
+
+.gx-doodle__over {
+  stroke: var(--fill, var(--umm-paper));
+  stroke-width: 4.2;
+}
+
+/* --- reduced motion: Gen-Z mode, held still --------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .gx-tile {
+    --gz: 1;
+    transform: rotate(var(--tilt)) scale(0.9);
+  }
+
+  .gx-sticker {
+    transform: none;
+  }
+
+  .gx-stage__holo {
+    transform: none;
+    width: 100%;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .gx-stage__track,
+  .gx-trail,
+  .gx-tile__burst {
+    display: none;
+  }
+
+  .gx-stage[data-live] .gx-sticker .gx-doodle {
+    animation: none;
+  }
+}

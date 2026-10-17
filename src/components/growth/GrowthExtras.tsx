@@ -1,6 +1,10 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ChipHead, withAccent } from '@/components/v2/ChipHead'
-import { discovery as discovery0, gensify as gensify0, type DiscoveryChannel } from '@/content/growth'
+import { FlyArrow } from '@/components/primitives'
+import { useReducedMotion } from '@/lib/useReducedMotion'
+import { discovery as discovery0, gensify as gensify0, services as services0 } from '@/content/growth'
+import { GensifyStage } from './GensifyStage'
+import { Place } from './DiscoveryPlaces'
 import '@/styles/growth-extras.css'
 
 /* ============================================================================
@@ -17,13 +21,28 @@ import '@/styles/growth-extras.css'
    Each opens on a small picture of the place it gets a brand found: a
    search result, a sponsored result, an answer box, an AI answer citing
    its source. Then the doc's line on what can and cannot be promised.
+
+   17 Oct, Krish: Gensify should show "all 6 services ... in genz mode", so
+   the card now opens on a stage where the six services' own scenes are
+   turned into stickers by a passing wand (GensifyStage.tsx). And the
+   discovery cards were "too pale": they now stand at the service cards'
+   strength, on their full tone, each picture drawn in the services' ink
+   and white and playing a small loop (DiscoveryPlaces.tsx).
    ========================================================================== */
 
-export function Gensify({ content = gensify0 }: { content?: typeof gensify0 }) {
+export function Gensify({
+  content = gensify0,
+  crew = services0.items,
+}: {
+  content?: typeof gensify0
+  /** the six services the stage turns Gen-Z */
+  crew?: (typeof services0)['items']
+}) {
   return (
     <section className="umm-section gx-gen" aria-labelledby="gx-gen-title">
       <div className="umm-container">
         <article className="gx-gen__card">
+          <GensifyStage items={crew} />
           <div className="gx-gen__main">
             <span className="gx-gen__step">07 / {content.step}</span>
             <h3 className="gx-gen__title" id="gx-gen-title">
@@ -68,73 +87,20 @@ export function Gensify({ content = gensify0 }: { content?: typeof gensify0 }) {
   )
 }
 
-/** The place each channel gets a brand found, drawn small. */
-function Place({ id }: { id: DiscoveryChannel['id'] }) {
-  if (id === 'seo')
-    return (
-      <div className="gx-place gx-place--seo" aria-hidden="true">
-        <span className="gx-place__bar">
-          <i className="gx-place__glass" />
-        </span>
-        <span className="gx-place__hit">
-          <b />
-          <i />
-          <i />
-        </span>
-        <span className="gx-place__row">
-          <b />
-          <i />
-        </span>
-      </div>
-    )
-  if (id === 'ads')
-    return (
-      <div className="gx-place gx-place--ads" aria-hidden="true">
-        <span className="gx-place__bar">
-          <i className="gx-place__glass" />
-        </span>
-        <span className="gx-place__hit">
-          <em />
-          <b />
-          <i />
-        </span>
-        <span className="gx-place__row">
-          <b />
-          <i />
-        </span>
-      </div>
-    )
-  if (id === 'aeo')
-    return (
-      <div className="gx-place gx-place--aeo" aria-hidden="true">
-        <span className="gx-place__q">?</span>
-        <span className="gx-place__answer">
-          <b />
-          <i />
-          <i />
-          <i />
-        </span>
-      </div>
-    )
-  return (
-    <div className="gx-place gx-place--llmo" aria-hidden="true">
-      <span className="gx-place__ask">
-        <i />
-      </span>
-      <span className="gx-place__reply">
-        <span className="gx-place__spark" />
-        <span className="gx-place__lines">
-          <i />
-          <i />
-          <i />
-        </span>
-        <span className="gx-place__cite">1</span>
-      </span>
-    </div>
-  )
-}
-
 export function Discovery({ content = discovery0 }: { content?: typeof discovery0 }) {
+  const grid = useRef<HTMLUListElement>(null)
+  const [live, setLive] = useState(false)
+  const reduced = useReducedMotion()
+
+  // The pictures play only while the grid is on screen.
+  useEffect(() => {
+    const node = grid.current
+    if (!node) return
+    const io = new IntersectionObserver(([entry]) => setLive(entry.isIntersecting), { rootMargin: '-40px 0px' })
+    io.observe(node)
+    return () => io.disconnect()
+  }, [])
+
   return (
     <section className="umm-section gx-disc" aria-labelledby="gx-disc-title">
       <div className="umm-container">
@@ -149,23 +115,29 @@ export function Discovery({ content = discovery0 }: { content?: typeof discovery
           />
           <p className="cx-lead">{content.lead}</p>
         </div>
-        <ul className="gx-disc__grid">
-          {content.channels.map((c) => (
+        <ul className="gx-disc__grid" ref={grid} data-live={live || undefined}>
+          {content.channels.map((c, i) => (
             <li key={c.id} className="gx-disc__card" data-umm-tone={c.tone}>
-              <Place id={c.id} />
+              <Place id={c.id} live={live} reduced={reduced} query={content.query} lead={i * 350} />
               <span className="gx-disc__label">{c.label}</span>
               <h3 className="gx-disc__title">{c.title}</h3>
               <p className="gx-disc__body">{c.body}</p>
               <ul className="gx-disc__points">
                 {c.points.map((p) => (
-                  <li key={p}>{p}</li>
+                  <li key={p}>
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                      <circle cx="10" cy="10" r="8.5" />
+                      <path d="M6 10.4l2.7 2.6L14.2 7.4" />
+                    </svg>
+                    {p}
+                  </li>
                 ))}
               </ul>
               <a className="gx-disc__cta" href="https://umm.digital/contact/">
-                {c.cta}
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M7 17 17 7M9 7h8v8" />
-                </svg>
+                <strong>{c.cta}</strong>
+                <span className="gx-disc__go">
+                  <FlyArrow size={16} strokeWidth={2.2} />
+                </span>
               </a>
             </li>
           ))}
