@@ -1117,11 +1117,12 @@
 }
 
 /* on a phone or tablet the tap is a port like the others, its collar in the
-   workflow's tone once open */
+   workflow's tone once open; it joins its card halfway down (17 Oct, Krish:
+   the pipe runs on to the middle of the last card) */
 .cp__tap {
   position: absolute;
   z-index: 1;
-  top: calc(var(--cp-pad) + 16px);
+  top: 50%;
   right: 100%;
   width: var(--cp-reach);
   height: 0;
