@@ -1133,6 +1133,14 @@
   background: var(--tone);
 }
 
+/* the last workflow's tap sits at the foot of its card, so the pipe runs the
+   whole of the last card */
+@media (max-width: 999px) {
+  .cp__flows > .cp__card:last-child > .cp__tap {
+    top: calc(100% - var(--cp-pad) - 16px);
+  }
+}
+
 .cp__feed,
 .cp__faucet,
 .cp__spout,
