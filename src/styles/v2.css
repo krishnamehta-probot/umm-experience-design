@@ -1427,12 +1427,20 @@ html.cx-v2 body {
    touched "behind". Both lift into the corners above it (wide frame). */
 .cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-intro__shape--0 {
   left: 100px;
-  top: 30px;
+  top: 12px;
 }
 
 .cx-film[data-cut='eng'] .cx-film__frame:not([data-tall]) .cx-f-intro__shape--1 {
   right: 110px;
-  top: 20px;
+  top: 10px;
+}
+
+/* and its chip, "the experience.": the p's tail ran out of the chip's foot
+   and the g's of "engineering" dipped into its top. Room under the tails,
+   and the chip a step down from the line above (both cuts). */
+.cx-film[data-cut='eng'] .cx-f-intro__title .cx-f-chip {
+  margin-top: 0.22em;
+  padding-bottom: 0.17em;
 }
 
 .cx-f-eyebrow,
