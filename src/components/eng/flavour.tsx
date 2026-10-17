@@ -12,7 +12,7 @@ import '@/styles/eng-flavour.css'
 
      - every section label's mark is a pair of code brackets
      - the stages' picture is the code base growing (StageLight "build")
-     - the roadmap reads as a release train: "Today" is "Release"
+     - (until 17 Oct, the roadmap read as a release train; it is CX's again)
 
    A trial: set ENG_FLAVOUR to false and the page is as it was.
 

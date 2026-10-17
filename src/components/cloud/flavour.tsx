@@ -13,8 +13,8 @@ import '@/styles/cloud-flavour.css'
 
      - every section label's mark is a small cloud
      - the stages' picture is infrastructure that grows (StageLight "infra")
-     - the roadmap reads as a deployment pipeline: "Today" is "Deploy",
-       with a status light, and the open stage's bar streams
+     - (until 17 Oct, the roadmap read as a deployment pipeline; it is
+       CX's again)
 
    It was a trial: set CLOUD_FLAVOUR to false and the page is as it was.
 

@@ -12,7 +12,7 @@ import '@/styles/growth-flavour.css'
 
      - every section label's mark is a rising trend
      - the stages' picture is growth taking shape (StageLight "rise")
-     - the roadmap's "Today" is "Now"
+     - (until 17 Oct, the roadmap's "Today" was "Now"; it is CX's again)
 
    A trial: set GROWTH_FLAVOUR to false and the page is as it was.
 

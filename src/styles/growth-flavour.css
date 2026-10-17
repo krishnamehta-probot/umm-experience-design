@@ -2,12 +2,11 @@
    INTEGRATED GROWTH · THE GROWTH FLAVOUR (components/growth/flavour.tsx)
    ----------------------------------------------------------------------------
    This page's half of the flavour (the shared rules are flavour.css): a
-   rising trend for the section labels' mark and "Now" on the roadmap. Its
+   rising trend for the section labels' mark. Its
    ground pattern, closing drawing and service card extras went on 16 Oct,
    to match CX and AI.
    ========================================================================== */
 
 html.growth-flavour {
   --fl-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17 9.5 10.5l4 4L21 7M15 7h6v6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --fl-today: 'Now';
 }

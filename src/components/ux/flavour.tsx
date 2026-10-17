@@ -11,7 +11,7 @@ import '@/styles/ux-flavour.css'
 
      - every section label's mark is a cursor
      - the stages' picture is the store growing (StageLight "shop")
-     - the roadmap's "Today" is "Live"
+     - (until 17 Oct, the roadmap's "Today" was "Live"; it is CX's again)
 
    A trial: set UX_FLAVOUR to false and the page is plain.
 

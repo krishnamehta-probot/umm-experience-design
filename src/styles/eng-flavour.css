@@ -2,12 +2,11 @@
    DIGITAL ENGINEERING · THE ENGINEERING FLAVOUR (components/eng/flavour.tsx)
    ----------------------------------------------------------------------------
    This page's half of the flavour (the shared rules are flavour.css): code
-   brackets for the section labels' mark and "Release" on the roadmap. Its
+   brackets for the section labels' mark. Its
    ground pattern, closing drawing and service card extras went on 16 Oct,
    to match CX and AI.
    ========================================================================== */
 
 html.eng-flavour {
   --fl-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 6 2.5 12 8 18M16 6l5.5 6-5.5 6M14 3.5l-4 17' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --fl-today: 'Release';
 }

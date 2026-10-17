@@ -2,12 +2,11 @@
    CLOUD & DATA · THE CLOUD FLAVOUR (components/cloud/flavour.tsx)
    ----------------------------------------------------------------------------
    This page's half of the flavour (the shared rules are flavour.css): a
-   cloud for the section labels' mark and "Deploy" on the roadmap. Its
+   cloud for the section labels' mark. Its
    ground pattern, closing drawing and service card extras went on 16 Oct,
    to match CX and AI.
    ========================================================================== */
 
 html.cloud-flavour {
   --fl-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 14 200 170'%3E%3Cpath d='M60 170H152A44 44 0 0 0 165.96 84.27A58 58 0 0 0 50.43 74.97A48 48 0 0 0 60 170Z'/%3E%3C/svg%3E");
-  --fl-today: 'Deploy';
 }

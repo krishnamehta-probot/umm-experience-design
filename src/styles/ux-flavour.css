@@ -2,12 +2,11 @@
    UX & DIGITAL COMMERCE · THE COMMERCE FLAVOUR (components/ux/flavour.tsx)
    ----------------------------------------------------------------------------
    This page's half of the flavour (the shared rules are flavour.css): a
-   cursor for the section labels' mark and "Live" on the roadmap. Its
+   cursor for the section labels' mark. Its
    ground pattern, closing drawing and service card extras went on 16 Oct,
    to match CX and AI.
    ========================================================================== */
 
 html.ux-flavour {
   --fl-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 2.5 19 11l-6.2 1.6L9.4 19z' fill='black' stroke='black' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --fl-today: 'Live';
 }
