@@ -26,6 +26,10 @@ const PAGES = [
   { href: '/ux-digital-commerce', label: 'UX & Digital Commerce' },
 ]
 
+/* 17 Oct, Krish: "for now remove the pages from navbar"; each page is shared
+   by its own link. Set true to bring the menu back. */
+const SHOW_PAGES = false
+
 export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
   const here = typeof window === 'undefined' ? '/' : window.location.pathname.replace(/\/$/, '') || '/'
   const others = PAGES.filter((p) => p.href !== here)
@@ -92,29 +96,37 @@ export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
           ))}
         </nav>
 
-        <div className="cx-nav__pages" ref={menuRef}>
-          <button
-            type="button"
-            className="cx-nav__page"
-            aria-expanded={menu}
-            aria-controls="cx-nav-pages"
-            onClick={() => setMenu((v) => !v)}
-          >
-            All services
-            <svg viewBox="0 0 12 12" aria-hidden="true">
-              <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
-          </button>
-          <ul className="cx-nav__menu" id="cx-nav-pages" hidden={!menu}>
-            {PAGES.map((p) => (
-              <li key={p.href}>
-                <a href={p.href} aria-current={p.href === here ? 'page' : undefined} onClick={() => setMenu(false)}>
-                  {p.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {SHOW_PAGES && (
+          <div className="cx-nav__pages" ref={menuRef}>
+            <button
+              type="button"
+              className="cx-nav__page"
+              aria-expanded={menu}
+              aria-controls="cx-nav-pages"
+              onClick={() => setMenu((v) => !v)}
+            >
+              All services
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <path
+                  d="M3 4.5 6 7.5 9 4.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <ul className="cx-nav__menu" id="cx-nav-pages" hidden={!menu}>
+              {PAGES.map((p) => (
+                <li key={p.href}>
+                  <a href={p.href} aria-current={p.href === here ? 'page' : undefined} onClick={() => setMenu(false)}>
+                    {p.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <a className="cx-nav__cta" href="#contact">
           Let&rsquo;s talk
@@ -147,12 +159,13 @@ export function NavV2({ items: nav = cxNav }: { items?: NavContent }) {
             <span>{String(nav.length + 1).padStart(2, '0')}</span>
             Let&rsquo;s talk
           </a>
-          {others.map((p, i) => (
-            <a key={p.href} href={p.href} onClick={() => setOpen(false)}>
-              <span>{String(nav.length + 2 + i).padStart(2, '0')}</span>
-              {p.label}
-            </a>
-          ))}
+          {SHOW_PAGES &&
+            others.map((p, i) => (
+              <a key={p.href} href={p.href} onClick={() => setOpen(false)}>
+                <span>{String(nav.length + 2 + i).padStart(2, '0')}</span>
+                {p.label}
+              </a>
+            ))}
         </nav>
       </div>
     </header>
