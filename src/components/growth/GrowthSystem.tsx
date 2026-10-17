@@ -3,12 +3,13 @@ import { AiHead } from '@/components/ai/AiHead'
 import { ChipHead, withAccent } from '@/components/v2/ChipHead'
 import type { Tone } from '@/components/primitives'
 import { growthSystem as content0 } from '@/content/growth'
-import { useGrowthCurve } from './growthCurve'
+import { Flywheel } from './Flywheel'
+import { useGrowthFlywheel } from './growthFlywheel'
 import '@/styles/cloud-arch.css'
-import '@/styles/growth-curve.css'
+import '@/styles/growth-flywheel.css'
 
 /* ============================================================================
-   INTEGRATED GROWTH · THE THINKING BEHIND THE GROWTH: THE GROWTH CURVE
+   INTEGRATED GROWTH · THE THINKING BEHIND THE GROWTH: THE GROWTH FLYWHEEL
 
    16 Oct, the doc's second version: the UMM growth system, the page's
    story: the commercial direction (one brief) over customer signals that
@@ -16,35 +17,34 @@ import '@/styles/growth-curve.css'
    responses return as intelligence; four workflows through it; then the
    marketing factory.
 
-   16 Oct, late, Krish: the four service pages' thinking sections looked
-   alike. Growth's own picture, his approved concept, is the growth curve.
-   Later the same day: the idea was right but the execution was not ("can
-   be 100% more customized and premium"). Rebuilt as one designed chart:
+   17 Oct, Krish: the growth curve was not it ("this section needs something
+   else, not this animation"). His pick is a growth flywheel, the loop the
+   copy already describes (feedback returns to the brief and the growth
+   engine):
 
-     - the hero is a chart card on the paper board: the commercial
-       direction as its title, a single ink curve over a sun gradient, a
-       glowing live tip, four pins on the curve and the four stages along
-       its axis. On a tall window it is held (sticky) above the stage rows,
-       so the tip sits on the row being read; at the last card it lets go
-       and rides up above it, so it never rests over a word. Static on
-       short windows.
-     - the four stages are quiet rows (the CX row: tick, number, title,
-       0.45 to 1), what links each on under its title, their details as
-       hairline columns, the growth engine as the board's one pastel tile
-     - the four workflows rise as ribbons from four points on the baseline,
-       one as its card is read; the legend (segmented pills) picks one, its
-       ribbon drawn in ink and its card lifted
-     - across the architecture is the board's baseline
+     - the hero is one rendered flywheel: the four stages as a loop of
+       chevron segments round it, an ink rotor with fine ticks and lit slots
+       that turns as you read and gathers speed, and the commercial
+       direction as its hub, its four priorities engraved round the edge.
+       The segment of the stage being read fills in its tone, a lit tip
+       running the loop.
+     - the four workflows are small wheels in its corners; the one being
+       read (or chosen in the legend) lights and is belted round the
+       flywheel, spinning with it
+     - the stages and the workflows are editorial rows in the page's flow
+       (the CX row: tick, number, big title from 0.45 to 1, hairlines)
 
-   On a phone or tablet the chart is a frosted strip held at the top (under
-   a third of the screen), its caption naming where the line is; the rows
-   and cards run full width under it. Then the factory, as it was.
+   Wide and tall enough, the wheel is held (sticky) beside the rows, in the
+   middle of the screen. On a phone or tablet it is a compact wheel in a
+   frosted strip held at the top (under a third of the screen), naming the
+   stage or workflow being read. On a short window nothing is held. Then
+   across the architecture, and the marketing factory, as they were.
    ========================================================================== */
 
-/** the system's light, and the workflows' four ribbons (the page tone and
- *  three support tones) */
-const PAGE_TONE: Tone = 'sun'
-const SERIES_TONES: Tone[] = ['citrus', 'sky', 'coral', 'sun']
+/** each stage's light round the loop (the engine, the page's own sun) */
+const STAGE_TONES: Tone[] = ['sky', 'sun', 'coral', 'citrus']
+/** the four workflows' wheels */
+const FLOW_TONES: Tone[] = ['citrus', 'sky', 'coral', 'sun']
 /** the factory's four, as they were */
 const FACTORY_TONES: Tone[] = ['citrus', 'sun', 'sky', 'blossom']
 
@@ -54,7 +54,6 @@ const split = (label: string) => {
   return m ? [m[1], m[2]] : ['', label]
 }
 
-const num = (i: number) => String(i + 1).padStart(2, '0')
 const tone = (t: Tone) => ({ ['--tone' as string]: `var(--umm-${t})` }) as CSSProperties
 
 const Check = () => (
@@ -67,48 +66,47 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
   const { board, workflows, factory } = content
   const runRef = useRef<HTMLDivElement>(null)
   const [pick, setPick] = useState<number | null>(null)
-  useGrowthCurve(runRef, pick)
+  useGrowthFlywheel(runRef, pick)
 
   const stages = [board.signals.label, board.engine.label, board.channels.label, board.measure.label].map(split)
 
-  /** a list of a part's sources or channels */
+  /** a part's sources or channels: hairline rows */
   const nodes = (list: { title: string; body: string }[]) => (
-    <ul className="gc__nodes">
+    <ul className="gf__nodes">
       {list.map((n) => (
         <li key={n.title}>
-          <span className="gc__item">{n.title}</span>
-          <span className="gc__small">{n.body}</span>
+          <span className="gf__item">{n.title}</span>
+          <span className="gf__small">{n.body}</span>
         </li>
       ))}
     </ul>
   )
 
-  /** a stage row: tick, number and title (and what links it on, under the
-   *  title), then what the stage holds */
-  const stage = (i: number, body: ReactNode, side?: ReactNode) => {
+  /** a stage row: tick, number and title, then what links it on and what it holds */
+  const stage = (i: number, side: ReactNode, body: ReactNode) => {
     const [n, name] = stages[i]
     return (
-      <li className="gc__stage" data-gc-stage="" style={tone(PAGE_TONE)}>
-        <div className="gc__stage-head">
-          <span className="gc__tick" aria-hidden="true">
+      <li className="gf__stage" data-gf-stage="" style={tone(STAGE_TONES[i])}>
+        <div className="gf__stage-head">
+          <span className="gf__tick" aria-hidden="true">
             <Check />
           </span>
-          <span className="gc__n" aria-hidden="true">
+          <span className="gf__n" aria-hidden="true">
             {n}
           </span>
-          <h3 className="gc__stage-title">
+          <h3 className="gf__stage-title">
             <span className="umm-sr-only">{n} </span>
             {name}
           </h3>
         </div>
-        {side ? <div className="gc__stage-side">{side}</div> : null}
-        <div className="gc__stage-body">{body}</div>
+        <div className="gf__stage-side">{side}</div>
+        <div className="gf__stage-body">{body}</div>
       </li>
     )
   }
 
   return (
-    <section className="umm-section cd-arch gc" id="growth" aria-labelledby="gs-title">
+    <section className="umm-section cd-arch gf" id="growth" aria-labelledby="gs-title">
       <div className="umm-container cd-arch__head">
         <AiHead
           id="gs-title"
@@ -123,235 +121,174 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
       </div>
 
       <div className="umm-container">
-        <div className="gc__board" role="group" aria-label={board.label}>
-          <div className="gc__run" ref={runRef} data-phase="system">
-            {/* the hero: the chart card, held above the rows on a tall window */}
-            <div className="gc__chart" data-gc-hold="">
-              <div className="gc__top">
-                <span className="gc__eyebrow">
-                  <span className="gc__live" aria-hidden="true" />
-                  {board.eyebrow}
-                </span>
-                <span className="gc__label">{board.tag}</span>
-              </div>
+        <div className="gf__board" role="group" aria-label={board.label}>
+          <div className="gf__top">
+            <span className="gf__eyebrow">
+              <span className="gf__live" aria-hidden="true" />
+              {board.eyebrow}
+            </span>
+            <span className="gf__label">{board.tag}</span>
+          </div>
 
-              {/* the commercial direction: the chart's title, what it climbs towards */}
-              <div className="gc__direction">
-                <p className="gc__label">{board.direction.label}</p>
-                <p className="gc__dir-title">{board.direction.title}</p>
-                <ul className="gc__pills">
+          <div className="gf__run" ref={runRef} data-phase="system">
+            {/* the hero: the flywheel, with the commercial direction as its hub */}
+            <div className="gf__hold">
+              <div className="gf__direction">
+                <p className="gf__label">{board.direction.label}</p>
+                <p className="gf__dir-title">
+                  {/* a sentence a line in the hub */}
+                  {(board.direction.title.match(/[^.]+(?:\.|$)/g) ?? [board.direction.title]).map((s, i, all) => (
+                    <span key={s}>
+                      {s.trim()}
+                      {i < all.length - 1 ? ' ' : ''}
+                    </span>
+                  ))}
+                </p>
+                <ul className="gf__pills">
                   {board.direction.items.map((d) => (
                     <li key={d}>{d}</li>
                   ))}
                 </ul>
               </div>
 
-              <div className="gc__strip" data-gc-hold="">
-                <div className="gc__plot" aria-hidden="true">
-                  <span className="gc__glow" />
-                  <svg className="gc__svg" focusable="false">
-                    <defs>
-                      <linearGradient id="gc-fill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" className="gc__stop" style={{ stopOpacity: 0.62 }} />
-                        <stop offset="0.55" className="gc__stop" style={{ stopOpacity: 0.2 }} />
-                        <stop offset="1" className="gc__stop" style={{ stopOpacity: 0 }} />
-                      </linearGradient>
-                      <clipPath id="gc-clip">
-                        <rect data-gc="clip" x="-40" y="-60" width="0" height="0" />
-                      </clipPath>
-                      <clipPath id="gc-under">
-                        <path data-gc="under" />
-                      </clipPath>
-                      <filter id="gc-soft" x="-10%" y="-60%" width="120%" height="220%">
-                        <feGaussianBlur stdDeviation="12" />
-                      </filter>
-                    </defs>
-                    <path className="gc__grid" data-gc="grid" />
-                    {stages.map(([n]) => (
-                      <path key={n} className="gc__drop" data-gc="drop" />
-                    ))}
-                    <path className="gc__base" data-gc="base" />
-                    {/* the light under the line: a gradient, and a soft band hugging the curve */}
-                    <g className="gc__lit" clipPath="url(#gc-clip)">
-                      <path className="gc__area" data-gc="area" fill="url(#gc-fill)" />
-                      <g clipPath="url(#gc-under)">
-                        <path className="gc__band" data-gc="band" filter="url(#gc-soft)" />
-                      </g>
-                    </g>
-                    <path className="gc__ghost" data-gc="ghost" />
-                    {workflows.map((w, k) => (
-                      <g key={w.id} className="gc__series" data-gc-series="" style={tone(SERIES_TONES[k])}>
-                        <linearGradient id={`gc-rib${k}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0" className="gc__rib-stop" style={{ stopOpacity: 0 }} />
-                          <stop offset="0.45" className="gc__rib-stop" style={{ stopOpacity: 0.55 }} />
-                          <stop offset="1" className="gc__rib-stop" style={{ stopOpacity: 1 }} />
-                        </linearGradient>
-                        <path className="gc__ribbon" stroke={`url(#gc-rib${k})`} />
-                        <path className="gc__core" />
-                        <circle className="gc__end" r="4.5" />
-                      </g>
-                    ))}
-                    <path className="gc__halo" data-gc="line" />
-                    <path className="gc__line" data-gc="line" />
-                    <path data-gc="scratch" fill="none" stroke="none" />
-                  </svg>
-
-                  {/* the pins on the curve: their real number dim, rolling over as lit */}
-                  {stages.map(([n]) => (
-                    <span key={n} className="gc__pin">
-                      <span className="gc__pin-n">
-                        <span>{n}</span>
-                        <span>{n}</span>
-                      </span>
-                    </span>
-                  ))}
-                  <span className="gc__tip" />
-                </div>
-
-                {/* the axis: the four stages under their pins (wide) */}
-                <div className="gc__axis" aria-hidden="true">
-                  {stages.map(([n, name]) => (
-                    <span key={n} className="gc__x">
+              <div className="gf__strip">
+                <Flywheel
+                  stages={stages}
+                  items={board.direction.items}
+                  stageTones={STAGE_TONES}
+                  flowTones={FLOW_TONES}
+                />
+                {/* the strip's caption (phones and tablets): what is being read */}
+                <div className="gf__readout" aria-hidden="true" data-i="0">
+                  {stages.map(([n, name], i) => (
+                    <span key={n} data-slot={i}>
                       <b>{n}</b>
                       {name}
                     </span>
                   ))}
-                </div>
-
-                {/* the caption under the strip (narrow): where the line is */}
-                <div className="gc__readout" aria-hidden="true">
-                  <span className="gc__roll">
-                    {stages.map(([n, name]) => (
-                      <span key={n}>
-                        <b>{n}</b>
-                        {name}
-                      </span>
-                    ))}
-                    {workflows.map((w, k) => (
-                      <span key={w.id} style={tone(SERIES_TONES[k])}>
-                        <i />
-                        {w.label}
-                      </span>
-                    ))}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* the system: four stages, read in turn as the curve climbs */}
-            <ol className="gc__stages">
-              {stage(0, nodes(board.signals.nodes), <p className="gc__link">{board.signals.link}</p>)}
-
-              {stage(
-                1,
-                <>
-                  <ul className="gc__mods">
-                    {board.engine.modules.map((m) => (
-                      <li key={m.title}>
-                        <span className="gc__item">{m.title}</span>
-                        <span className="gc__small">{m.body}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <ul className="gc__chips">
-                    {board.engine.guard.map((g) => (
-                      <li key={g}>{g}</li>
-                    ))}
-                  </ul>
-                </>,
-                <div className="gc__engine">
-                  <p className="gc__engine-title">{board.engine.title}</p>
-                  <p className="gc__engine-sub">{board.engine.sub}</p>
-                </div>,
-              )}
-
-              {stage(2, nodes(board.channels.nodes), <p className="gc__link">{board.channels.link}</p>)}
-
-              {stage(
-                3,
-                <>
-                  <p className="gc__headline">{board.measure.title}</p>
-                  <p className="gc__chain">
-                    {board.measure.chain.map((c, i) => (
-                      <span key={c}>
-                        {c}
-                        {i < board.measure.chain.length - 1 ? (i < 3 ? ' + ' : ' → ') : ''}
-                      </span>
-                    ))}
-                  </p>
-                </>,
-                <p className="gc__link">{board.measure.loop}</p>,
-              )}
-            </ol>
-
-            {/* the workflows: the heading and the chart's legend */}
-            <div className="gc__wf">
-              <div className="gc__wf-copy">
-                <h3 className="gc__wf-title">{content.workflowsLabel}</h3>
-                <p className="gc__small" id="gc-wf-lead">
-                  {content.workflowsLead}
-                </p>
-              </div>
-              <ul className="gc__legend" aria-describedby="gc-wf-lead">
-                {workflows.map((w, k) => (
-                  <li key={w.id} style={tone(SERIES_TONES[k])}>
-                    <button
-                      type="button"
-                      className="gc__key"
-                      aria-pressed={pick === k}
-                      onClick={() => setPick((p) => (p === k ? null : k))}
-                    >
+                  {workflows.map((w, k) => (
+                    <span key={w.id} data-slot={4 + k} style={tone(FLOW_TONES[k])}>
+                      <i />
                       {w.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* the four workflows, each a card its ribbon rises to */}
-            <ol className="gc__flows">
-              {workflows.map((w, k) => (
-                <li
-                  key={w.id}
-                  className="gc__flow"
-                  data-gc-flow=""
-                  data-picked={pick === k || undefined}
-                  style={tone(SERIES_TONES[k])}
-                >
-                  <div className="gc__flow-head">
-                    <p className="gc__label gc__eyebrow-dot">{w.eyebrow}</p>
-                    <h4 className="gc__flow-title">{w.title}</h4>
-                    <p className="gc__small">{w.body}</p>
-                  </div>
-                  <div className="gc__spec">
-                    <p className="gc__label">{content.doesLabel}</p>
-                    <ol className="gc__does">
-                      {w.does.map((d, i) => (
-                        <li key={d}>
-                          <span className="gc__n" aria-hidden="true">
-                            {num(i)}
-                          </span>
-                          <span>{d}</span>
+            <div className="gf__rows">
+              {/* the system: four stages, read in turn as the wheel fills */}
+              <ol className="gf__stages">
+                {stage(0, <p className="gf__link">{board.signals.link}</p>, nodes(board.signals.nodes))}
+
+                {stage(
+                  1,
+                  <div className="gf__engine">
+                    <p className="gf__engine-title">{board.engine.title}</p>
+                    <p className="gf__engine-sub">{board.engine.sub}</p>
+                  </div>,
+                  <>
+                    <ul className="gf__nodes gf__nodes--mods">
+                      {board.engine.modules.map((m) => (
+                        <li key={m.title}>
+                          <span className="gf__item">{m.title}</span>
+                          <span className="gf__small">{m.body}</span>
                         </li>
                       ))}
-                    </ol>
-                  </div>
-                  <div className="gc__spec">
-                    <p className="gc__label">{content.controlsLabel}</p>
-                    <p className="gc__small">{w.controls}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+                    </ul>
+                    <ul className="gf__chips">
+                      {board.engine.guard.map((g) => (
+                        <li key={g}>{g}</li>
+                      ))}
+                    </ul>
+                  </>,
+                )}
+
+                {stage(2, <p className="gf__link">{board.channels.link}</p>, nodes(board.channels.nodes))}
+
+                {stage(
+                  3,
+                  <p className="gf__link">{board.measure.loop}</p>,
+                  <>
+                    <p className="gf__headline">{board.measure.title}</p>
+                    <p className="gf__chain">
+                      {board.measure.chain.map((c, i) => (
+                        <span key={c}>
+                          {c}
+                          {i < board.measure.chain.length - 1 ? (i < 3 ? ' + ' : ' → ') : ''}
+                        </span>
+                      ))}
+                    </p>
+                  </>,
+                )}
+              </ol>
+
+              {/* the workflows: the heading and the wheels' legend */}
+              <div className="gf__wf">
+                <h3 className="gf__wf-title">{content.workflowsLabel}</h3>
+                <p className="gf__small" id="gf-wf-lead">
+                  {content.workflowsLead}
+                </p>
+                <ul className="gf__legend" aria-describedby="gf-wf-lead">
+                  {workflows.map((w, k) => (
+                    <li key={w.id} style={tone(FLOW_TONES[k])}>
+                      <button
+                        type="button"
+                        className="gf__key"
+                        aria-pressed={pick === k}
+                        onClick={() => setPick((p) => (p === k ? null : k))}
+                      >
+                        {w.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* the four workflows, each belted to the wheel as it is read */}
+              <ol className="gf__flows">
+                {workflows.map((w, k) => (
+                  <li
+                    key={w.id}
+                    className="gf__flow"
+                    data-gf-flow=""
+                    data-picked={pick === k || undefined}
+                    style={tone(FLOW_TONES[k])}
+                  >
+                    <p className="gf__label gf__dot">{w.eyebrow}</p>
+                    <h4 className="gf__flow-title">{w.title}</h4>
+                    <p className="gf__small">{w.body}</p>
+                    <dl className="gf__spec">
+                      <div>
+                        <dt className="gf__label">{content.doesLabel}</dt>
+                        <dd>
+                          <ol className="gf__does">
+                            {w.does.map((d) => (
+                              <li key={d}>{d}</li>
+                            ))}
+                          </ol>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="gf__label">{content.controlsLabel}</dt>
+                        <dd>
+                          <p className="gf__small">{w.controls}</p>
+                        </dd>
+                      </div>
+                    </dl>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
 
           {/* across the architecture: the board's baseline */}
-          <div className="gc__across">
-            <p className="gc__label">{board.across.label}</p>
-            <ul className="gc__assure" style={tone(PAGE_TONE)}>
+          <div className="gf__across">
+            <p className="gf__label">{board.across.label}</p>
+            <ul className="gf__assure" style={tone('sun')}>
               {board.across.items.map((a) => (
                 <li key={a}>
-                  <span className="gc__tick" data-done="" aria-hidden="true">
+                  <span className="gf__tick" data-done="" aria-hidden="true">
                     <Check />
                   </span>
                   {a}
@@ -362,8 +299,8 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
         </div>
 
         {/* the marketing factory model */}
-        <div className="gc__factory">
-          <div className="gc__factory-head">
+        <div className="gf__factory">
+          <div className="gf__factory-head">
             <ChipHead
               line1={factory.line1}
               line2={withAccent(factory.line2, factory.line2)}
@@ -374,19 +311,19 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
             />
             <p className="cx-lead">{factory.lead}</p>
           </div>
-          <ol className="gc__steps">
+          <ol className="gf__steps">
             {factory.steps.map((s, i) => (
               <li
                 key={s.label}
-                className="gc__step"
+                className="gf__step"
                 data-umm-tone={FACTORY_TONES[i]}
                 style={{ ['--i' as string]: i } as CSSProperties}
               >
-                <span className="gc__step-label">
+                <span className="gf__step-label">
                   {String(i + 1).padStart(2, '0')} / {s.label}
                 </span>
-                <p className="gc__step-title">{s.title}</p>
-                <p className="gc__step-body">{s.body}</p>
+                <p className="gf__step-title">{s.title}</p>
+                <p className="gf__step-body">{s.body}</p>
               </li>
             ))}
           </ol>
