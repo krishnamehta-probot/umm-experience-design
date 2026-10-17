@@ -364,12 +364,13 @@ export function EngineeringFactory({ content = engFactory }: { content?: typeof 
     }
   }, [geo, g, n])
 
-  /* the stage light sits behind the commit being read */
+  /* the stage light sits behind the commit being read, on its own lane
+     (Release's merge commit is on main, the others on the branch) */
   const lit = Math.max(0, active)
   const boardStyle = {
     ...tone(TONES[lit % TONES.length]),
     ['--ep-gy' as string]: geo ? `${geo.top + (geo.ys[lit] ?? 0)}px` : '30%',
-    ['--ep-gx' as string]: g ? `${g.xB}px` : '0px',
+    ['--ep-gx' as string]: g ? `${g.dots[lit]?.x ?? g.xB}px` : '0px',
   } as CSSProperties
 
   return (
