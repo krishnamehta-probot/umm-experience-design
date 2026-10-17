@@ -265,7 +265,9 @@
   }
 }
 
-/* phones and tablets: a frosted strip at the top, the top of the phone in it */
+/* phones and tablets: a strip held at the top, the board's label across it
+   and the top of the phone rising out of its bottom edge (17 Oct, Krish: no
+   fade, so the cards passing under it never show through) */
 @media (max-width: 999px) {
   .up__hold {
     position: sticky;
@@ -275,25 +277,24 @@
   }
 
   .up__stage {
-    --pw: clamp(160px, 22svh, 200px);
+    --pw: clamp(150px, 20svh, 188px);
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto 1fr auto auto;
     grid-template-areas:
-      'slot label'
+      'label label'
       'slot .'
       'slot progress'
       'slot now';
-    column-gap: 18px;
+    column-gap: 20px;
     row-gap: 10px;
     padding: 14px var(--umm-gutter) 0;
     border: 0;
     border-radius: 0;
-    background: rgb(255 255 255 / 0.8);
-    -webkit-backdrop-filter: blur(16px) saturate(1.4);
-    backdrop-filter: blur(16px) saturate(1.4);
-    box-shadow: none;
-    -webkit-mask-image: linear-gradient(#000 calc(100% - 18px), transparent);
-    mask-image: linear-gradient(#000 calc(100% - 18px), transparent);
+    background: var(--umm-paper);
+    box-shadow:
+      0 1px 0 var(--umm-line),
+      0 18px 30px -24px rgb(16 14 20 / 0.45);
+    overflow: hidden;
   }
 
   .up__chrome {
@@ -303,11 +304,6 @@
   .up__caselabel {
     grid-area: label;
     align-self: start;
-    align-items: flex-start;
-  }
-
-  .up__caselabel i {
-    margin-top: 2px;
   }
 
   .up__progress {
@@ -319,10 +315,9 @@
   .up__slot {
     --rig-w: 300px;
     --fit: width;
+    align-self: end;
     width: var(--pw);
-    height: min(calc(var(--pw) * 1.24), calc(30svh - 14px));
-    -webkit-mask-image: linear-gradient(#000 72%, transparent 96%);
-    mask-image: linear-gradient(#000 72%, transparent 96%);
+    height: min(calc(var(--pw) * 1.12), calc(28svh - 40px));
   }
 
   .up__rig {
@@ -340,10 +335,12 @@
     grid-area: now;
     justify-self: start;
     align-self: end;
-    margin-bottom: 26px;
+    margin-bottom: 20px;
     padding: 0;
     background: none;
     box-shadow: none;
+    font-size: clamp(1.125rem, 4.8vw, 1.375rem);
+    line-height: 1.15;
   }
 
   .up__now i {
@@ -355,7 +352,7 @@
   }
 
   .up__step {
-    scroll-margin-top: 260px;
+    scroll-margin-top: calc(28svh + 24px);
   }
 }
 
@@ -853,6 +850,22 @@
   }
 }
 
+@media (max-width: 479px) {
+  .up__svcs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .up__svcs li,
+  .up__svcs li:nth-child(even) {
+    padding: 12px 0;
+    border-left: 0;
+  }
+
+  .up__svcs li + li {
+    border-top: 1px solid var(--up-rule);
+  }
+}
+
 /* ============================================================================
    THE HANDSET, drawn at 300 x 620 (the CX device recipe, in tokens)
    ========================================================================== */
@@ -900,6 +913,9 @@
   border-radius: 48px;
   background: var(--umm-veil);
   isolation: isolate;
+  /* Chrome draws a frosted (backdrop-filter) layer, like the pay dock, with
+     square corners past an overflow clip's radius; a clip-path holds it */
+  clip-path: inset(0 round 48px);
 }
 
 /* a faint reflection across the glass */
