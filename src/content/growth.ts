@@ -53,7 +53,7 @@ export const ribbon = ['Growth strategy', 'Demand generation', 'Conversion & ret
 export const why = {
   chip: 'Why connection matters',
   line1: 'Marketing has changed.',
-  line2: 'Your operating model should too.',
+  line2: 'Your operating model should, too.',
   /** the word in the headline the stickers merge into */
   one: 'model',
   /** Ten channels and teams, as stickers that fly together into "model". */

@@ -49,11 +49,18 @@ function spoke(d: number): CSSProperties {
   }
 }
 
+/* 19 Oct, from iPhones: where each group carries a line on its role
+   (Growth), that row shares the frame with the tools. Safari leaves an
+   upright phone only ~120px of frame, and the tools were squeezed to
+   slivers, so such a toolkit pins on a phone only when the screen is tall
+   enough for it; otherwise it lists each group over its own frame. */
+const PIN_KIT_ABOUT = '(min-width: 900px) and (min-height: 500px), (max-width: 899px) and (min-height: 840px)'
+
 export function ToolsStack({ content: tools = cxTools }: { content?: ToolsContent }) {
   const groups = tools.groups
   const STOPS = groups.length
   const { ref, progress } = usePinProgress<HTMLElement>()
-  const wide = usePinned(PIN_V2)
+  const wide = usePinned(groups.some((g) => g.about) ? PIN_KIT_ABOUT : PIN_V2)
   const reduced = useReducedMotion()
   const pinMode = wide && !reduced
   const stop = pinMode ? stopAt(progress, STOPS) : 0

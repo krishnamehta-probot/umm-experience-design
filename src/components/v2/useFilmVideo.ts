@@ -1,11 +1,4 @@
-import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type PointerEvent,
-  type RefObject,
-} from 'react'
+import { useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type RefObject } from 'react'
 import { gsap } from '@/lib/gsap'
 import { openFilm } from './filmOpen'
 
@@ -27,6 +20,7 @@ import { openFilm } from './filmOpen'
    16 Oct, from testing on iPhones: the bar drags (mouse or finger), not
    just clicks; and where the phone refuses to play on its own (Low Power
    Mode), the film starts on the reader's next touch while it is on screen.
+   19 Oct: until then it shows the film's title, not its last frame (play).
    ========================================================================== */
 
 const fmt = (t: number) => `0:${String(Math.floor(t)).padStart(2, '0')}`
@@ -121,8 +115,11 @@ export function useFilmVideo(o: {
   }, [o.on, o.src, o.video])
 
   /** Play, and if the browser refuses (an iPhone in Low Power Mode blocks
-   *  autoplay), rest on the cards with the play button instead of a still
-   *  first frame. */
+   *  autoplay), rest on the film's title with the play button ready.
+   *  19 Oct, from iPhones: it used to rest on the last frame, whose cards are
+   *  links, and an iPhone sends the tap that starts the film to the card
+   *  under the finger too, so the film seemed to open a case study by
+   *  itself. The title is a still of the video (the same name, .webp). */
   const play = (v: HTMLVideoElement) => {
     setPlaying(true)
     v.play().catch((e: unknown) => {
@@ -130,8 +127,7 @@ export function useFilmVideo(o: {
       if ((e as Error)?.name !== 'NotAllowedError') return
       blocked.current = true
       setPlaying(false)
-      setEnded(true)
-      setCards(true)
+      v.poster = opts.current.src.replace(/\.mp4$/, '.webp')
     })
   }
 
@@ -237,10 +233,37 @@ export function useFilmVideo(o: {
     const GESTURES = ['touchend', 'pointerup', 'keydown'] as const
     GESTURES.forEach((t) => window.addEventListener(t, retry, { capture: true, passive: true }))
 
+    /* 19 Oct, Krish: "it should start anyway". Low Power Mode refuses a
+       video that starts itself, but not one a touch has started once. So on
+       an iPhone or iPad the reader's first tap anywhere on the page plays the
+       film for an instant (muted, far out of sight) and stops it; from then
+       on it starts on its own when they reach it. Without a tap, the title
+       and the play button wait as above. */
+    const ios =
+      /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    let primed = !ios
+    const prime = () => {
+      if (primed || wanted.current || !v.paused || v.currentTime > 0) return
+      primed = true
+      v.play()
+        .then(() => {
+          if (wanted.current) return
+          v.pause()
+          v.currentTime = 0
+        })
+        .catch((e: unknown) => {
+          /* a touch that only scrolled is no gesture: wait for the next */
+          if ((e as Error)?.name === 'NotAllowedError') primed = false
+        })
+    }
+    const PRIME = ['touchend', 'pointerup', 'click', 'keydown'] as const
+    if (!primed) PRIME.forEach((t) => window.addEventListener(t, prime, { capture: true, passive: true }))
+
     return () => {
       mm.revert()
       near.disconnect()
       GESTURES.forEach((t) => window.removeEventListener(t, retry, { capture: true }))
+      PRIME.forEach((t) => window.removeEventListener(t, prime, { capture: true }))
       wanted.current = false
       blocked.current = false
     }
