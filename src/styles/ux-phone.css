@@ -283,10 +283,12 @@
   }
 }
 
-/* phones: the receipt is left out (below), so the phone stands centred */
+/* phones: the receipt is left out (below), so the phone stands centred, and
+   smaller, the cards swiping under it (19 Oct, Krish) */
 @media (max-width: 639px) {
   .up__slot {
     --rig-w: 300px;
+    height: clamp(260px, 72vw, 320px);
   }
 }
 
@@ -790,6 +792,60 @@
 
   .up__svcs li + li {
     border-top: 1px solid var(--up-rule);
+  }
+}
+
+/* --- phones: the cards swipe, one in view at a time ---------------------------------
+   19 Oct, Krish: a smaller phone and one card at a time, without cutting
+   any words. Each card is a white card the width of the screen less a
+   sliver, where the edge of the next shows there is more; the row is as tall
+   as its tallest card, so nothing is clipped, and the phone above shows the
+   card in view */
+@media (max-width: 639px) {
+  .up__steps {
+    display: flex;
+    gap: 12px;
+    margin-inline: calc(-1 * var(--umm-gutter));
+    padding: 4px var(--umm-gutter) 36px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--umm-gutter);
+    scrollbar-width: none;
+  }
+
+  .up__steps::-webkit-scrollbar {
+    display: none;
+  }
+
+  .up__steps > li {
+    flex: 0 0 calc(100% - 24px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* every card a card, so the sliver of the next reads as one */
+  .up__step,
+  .up__divider {
+    border-radius: 18px;
+    background-color: var(--umm-paper);
+    box-shadow:
+      0 0 0 1px rgb(16 14 20 / 0.06),
+      0 24px 40px -30px rgb(16 14 20 / 0.4);
+  }
+
+  .up__step[data-on] {
+    translate: none;
+  }
+
+  .up__step::before {
+    display: none;
+  }
+
+  /* the business models' heading: a card of its own, the words at its foot */
+  .up__divider {
+    align-content: end;
+    padding: 16px;
   }
 }
 

@@ -370,3 +370,13 @@
     width: 17vw;
   }
 }
+
+/* --- the closing ---------------------------------------------------------------------
+   19 Oct, Krish: "Make the journey worth choosing." is longer than the lines
+   the closing keeps unbroken elsewhere, and ran into the questions beside
+   it. Here it may break, in two even lines, as the other pages' two lines
+   stand over their chip */
+html.ux-page .cx-close__title span:not(:last-child) {
+  white-space: normal;
+  text-wrap: balance;
+}

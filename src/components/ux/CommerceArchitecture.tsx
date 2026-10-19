@@ -24,7 +24,9 @@ import '@/styles/ux-phone.css'
        printing a line per card
      - the case is held (sticky) on the left on wide screens, the cards pass
        on the right; on phones and tablets it stands once, whole, above the
-       cards (19 Oct, Krish: not a strip with half the phone)
+       cards (19 Oct, Krish: not a strip with half the phone). On a phone
+       the phone is smaller and the cards swipe, one in view at a time, the
+       phone showing the card in view
      - the cards are quiet: no boxes until one is read, which lifts as a
        white card with its tone dot lit; everything else is type, hairlines
        and plain chips
@@ -52,14 +54,16 @@ const toned = (t: Tone) => ({ ['--umm-tone' as string]: `var(--umm-${t})` }) as 
 
 /**
  * Which card is being read, and how far through it: the last card whose top
- * has passed the reading line (mid-screen beside the case; under the strip on
- * a phone). The fraction runs the case's meter as a CSS variable, written
- * once a frame, so React only hears about a new card.
+ * has passed the reading line (mid-screen beside the case; below the case on
+ * a tablet). On a phone the cards swipe sideways, one at a time, and the card
+ * is the one in the frame. The fraction runs the case's meter as a CSS
+ * variable, written once a frame, so React only hears about a new card.
  */
 function useShopReading() {
   const [at, setAt] = useState(0)
   const holdRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLOListElement>(null)
   const cards = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
@@ -67,19 +71,32 @@ function useShopReading() {
     const measure = () => {
       raf = 0
       const hold = holdRef.current
-      if (!hold) return
-      const vh = window.innerHeight
-      const strip = window.innerWidth < 1000 && vh > 560
-      const held = hold.getBoundingClientRect()
-      const line = strip ? Math.max(held.bottom, 0) + (vh - Math.max(held.bottom, 0)) * 0.3 : vh * 0.5
-      const tops = cards.current.map((c) => (c ? c.getBoundingClientRect().top : Infinity))
+      const list = listRef.current
+      if (!hold || !list) return
       let now = 0
-      tops.forEach((t, i) => {
-        if (t < line) now = i
-      })
-      const last = cards.current[cards.current.length - 1]
-      const end = tops[now + 1] ?? (last ? last.getBoundingClientRect().bottom : tops[now] + 1)
-      const p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
+      let p = 1
+      if (list.scrollWidth > list.clientWidth + 1) {
+        /* swiped (phones): the card whose left edge has passed the frame's middle */
+        const frame = list.getBoundingClientRect()
+        const line = frame.left + frame.width * 0.5
+        const lefts = cards.current.map((c) => (c ? c.getBoundingClientRect().left : Infinity))
+        lefts.forEach((l, i) => {
+          if (l < line) now = i
+        })
+        p = Math.min(1, Math.max(0, (line - lefts[now]) / (frame.width * 0.5)))
+      } else {
+        const vh = window.innerHeight
+        const below = window.innerWidth < 1000 && vh > 560
+        const held = hold.getBoundingClientRect()
+        const line = below ? Math.max(held.bottom, 0) + (vh - Math.max(held.bottom, 0)) * 0.3 : vh * 0.5
+        const tops = cards.current.map((c) => (c ? c.getBoundingClientRect().top : Infinity))
+        tops.forEach((t, i) => {
+          if (t < line) now = i
+        })
+        const last = cards.current[cards.current.length - 1]
+        const end = tops[now + 1] ?? (last ? last.getBoundingClientRect().bottom : tops[now] + 1)
+        p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
+      }
       stageRef.current?.style.setProperty('--p', p.toFixed(3))
       setAt((was) => (was === now ? was : now))
     }
@@ -87,11 +104,14 @@ function useShopReading() {
       if (!raf) raf = requestAnimationFrame(measure)
     }
     measure()
+    const list = listRef.current
     window.addEventListener('scroll', queue, { passive: true })
     window.addEventListener('resize', queue)
+    list?.addEventListener('scroll', queue, { passive: true })
     return () => {
       window.removeEventListener('scroll', queue)
       window.removeEventListener('resize', queue)
+      list?.removeEventListener('scroll', queue)
       if (raf) cancelAnimationFrame(raf)
     }
   }, [])
@@ -99,7 +119,7 @@ function useShopReading() {
   const cardRef = (i: number) => (el: HTMLElement | null) => {
     cards.current[i] = el
   }
-  return { at, holdRef, stageRef, cardRef }
+  return { at, holdRef, stageRef, listRef, cardRef }
 }
 
 /**
@@ -134,7 +154,7 @@ function useFit() {
 
 export function CommerceArchitecture({ content = commerce0 }: { content?: typeof commerce0 }) {
   const { board, models, principles } = content
-  const { at, holdRef, stageRef, cardRef } = useShopReading()
+  const { at, holdRef, stageRef, listRef, cardRef } = useShopReading()
   const slotRef = useFit()
 
   /* the eight cards, in order: the layers, then the business models */
@@ -250,8 +270,8 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
               </div>
             </div>
 
-            {/* the cards, in the page's flow */}
-            <ol className="up__steps">
+            {/* the cards, in the page's flow (swiped one at a time on a phone) */}
+            <ol className="up__steps" ref={listRef}>
               {card(
                 0,
                 <>
