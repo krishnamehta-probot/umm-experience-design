@@ -394,10 +394,24 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
     </p>
   )
 
-  /** where the order goes next, under a layer */
+  /** where the order goes next, under a layer: an arrow on to the next layer,
+   *  or, under the last, a loop back to the first (19 Oct, Krish: drawn
+   *  arrows in place of the bare hook and ring, which read as stray marks) */
   const link = (text: string, loop?: boolean) => (
     <p className="up__link" data-k={loop ? 'loop' : undefined}>
-      <i aria-hidden="true" />
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        {loop ? (
+          <>
+            <path d="M17 10a7 7 0 1 1-7-7c2 0 3.9.8 5.3 2.2L17 7" />
+            <path d="M17 3v4h-4" />
+          </>
+        ) : (
+          <>
+            <path d="M4.5 3.5v6.25a3.5 3.5 0 0 0 3.5 3.5h8" />
+            <path d="M13 10.25l3 3-3 3" />
+          </>
+        )}
+      </svg>
       {text}
     </p>
   )

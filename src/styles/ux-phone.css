@@ -634,24 +634,17 @@
   border-top: 1px solid var(--up-rule);
 }
 
-.up__link i {
+/* the arrow: on to the next layer, or the loop back to the first */
+.up__link svg {
   flex: none;
-  width: 12px;
-  height: 10px;
-  margin-top: 4px;
-  border-left: 1.5px solid var(--umm-ink-quiet);
-  border-bottom: 1.5px solid var(--umm-ink-quiet);
-  border-bottom-left-radius: 5px;
-}
-
-.up__link[data-k='loop'] i {
-  width: 12px;
-  height: 12px;
-  margin-top: 4px;
-  border: 1.5px solid var(--umm-ink-quiet);
-  border-right-color: transparent;
-  border-radius: 50%;
-  rotate: -45deg;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--umm-ink-soft);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* the four services: a cross of hairlines */
