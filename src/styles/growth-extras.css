@@ -143,6 +143,12 @@
   gap: 6px;
   margin: 12px 0 0;
   padding-left: 1.1rem;
+  /* bullet points (Krish, 19 Oct) */
+  list-style: disc;
+}
+
+.gx-gen__more li::marker {
+  color: var(--umm-ink);
 }
 
 .gx-gen__scope {
