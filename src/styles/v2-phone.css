@@ -95,8 +95,8 @@
     font-size: 0.6875rem;
   }
 
-  /* a toolkit listed, not pinned (ToolsStack: Growth on any phone shorter
-     than its frame needs): no held screen, the groups read in order */
+  /* a toolkit listed, not pinned (ToolsStack: reduced motion on a phone):
+     no held screen, the groups read in order */
   html.cx-v2 .cx-kit[data-mode='stack'] {
     min-height: 0;
   }

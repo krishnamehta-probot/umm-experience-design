@@ -1308,3 +1308,35 @@
     width: 13vw;
   }
 }
+
+/* --- the toolkit's wheel on phones -----------------------------------------------
+   19 Oct, Krish: animated as on the other pages, its description smaller.
+   Only Growth's groups carry a line on their role, and it shares the frame
+   with the tools; in the height Safari leaves an iPhone the tools were
+   squeezed to slivers. So on a phone: the description small (two lines),
+   the heading a size down (its chip on one line), the wheel's arc tighter,
+   and the four tools share what that frees. */
+@media (max-width: 899px) and (min-height: 560px) {
+  html.cx-v2.growth-page .cx-kit[data-mode='scroll'] .cx-h {
+    font-size: clamp(1.375rem, 6.3vw, 2.25rem);
+  }
+
+  html.cx-v2.growth-page .cx-kit__body {
+    grid-template-rows: 88px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  html.cx-v2.growth-page .cx-kit__wheel {
+    --step: 28px;
+  }
+
+  html.cx-v2.growth-page .cx-kit__body .cx-kit__tiles li {
+    font-size: 1rem;
+  }
+
+  html.cx-v2.growth-page .cx-kit__body .cx-kit__tiles li.cx-kit__about {
+    padding-block: 8px;
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+}
