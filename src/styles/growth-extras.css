@@ -1301,17 +1301,14 @@
   }
 }
 
-/* --- the hero's glass object on phones -----------------------------------------
-   This page's headline is two long lines, so the shared spot beside a short
-   first line (v2.css) lands on the headline's end. 19 Oct, from Krish's
-   device test: the arrow sits small in the top-right corner, at the
-   eyebrow's end, between the nav and the headline (17 Oct it had dropped
-   beside the call to action). */
+/* --- the hero on phones and tablets -------------------------------------------
+   19 Oct, Krish: the glass object the same size and in the same place as on
+   every page (v2.css). This headline's first line ran the width, so up to
+   900px it breaks after "your", as short as the first lines the object
+   sits beside elsewhere ("Expert engineers." is 7.1em). */
 @media (max-width: 900px) {
-  html.growth-page .cx-hero__cube {
-    top: calc(clamp(104px, 17vh, 230px) - 22px - 6.5vw);
-    right: 4vw;
-    width: 13vw;
+  html.growth-page .cx-hero__line:first-child > span {
+    max-width: 7.2em;
   }
 }
 

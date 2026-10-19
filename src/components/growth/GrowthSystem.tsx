@@ -117,7 +117,15 @@ export function GrowthSystem({ content = content0 }: { content?: typeof content0
           tone="sun"
           lineRecipe={2}
         />
-        <p className="cx-lead cd-arch__lead">{content.lead}</p>
+        {/* each sentence on its own line (Krish, 19 Oct) */}
+        <p className="cx-lead cd-arch__lead">
+          {content.lead.split(/(?<=\.)\s+/).map((s, i) => (
+            <span key={s} style={{ display: 'block' }}>
+              {i > 0 ? ' ' : null}
+              {s}
+            </span>
+          ))}
+        </p>
       </div>
 
       <div className="umm-container">
