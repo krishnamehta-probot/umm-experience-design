@@ -107,6 +107,17 @@ export const film = {
    *  /public/work/<id>/. `short` is ours, for the end cards. */
   projects: [
     {
+      id: 'cocoandcoir',
+      client: 'Coco & Coir',
+      type: 'Home & lifestyle',
+      title: 'Thoughtful products. Thoughtful shopping.',
+      chip: 'Thoughtful shopping.',
+      body: 'A Shopify experience bringing sustainable home products into a clear catalog, with streamlined checkout and tools for managing inventory and promotions.',
+      short: 'Sustainable home products in a clear catalog.',
+      href: 'https://umm.digital/casestudies/coco-coir/',
+      tone: 'citrus' as Tone,
+    },
+    {
       id: 'tfp',
       client: 'Twins for Peace',
       type: 'Fashion & commerce',
@@ -127,17 +138,6 @@ export const film = {
       short: 'Performance footwear, shopped across regions.',
       href: 'https://umm.digital/casestudies/enda-sportswear/',
       tone: 'sky' as Tone,
-    },
-    {
-      id: 'cocoandcoir',
-      client: 'Coco & Coir',
-      type: 'Home & lifestyle',
-      title: 'Thoughtful products. Thoughtful shopping.',
-      chip: 'Thoughtful shopping.',
-      body: 'A Shopify experience bringing sustainable home products into a clear catalog, with streamlined checkout and tools for managing inventory and promotions.',
-      short: 'Sustainable home products in a clear catalog.',
-      href: 'https://umm.digital/casestudies/coco-coir/',
-      tone: 'citrus' as Tone,
     },
   ],
   site: 'umm.digital',
@@ -477,6 +477,60 @@ export const commerce: {
       step: 'Keep learning',
       title: 'Measure what matters.',
       body: 'Agree success measures around the business model, then use research and experiments to improve the experience over time.',
+    },
+  ],
+}
+
+/* ── 6a · Tech stack (Krish, 19 Oct: the toolkit section, after the thinking) ── */
+
+export const tools = {
+  chip: 'Tech Stack',
+  line1: 'Design craft and engineering precision',
+  line2: 'in one stack',
+  accent: 'in one stack',
+  groups: [
+    {
+      label: 'Design and Prototyping',
+      tone: 'blossom' as Tone,
+      items: ['Figma', 'Adobe XD', 'Sketch', 'InVision', 'Framer'],
+    },
+    {
+      label: 'Front-End Frameworks',
+      tone: 'sky' as Tone,
+      items: ['React', 'Next.js', 'Vue', 'Angular', 'Tailwind CSS', 'TypeScript'],
+    },
+    {
+      label: 'CMS and Experience Platforms',
+      tone: 'sun' as Tone,
+      items: ['Contentful', 'Sanity', 'Strapi', 'WordPress', 'Adobe Experience Manager'],
+    },
+    {
+      label: 'Data and Analytics',
+      tone: 'citrus' as Tone,
+      items: ['Google Analytics 4', 'Mixpanel', 'Hotjar', 'Heap', 'Microsoft Clarity', 'Amplitude'],
+    },
+    {
+      label: 'Personalization and AI',
+      tone: 'coral' as Tone,
+      items: ['Segment', 'Optimizely', 'Dynamic Yield', 'Google Vertex AI', 'OpenAI', 'Adobe Target'],
+    },
+    {
+      label: 'Performance and Security',
+      tone: 'sky' as Tone,
+      items: ['Cloudflare', 'AWS', 'Azure', 'Google Cloud', 'SOC 2', 'GDPR'],
+    },
+    {
+      label: 'Commerce Platforms',
+      tone: 'blossom' as Tone,
+      items: [
+        'Shopify Plus',
+        'Adobe Commerce',
+        'BigCommerce',
+        'WooCommerce',
+        'Salesforce Commerce Cloud',
+        'commercetools',
+        'Fabric',
+      ],
     },
   ],
 }

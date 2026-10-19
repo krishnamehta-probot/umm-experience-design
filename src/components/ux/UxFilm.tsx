@@ -5,11 +5,12 @@ import { film } from '@/content/uxCommerce'
    UX & DIGITAL COMMERCE · SELECTED WORK — the CX film, with this page's work
 
    The same player, timing, cuts and last frame as the CX page's film
-   (ProofFilm), on Twins for Peace, Enda Sportswear and Coco & Coir. Twins
-   for Peace plays its shopping flow, as on the CX page (collection,
-   product, bag, checkout); Enda and Coco & Coir as their stores scrolling
-   (one long capture each). The page plays the exports, film/ux-wide.mp4
-   and film/ux-tall.mp4 (scripts/render-film.mjs --film ux).
+   (ProofFilm), on Coco & Coir, Twins for Peace and Enda Sportswear (Coco &
+   Coir first, Krish 19 Oct). Twins for Peace plays its shopping flow, as on
+   the CX page (collection, product, bag, checkout); Coco & Coir and Enda as
+   their stores scrolling (one long capture each). The page plays the
+   exports, film/ux-wide.mp4 and film/ux-tall.mp4
+   (scripts/render-film.mjs --film ux).
    ========================================================================== */
 
 /** where each store rests (yPercent of the capture) */

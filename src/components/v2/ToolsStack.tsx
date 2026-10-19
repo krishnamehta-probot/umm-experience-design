@@ -6,9 +6,10 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
 import { stopAt, useMagneticStops } from '@/lib/useMagneticStops'
 import { tools as cxTools } from '@/content/cxUiDesign'
 
-/* the note is optional: a plan can leave it out */
+/* the lead and the note are optional: a plan can leave them out */
 /** `note`: a line under the toolkit; a group's `about`: a line under its tools */
-export type ToolsContent = Omit<typeof cxTools, 'note' | 'groups'> & {
+export type ToolsContent = Omit<typeof cxTools, 'lead' | 'note' | 'groups'> & {
+  lead?: string
   note?: string
   groups: ((typeof cxTools)['groups'][number] & { about?: string })[]
 }
@@ -77,7 +78,7 @@ export function ToolsStack({ content: tools = cxTools }: { content?: ToolsConten
               tone="citrus"
               lineRecipe={5}
             />
-            <p className="cx-lead">{tools.lead}</p>
+            {tools.lead ? <p className="cx-lead">{tools.lead}</p> : null}
           </div>
 
           {pinMode ? (

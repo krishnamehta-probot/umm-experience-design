@@ -7,6 +7,7 @@ import { StagesV2 } from '@/components/v2/StagesV2'
 import { Industries } from '@/components/v2/Industries'
 import { ProcessClose } from '@/components/v2/ProcessClose'
 import { ToTop } from '@/components/v2/ToTop'
+import { ToolsStack } from '@/components/v2/ToolsStack'
 import { Engagement } from '@/components/ai/Engagement'
 import { UxFilm } from '@/components/ux/UxFilm'
 import { AiMoments, Platforms } from '@/components/ux/UxExtras'
@@ -28,6 +29,7 @@ import {
   ribbon,
   services,
   stages,
+  tools,
   why,
 } from '@/content/uxCommerce'
 
@@ -38,9 +40,9 @@ import {
  * Enda Sportswear and Coco & Coir, the services with the CX page's marks
  * (the same kind of work). Its own sections: AI where it improves the
  * experience and the businesses it serves, under the services; the
- * commerce architecture (CommerceArchitecture), the page's story; and the
- * next commerce platform, where the others have their toolkit. Its glass
- * object is a shopping bag. The commerce flavour (components/ux/flavour.tsx)
+ * commerce architecture (CommerceArchitecture), the page's story; the
+ * toolkit, its tech stack (Krish, 19 Oct); and the next commerce platform.
+ * Its glass object is a shopping bag. The commerce flavour (components/ux/flavour.tsx)
  * is a trial behind UX_FLAVOUR.
  */
 export function UxCommercePage() {
@@ -75,6 +77,7 @@ export function UxCommercePage() {
         <Industries content={industries} art={UX_INDUSTRY_ART} />
         <StagesV2 content={stages} light={STAGE_LIGHT} />
         <CommerceArchitecture />
+        <ToolsStack content={tools} />
         <Platforms />
         <ProcessClose process={process} closing={closing} faq={faq}>
           <Engagement content={engagement} />

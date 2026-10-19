@@ -352,3 +352,21 @@
     max-width: 7.2em;
   }
 }
+
+/* 19 Oct, Krish: the object never touches the words. Under 526px the
+   headline is 32px and the object is taller than the two short lines it sits
+   beside, so it rises until what is drawn (to 93% of its square) ends 10px
+   above "Connected end to end.", where the eyebrow has already ended */
+@media (max-width: 525px) {
+  html.ux-page .cx-hero__cube {
+    top: calc(clamp(104px, 17vh, 230px) + 2.12 * 32px - 0.93 * 24vw - 10px);
+  }
+}
+
+/* the narrowest phones: it sits smaller, beside the first line alone */
+@media (max-width: 340px) {
+  html.ux-page .cx-hero__cube {
+    top: calc(clamp(104px, 17vh, 230px) - 2px);
+    width: 17vw;
+  }
+}
