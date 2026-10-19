@@ -302,7 +302,9 @@
   font-weight: var(--umm-weight-semibold);
   text-decoration: underline;
   text-decoration-thickness: 1.5px;
-  text-underline-offset: 3px;
+  /* 19 Oct, Krish: one unbroken line, below the tails of g, p and y */
+  text-underline-offset: 0.38em;
+  text-decoration-skip-ink: none;
 }
 
 .gx-disc__cta:hover strong {
