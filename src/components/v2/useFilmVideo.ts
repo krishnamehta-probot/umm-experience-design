@@ -59,29 +59,91 @@ export function useFilmVideo(o: {
   const opts = useRef(o)
   opts.current = o
 
+  /** the bar, the time, and whether the live cards have taken over, at t */
+  const paintAt = (t: number) => {
+    const { fill, time, seconds, cardsAt } = opts.current
+    const p = Math.min(1, t / seconds)
+    if (fill.current) {
+      fill.current.style.transform = `scaleX(${p})`
+      const bar = fill.current.parentElement
+      bar?.style.setProperty('--p', String(p))
+      bar?.setAttribute('aria-valuenow', String(Math.round(t)))
+      bar?.setAttribute('aria-valuetext', `${fmt(t)} of ${fmt(seconds)}`)
+    }
+    if (time.current) time.current.textContent = `${fmt(t)} / ${fmt(seconds)}`
+    setCards(t >= cardsAt)
+  }
+
+  /* ── Safari, refused: the film as an image ─────────────────────────────
+     19 Oct, Krish: "it should start anyway". Safari will not start a video
+     by itself in Low Power Mode, but it plays an MP4 given to an <img> as a
+     silent moving image, which no autoplay rule covers. So when Safari
+     (iPhone, iPad or Mac) refuses the video, the film rolls as an image laid
+     over it, on its own clock for the bar and the cards. The reader's first
+     touch hands it back to the video at the same moment, so pause and the
+     bar work as ever. Anywhere else, or if the image will not load, the
+     title waits with its play button (play). */
+  const asImage = useRef<{ img: HTMLImageElement; t0: number; raf: number } | null>(null)
+  /* the film ran to its end as an image: it does not start over by itself */
+  const imageDone = useRef(false)
+  const imageTime = () => {
+    const f = asImage.current
+    return f?.t0 ? (performance.now() - f.t0) / 1000 : 0
+  }
+  const dropImage = () => {
+    const f = asImage.current
+    if (!f) return
+    cancelAnimationFrame(f.raf)
+    f.img.remove()
+    asImage.current = null
+  }
+  const playAsImage = (v: HTMLVideoElement) => {
+    const ua = navigator.userAgent
+    if (asImage.current || imageDone.current || !/AppleWebKit/.test(ua) || /Chrome|Chromium|Android/.test(ua)) return
+    const { src, seconds } = opts.current
+    const img = document.createElement('img')
+    img.className = 'cx-f-video'
+    img.alt = ''
+    /* see-through while it loads, so the title still shows */
+    img.style.background = 'none'
+    const f = { img, t0: 0, raf: 0 }
+    asImage.current = f
+    const roll = () => {
+      if (asImage.current !== f || f.t0) return
+      f.t0 = performance.now()
+      setPlaying(true)
+      const tick = () => {
+        const t = imageTime()
+        paintAt(t)
+        if (t < seconds - 0.1) {
+          f.raf = requestAnimationFrame(tick)
+          return
+        }
+        dropImage()
+        imageDone.current = true
+        blocked.current = false
+        setPlaying(false)
+        setEnded(true)
+        setCards(true)
+      }
+      f.raf = requestAnimationFrame(tick)
+    }
+    img.addEventListener('load', () => img.decode().then(roll, roll))
+    img.addEventListener('error', () => asImage.current === f && dropImage())
+    img.src = src
+    v.after(img)
+  }
+
   /* ── the clock: the bar, the time, and when the live cards take over ── */
   useLayoutEffect(() => {
     const v = o.video.current
     if (!o.on || !v) return
-    const { fill, time, seconds, cardsAt } = opts.current
     /* React sets `muted` as a property only; iOS lets a video play on its
        own only when it is muted in the markup too */
     v.muted = true
     v.setAttribute('muted', '')
     let raf = 0
-    const paint = () => {
-      const t = v.currentTime
-      const p = Math.min(1, t / seconds)
-      if (fill.current) {
-        fill.current.style.transform = `scaleX(${p})`
-        const bar = fill.current.parentElement
-        bar?.style.setProperty('--p', String(p))
-        bar?.setAttribute('aria-valuenow', String(Math.round(t)))
-        bar?.setAttribute('aria-valuetext', `${fmt(t)} of ${fmt(seconds)}`)
-      }
-      if (time.current) time.current.textContent = `${fmt(t)} / ${fmt(seconds)}`
-      setCards(t >= cardsAt)
-    }
+    const paint = () => paintAt(v.currentTime)
     const loop = () => {
       paint()
       raf = requestAnimationFrame(loop)
@@ -128,6 +190,7 @@ export function useFilmVideo(o: {
       blocked.current = true
       setPlaying(false)
       v.poster = opts.current.src.replace(/\.mp4$/, '.webp')
+      if (wanted.current) playAsImage(v)
     })
   }
 
@@ -144,12 +207,20 @@ export function useFilmVideo(o: {
     const done = () => v.ended || v.currentTime >= seconds - 0.05
     const start = () => {
       wanted.current = true
-      if (userPaused.current || blocked.current || done() || !v.paused) return
+      if (userPaused.current || imageDone.current || done()) return
       section.dataset.state = 'rolling'
+      /* refused before (Safari): back as the image, from the top */
+      if (blocked.current) return playAsImage(v)
+      if (!v.paused) return
       play(v)
     }
     const stop = () => {
       wanted.current = false
+      if (asImage.current) {
+        dropImage()
+        setPlaying(false)
+        return
+      }
       if (v.paused) return
       v.pause()
       setPlaying(false)
@@ -217,18 +288,28 @@ export function useFilmVideo(o: {
     )
 
     /* refused (an iPhone in Low Power Mode): any touch, click or key while
-       the film is in view counts as the gesture the phone wants, so it
-       rolls from the top then. Not one on the controls: they do their own. */
+       the film is in view counts as the gesture the phone wants, so the
+       video takes over then: from where the image has got to (Safari), or
+       from the top. Not one on the controls: they do their own. */
     const controls = opts.current.controls
     const retry = (e: Event) => {
       if (!blocked.current || !wanted.current || userPaused.current) return
       if (controls.current?.contains(e.target as Node)) return
       blocked.current = false
+      const f = asImage.current
       setEnded(false)
       setCards(false)
-      v.currentTime = 0
+      v.currentTime = f?.t0 ? Math.min(imageTime(), seconds - 0.2) : 0
       section.dataset.state = 'rolling'
-      play(v)
+      setPlaying(true)
+      v.play().then(
+        /* the image goes once the video is rolling under it */
+        () => asImage.current === f && dropImage(),
+        () => {
+          blocked.current = true
+          if (!f) setPlaying(false)
+        },
+      )
     }
     const GESTURES = ['touchend', 'pointerup', 'keydown'] as const
     GESTURES.forEach((t) => window.addEventListener(t, retry, { capture: true, passive: true }))
@@ -264,6 +345,8 @@ export function useFilmVideo(o: {
       near.disconnect()
       GESTURES.forEach((t) => window.removeEventListener(t, retry, { capture: true }))
       PRIME.forEach((t) => window.removeEventListener(t, prime, { capture: true }))
+      dropImage()
+      imageDone.current = false
       wanted.current = false
       blocked.current = false
     }
@@ -302,6 +385,23 @@ export function useFilmVideo(o: {
     const v = o.video.current
     if (!v) return
     o.section.current?.setAttribute('data-state', 'rolling')
+    const f = asImage.current
+    if (f?.t0) {
+      /* the film rolling as an image: pause it where it is, as the video
+         (played for an instant in this tap so the phone shows its frame) */
+      userPaused.current = true
+      blocked.current = false
+      setPlaying(false)
+      v.currentTime = Math.min(imageTime(), o.seconds - 0.2)
+      const drop = () => asImage.current === f && dropImage()
+      v.play().then(() => {
+        v.pause()
+        drop()
+      }, drop)
+      return
+    }
+    dropImage()
+    imageDone.current = false
     userPaused.current = false
     blocked.current = false
     if (ended) {
@@ -365,8 +465,10 @@ export function useFilmVideo(o: {
       e.preventDefault()
       e.currentTarget.setPointerCapture(e.pointerId)
       /* the film holds still under the finger, and carries on from where
-         it is let go if it was playing */
-      drag.current = { resume: !v.paused }
+         it is let go if it was playing (as the video, if it was the image) */
+      const rolling = !!asImage.current?.t0
+      dropImage()
+      drag.current = { resume: rolling || !v.paused }
       if (!v.paused) v.pause()
       e.currentTarget.dataset.drag = 'true'
       o.section.current?.setAttribute('data-state', 'rolling')
