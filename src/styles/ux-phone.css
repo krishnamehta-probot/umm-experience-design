@@ -265,35 +265,39 @@
   }
 }
 
-/* phones and tablets: a strip held at the top, the board's label across it
-   and the top of the phone rising out of its bottom edge (17 Oct, Krish: no
-   fade, so the cards passing under it never show through) */
+/* phones and tablets: a card held at the top, the Growth strip's recipe
+   (19 Oct, Krish: the full-width band was "too weird"): inset and rounded,
+   the top of the phone rising out of its bottom edge, and beside it where
+   you are and the card's name, centred. Opaque (17 Oct, Krish: no fade, so
+   the cards passing under it never show through) */
 @media (max-width: 999px) {
   .up__hold {
     position: sticky;
-    top: 0;
+    top: 8px;
     z-index: 4;
-    margin-inline: calc(-1 * var(--umm-gutter));
   }
 
   .up__stage {
-    --pw: clamp(150px, 20svh, 188px);
+    --pw: clamp(140px, 40vw, 188px);
     grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-rows: 1fr auto auto auto 1fr;
     grid-template-areas:
-      'label label'
       'slot .'
+      'slot label'
       'slot progress'
-      'slot now';
-    column-gap: 20px;
+      'slot now'
+      'slot .';
+    column-gap: clamp(16px, 4vw, 28px);
     row-gap: 10px;
-    padding: 14px var(--umm-gutter) 0;
+    padding: 12px clamp(16px, 4vw, 28px) 0 12px;
     border: 0;
-    border-radius: 0;
+    border-radius: 22px;
     background: var(--umm-paper);
+    /* the last shadow fills the gap above the card, so nothing shows there */
     box-shadow:
-      0 1px 0 var(--umm-line),
-      0 18px 30px -24px rgb(16 14 20 / 0.45);
+      0 0 0 1px rgb(16 14 20 / 0.06),
+      0 18px 36px -22px rgb(16 14 20 / 0.35),
+      0 -12px 0 4px var(--umm-canvas);
     overflow: hidden;
   }
 
@@ -303,13 +307,10 @@
 
   .up__caselabel {
     grid-area: label;
-    align-self: start;
   }
 
   .up__progress {
     grid-area: progress;
-    flex-wrap: wrap;
-    row-gap: 8px;
   }
 
   .up__slot {
@@ -317,7 +318,7 @@
     --fit: width;
     align-self: end;
     width: var(--pw);
-    height: min(calc(var(--pw) * 1.12), calc(28svh - 40px));
+    height: min(calc(var(--pw) * 1.12), calc(30svh - 38px));
   }
 
   .up__rig {
@@ -334,8 +335,7 @@
   .up__now {
     grid-area: now;
     justify-self: start;
-    align-self: end;
-    margin-bottom: 20px;
+    margin: 0;
     padding: 0;
     background: none;
     box-shadow: none;
@@ -352,7 +352,34 @@
   }
 
   .up__step {
-    scroll-margin-top: calc(28svh + 24px);
+    scroll-margin-top: calc(30svh + 32px);
+  }
+}
+
+/* phones: the section's heading names the board already, so the card holds
+   where you are (the count over the meter) and the card's name */
+@media (max-width: 639px) {
+  .up__stage {
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas:
+      'slot .'
+      'slot progress'
+      'slot now'
+      'slot .';
+  }
+
+  .up__caselabel {
+    display: none;
+  }
+
+  .up__progress {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .up__count {
+    order: -1;
   }
 }
 
