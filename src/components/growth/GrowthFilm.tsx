@@ -5,9 +5,10 @@ import { film } from '@/content/growth'
    INTEGRATED GROWTH & STRATEGY · SELECTED WORK — the CX film, this page's work
 
    The same player, timing, cuts and last frame as the CX page's film
-   (ProofFilm), on Enda Sportswear, Biocon Group and iAdeptive, each as its
-   live homepage scrolling (one long capture, as Licuido does on CX). The
-   page plays the exports, film/growth-wide.mp4 and film/growth-tall.mp4
+   (ProofFilm), on Biocon Group, iAdeptive and Enda Sportswear (that order,
+   Krish 19 Oct), each as its live homepage scrolling (one long capture, as
+   Licuido does on CX). The page plays the exports, film/growth-wide.mp4 and
+   film/growth-tall.mp4
    (scripts/render-film.mjs --film growth).
    ========================================================================== */
 

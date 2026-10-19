@@ -1435,6 +1435,13 @@ html.cx-v2 body {
   top: 10px;
 }
 
+/* Growth's citrus star sat under the D of "Different" (19 Oct): it lifts
+   into its corner too */
+.cx-film[data-cut='growth'] .cx-film__frame:not([data-tall]) .cx-f-intro__shape--0 {
+  left: 110px;
+  top: 50px;
+}
+
 /* and its chip, "the experience.": the p's tail ran out of the chip's foot
    and the g's of "engineering" dipped into its top. Room under the tails,
    and the chip a step down from the line above (both cuts). */
