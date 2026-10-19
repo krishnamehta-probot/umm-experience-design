@@ -283,19 +283,45 @@
   }
 }
 
+/* the panel only exists on a phone (below); elsewhere its two parts are the
+   story's own */
+.up__panel {
+  display: contents;
+}
+
 /* phones: the case and the cards are one white panel (19 Oct, Krish: "keep
-   things attached"). Its top is the whole phone, small, on the left, and
-   beside it where you are and the card's name; under a hairline, the card
-   (the deck, below). The receipt is left out: its lines are the cards' names */
+   things attached"), held in the middle of the screen while the section's
+   runway passes (its height and place are set by useScrollDeck). Its top is
+   the whole phone, small, on the left, and beside it where you are and the
+   card's name; under a hairline, the card (the deck, below). The receipt is
+   left out: its lines are the cards' names */
 @media (max-width: 639px) {
+  /* the row of cards must not widen the board */
+  .up__board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .up__story {
-    row-gap: 0;
+    display: block;
+    min-width: 0;
+  }
+
+  .up__panel {
+    position: sticky;
+    top: var(--panel-top, 8px);
+    display: flex;
+    flex-direction: column;
+    height: var(--panel-h, auto);
     border-radius: 22px;
     background: var(--umm-paper);
     box-shadow:
       0 0 0 1px rgb(16 14 20 / 0.06),
       0 30px 60px -36px rgb(16 14 20 / 0.4);
     overflow: clip;
+  }
+
+  .up__hold {
+    flex: none;
   }
 
   .up__stage {
@@ -338,7 +364,7 @@
 
   .up__slot {
     --rig-w: 300px;
-    --ph: clamp(200px, 56vw, 250px);
+    --ph: clamp(186px, 26svh, 230px);
     width: calc(var(--ph) * 300 / 620);
     height: var(--ph);
   }
@@ -864,35 +890,25 @@
   }
 }
 
-/* --- phones: the deck, one card at a time, playing by itself ------------------------
-   19 Oct, Krish: one card at a time, moving on by itself, attached to the
-   phone, no words cut. The cards run sideways under the case, each the
-   width of the panel; useDeck moves them on and sets the deck's height to
-   the card in it (--deck-h), so nothing is clipped and nothing gapes. A
-   swipe still works. */
+/* --- phones: the deck, one card at a time, moved by the scroll ----------------------
+   19 Oct, Krish: one card at a time, attached to the phone, moving as you
+   scroll, no words cut. The cards stand in a row under the case, each the
+   width of the panel; useScrollDeck slides the row across, and lifts a
+   card taller than the room past the case until its end is in view */
 @media (max-width: 639px) {
   .up__steps {
+    flex: 1 1 auto;
     display: flex;
     align-items: flex-start;
     gap: 0;
-    height: var(--deck-h, auto);
+    min-height: 0;
     padding: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    transition: height 0.5s var(--umm-ease-out);
-  }
-
-  .up__steps::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   .up__steps > li {
     flex: 0 0 100%;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
+    will-change: transform;
   }
 
   /* the panel is the card: none of its own */
@@ -909,9 +925,10 @@
     display: none;
   }
 
-  /* the business models' heading: a chapter of its own, its words centred */
+  /* the business models' heading: a chapter of its own, its words in the
+     middle */
   .up__divider {
-    min-height: 220px;
+    min-height: 240px;
     align-content: center;
     padding: 28px 16px;
   }

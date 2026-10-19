@@ -3,6 +3,7 @@ import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
 import { commerce as commerce0 } from '@/content/uxCommerce'
 import { Receipt, ShopPhone, type PhoneStep } from './ShopPhone'
+import { lanePx, screenPx } from '@/lib/lane'
 import '@/styles/cloud-arch.css'
 import '@/styles/ux-phone.css'
 
@@ -52,65 +53,53 @@ const split = (label: string) => {
 const num = (i: number) => String(i + 1).padStart(2, '0')
 const toned = (t: Tone) => ({ ['--umm-tone' as string]: `var(--umm-${t})` }) as CSSProperties
 
+/** phones: the case and the cards are one panel, held, the scroll moving the cards (useScrollDeck) */
+const PHONE = '(max-width: 639px)'
+
 /**
  * Which card is being read, and how far through it: the last card whose top
  * has passed the reading line (mid-screen beside the case; below the case on
- * a tablet). On a phone the cards run sideways, one at a time, and the card
- * is the one in the frame (its meter is the deck's clock, useDeck). The
- * fraction runs the case's meter as a CSS variable, written once a frame, so
- * React only hears about a new card.
+ * a tablet). On a phone the deck says (useScrollDeck). The fraction runs the
+ * case's meter as a CSS variable, written once a frame, so React only hears
+ * about a new card.
  */
 function useShopReading() {
   const [at, setAt] = useState(0)
   const holdRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
-  const listRef = useRef<HTMLOListElement>(null)
   const cards = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
+    const phone = window.matchMedia(PHONE)
     let raf = 0
     const measure = () => {
       raf = 0
       const hold = holdRef.current
-      const list = listRef.current
-      if (!hold || !list) return
+      if (!hold || phone.matches) return
+      const vh = window.innerHeight
+      const below = window.innerWidth < 1000 && vh > 560
+      const held = hold.getBoundingClientRect()
+      const line = below ? Math.max(held.bottom, 0) + (vh - Math.max(held.bottom, 0)) * 0.3 : vh * 0.5
+      const tops = cards.current.map((c) => (c ? c.getBoundingClientRect().top : Infinity))
       let now = 0
-      if (list.scrollWidth > list.clientWidth + 1) {
-        /* sideways (phones): the card whose left edge has passed the frame's middle */
-        const frame = list.getBoundingClientRect()
-        const line = frame.left + frame.width * 0.5
-        const lefts = cards.current.map((c) => (c ? c.getBoundingClientRect().left : Infinity))
-        lefts.forEach((l, i) => {
-          if (l < line) now = i
-        })
-      } else {
-        const vh = window.innerHeight
-        const below = window.innerWidth < 1000 && vh > 560
-        const held = hold.getBoundingClientRect()
-        const line = below ? Math.max(held.bottom, 0) + (vh - Math.max(held.bottom, 0)) * 0.3 : vh * 0.5
-        const tops = cards.current.map((c) => (c ? c.getBoundingClientRect().top : Infinity))
-        tops.forEach((t, i) => {
-          if (t < line) now = i
-        })
-        const last = cards.current[cards.current.length - 1]
-        const end = tops[now + 1] ?? (last ? last.getBoundingClientRect().bottom : tops[now] + 1)
-        const p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
-        stageRef.current?.style.setProperty('--p', p.toFixed(3))
-      }
+      tops.forEach((t, i) => {
+        if (t < line) now = i
+      })
+      const last = cards.current[cards.current.length - 1]
+      const end = tops[now + 1] ?? (last ? last.getBoundingClientRect().bottom : tops[now] + 1)
+      const p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
+      stageRef.current?.style.setProperty('--p', p.toFixed(3))
       setAt((was) => (was === now ? was : now))
     }
     const queue = () => {
       if (!raf) raf = requestAnimationFrame(measure)
     }
     measure()
-    const list = listRef.current
     window.addEventListener('scroll', queue, { passive: true })
     window.addEventListener('resize', queue)
-    list?.addEventListener('scroll', queue, { passive: true })
     return () => {
       window.removeEventListener('scroll', queue)
       window.removeEventListener('resize', queue)
-      list?.removeEventListener('scroll', queue)
       if (raf) cancelAnimationFrame(raf)
     }
   }, [])
@@ -118,98 +107,206 @@ function useShopReading() {
   const cardRef = (i: number) => (el: HTMLElement | null) => {
     cards.current[i] = el
   }
-  return { at, holdRef, stageRef, listRef, cardRef }
+  return { at, setAt, holdRef, stageRef, cardRef }
 }
 
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+
 /**
- * The phone's deck (19 Oct, Krish: "scroll automatically", one card, nothing
- * cut). Where the cards run sideways, each holds for as long as its words
- * take to read, the meter filling meanwhile, then the next slides in, round
- * to the first again. A touch takes over; let go and the card under the
- * finger starts its own hold. It plays only in view, never with reduced
- * motion. The deck is as tall as the card in it (--deck-h), so a short card
- * leaves no gap and a long one is never clipped.
+ * The phone's deck, on scroll (19 Oct, Krish: one card at a time, attached
+ * to the phone, moving as you scroll, no words cut). The panel (the case
+ * over the cards) is held in the middle of the screen while the section's
+ * runway passes, and the runway is cut into one lane per card:
+ *
+ *   - a pause on the card as it arrives,
+ *   - where a card is taller than the panel's room, its words rising past
+ *     the case one for one with the scroll until its end is in view,
+ *   - then the next card sliding in from the right.
+ *
+ * So nothing is ever cut: the scroll reads a long card to its end before it
+ * moves on. When the scroll goes quiet partway through a slide, the page
+ * glides to whichever card is nearer (never while a finger is down, and
+ * never inside a card, where every stop is a place to read).
  */
-function useDeck(listRef: RefObject<HTMLOListElement | null>, stageRef: RefObject<HTMLDivElement | null>) {
+function useScrollDeck(
+  storyRef: RefObject<HTMLDivElement | null>,
+  panelRef: RefObject<HTMLDivElement | null>,
+  listRef: RefObject<HTMLOListElement | null>,
+  stageRef: RefObject<HTMLDivElement | null>,
+  setAt: (at: number) => void,
+) {
   useEffect(() => {
+    const story = storyRef.current
+    const panel = panelRef.current
     const list = listRef.current
-    if (!list) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const slides = () => Array.from(list.children) as HTMLElement[]
-    const across = () => list.scrollWidth > list.clientWidth + 1
-    const index = () => Math.round(list.scrollLeft / Math.max(1, list.clientWidth))
-    /** about 4 words a second, from 4.5 to 13 seconds */
-    const hold = (el?: HTMLElement) => {
-      const words = (el?.textContent ?? '').trim().split(/\s+/).length
-      return Math.min(13000, Math.max(4500, words * 240))
-    }
+    if (!story || !panel || !list) return
+    const phone = window.matchMedia(PHONE)
+    const slides = Array.from(list.children) as HTMLElement[]
+    /* the card each slide shows on the phone (the models' heading: the card before it) */
+    const cardOf: number[] = []
+    slides.reduce((n, el) => {
+      const k = el.classList.contains('up__step') ? n + 1 : n
+      cardOf.push(Math.max(0, k))
+      return k
+    }, -1)
 
+    type Lane = { start: number; pause: number; rise: number; slide: number }
+    let lanes: Lane[] = []
+    /** each card's own height, the case's, and the most the panel may be */
+    let heights: number[] = []
+    let head = 0
+    let most = 0
+    let total = 0
+    let top = 0
     let raf = 0
-    let last = 0
-    let elapsed = 0
-    let shown = -1
-    let inView = false
-    let touching = false
+    let on = false
 
-    const fit = () => {
-      const el = slides()[index()]
-      if (el && across()) list.style.setProperty('--deck-h', `${el.offsetHeight}px`)
-    }
-
-    const frame = (now: number) => {
-      raf = requestAnimationFrame(frame)
-      const dt = last ? Math.min(100, now - last) : 0
-      last = now
-      if (!across()) return
-      const i = index()
-      if (i !== shown) {
-        shown = i
-        elapsed = 0
-        fit()
-      }
-      if (reduce.matches) {
-        stageRef.current?.style.setProperty('--p', '1')
+    /** measure the panel and every card, and cut the runway */
+    const layout = () => {
+      on = phone.matches
+      if (!on) {
+        story.style.removeProperty('height')
+        panel.style.removeProperty('--panel-h')
+        panel.style.removeProperty('--panel-top')
+        slides.forEach((el) => el.style.removeProperty('transform'))
         return
       }
-      if (!inView || touching || document.hidden) return
-      elapsed += dt
-      const all = slides()
-      const span = hold(all[i])
-      stageRef.current?.style.setProperty('--p', Math.min(1, elapsed / span).toFixed(3))
-      if (elapsed >= span) {
-        elapsed = 0
-        const next = (i + 1) % all.length
-        list.scrollTo({ left: next * list.clientWidth, behavior: 'smooth' })
-      }
+      const screen = screenPx()
+      const lane = lanePx()
+      head = (panel.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0
+      heights = slides.map((el) => el.offsetHeight)
+      /* held clear of the menu bar, which comes back as the page scrolls up */
+      const bar = document.querySelector('.cx-nav')
+      const clear = bar ? Math.round(bar.getBoundingClientRect().height + 18) : 72
+      const h = Math.min(screen - clear - 8, head + Math.max(...heights))
+      most = h
+      top = Math.max(clear, Math.round((screen - h) / 2))
+      panel.style.setProperty('--panel-top', `${top}px`)
+      const room = h - head
+      let at = 0
+      lanes = slides.map((el, i) => {
+        const l = {
+          start: at,
+          pause: lane * 0.35,
+          rise: Math.max(0, el.offsetHeight - room),
+          slide: i < slides.length - 1 ? lane * 0.55 : lane * 0.2,
+        }
+        at += l.pause + l.rise + l.slide
+        return l
+      })
+      total = at
+      story.style.height = `${Math.round(total + h)}px`
     }
 
-    const io = new IntersectionObserver(([e]) => (inView = e.isIntersecting), { threshold: 0.4 })
-    io.observe(list)
-    const ro = new ResizeObserver(fit)
-    slides().forEach((el) => ro.observe(el))
-    const down = () => (touching = true)
-    const up = () => {
+    /** where the runway has got to: the slide, its rise, and the slide across */
+    const read = () => {
+      const s = Math.min(total, Math.max(0, top - story.getBoundingClientRect().top))
+      let i = lanes.length - 1
+      while (i > 0 && s < lanes[i].start) i--
+      const l = lanes[i]
+      const u = s - l.start
+      const rise = Math.min(l.rise, Math.max(0, u - l.pause))
+      const across = i < lanes.length - 1 ? Math.min(1, Math.max(0, (u - l.pause - l.rise) / l.slide)) : 0
+      return { i, u, rise, across }
+    }
+
+    const paint = () => {
+      raf = 0
+      if (!on) return
+      const { i, u, rise, across } = read()
+      const x = i + easeInOut(across)
+      /* the panel as tall as the card in it (up to the screen's room), its
+         top still, so the phone never moves; between two cards, between
+         their two heights */
+      const fits = (k: number) => Math.min(most, head + heights[k])
+      const next = Math.min(i + 1, slides.length - 1)
+      panel.style.setProperty('--panel-h', `${fits(i) + (fits(next) - fits(i)) * easeInOut(across)}px`)
+      slides.forEach((el, k) => {
+        const lift = k < i ? lanes[k].rise : k === i ? rise : 0
+        el.style.transform = `translate3d(${-x * 100}%, ${-lift}px, 0)`
+      })
+      const l = lanes[i]
+      stageRef.current?.style.setProperty('--p', Math.min(1, u / (l.pause + l.rise + l.slide)).toFixed(3))
+      setAt(cardOf[Math.round(x)] ?? 0)
+    }
+    const queue = () => {
+      if (!raf) raf = requestAnimationFrame(paint)
+    }
+
+    /* --- the settle: onto the nearer card when the scroll stops mid-slide --- */
+    let idle = 0
+    let tween = 0
+    let touching = false
+    const cancel = () => {
+      if (tween) cancelAnimationFrame(tween)
+      tween = 0
+    }
+    const glideBy = (d: number) => {
+      cancel()
+      if (Math.abs(d) < 2) return
+      const from = window.scrollY
+      const dur = Math.min(900, 380 + Math.abs(d) * 0.5)
+      const t0 = performance.now()
+      const step = (now: number) => {
+        const t = Math.min(1, (now - t0) / dur)
+        window.scrollTo({ top: from + d * easeInOut(t), behavior: 'instant' })
+        tween = t < 1 ? requestAnimationFrame(step) : 0
+      }
+      tween = requestAnimationFrame(step)
+    }
+    const settle = () => {
+      if (!on || touching) return
+      const { i, u, across } = read()
+      if (across <= 0.02 || across >= 0.98) return
+      const l = lanes[i]
+      const back = l.pause + l.rise - u
+      const ahead = l.pause + l.rise + l.slide - u + lanes[i + 1].pause * 0.5
+      glideBy(across < 0.5 ? back : ahead)
+    }
+    const onScroll = () => {
+      queue()
+      if (tween) return
+      window.clearTimeout(idle)
+      if (!touching) idle = window.setTimeout(settle, 170)
+    }
+    const down = () => {
+      touching = true
+      window.clearTimeout(idle)
+      cancel()
+    }
+    const up = (e: TouchEvent) => {
+      if (e.touches.length) return
       touching = false
-      elapsed = 0
+      onScroll()
     }
-    list.addEventListener('pointerdown', down)
-    list.addEventListener('touchstart', down, { passive: true })
-    list.addEventListener('pointerup', up)
-    list.addEventListener('pointercancel', up)
-    list.addEventListener('touchend', up)
-    raf = requestAnimationFrame(frame)
+
+    const relayout = () => {
+      layout()
+      queue()
+    }
+    relayout()
+    const ro = new ResizeObserver(relayout)
+    slides.forEach((el) => ro.observe(el))
+    if (panel.firstElementChild) ro.observe(panel.firstElementChild)
+    phone.addEventListener('change', relayout)
+    window.addEventListener('resize', relayout)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('touchstart', down, { passive: true })
+    window.addEventListener('touchend', up)
+    window.addEventListener('wheel', cancel, { passive: true })
     return () => {
-      cancelAnimationFrame(raf)
-      io.disconnect()
       ro.disconnect()
-      list.removeEventListener('pointerdown', down)
-      list.removeEventListener('touchstart', down)
-      list.removeEventListener('pointerup', up)
-      list.removeEventListener('pointercancel', up)
-      list.removeEventListener('touchend', up)
-      list.style.removeProperty('--deck-h')
+      phone.removeEventListener('change', relayout)
+      window.removeEventListener('resize', relayout)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('touchstart', down)
+      window.removeEventListener('touchend', up)
+      window.removeEventListener('wheel', cancel)
+      window.clearTimeout(idle)
+      cancel()
+      if (raf) cancelAnimationFrame(raf)
     }
-  }, [listRef, stageRef])
+  }, [storyRef, panelRef, listRef, stageRef, setAt])
 }
 
 /**
@@ -244,8 +341,11 @@ function useFit() {
 
 export function CommerceArchitecture({ content = commerce0 }: { content?: typeof commerce0 }) {
   const { board, models, principles } = content
-  const { at, holdRef, stageRef, listRef, cardRef } = useShopReading()
-  useDeck(listRef, stageRef)
+  const { at, setAt, holdRef, stageRef, cardRef } = useShopReading()
+  const storyRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLOListElement>(null)
+  useScrollDeck(storyRef, panelRef, listRef, stageRef, setAt)
   const slotRef = useFit()
 
   /* the eight cards, in order: the layers, then the business models */
@@ -327,126 +427,129 @@ export function CommerceArchitecture({ content = commerce0 }: { content?: typeof
 
       <div className="umm-container">
         <div className="up__board" role="group" aria-label={board.label}>
-          <div className="up__story">
-            {/* the display case: held while the cards pass */}
-            <div className="up__hold" ref={holdRef}>
-              <div className="up__stage" ref={stageRef} style={toned(now.tone)}>
-                <div className="up__chrome">
-                  <p className="up__caselabel">
-                    <i aria-hidden="true" />
-                    {board.label}
+          <div className="up__story" ref={storyRef}>
+            {/* one panel on a phone (useScrollDeck); no box of its own elsewhere */}
+            <div className="up__panel" ref={panelRef}>
+              {/* the display case: held while the cards pass */}
+              <div className="up__hold" ref={holdRef}>
+                <div className="up__stage" ref={stageRef} style={toned(now.tone)}>
+                  <div className="up__chrome">
+                    <p className="up__caselabel">
+                      <i aria-hidden="true" />
+                      {board.label}
+                    </p>
+                    <div className="up__progress" aria-hidden="true">
+                      <span className="up__meter">
+                        {steps.map((s, i) => (
+                          <i key={s.focus} data-k={i < at ? 'done' : i === at ? 'now' : undefined} />
+                        ))}
+                      </span>
+                      <span className="up__count">
+                        <b>{num(at)}</b> / {num(steps.length - 1)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="up__slot" ref={slotRef}>
+                    <i className="up__glow" aria-hidden="true" />
+                    <div className="up__rig">
+                      <Receipt steps={steps} at={at} label={board.label} footer={footer} />
+                      <ShopPhone steps={steps} at={at} words={words} />
+                    </div>
+                  </div>
+                  <p className="up__now" aria-hidden="true">
+                    <i />
+                    <span key={now.focus}>{now.name}</span>
                   </p>
-                  <div className="up__progress" aria-hidden="true">
-                    <span className="up__meter">
-                      {steps.map((s, i) => (
-                        <i key={s.focus} data-k={i < at ? 'done' : i === at ? 'now' : undefined} />
-                      ))}
-                    </span>
-                    <span className="up__count">
-                      <b>{num(at)}</b> / {num(steps.length - 1)}
-                    </span>
-                  </div>
                 </div>
-                <div className="up__slot" ref={slotRef}>
-                  <i className="up__glow" aria-hidden="true" />
-                  <div className="up__rig">
-                    <Receipt steps={steps} at={at} label={board.label} footer={footer} />
-                    <ShopPhone steps={steps} at={at} words={words} />
-                  </div>
-                </div>
-                <p className="up__now" aria-hidden="true">
-                  <i />
-                  <span key={now.focus}>{now.name}</span>
-                </p>
               </div>
-            </div>
 
-            {/* the cards, in the page's flow (swiped one at a time on a phone) */}
-            <ol className="up__steps" ref={listRef}>
-              {card(
-                0,
-                <>
-                  {meta(0)}
-                  <h3 className="up__title">{split(board.experience.label)[1]}</h3>
-                  {chips(board.experience.items)}
-                  {link(board.experience.link)}
-                </>,
-              )}
-
-              {card(
-                1,
-                <>
-                  {meta(1)}
-                  <h3 className="up__title">{split(board.ai.label)[1]}</h3>
-                  <p className="up__lede">{board.ai.title}</p>
-                  {chips(board.ai.items)}
-                  {link(board.ai.link)}
-                </>,
-              )}
-
-              {card(
-                2,
-                <>
-                  {meta(2)}
-                  <h3 className="up__title">{split(board.services.label)[1]}</h3>
-                  <p className="up__body">{board.services.note}</p>
-                  <ul className="up__svcs">
-                    {board.services.items.map((s) => (
-                      <li key={s.title}>
-                        <span className="up__svc-title">{s.title}</span>
-                        <span className="up__svc-sub">{s.body}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {link(board.services.link)}
-                </>,
-              )}
-
-              {card(
-                3,
-                <>
-                  {meta(3)}
-                  <h3 className="up__title">{split(board.operations.label)[1]}</h3>
-                  {chips(board.operations.items, true)}
-                  {link(board.operations.loop, true)}
-                </>,
-              )}
-
-              {/* the business models, under their heading */}
-              <li className="up__divider">
-                <p className="up__divider-eyebrow">{content.modelsEyebrow}</p>
-                <p className="up__divider-title">{content.modelsTitle}</p>
-              </li>
-
-              {models.map((m, k) =>
-                card(
-                  4 + k,
+              {/* the cards, in the page's flow (on a phone, one at a time as you scroll) */}
+              <ol className="up__steps" ref={listRef}>
+                {card(
+                  0,
                   <>
-                    {meta(4 + k, m.eyebrow)}
-                    <h3 className="up__title">{m.title}</h3>
-                    <p className="up__body">{m.body}</p>
-                    <dl className="up__spec">
-                      <div>
-                        <dt>{content.aiLabel}</dt>
-                        <dd>{m.ai}</dd>
-                      </div>
-                      <div>
-                        <dt>{content.connectsLabel}</dt>
-                        <dd>
-                          <ol className="up__chain">
-                            {m.connects.map((c, j) => (
-                              <li key={c} style={{ ['--i' as string]: j } as CSSProperties}>
-                                <span>{c}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        </dd>
-                      </div>
-                    </dl>
+                    {meta(0)}
+                    <h3 className="up__title">{split(board.experience.label)[1]}</h3>
+                    {chips(board.experience.items)}
+                    {link(board.experience.link)}
                   </>,
-                ),
-              )}
-            </ol>
+                )}
+
+                {card(
+                  1,
+                  <>
+                    {meta(1)}
+                    <h3 className="up__title">{split(board.ai.label)[1]}</h3>
+                    <p className="up__lede">{board.ai.title}</p>
+                    {chips(board.ai.items)}
+                    {link(board.ai.link)}
+                  </>,
+                )}
+
+                {card(
+                  2,
+                  <>
+                    {meta(2)}
+                    <h3 className="up__title">{split(board.services.label)[1]}</h3>
+                    <p className="up__body">{board.services.note}</p>
+                    <ul className="up__svcs">
+                      {board.services.items.map((s) => (
+                        <li key={s.title}>
+                          <span className="up__svc-title">{s.title}</span>
+                          <span className="up__svc-sub">{s.body}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {link(board.services.link)}
+                  </>,
+                )}
+
+                {card(
+                  3,
+                  <>
+                    {meta(3)}
+                    <h3 className="up__title">{split(board.operations.label)[1]}</h3>
+                    {chips(board.operations.items, true)}
+                    {link(board.operations.loop, true)}
+                  </>,
+                )}
+
+                {/* the business models, under their heading */}
+                <li className="up__divider">
+                  <p className="up__divider-eyebrow">{content.modelsEyebrow}</p>
+                  <p className="up__divider-title">{content.modelsTitle}</p>
+                </li>
+
+                {models.map((m, k) =>
+                  card(
+                    4 + k,
+                    <>
+                      {meta(4 + k, m.eyebrow)}
+                      <h3 className="up__title">{m.title}</h3>
+                      <p className="up__body">{m.body}</p>
+                      <dl className="up__spec">
+                        <div>
+                          <dt>{content.aiLabel}</dt>
+                          <dd>{m.ai}</dd>
+                        </div>
+                        <div>
+                          <dt>{content.connectsLabel}</dt>
+                          <dd>
+                            <ol className="up__chain">
+                              {m.connects.map((c, j) => (
+                                <li key={c} style={{ ['--i' as string]: j } as CSSProperties}>
+                                  <span>{c}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </dd>
+                        </div>
+                      </dl>
+                    </>,
+                  ),
+                )}
+              </ol>
+            </div>
           </div>
 
           {/* across the architecture */}
