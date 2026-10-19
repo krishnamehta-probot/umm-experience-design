@@ -732,21 +732,34 @@
 }
 
 /* 19 Oct, Krish: a thin line under the words, clear of their tails, in
-   place of the band through them */
+   place of the band through them; then each of the four in its own colour,
+   the brand's four most distinct (blossom, sky, sun, citrus), in order */
 .up__chain span {
-  --up-mark: color-mix(in oklab, var(--umm-tone) 55%, var(--umm-ink));
+  --up-mark: var(--umm-blossom);
   padding-bottom: 0.2em;
   background-image: linear-gradient(var(--up-mark), var(--up-mark));
   background-repeat: no-repeat;
   background-position: 0 100%;
-  background-size: 0% 1.5px;
+  background-size: 0% 3px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   transition: background-size 0.6s var(--umm-ease-out) calc(var(--i, 0) * var(--umm-stagger) + 0.15s);
 }
 
+.up__chain li:nth-child(4n + 2) span {
+  --up-mark: var(--umm-sky);
+}
+
+.up__chain li:nth-child(4n + 3) span {
+  --up-mark: var(--umm-sun);
+}
+
+.up__chain li:nth-child(4n + 4) span {
+  --up-mark: var(--umm-citrus);
+}
+
 .up__step[data-on] .up__chain span {
-  background-size: 100% 1.5px;
+  background-size: 100% 3px;
 }
 
 /* --- across the architecture ------------------------------------------------------ */
