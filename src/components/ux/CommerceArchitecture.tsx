@@ -23,8 +23,8 @@ import '@/styles/ux-phone.css'
        the pastel of the card being read, a thermal receipt tucked behind it
        printing a line per card
      - the case is held (sticky) on the left on wide screens, the cards pass
-       on the right; on phones and tablets it becomes a frosted strip at the
-       top: the top of the phone, where you are, the card's name
+       on the right; on phones and tablets it stands once, whole, above the
+       cards (19 Oct, Krish: not a strip with half the phone)
      - the cards are quiet: no boxes until one is read, which lifts as a
        white card with its tone dot lit; everything else is type, hairlines
        and plain chips
