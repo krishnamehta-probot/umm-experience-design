@@ -283,12 +283,81 @@
   }
 }
 
-/* phones: the receipt is left out (below), so the phone stands centred, and
-   smaller, the cards swiping under it (19 Oct, Krish) */
+/* phones: the case and the cards are one white panel (19 Oct, Krish: "keep
+   things attached"). Its top is the whole phone, small, on the left, and
+   beside it where you are and the card's name; under a hairline, the card
+   (the deck, below). The receipt is left out: its lines are the cards' names */
 @media (max-width: 639px) {
+  .up__story {
+    row-gap: 0;
+    border-radius: 22px;
+    background: var(--umm-paper);
+    box-shadow:
+      0 0 0 1px rgb(16 14 20 / 0.06),
+      0 30px 60px -36px rgb(16 14 20 / 0.4);
+    overflow: clip;
+  }
+
+  .up__stage {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-areas:
+      'slot .'
+      'slot label'
+      'slot progress'
+      'slot now'
+      'slot .';
+    column-gap: 18px;
+    row-gap: 10px;
+    padding: 16px 16px 16px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--up-rule);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .up__chrome {
+    display: contents;
+  }
+
+  .up__caselabel {
+    grid-area: label;
+  }
+
+  .up__progress {
+    grid-area: progress;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .up__count {
+    order: -1;
+  }
+
   .up__slot {
     --rig-w: 300px;
-    height: clamp(260px, 72vw, 320px);
+    --ph: clamp(200px, 56vw, 250px);
+    width: calc(var(--ph) * 300 / 620);
+    height: var(--ph);
+  }
+
+  .up__glow {
+    width: 320%;
+  }
+
+  .up__now {
+    justify-self: start;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    font-size: clamp(1.125rem, 5vw, 1.375rem);
+    line-height: 1.15;
+  }
+
+  .up__now i {
+    display: none;
   }
 }
 
@@ -795,23 +864,25 @@
   }
 }
 
-/* --- phones: the cards swipe, one in view at a time ---------------------------------
-   19 Oct, Krish: a smaller phone and one card at a time, without cutting
-   any words. Each card is a white card the width of the screen less a
-   sliver, where the edge of the next shows there is more; the row is as tall
-   as its tallest card, so nothing is clipped, and the phone above shows the
-   card in view */
+/* --- phones: the deck, one card at a time, playing by itself ------------------------
+   19 Oct, Krish: one card at a time, moving on by itself, attached to the
+   phone, no words cut. The cards run sideways under the case, each the
+   width of the panel; useDeck moves them on and sets the deck's height to
+   the card in it (--deck-h), so nothing is clipped and nothing gapes. A
+   swipe still works. */
 @media (max-width: 639px) {
   .up__steps {
     display: flex;
-    gap: 12px;
-    margin-inline: calc(-1 * var(--umm-gutter));
-    padding: 4px var(--umm-gutter) 36px;
+    align-items: flex-start;
+    gap: 0;
+    height: var(--deck-h, auto);
+    padding: 0;
     overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--umm-gutter);
     scrollbar-width: none;
+    transition: height 0.5s var(--umm-ease-out);
   }
 
   .up__steps::-webkit-scrollbar {
@@ -819,22 +890,18 @@
   }
 
   .up__steps > li {
-    flex: 0 0 calc(100% - 24px);
+    flex: 0 0 100%;
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
 
-  /* every card a card, so the sliver of the next reads as one */
+  /* the panel is the card: none of its own */
   .up__step,
-  .up__divider {
-    border-radius: 18px;
-    background-color: var(--umm-paper);
-    box-shadow:
-      0 0 0 1px rgb(16 14 20 / 0.06),
-      0 24px 40px -30px rgb(16 14 20 / 0.4);
-  }
-
   .up__step[data-on] {
+    padding: 18px 16px 22px;
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
     translate: none;
   }
 
@@ -842,10 +909,15 @@
     display: none;
   }
 
-  /* the business models' heading: a card of its own, the words at its foot */
+  /* the business models' heading: a chapter of its own, its words centred */
   .up__divider {
-    align-content: end;
-    padding: 16px;
+    min-height: 220px;
+    align-content: center;
+    padding: 28px 16px;
+  }
+
+  .up__divider-title {
+    font-size: clamp(1.5rem, 7vw, 1.875rem);
   }
 }
 

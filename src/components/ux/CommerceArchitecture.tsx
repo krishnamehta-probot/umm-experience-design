@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react'
 import { AiHead } from '@/components/ai/AiHead'
 import type { Tone } from '@/components/primitives'
 import { commerce as commerce0 } from '@/content/uxCommerce'
@@ -24,9 +24,9 @@ import '@/styles/ux-phone.css'
        printing a line per card
      - the case is held (sticky) on the left on wide screens, the cards pass
        on the right; on phones and tablets it stands once, whole, above the
-       cards (19 Oct, Krish: not a strip with half the phone). On a phone
-       the phone is smaller and the cards swipe, one in view at a time, the
-       phone showing the card in view
+       cards (19 Oct, Krish: not a strip with half the phone). On a phone the
+       case and the cards are one panel: a smaller phone beside where you
+       are, and under it one card at a time, playing by itself (useDeck)
      - the cards are quiet: no boxes until one is read, which lifts as a
        white card with its tone dot lit; everything else is type, hairlines
        and plain chips
@@ -55,9 +55,10 @@ const toned = (t: Tone) => ({ ['--umm-tone' as string]: `var(--umm-${t})` }) as 
 /**
  * Which card is being read, and how far through it: the last card whose top
  * has passed the reading line (mid-screen beside the case; below the case on
- * a tablet). On a phone the cards swipe sideways, one at a time, and the card
- * is the one in the frame. The fraction runs the case's meter as a CSS
- * variable, written once a frame, so React only hears about a new card.
+ * a tablet). On a phone the cards run sideways, one at a time, and the card
+ * is the one in the frame (its meter is the deck's clock, useDeck). The
+ * fraction runs the case's meter as a CSS variable, written once a frame, so
+ * React only hears about a new card.
  */
 function useShopReading() {
   const [at, setAt] = useState(0)
@@ -74,16 +75,14 @@ function useShopReading() {
       const list = listRef.current
       if (!hold || !list) return
       let now = 0
-      let p = 1
       if (list.scrollWidth > list.clientWidth + 1) {
-        /* swiped (phones): the card whose left edge has passed the frame's middle */
+        /* sideways (phones): the card whose left edge has passed the frame's middle */
         const frame = list.getBoundingClientRect()
         const line = frame.left + frame.width * 0.5
         const lefts = cards.current.map((c) => (c ? c.getBoundingClientRect().left : Infinity))
         lefts.forEach((l, i) => {
           if (l < line) now = i
         })
-        p = Math.min(1, Math.max(0, (line - lefts[now]) / (frame.width * 0.5)))
       } else {
         const vh = window.innerHeight
         const below = window.innerWidth < 1000 && vh > 560
@@ -95,9 +94,9 @@ function useShopReading() {
         })
         const last = cards.current[cards.current.length - 1]
         const end = tops[now + 1] ?? (last ? last.getBoundingClientRect().bottom : tops[now] + 1)
-        p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
+        const p = Math.min(1, Math.max(0, (line - tops[now]) / Math.max(1, end - tops[now])))
+        stageRef.current?.style.setProperty('--p', p.toFixed(3))
       }
-      stageRef.current?.style.setProperty('--p', p.toFixed(3))
       setAt((was) => (was === now ? was : now))
     }
     const queue = () => {
@@ -120,6 +119,97 @@ function useShopReading() {
     cards.current[i] = el
   }
   return { at, holdRef, stageRef, listRef, cardRef }
+}
+
+/**
+ * The phone's deck (19 Oct, Krish: "scroll automatically", one card, nothing
+ * cut). Where the cards run sideways, each holds for as long as its words
+ * take to read, the meter filling meanwhile, then the next slides in, round
+ * to the first again. A touch takes over; let go and the card under the
+ * finger starts its own hold. It plays only in view, never with reduced
+ * motion. The deck is as tall as the card in it (--deck-h), so a short card
+ * leaves no gap and a long one is never clipped.
+ */
+function useDeck(listRef: RefObject<HTMLOListElement | null>, stageRef: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const slides = () => Array.from(list.children) as HTMLElement[]
+    const across = () => list.scrollWidth > list.clientWidth + 1
+    const index = () => Math.round(list.scrollLeft / Math.max(1, list.clientWidth))
+    /** about 4 words a second, from 4.5 to 13 seconds */
+    const hold = (el?: HTMLElement) => {
+      const words = (el?.textContent ?? '').trim().split(/\s+/).length
+      return Math.min(13000, Math.max(4500, words * 240))
+    }
+
+    let raf = 0
+    let last = 0
+    let elapsed = 0
+    let shown = -1
+    let inView = false
+    let touching = false
+
+    const fit = () => {
+      const el = slides()[index()]
+      if (el && across()) list.style.setProperty('--deck-h', `${el.offsetHeight}px`)
+    }
+
+    const frame = (now: number) => {
+      raf = requestAnimationFrame(frame)
+      const dt = last ? Math.min(100, now - last) : 0
+      last = now
+      if (!across()) return
+      const i = index()
+      if (i !== shown) {
+        shown = i
+        elapsed = 0
+        fit()
+      }
+      if (reduce.matches) {
+        stageRef.current?.style.setProperty('--p', '1')
+        return
+      }
+      if (!inView || touching || document.hidden) return
+      elapsed += dt
+      const all = slides()
+      const span = hold(all[i])
+      stageRef.current?.style.setProperty('--p', Math.min(1, elapsed / span).toFixed(3))
+      if (elapsed >= span) {
+        elapsed = 0
+        const next = (i + 1) % all.length
+        list.scrollTo({ left: next * list.clientWidth, behavior: 'smooth' })
+      }
+    }
+
+    const io = new IntersectionObserver(([e]) => (inView = e.isIntersecting), { threshold: 0.4 })
+    io.observe(list)
+    const ro = new ResizeObserver(fit)
+    slides().forEach((el) => ro.observe(el))
+    const down = () => (touching = true)
+    const up = () => {
+      touching = false
+      elapsed = 0
+    }
+    list.addEventListener('pointerdown', down)
+    list.addEventListener('touchstart', down, { passive: true })
+    list.addEventListener('pointerup', up)
+    list.addEventListener('pointercancel', up)
+    list.addEventListener('touchend', up)
+    raf = requestAnimationFrame(frame)
+    return () => {
+      cancelAnimationFrame(raf)
+      io.disconnect()
+      ro.disconnect()
+      list.removeEventListener('pointerdown', down)
+      list.removeEventListener('touchstart', down)
+      list.removeEventListener('pointerup', up)
+      list.removeEventListener('pointercancel', up)
+      list.removeEventListener('touchend', up)
+      list.style.removeProperty('--deck-h')
+    }
+  }, [listRef, stageRef])
 }
 
 /**
@@ -155,6 +245,7 @@ function useFit() {
 export function CommerceArchitecture({ content = commerce0 }: { content?: typeof commerce0 }) {
   const { board, models, principles } = content
   const { at, holdRef, stageRef, listRef, cardRef } = useShopReading()
+  useDeck(listRef, stageRef)
   const slotRef = useFit()
 
   /* the eight cards, in order: the layers, then the business models */
