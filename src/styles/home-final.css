@@ -351,7 +351,7 @@
      drop    the U falls from above the screen, gathering speed, lands,
              rebounds a little and settles
 
-   In every one the picture starts a touch large and settles as it plays. */
+   In every one the still starts a touch large and settles as it lands. */
 
 .hf__film:not([data-on]) {
   visibility: hidden;
@@ -429,7 +429,7 @@
   }
 }
 
-/* the picture settles as it plays; backwards only, so the hover zoom works
+/* the still settles as it lands; backwards only, so the hover zoom works
    once it has */
 .hf__film[data-on] .hf__u video {
   animation: hf-settle 2.2s var(--umm-ease-out) backwards;

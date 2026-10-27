@@ -28,14 +28,15 @@ import '@/styles/home-final.css'
    ?layout=, ?film= and ?cursor=. The dock shows only with ?options, so the
    plain link is the page as it will ship.
 
-   The film plays inside the U, the quarter-circle shape from the mark, and
-   the scroll grows it: the hero holds while the U opens out of its corner
-   until the film covers the whole screen (useGrow).
+   The film sits inside the U, the quarter-circle shape from the mark, as a
+   still, and the scroll sets it going and grows it: the hero holds while
+   the U opens out of its corner until the film covers the whole screen
+   (useGrow). Scrolling back to the top pauses it again.
 
    The entrance, slow and in reading order: the nav, the mark printing
    itself in from the left, the ask bar, the questions one after another,
-   the headline rising line by line, the pillars; the film comes in last
-   and plays from the moment it arrives. Asking prints RAGe's name and
+   the headline rising line by line, the pillars; the film's still comes
+   in last. Asking prints RAGe's name and
    hands over to RAGe, as everywhere.
    ========================================================================== */
 
@@ -70,17 +71,17 @@ const FILMS: { id: FilmIn; label: string; hint: string }[] = [
   {
     id: 'sweep',
     label: 'Quarter sweep',
-    hint: 'The U opens like a fan about its own centre, the big quarter first and then the small one, the film already playing inside it.',
+    hint: 'The U opens like a fan about its own centre, the big quarter first and then the small one, the film’s still inside it.',
   },
   {
     id: 'unfold',
     label: 'Unfold',
-    hint: 'The U is drawn open from left to right, gliding into place, the film inside it.',
+    hint: 'The U is drawn open from left to right, gliding into place, the film’s still inside it.',
   },
   {
     id: 'drop',
     label: 'Drop',
-    hint: 'The U falls from the top of the screen, lands with a small bounce and the film plays from the impact.',
+    hint: 'The U falls from the top of the screen and lands with a small bounce, the film’s still inside it.',
   },
 ]
 
@@ -91,10 +92,10 @@ const CURSORS = (['magnet', 'repel'] as const).map((id) => ({ ...EFFECTS.find((e
 
 /** When the film comes in, once the rest of the page has (ms) */
 const FILM_AT = 2200
-/** From the start of the film's entrance to the moment it plays (ms): as the
- *  sweep and the unfold begin to open, and at the drop's impact (the
- *  keyframes' 55% of 1.4s) */
-const PLAY_AT: Record<FilmIn, number> = { sweep: 250, unfold: 250, drop: 770 }
+/** The frame the U holds until the scroll sets the film going (s): in the
+ *  live reel, the phones on black, which reads in a small U on the grey.
+ *  Worth choosing again when the eye film lands at public/home/eye.mp4. */
+const STILL_AT = 3.5
 
 /** The U's drawing (umm-u.svg), and its deepest point: the middle of the big
  *  quarter ring, half its 230-unit thickness from either edge, which the
@@ -110,8 +111,9 @@ const pick = <T extends string>(v: string | null, from: { id: T }[], or: T) =>
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
-/** The film inside the U. Its entrance waits `delay` ms and for the film to
- *  be on screen (on a phone it can be below the fold), then plays. */
+/** The film inside the U, held on its still (STILL_AT). Its entrance waits
+ *  `delay` ms and for the U to be on screen (on a phone it can be below the
+ *  fold), then plays; the film itself is set going by the scroll (useGrow). */
 function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const video = useRef<HTMLVideoElement>(null)
@@ -133,7 +135,6 @@ function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
       const r = el.getBoundingClientRect()
       el.style.setProperty('--fall', `${-Math.round(r.top + r.height + 24)}px`)
       setOn(true)
-      timers.push(window.setTimeout(() => video.current?.play().catch(() => {}), calm ? 0 : PLAY_AT[mode]))
     }
     const io = new IntersectionObserver(
       ([e]) => {
@@ -163,7 +164,17 @@ function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
       <div className="hf__u" style={{ '--u': `url("${uUrl}")` } as CSSProperties}>
         {/* the eye film is not on the live site yet: drop it at
             public/home/eye.mp4 and it plays; until then, the live reel */}
-        <video ref={video} muted loop playsInline preload="auto">
+        <video
+          ref={video}
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget
+            if (v.paused && v.currentTime < 0.1) v.currentTime = Math.min(STILL_AT, Math.max(0, v.duration - 0.1))
+          }}
+        >
           <source src="/home/eye.mp4" type="video/mp4" />
           <source src={eyeFilm} type="video/webm" />
         </video>
@@ -181,6 +192,7 @@ function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
  * every direction. The film inside grows with it: it always fills the part
  * of the U's box that is on screen, so it fills the U as it rests and the
  * screen as it ends. The rest of the hero fades as the U passes over it.
+ * The film plays from the first step of scroll, and pauses at the top.
  */
 function useGrow(run: RefObject<HTMLElement | null>, page: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
@@ -214,9 +226,12 @@ function useGrow(run: RefObject<HTMLElement | null>, page: RefObject<HTMLDivElem
 
       const film = pg.querySelector<HTMLElement>('.hf__film')
       const u = film?.querySelector<HTMLElement>('.hf__u')
-      const v = u?.querySelector<HTMLElement>('video')
+      const v = u?.querySelector<HTMLVideoElement>('video')
       if (!film || !u || !v) return
       pg.style.setProperty('--fade', (1 - clamp01(p * 2.4)).toFixed(3))
+      if (p > 0.005) {
+        if (v.paused) v.play().catch(() => {})
+      } else if (!v.paused) v.pause()
       if (p <= 0) {
         pg.removeAttribute('data-growing')
         rest(film, u, v)
