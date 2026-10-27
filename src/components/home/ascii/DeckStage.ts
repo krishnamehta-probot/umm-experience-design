@@ -83,11 +83,12 @@ export const PASS_CURSOR = /* glsl */ `
   } else {
     /* magnet: the picture drawn in toward the cursor, its lines closing up
        round it and the ink there a little fuller; on the mark only, the
-       paper around it stays bare (27 Oct, Krish) */
-    float k = exp(-pow(length(dp) / 0.085, 2.0)) * uMouseOn;
-    suv = uv + normalize(dp + 1e-6) * big / uRes * 0.018 * k;
-    pull = (uv.y - uMouse.y) * uRes.y * 0.45 * k;
-    shade = k * 0.16;
+       paper around it stays bare; gentle, about half its first strength
+       (27 Oct, Krish: "too harsh") */
+    float k = exp(-pow(length(dp) / 0.08, 2.0)) * uMouseOn;
+    suv = uv + normalize(dp + 1e-6) * big / uRes * 0.01 * k;
+    pull = (uv.y - uMouse.y) * uRes.y * 0.24 * k;
+    shade = k * 0.08;
     inkOnly = 1.0;
   }
 `
