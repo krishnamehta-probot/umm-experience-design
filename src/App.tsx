@@ -9,7 +9,9 @@ const ExperienceDesignPage = lazy(() =>
 const StyleguidePage = lazy(() =>
   import('./pages/StyleguidePage').then((m) => ({ default: m.StyleguidePage })),
 )
+const PhonePreview = lazy(() => import('./pages/PhonePreview').then((m) => ({ default: m.PhonePreview })))
 const HomeShowcase = lazy(() => import('./pages/HomeShowcase').then((m) => ({ default: m.HomeShowcase })))
+const HomeFinal = lazy(() => import('./pages/HomeFinal').then((m) => ({ default: m.HomeFinal })))
 const AiAutomationPage = lazy(() =>
   import('./pages/AiAutomationPage').then((m) => ({ default: m.AiAutomationPage })),
 )
@@ -39,19 +41,43 @@ const FilmRenderPage = lazy(() =>
  *   /integrated-growth  the Integrated Growth & Strategy service page
  *   /ux-digital-commerce  the UX & Digital Commerce service page
  *   /home        the umm.digital homepage hero, with an options dock that
- *                switches between its three versions (ASCII, print,
- *                particles) and every option of each; /home-ascii, -print
- *                and -particles open it on that version
+ *                switches between its versions (ASCII, print, particles,
+ *                glow, blush) and every option of each; /home-ascii,
+ *                -print, -particles, -glow and -blush open it on that version
+ *   /home-final  the homepage the boss chose (26 Oct): print, engraving,
+ *                the UMM mark, in its own layout with nothing on the mark
+ *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
  */
 export function App() {
   const path = window.location.pathname.replace(/\/$/, '')
-  const homes = { '/home': 'ascii', '/home-ascii': 'ascii', '/home-print': 'print', '/home-particles': 'particles' } as const
+  const homes = {
+    '/home': 'ascii',
+    '/home-ascii': 'ascii',
+    '/home-print': 'print',
+    '/home-particles': 'particles',
+    '/home-glow': 'glow',
+    '/home-blush': 'blush',
+  } as const
   if (path in homes) {
     return (
       <Suspense fallback={null}>
         <HomeShowcase initial={homes[path as keyof typeof homes]} />
+      </Suspense>
+    )
+  }
+  if (path === '/home-final') {
+    return (
+      <Suspense fallback={null}>
+        <HomeFinal />
+      </Suspense>
+    )
+  }
+  if (path === '/phone') {
+    return (
+      <Suspense fallback={null}>
+        <PhonePreview />
       </Suspense>
     )
   }

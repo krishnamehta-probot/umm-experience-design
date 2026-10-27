@@ -30,15 +30,16 @@ export const rage = {
   url: (q: string) => `https://umm.digital/rage/?query=${encodeURIComponent(q)}`,
 }
 
-/** The six chips exactly as the live hero words them, each with the scene
- *  it calls up on hover. */
+/** The six chips exactly as the live hero words them, each with the form
+ *  the landing's dots gather into on hover, picturing what the chip says
+ *  (forms.ts). */
 export const asciiChips = [
-  { q: 'Architect data-rich solutions for tomorrow’s leaders', scene: 'city' },
-  { q: 'Accelerate your digital transformation', scene: 'tunnel' },
-  { q: 'Drive innovation through AI-powered solutions', scene: 'eye' },
-  { q: 'Build scalable solutions for the future', scene: 'knot' },
-  { q: 'See how UMM delivers impact', scene: 'logo' },
-  { q: 'Scale smarter with UMM’s AI-powered solutions', scene: 'mountains' },
+  { q: 'Architect data-rich solutions for tomorrow’s leaders', scene: 'lattice' },
+  { q: 'Accelerate your digital transformation', scene: 'warp' },
+  { q: 'Drive innovation through AI-powered solutions', scene: 'spark' },
+  { q: 'Build scalable solutions for the future', scene: 'grid' },
+  { q: 'See how UMM delivers impact', scene: 'globe' },
+  { q: 'Scale smarter with UMM’s AI-powered solutions', scene: 'land' },
 ] as const
 
 /** The live site's reel, the fallback for the hero's bottom-right card until

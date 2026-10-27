@@ -1,0 +1,555 @@
+/* ============================================================================
+   HOME · FINAL — /home-final (HomeFinal.tsx)
+
+   Print, engraving, ink on the grey ground, the UMM mark all but still: the
+   version the boss chose. Nothing sits on the mark: the canvas is a stage of
+   its own in a grid, and every piece of copy owns its own box. Four
+   layouts, set by data-layout on the page:
+
+     stack   mark / ask bar and questions / headline · film     (default)
+     ask     ask bar and questions / mark / headline · film
+     split   headline, ask bar, questions | mark, film under it
+     side    mark | film, questions as a list; headline under the mark
+
+   The rows give and take with the screen; when a short screen can't hold
+   it all, the page grows rather than letting one piece slide over another.
+
+   The film plays inside the U, and the scroll grows the U until the film
+   covers the screen: .hf__run is the runway, .hf__page holds on it (useGrow
+   in HomeFinal.tsx sizes both and places the U as it grows).
+   ========================================================================== */
+
+.hf {
+  height: auto;
+  min-height: max(100svh, 640px);
+  /* clip, not hidden, so the hero's pin can stick */
+  overflow: clip;
+}
+
+.hf__run {
+  position: relative;
+}
+
+.hf__page {
+  --hf-gap: clamp(16px, 3vh, 36px);
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: max(100svh, 640px);
+}
+
+.hf .hm-nav {
+  position: relative;
+  inset: auto;
+}
+
+.hf__body {
+  display: grid;
+  gap: var(--hf-gap) clamp(28px, 4vw, 80px);
+  padding: var(--hf-gap) var(--hm-gutter) 0;
+}
+
+/* --- the pieces ----------------------------------------------------------- */
+
+/* the mark: the canvas is the stage, so the engraving stays inside it */
+.hf__stage {
+  grid-area: stage;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 180px;
+}
+
+.hf__gl {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hf__title {
+  grid-area: title;
+  position: relative;
+  z-index: 6;
+  margin: 0;
+  font-size: clamp(2.6rem, 4.9vw, 5rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+/* each line inside its own mask, room left for the descenders */
+.hf__title > span {
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.hf__ask {
+  grid-area: ask;
+  position: relative;
+  z-index: 6;
+  display: grid;
+  gap: clamp(14px, 2.2vh, 22px);
+  min-width: 0;
+}
+
+/* the bar's own white halo ring is not wanted here: only its soft shadow */
+.hf .hf__bar,
+.hf .hf__bar:is(:hover, :focus-within) {
+  box-shadow: 0 30px 60px -30px rgb(16 14 20 / 0.55);
+}
+
+.hf__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hf__chips .ha__chip {
+  max-width: 100%;
+  text-align: left;
+  white-space: normal;
+}
+
+/* the film inside the U (umm-u.svg), the quarter-circle shape from the mark.
+   At rest it comes in behind the copy and the mark, never over them; while
+   the scroll grows it, it is over everything (useGrow). Ink fills the U
+   until the film's first frame arrives. */
+.hf__film {
+  --h: clamp(120px, 19vh, 190px);
+  grid-area: film;
+  position: relative;
+  z-index: 0;
+  width: calc(var(--h) * 1.5);
+  height: var(--h);
+}
+
+.hf__u {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--umm-ink);
+  -webkit-mask: var(--u) 0 0 / 100% 100% no-repeat;
+  mask: var(--u) 0 0 / 100% 100% no-repeat;
+}
+
+.hf__u video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.4s var(--umm-ease-out);
+}
+
+.hf__film:hover .hf__u video {
+  transform: scale(1.06);
+}
+
+.hf__page[data-growing] .hf__film .hf__u video {
+  transform: none;
+}
+
+/* as the U grows over the hero, the rest of it fades */
+.hf__page[data-growing] :is(.hm-nav, .hf__stage, .hf__title, .hf__ask, .hf__pillars) {
+  filter: opacity(var(--fade, 1));
+}
+
+.hf .hf__pillars {
+  position: relative;
+  inset: auto;
+  padding: var(--hf-gap) var(--hm-gutter) clamp(16px, 3.4vh, 40px);
+}
+
+/* --- stack (default) and ask: the live hero's composition -------------------- */
+
+.hf[data-layout='stack'] .hf__body {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: 1fr auto auto;
+  grid-template-areas:
+    'stage stage'
+    'ask   ask'
+    'title film';
+}
+
+.hf[data-layout='ask'] .hf__body {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'ask   ask'
+    'stage stage'
+    'title film';
+}
+
+.hf:is([data-layout='stack'], [data-layout='ask']) .hf__ask {
+  justify-self: center;
+  justify-items: center;
+  width: min(1200px, 100%);
+}
+
+.hf:is([data-layout='stack'], [data-layout='ask']) .hf__chips {
+  justify-content: center;
+}
+
+.hf:is([data-layout='stack'], [data-layout='ask']) .hf__title {
+  align-self: end;
+}
+
+.hf:is([data-layout='stack'], [data-layout='ask']) .hf__film {
+  align-self: end;
+  justify-self: end;
+}
+
+/* --- split: the copy on the left, the mark on the right -------------------- */
+
+.hf[data-layout='split'] .hf__body {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-rows: 1fr auto auto 1fr auto;
+  grid-template-areas:
+    '.     stage'
+    'title stage'
+    'ask   stage'
+    '.     stage'
+    '.     film';
+}
+
+.hf[data-layout='split'] .hf__title {
+  font-size: clamp(2.4rem, 4.4vw, 4.6rem);
+}
+
+.hf[data-layout='split'] .hf__bar {
+  width: min(100%, 560px);
+}
+
+.hf[data-layout='split'] .hf__film {
+  justify-self: end;
+}
+
+/* --- side: the mark left, the questions as a list beside the headline -------- */
+
+.hf[data-layout='side'] .hf__body {
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 28vw, 460px);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'stage film'
+    'stage ask'
+    'title ask';
+}
+
+.hf[data-layout='side'] .hf__title {
+  align-self: end;
+  font-size: clamp(2.4rem, 4.6vw, 4.9rem);
+}
+
+.hf[data-layout='side'] .hf__ask {
+  align-self: end;
+}
+
+.hf[data-layout='side'] .hf__bar {
+  width: 100%;
+}
+
+.hf[data-layout='side'] .hf__chips {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hf[data-layout='side'] .hf__film {
+  --h: clamp(110px, 17vh, 170px);
+  justify-self: end;
+}
+
+/* --- the entrance -------------------------------------------------------------
+   Slow and in reading order: the nav settles, the mark prints itself in from
+   the left (PrintScene.printIn), the ask bar rises, the questions follow one
+   after another, the headline rises line by line out of its masks, the
+   pillars come in along the foot. The film comes in last (below). */
+
+.hf .hm-nav {
+  transition:
+    opacity 1s var(--umm-ease-out),
+    transform 1.2s var(--umm-ease-out);
+}
+
+.hf__page:not([data-in]) .hm-nav {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+.hf__bar {
+  transition:
+    opacity 1s var(--umm-ease-out) 0.45s,
+    transform 1.3s var(--umm-ease-out) 0.45s,
+    box-shadow 0.6s var(--umm-ease-out);
+}
+
+.hf__page:not([data-in]) .hf__bar {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+}
+
+.hf__chips li {
+  transition:
+    opacity 1s var(--umm-ease-out),
+    transform 1.2s var(--umm-ease-out);
+  transition-delay: calc(0.62s + var(--i, 0) * 0.07s);
+}
+
+.hf__page:not([data-in]) .hf__chips li {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.hf__title > span > span {
+  transition: transform 1.4s var(--umm-ease-out) 0.85s;
+}
+
+.hf__title > span:last-child > span {
+  transition-delay: 0.97s;
+}
+
+.hf__page:not([data-in]) .hf__title > span > span {
+  transform: translateY(110%);
+}
+
+.hf__pillars li {
+  transition:
+    opacity 1s var(--umm-ease-out),
+    transform 1.2s var(--umm-ease-out);
+}
+
+.hf__pillars li:nth-child(1) {
+  transition-delay: 1.25s;
+}
+.hf__pillars li:nth-child(2) {
+  transition-delay: 1.33s;
+}
+.hf__pillars li:nth-child(3) {
+  transition-delay: 1.41s;
+}
+.hf__pillars li:nth-child(4) {
+  transition-delay: 1.49s;
+}
+
+.hf__page:not([data-in]) .hf__pillars li {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* --- the film's entrance ---------------------------------------------------------
+   Hidden until its turn (data-on, set by Film), then one of three:
+
+     sweep   the U opens like a fan about its own centre, the big quarter
+             first and then the small one
+     unfold  the U is drawn open from left to right as it glides into place
+     drop    the U falls from above the screen, gathering speed, lands,
+             rebounds a little and settles
+
+   In every one the picture starts a touch large and settles as it plays. */
+
+.hf__film:not([data-on]) {
+  visibility: hidden;
+}
+
+@property --hf-fan {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 360deg;
+}
+
+/* sweep: the U's centre is (230, 0) in its 690 x 460 drawing, a third of the
+   way along its top edge, and both pieces lie below it; so the fan turns
+   from pointing right, round through straight down, to pointing left */
+.hf__film[data-film='sweep'][data-on] .hf__u {
+  -webkit-mask-image: var(--u), conic-gradient(from 90deg at 33.333% 0, #000 var(--hf-fan), transparent var(--hf-fan));
+  mask-image: var(--u), conic-gradient(from 90deg at 33.333% 0, #000 var(--hf-fan), transparent var(--hf-fan));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  animation: hf-fan 1.5s cubic-bezier(0.65, 0, 0.25, 1) both;
+}
+
+@keyframes hf-fan {
+  from {
+    --hf-fan: 0deg;
+  }
+  to {
+    --hf-fan: 185deg;
+  }
+}
+
+/* unfold */
+.hf__film[data-film='unfold'][data-on] .hf__u {
+  animation: hf-unfold 1.4s cubic-bezier(0.65, 0, 0.25, 1) both;
+}
+
+@keyframes hf-unfold {
+  from {
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-14%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+/* drop */
+.hf__film[data-film='drop'][data-on] .hf__u {
+  animation: hf-drop 1.4s both;
+}
+
+@keyframes hf-drop {
+  0% {
+    transform: translateY(var(--fall, -100vh)) rotate(-4deg);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4);
+  }
+  55% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.15, 0.6, 0.35, 1);
+  }
+  70% {
+    transform: translateY(calc(var(--h) * -0.08)) rotate(0.5deg);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.45);
+  }
+  84% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.15, 0.6, 0.35, 1);
+  }
+  92% {
+    transform: translateY(calc(var(--h) * -0.018));
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* the picture settles as it plays; backwards only, so the hover zoom works
+   once it has */
+.hf__film[data-on] .hf__u video {
+  animation: hf-settle 2.2s var(--umm-ease-out) backwards;
+}
+
+.hf__film[data-film='drop'][data-on] .hf__u video {
+  animation-delay: 0.77s;
+  animation-duration: 1.3s;
+}
+
+@keyframes hf-settle {
+  from {
+    transform: scale(1.18);
+  }
+}
+
+/* --- asking: everything but the bar steps back while RAGe's name prints --- */
+
+.hf :is(.hf__title, .hf__film, .hf__chips, .hf__pillars) {
+  transition:
+    opacity 0.9s var(--umm-ease-out),
+    transform 1.1s var(--umm-ease-out);
+}
+
+.hf__page:not([data-phase='idle']) :is(.hf__title, .hf__film, .hf__chips, .hf__pillars) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* --- the dock: a review tool, fixed so it stays to hand down the runway ---- */
+
+.hf .ha-dock {
+  position: fixed;
+  z-index: 40;
+}
+
+.hf-replay {
+  justify-self: start;
+  padding: 8px 14px;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-ink);
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+/* --- tablets and phones: one column, in each layout's own order -------------- */
+
+@media (max-width: 1000px) {
+  .hf[data-layout] .hf__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .hf[data-layout='stack'] .hf__body {
+    grid-template-areas: 'stage' 'ask' 'title' 'film';
+  }
+  .hf[data-layout='ask'] .hf__body {
+    grid-template-areas: 'ask' 'stage' 'title' 'film';
+  }
+  .hf[data-layout='split'] .hf__body {
+    grid-template-areas: 'title' 'ask' 'stage' 'film';
+  }
+  .hf[data-layout='side'] .hf__body {
+    grid-template-areas: 'stage' 'title' 'ask' 'film';
+  }
+  /* the mark is 3.4 times as wide as it is tall: a stage near its shape */
+  .hf__stage {
+    min-height: 0;
+    aspect-ratio: 2.6 / 1;
+    max-height: 46svh;
+  }
+  /* the review dock floats in the corner, off the mark */
+  .hf .ha-dock {
+    position: fixed;
+    top: auto;
+    bottom: 14px;
+    right: 14px;
+    flex-direction: column-reverse;
+    max-height: calc(100svh - 28px);
+  }
+  .hf[data-layout] .hf__chips {
+    flex-direction: row;
+    align-items: center;
+  }
+  .hf[data-layout] .hf__film {
+    --h: clamp(90px, 22vw, 140px);
+    justify-self: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .hf__stage {
+    aspect-ratio: 2.3 / 1;
+  }
+  .hf[data-layout] .hf__title {
+    font-size: clamp(2rem, 9.4vw, 2.6rem);
+  }
+  .hf[data-layout] .hf__bar {
+    width: 100%;
+  }
+  .hf__chips .ha__chip {
+    padding: 0.45em 1em;
+    font-size: 0.84rem;
+  }
+  /* as on the live hero's phone layout, three of the six questions */
+  .hf__chips li:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf .hm-nav,
+  .hf__bar,
+  .hf__chips li,
+  .hf__title > span > span,
+  .hf__pillars li {
+    transition-duration: 0.01s;
+    transition-delay: 0s;
+  }
+  .hf__film[data-on] .hf__u,
+  .hf__film[data-on] .hf__u video {
+    animation: none !important;
+  }
+}

@@ -1,7 +1,10 @@
 import * as THREE from 'three'
 import { NOISE, Stage } from './gl'
 import type { SceneId } from './ascii/scenes'
-import logoUrl from '@/assets/home/umm-logo.svg'
+import { AVOID, avoidUniforms, WAVE } from './ascii/wave'
+import { MOTION } from './ascii/dots'
+import * as F from './ascii/forms'
+import { frameWidth, PHONE_DROP } from './ascii/lum'
 
 /* ============================================================================
    PARTICLES · MORPH — one cloud of fine grains that pours from shape to shape
@@ -13,7 +16,14 @@ import logoUrl from '@/assets/home/umm-logo.svg'
    scatters, attracts or swirls the grains near it.
    ========================================================================== */
 
-export type Pull = 'scatter' | 'attract' | 'swirl'
+export type Pull = 'scatter' | 'attract' | 'swirl' | 'wave'
+
+export const PULLS: { id: Pull; label: string; hint: string }[] = [
+  { id: 'scatter', label: 'Scatter', hint: 'Grains near the cursor drift aside, like sand under a hand.' },
+  { id: 'attract', label: 'Attract', hint: 'Grains near the cursor gather toward it.' },
+  { id: 'swirl', label: 'Swirl', hint: 'Grains near the cursor circle around it.' },
+  { id: 'wave', label: 'Wave', hint: 'Slow rings roll out through the cloud from the cursor.' },
+]
 export type ParticleOpts = { count: number; size: number; palette: 'light' | 'dark' | 'blue'; pull: Pull }
 
 const vert = /* glsl */ `
@@ -26,9 +36,17 @@ uniform float uSize;
 uniform vec3 uMouse;
 uniform float uMouseOn;
 uniform int uPull;
+uniform float uWave;
+uniform float uLand;
+uniform float uWarp;
 varying float vSeed;
 varying float vDepth;
+varying float vKeep;
+varying float vCrest;
 ${NOISE}
+${WAVE}
+${MOTION}
+${AVOID}
 
 void main(){
   float k = clamp((uMix - aSeed * 0.4) / 0.6, 0.0, 1.0);
@@ -44,19 +62,39 @@ void main(){
     snoise(vec3(p * 0.6 + uTime * 0.07)),
     snoise(vec3(p * 0.6 + uTime * 0.07 + 11.0)),
     0.0) * 0.035;
+  /* on the landing grid, the slow swell of the dot wave */
+  float sw = wave(p.xz, uTime * 0.6);
+  p.y += sw * uWave;
+  /* the land: the same grid lifted into mountains */
+  float lh = landH(p.xz, uTime * 0.5);
+  p.y += (lh + sw * 0.25) * uLand;
+  /* the warp: every streak rushing toward the viewer */
+  p.z = mix(p.z, warpZ(p.z, uTime * 0.5), uWarp);
 
   vec4 w = modelMatrix * vec4(p, 1.0);
   vec2 d = w.xy - uMouse.xy;
   float f = exp(-dot(d, d) * 2.6) * uMouseOn;
   vec2 n = normalize(d + 1e-4);
-  if (uPull == 0) w.xy += n * f * 0.42;
-  else if (uPull == 1) w.xy -= n * f * min(length(d), 0.7) * 0.45;
-  else w.xy += vec2(-n.y, n.x) * f * 0.42;
-  w.z += f * 0.2;
+  if (uPull == 0) w.xy += n * f * 0.2;
+  else if (uPull == 1) w.xy -= n * f * min(length(d), 0.7) * 0.22;
+  else if (uPull == 2) w.xy += vec2(-n.y, n.x) * f * 0.2;
+  else {
+    float dl = length(d);
+    float wave = sin(dl * 6.0 - uTime * 0.6) * exp(-dl * 1.2) * uMouseOn;
+    w.z += wave * 0.12;
+    w.xy += n * wave * 0.025;
+  }
+  if (uPull != 3) w.z += f * 0.08;
 
   vec4 mv = viewMatrix * w;
   gl_Position = projectionMatrix * mv;
   gl_PointSize = uSize * (0.55 + aSeed * 0.9) / -mv.z;
+  /* the dot wave keeps clear of the copy, and its crests catch the light */
+  vec2 suv = gl_Position.xy / gl_Position.w * 0.5 + 0.5;
+  vKeep = smoothstep(0.01, 0.04, avoidDist(suv));
+  vCrest = mix(1.0, 0.35 + 0.65 * smoothstep(-0.3, 0.45, sw), uWave);
+  vCrest *= mix(1.0, 0.3 + 0.7 * smoothstep(0.1, 1.6, lh), uLand);
+  vCrest *= mix(1.0, smoothstep(1.5, 4.0, -mv.z), uWarp);
   vSeed = aSeed;
   vDepth = -mv.z;
 }
@@ -64,20 +102,25 @@ void main(){
 
 const frag = /* glsl */ `
 uniform int uPalette;
+uniform float uField;
+uniform float uWarp;
 varying float vSeed;
 varying float vDepth;
+varying float vKeep;
+varying float vCrest;
 void main(){
   vec2 c = gl_PointCoord - 0.5;
   float r = length(c);
   if (r > 0.5) discard;
   float a = smoothstep(0.5, 0.2, r);
-  float fog = smoothstep(16.0, 6.0, vDepth);
+  /* the field forms reach deep into the distance; the warp deeper still */
+  float fog = smoothstep(mix(16.0, 27.0, uField) + uWarp * 12.0, mix(6.0, 15.0, uField) + uWarp * 15.0, vDepth);
   vec3 col;
   float alpha;
   if (uPalette == 0) { col = vec3(0.063, 0.055, 0.08); alpha = a * 0.72 * fog; }
   else if (uPalette == 1) { col = vec3(0.96, 0.96, 0.98); alpha = a * 0.75 * fog; }
   else { col = mix(vec3(0.08, 0.3, 1.0), vec3(0.7, 0.9, 1.0), vSeed * vSeed); alpha = a * 0.85 * fog; }
-  gl_FragColor = vec4(col, alpha);
+  gl_FragColor = vec4(col, alpha * vKeep * vCrest);
 }
 `
 
@@ -109,50 +152,10 @@ function fromMask(n: number, draw: (g: CanvasRenderingContext2D, w: number, h: n
   return out
 }
 
-let logoImg: HTMLImageElement | null = null
-function loadLogo() {
-  if (logoImg) return Promise.resolve(logoImg)
-  return new Promise<HTMLImageElement>((ok) => {
-    const img = new Image()
-    img.onload = () => {
-      logoImg = img
-      ok(img)
-    }
-    img.src = logoUrl
-  })
-}
-
+/** Each shape is one of the dot forms the ASCII and print versions draw
+ *  (forms.ts), so all three versions show the same seven forms. */
 function shape(id: SceneId, n: number): Float32Array {
-  const out = new Float32Array(n * 3)
-  const set = (i: number, x: number, y: number, z: number) => {
-    out[i * 3] = x
-    out[i * 3 + 1] = y
-    out[i * 3 + 2] = z
-  }
   switch (id) {
-    case 'sphere': {
-      for (let i = 0; i < n; i++) {
-        const y = 1 - (2 * (i + 0.5)) / n
-        const r = Math.sqrt(1 - y * y)
-        const a = i * 2.399963
-        const R = 1.45 * (0.97 + rnd() * 0.06)
-        set(i, Math.cos(a) * r * R, y * R, Math.sin(a) * r * R)
-      }
-      return out
-    }
-    case 'logo':
-      return fromMask(
-        n,
-        (g, W, H) => {
-          if (logoImg) {
-            const w = W * 0.96
-            const h = (w * 460) / 1553
-            g.drawImage(logoImg, (W - w) / 2, (H - h) / 2, w, h)
-          }
-        },
-        6.6,
-        0.3,
-      )
     case 'rage':
       return fromMask(
         n,
@@ -164,73 +167,43 @@ function shape(id: SceneId, n: number): Float32Array {
         },
         5.8,
       )
-    case 'eye': {
-      for (let i = 0; i < n; i++) {
-        const fibre = Math.floor(rnd() * 220)
-        const a = (fibre / 220) * Math.PI * 2 + (rnd() - 0.5) * 0.02
-        const t = Math.pow(rnd(), 0.8)
-        const r = 0.55 + t * 1.75
-        set(i, Math.cos(a + t * 0.25) * r, Math.sin(a + t * 0.25) * r, (rnd() - 0.5) * 0.2 - t * 0.4)
-      }
-      return out
-    }
-    case 'mountains': {
-      for (let i = 0; i < n; i++) {
-        const x = (rnd() - 0.5) * 13
-        const z = -rnd() * 9 + 2
-        const h =
-          Math.max(0, Math.sin(x * 0.8) + Math.sin(z * 0.9 + x * 0.3) + Math.sin(x * 0.35 - z * 0.5) * 1.4) * 0.45
-        set(i, x, -1.6 + h * h * 0.9, z)
-      }
-      return out
-    }
-    case 'knot': {
-      for (let i = 0; i < n; i++) {
-        const t = rnd() * Math.PI * 2
-        const p = 2
-        const q = 3
-        const R = 1.25
-        const cx = (R + 0.5 * Math.cos(q * t)) * Math.cos(p * t)
-        const cy = (R + 0.5 * Math.cos(q * t)) * Math.sin(p * t)
-        const cz = 0.5 * Math.sin(q * t)
-        const a = rnd() * Math.PI * 2
-        const r = 0.32
-        set(i, cx + Math.cos(a) * r, cy + Math.sin(a) * r, cz + Math.sin(a + t) * r)
-      }
-      return out
-    }
-    case 'city': {
-      const g = 18
-      for (let i = 0; i < n; i++) {
-        const bx = Math.floor(rnd() * g)
-        const bz = Math.floor(rnd() * g)
-        const hgt = 0.2 + Math.max(0, Math.sin(bx * 0.7) * Math.cos(bz * 0.6) + 0.5) * 1.6
-        const x = (bx - g / 2) * 0.42 + (rnd() - 0.5) * 0.3
-        const z = (bz - g / 2) * 0.42 + (rnd() - 0.5) * 0.3
-        set(i, x, -1.4 + rnd() * hgt, z)
-      }
-      return out
-    }
-    case 'tunnel': {
-      for (let i = 0; i < n; i++) {
-        const ring = Math.floor(rnd() * 26)
-        const a = rnd() * Math.PI * 2
-        const r = 2.3 + (rnd() - 0.5) * 0.08
-        set(i, Math.cos(a) * r, Math.sin(a) * r, 3 - ring * 0.9)
-      }
-      return out
-    }
+    case 'home':
+    case 'land':
+    case 'logo' /* the final homepage's print mark; never a particle shape */:
+      /* the wave's grid; the swell, the mountains and the fade around the
+         copy happen in the shader */
+      return F.field(n).pos
+    case 'lattice':
+      return F.lattice(n).pos
+    case 'warp':
+      return F.warp(n).pos
+    case 'spark':
+      return F.spark(n).pos
+    case 'grid':
+      return F.grid(n).pos
+    case 'globe':
+      return F.globe(n).pos
   }
-  return out
 }
 
 /** How the cloud is held for each shape: a slow spin or none, a tilt, and
- *  where it sits (the sphere where the live hero keeps it, left of centre). */
-const HOLD: Partial<Record<SceneId, { spin: number; tiltX: number; x?: number; y?: number }>> = {
-  sphere: { spin: 0.08, tiltX: 0, x: -1.9, y: -0.1 },
-  knot: { spin: 0.1, tiltX: 0.2, x: 1 },
-  city: { spin: 0.05, tiltX: 0.55 },
+ *  where it sits beside the copy. */
+const HOLD: Partial<Record<SceneId, { spin: number; tiltX: number; x?: number; y?: number; s?: number }>> = {
+  lattice: { spin: 0.12, tiltX: 0.45, x: 2.3, y: 0.55 },
+  spark: { spin: 0.08, tiltX: 0.2, x: 2.3, y: 0.55 },
+  globe: { spin: 0.1, tiltX: 0.35, x: 2.3, y: 0.55 },
 }
+
+/** How wide each object shape is, for fitting it to a phone. */
+const WIDTH: Partial<Record<SceneId, number>> = {
+  lattice: 2.9,
+  spark: 3.6,
+  globe: 3.4,
+  rage: 5.8,
+}
+
+/** The shapes that fill the frame as they are, never moved or fitted. */
+const FIELDS = new Set<SceneId>(['home', 'land', 'warp', 'grid'])
 
 export class ParticleScene extends Stage {
   opts: ParticleOpts
@@ -243,6 +216,7 @@ export class ParticleScene extends Stage {
   private ray = new THREE.Raycaster()
   private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
   private mouseOn = 0
+  private avoidU = avoidUniforms()
   private holder = new THREE.Group()
   private mat: THREE.ShaderMaterial
 
@@ -264,14 +238,15 @@ export class ParticleScene extends Stage {
         uMouseOn: { value: 0 },
         uPull: { value: 0 },
         uPalette: { value: 0 },
+        uWave: { value: 0 },
+        uLand: { value: 0 },
+        uWarp: { value: 0 },
+        uField: { value: 0 },
+        ...this.avoidU.u,
       },
     })
     this.scene.add(this.holder)
     this.build()
-    loadLogo().then(() => {
-      this.cache.forEach((_, k) => k.startsWith('logo') && this.cache.delete(k))
-      if (this.current === 'logo' || this.next === 'logo') this.build()
-    })
     document.fonts?.ready.then(() => this.cache.forEach((_, k) => k.startsWith('rage') && this.cache.delete(k)))
     this.setOpts(opts)
     this.resize()
@@ -313,7 +288,7 @@ export class ParticleScene extends Stage {
     const rebuild = o.count !== this.opts.count
     this.opts = o
     const u = this.mat.uniforms
-    u.uPull.value = ['scatter', 'attract', 'swirl'].indexOf(o.pull)
+    u.uPull.value = PULLS.findIndex((x) => x.id === o.pull)
     u.uPalette.value = ['light', 'dark', 'blue'].indexOf(o.palette)
     this.mat.blending = o.palette === 'light' ? THREE.NormalBlending : THREE.AdditiveBlending
     this.mat.needsUpdate = true
@@ -359,10 +334,17 @@ export class ParticleScene extends Stage {
     this.ray.setFromCamera(this.pointer, this.camera)
     const hit = this.ray.ray.intersectPlane(this.plane, new THREE.Vector3())
     if (hit) u.uMouse.value.copy(hit)
-    this.mouseOn += ((this.pointerIn ? 1 : 0) - this.mouseOn) * (1 - Math.exp(-1.8 * dt))
+    this.mouseOn += ((this.pointerIn ? 1 : 0) - this.mouseOn) * (1 - Math.exp(-1.1 * dt))
     u.uMouseOn.value = this.mouseOn
 
     const shown = this.next && this.mix > 0.5 ? this.next : this.current
+    /* the swell comes in as the grains settle on the landing grid */
+    this.avoidU.sync()
+    const toward = (k: number, on: boolean) => k + ((on ? 1 : 0) - k) * (1 - Math.exp(-1.5 * dt))
+    u.uWave.value = toward(u.uWave.value, shown === 'home')
+    u.uLand.value = toward(u.uLand.value, shown === 'land')
+    u.uWarp.value = toward(u.uWarp.value, shown === 'warp')
+    u.uField.value = toward(u.uField.value, FIELDS.has(shown))
     const hold = HOLD[shown] ?? { spin: 0, tiltX: 0 }
     const ease = 1 - Math.exp(-1.2 * dt)
     if (this.points) {
@@ -371,12 +353,20 @@ export class ParticleScene extends Stage {
       if (hold.spin) r.y += hold.spin * dt
       else r.y += (Math.round(r.y / (Math.PI * 2)) * Math.PI * 2 - r.y) * ease
       r.x += (hold.tiltX - r.x) * ease
+      /* on a phone the shape is centred and shrunk to fit the width */
+      const aspect = this.width / this.height
+      const tall = aspect < 1
+      /* the landing contours are drawn for this frame, edge to edge */
+      const full = FIELDS.has(shown)
+      const fit = full ? 1 : tall ? Math.min(1, (frameWidth(this.camera, 8) * 0.86) / (WIDTH[shown] ?? 3.2)) : (hold.s ?? 1)
       const q = this.points.position
-      q.x += ((hold.x ?? 0) - q.x) * ease
-      q.y += ((hold.y ?? 0) - q.y) * ease
+      q.x += ((tall || full ? 0 : (hold.x ?? 0)) - q.x) * ease
+      q.y += ((full ? 0 : tall ? -(frameWidth(this.camera, 8) / aspect) * PHONE_DROP : (hold.y ?? 0)) - q.y) * ease
+      const s = this.points.scale
+      s.setScalar(s.x + (fit - s.x) * ease)
     }
     const h = this.holder.rotation
-    h.y += (this.pointer.x * 0.12 - h.y) * ease
-    h.x += (-this.pointer.y * 0.07 - h.x) * ease
+    h.y += (this.pointer.x * 0.07 - h.y) * ease
+    h.x += (-this.pointer.y * 0.04 - h.x) * ease
   }
 }

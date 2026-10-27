@@ -90,7 +90,7 @@ export abstract class Stage {
       this.last = now
       this.time += this.slow ? dt * 0.35 : dt
       /* a slow follow: the scenes lean after the cursor, never snap to it */
-      this.pointer.lerp(this.pointerTarget, 1 - Math.exp(-2.2 * dt))
+      this.pointer.lerp(this.pointerTarget, 1 - Math.exp(-1.3 * dt))
       this.frame(dt)
       this.renderer.render(this.scene, this.camera)
       this.raf = this.visible ? requestAnimationFrame(loop) : 0

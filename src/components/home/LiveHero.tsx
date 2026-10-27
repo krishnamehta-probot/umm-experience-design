@@ -1,7 +1,9 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { asciiChips, eyeFilm } from '@/content/home'
+import { IconArrowUpRight } from '../icons'
 import { AskBar, HomeNav, Pillars, Title } from './HomeParts'
 import type { Rage } from './useRage'
+import { measureAvoid } from './avoid'
 import type { SceneId } from './ascii/scenes'
 
 /* ============================================================================
@@ -13,10 +15,10 @@ import type { SceneId } from './ascii/scenes'
 
 export type Palette = 'light' | 'dark' | 'blue'
 
-export const PALETTES: { id: Palette; label: string }[] = [
-  { id: 'light', label: 'Ink on white' },
-  { id: 'dark', label: 'White on black' },
-  { id: 'blue', label: 'Eye blue' },
+export const PALETTES: { id: Palette; label: string; hint: string }[] = [
+  { id: 'light', label: 'Ink on grey', hint: 'Dark ink on the #DEDEDE ground, like the live homepage.' },
+  { id: 'dark', label: 'White on black', hint: 'Light ink on black, for a night version.' },
+  { id: 'blue', label: 'Eye blue', hint: 'The blue of the fibre-optic eye film, glowing on black.' },
 ]
 
 /** What carries over when the showcase switches version. */
@@ -36,61 +38,94 @@ export function MarkU() {
   )
 }
 
+type Option<T> = { id: T; label: string; hint?: string; sample?: string }
+
+/** The buttons of one dock row. Hovering or focusing one previews it on the
+ *  hero through `onPeek` (null when the pointer leaves), and the line under
+ *  the row says what it does. */
+function Options<T extends string | number>({
+  items,
+  value,
+  onPick,
+  onPeek,
+}: {
+  items: Option<T>[]
+  value: T | null
+  onPick: (v: T) => void
+  onPeek?: (v: T | null) => void
+}) {
+  const [hover, setHover] = useState<T | null>(null)
+  const peek = (v: T | null) => {
+    setHover(v)
+    onPeek?.(v)
+  }
+  const hint = items.find((it) => it.id === (hover ?? value))?.hint
+  return (
+    <>
+      <div onPointerLeave={() => peek(null)} onBlur={() => peek(null)}>
+        {items.map((it) => (
+          <button
+            key={String(it.id)}
+            type="button"
+            aria-pressed={value === it.id}
+            onPointerEnter={() => peek(it.id)}
+            onFocus={() => peek(it.id)}
+            onClick={() => onPick(it.id)}
+          >
+            {it.label}
+            {it.sample && (
+              <span className="ha-dock__sample" aria-hidden="true">
+                {it.sample}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+      {items.some((it) => it.hint) && <p className="ha-dock__hint">{hint ?? ' '}</p>}
+    </>
+  )
+}
+
 /** One row of the options dock. */
 export function Seg<T extends string | number>({
   label,
   items,
   value,
   onPick,
+  onPeek,
 }: {
   label: string
-  items: { id: T; label: string }[]
+  items: Option<T>[]
   value: T
   onPick: (v: T) => void
+  onPeek?: (v: T | null) => void
 }) {
   return (
     <fieldset className="ha-dock__set">
       <legend>{label}</legend>
-      <div>
-        {items.map((it) => (
-          <button key={String(it.id)} type="button" aria-pressed={value === it.id} onClick={() => onPick(it.id)}>
-            {it.label}
-          </button>
-        ))}
-      </div>
+      <Options items={items} value={value} onPick={onPick} onPeek={onPeek} />
     </fieldset>
   )
 }
 
-/** The dock's scene row: Auto, then every scene. */
+/** The dock's scene row. */
 export function SceneSet<T extends string>({
   items,
   value,
-  auto,
-  onAuto,
   onPick,
+  onPeek,
   label = 'Scene',
 }: {
-  items: { id: T; label: string }[]
+  items: Option<T>[]
   value: T
-  auto: boolean
-  onAuto: () => void
   onPick: (v: T) => void
+  onPeek?: (v: T | null) => void
   label?: string
 }) {
   return (
     <fieldset className="ha-dock__set">
       <legend>{label}</legend>
-      <div>
-        <button type="button" aria-pressed={auto} onClick={onAuto}>
-          Auto
-        </button>
-        {items.map((s) => (
-          <button key={s.id} type="button" aria-pressed={!auto && value === s.id} onClick={() => onPick(s.id)}>
-            {s.label}
-          </button>
-        ))}
-      </div>
+      <Options items={items} value={value} onPick={onPick} onPeek={onPeek} />
     </fieldset>
   )
 }
@@ -119,8 +154,30 @@ export function LiveHero({
   children?: ReactNode
 }) {
   const [open, setOpen] = useState(() => window.innerWidth >= 900)
+  const root = useRef<HTMLElement>(null)
+
+  /* tell the landing scene where the copy is, and again whenever it moves */
+  useEffect(() => {
+    const el = root.current
+    if (!el) return
+    const run = () => {
+      const cv = el.querySelector<HTMLElement>('.ha__gl')
+      if (cv) measureAvoid(el, cv)
+    }
+    run()
+    const ro = new ResizeObserver(run)
+    ro.observe(el)
+    document.fonts?.ready.then(run)
+    const late = window.setTimeout(run, 600)
+    return () => {
+      ro.disconnect()
+      window.clearTimeout(late)
+    }
+  }, [])
+
   return (
     <main
+      ref={root}
       className={`hm ha ha--${version}`}
       data-phase={rage.phase}
       data-palette={palette}
@@ -143,7 +200,8 @@ export function LiveHero({
                 onFocus={() => onChip?.(i)}
                 onClick={() => rage.go(c.q)}
               >
-                {c.q}
+                <span>{c.q}</span>
+                <IconArrowUpRight className="ha__chip-go" size={14} strokeWidth={2} aria-hidden="true" />
               </button>
             </li>
           ))}

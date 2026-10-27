@@ -60,11 +60,31 @@
 }
 
 .hm-nav__links a {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
   font-size: clamp(0.95rem, 1.1vw, 1.15rem);
   font-weight: var(--umm-weight-medium);
+}
+
+/* a hairline draws in under the link from the left, and out to the right */
+.hm-nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s var(--umm-ease-out);
+}
+
+.hm-nav__links a:is(:hover, :focus-visible)::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 .hm-nav__cta {
@@ -112,6 +132,20 @@
   color: #fff;
   box-shadow: 0 30px 60px -30px rgb(16 14 20 / 0.55), 0 0 0 6px rgb(255 255 255 / 0.35);
   pointer-events: auto;
+  transition: box-shadow 0.6s var(--umm-ease-out);
+}
+
+/* the halo firms up, and the arrow turns to point the way: in */
+.hm-ask:is(:hover, :focus-within) {
+  box-shadow: 0 30px 60px -30px rgb(16 14 20 / 0.55), 0 0 0 6px rgb(255 255 255 / 0.7);
+}
+
+.hm-ask__go svg {
+  transition: transform 0.6s var(--umm-ease-out);
+}
+
+.hm-ask:is(:hover, :focus-within) .hm-ask__go svg {
+  transform: rotate(45deg);
 }
 
 .hm-ask__input {
@@ -286,6 +320,8 @@
 }
 
 .ha__chip {
+  display: inline-flex;
+  align-items: center;
   padding: 0.5em 1.25em;
   border-radius: var(--umm-r-pill);
   border: 1px solid var(--ha-chip-line);
@@ -297,7 +333,36 @@
   font-weight: var(--umm-weight-light);
   letter-spacing: -0.01em;
   white-space: nowrap;
-  transition: background-color 0.6s var(--umm-ease-out), border-color 0.6s var(--umm-ease-out);
+  transition:
+    background-color 0.6s var(--umm-ease-out),
+    border-color 0.6s var(--umm-ease-out),
+    padding 0.6s var(--umm-ease-out);
+}
+
+/* the arrow says where a chip goes: to RAGe. It slides in out of the
+   padding, so the chip keeps its width and the row never shifts. */
+.ha__chip-go {
+  flex: none;
+  width: 0;
+  margin-left: 0;
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition:
+    width 0.6s var(--umm-ease-out),
+    margin-left 0.6s var(--umm-ease-out),
+    opacity 0.5s,
+    transform 0.6s var(--umm-ease-out);
+}
+
+.ha__chip:not(:disabled):is(:hover, :focus-visible) {
+  padding-inline: calc(1.25em - 10px);
+}
+
+.ha__chip:not(:disabled):is(:hover, :focus-visible) .ha__chip-go {
+  width: 14px;
+  margin-left: 6px;
+  opacity: 1;
+  transform: none;
 }
 
 /* a quiet hover: the chip firms up rather than flipping to ink */
@@ -359,6 +424,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 1.4s var(--umm-ease-out);
+}
+
+.ha__film:hover .ha__card video {
+  transform: scale(1.05);
 }
 
 .ha__pillars {
@@ -410,7 +480,7 @@
 .ha-dock__body {
   display: grid;
   gap: 14px;
-  width: 268px;
+  width: 300px;
   padding: 16px;
   overflow-y: auto;
   border-radius: 20px;
@@ -457,6 +527,25 @@
   transition: background-color 0.2s, color 0.2s;
 }
 
+.ha-dock__set button:hover {
+  border-color: rgb(16 14 20 / 0.4);
+}
+
+.ha-dock__sample {
+  margin-left: 6px;
+  opacity: 0.5;
+  letter-spacing: 0.04em;
+}
+
+/* what the hovered (or chosen) option does, in a line under its row */
+.ha-dock__hint {
+  min-height: 2.7em;
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--umm-ink-quiet);
+}
+
 .ha-dock__set button[aria-pressed='true'] {
   background: var(--umm-ink);
   border-color: var(--umm-ink);
@@ -486,4 +575,77 @@
     top: auto;
     bottom: 80px;
   }
+}
+
+/* ===========================================================================
+   PHONE PREVIEW — /phone
+   ========================================================================= */
+
+.pp {
+  min-height: 100svh;
+  padding: 28px 40px 36px;
+  background: #18181b;
+  color: #f4f4f5;
+  font-family: var(--umm-font-body);
+}
+
+.pp__head {
+  max-width: 760px;
+  margin: 0 auto 24px;
+  text-align: center;
+}
+
+.pp__head h1 {
+  margin: 0 0 6px;
+  font-family: var(--umm-font-display);
+  font-size: 1.6rem;
+  font-weight: var(--umm-weight-light);
+  letter-spacing: -0.03em;
+}
+
+.pp__head p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgb(244 244 245 / 0.6);
+}
+
+.pp__row {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+}
+
+.pp__phone {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.pp__bezel {
+  display: grid;
+  place-items: center;
+  border-radius: 44px;
+  background: #000;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.14), 0 30px 60px -20px rgb(0 0 0 / 0.8);
+}
+
+.pp__screen {
+  overflow: hidden;
+  border-radius: 34px;
+  background: #dedede;
+}
+
+.pp__screen iframe {
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+}
+
+.pp__phone figcaption {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(244 244 245 / 0.7);
 }

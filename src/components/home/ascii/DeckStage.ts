@@ -15,12 +15,15 @@ import { BUILD, type Built, type SceneId } from './scenes'
    1 + band), uBand, uTime, uRes (device px), uMouse (0..1) and uMouseOn.
    ========================================================================== */
 
-export type Effect = 'ripple' | 'magnify' | 'reveal'
+export type Effect = 'ripple' | 'magnify' | 'reveal' | 'scramble' | 'repel' | 'magnet'
 
-export const EFFECTS: { id: Effect; label: string }[] = [
-  { id: 'ripple', label: 'Ripple' },
-  { id: 'magnify', label: 'Magnify' },
-  { id: 'reveal', label: 'Reveal' },
+export const EFFECTS: { id: Effect; label: string; hint: string }[] = [
+  { id: 'ripple', label: 'Ripple', hint: 'Slow rings spread out from the cursor, like a drop in water.' },
+  { id: 'magnify', label: 'Lens', hint: 'A round lens under the cursor shows the scene up close.' },
+  { id: 'reveal', label: 'Spotlight', hint: 'A soft circle under the cursor shows the picture behind the ink.' },
+  { id: 'scramble', label: 'Scramble', hint: 'The ink under the cursor decodes and re-codes itself.' },
+  { id: 'repel', label: 'Repel', hint: 'A soft round dimple: the ink makes way for the cursor and closes again behind it.' },
+  { id: 'magnet', label: 'Magnetic', hint: 'The ink is drawn toward the cursor and its lines gather round it, following with a little spring.' },
 ]
 
 /** How fast the scenes move, and how far they follow the cursor. */
@@ -31,21 +34,61 @@ export const PASS_VERT = /* glsl */ `
 void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }
 `
 
-/** The cursor's bend of the sampling coordinates, shared by every pass.
- *  Sets `suv` and `reveal`; needs uv, uMouse, uMouseOn, uRes, uTime, uEffect. */
+/** What the cursor does, shared by every pass. Sets `suv` (where to read
+ *  the scene), `shade` (added to its brightness), `reveal` (show the plain
+ *  picture), `scramble` (randomise the ink), `ring` (a hairline circle
+ *  that outlines the lens and the spotlight), `pull` (device px a pass
+ *  with lines, the engraving, shifts them by, toward the cursor) and
+ *  `inkOnly` (1 when the shade may only add to the picture, never to the
+ *  bare paper around it). Needs uv, uMouse, uMouseOn,
+ *  uRes, uTime and uEffect. */
 export const PASS_CURSOR = /* glsl */ `
   float aspect = uRes.x / uRes.y;
   vec2 dv = (uv - uMouse) * vec2(aspect, 1.0);
   float d = length(dv);
+  float pd = length((gl_FragCoord.xy / uRes - uMouse) * vec2(aspect, 1.0));
   vec2 suv = uv;
+  float shade = 0.0;
   float reveal = 0.0;
+  float scramble = 0.0;
+  float ring = 0.0;
+  float pull = 0.0;
+  float inkOnly = 0.0;
+  /* the repel and the magnet are sized off the frame's longer side, so a
+     wide, short stage gets the same hand as a full screen */
+  float big = max(uRes.x, uRes.y);
+  vec2 dp = (uv - uMouse) * uRes / big;
   if (uEffect == 0) {
-    suv += normalize(dv + 1e-5) / vec2(aspect, 1.0) * sin(d * 46.0 - uTime * 1.8) * 0.0032 * exp(-d * 7.0) * uMouseOn;
+    float w = sin(d * 28.0 - uTime * 0.7);
+    float fall = exp(-d * 7.0) * smoothstep(0.0, 0.04, d) * uMouseOn;
+    suv += normalize(dv + 1e-5) / vec2(aspect, 1.0) * w * 0.002 * fall;
+    shade = w * 0.04 * fall;
   } else if (uEffect == 1) {
-    float k = mix(0.78, 1.0, smoothstep(0.0, 0.2, d));
-    suv = mix(uv, uMouse + (uv - uMouse) * k, uMouseOn);
+    float R = 0.14;
+    float inside = 1.0 - smoothstep(R - 0.03, R, d);
+    suv = mix(uv, uMouse + (uv - uMouse) / 1.3, inside * uMouseOn);
+    ring = (1.0 - smoothstep(0.0, 1.2 / uRes.y, abs(pd - R))) * uMouseOn * 0.35;
+  } else if (uEffect == 2) {
+    float R = 0.15;
+    reveal = (1.0 - smoothstep(R - 0.06, R, d)) * uMouseOn * 0.6;
+    ring = (1.0 - smoothstep(0.0, 1.2 / uRes.y, abs(pd - R))) * uMouseOn * 0.25;
+  } else if (uEffect == 3) {
+    scramble = (1.0 - smoothstep(0.04, 0.13, d)) * uMouseOn * 0.5;
+  } else if (uEffect == 4) {
+    /* repel: a soft round dimple, the picture eased out from under the
+       cursor and the ink there thinned, not cleared */
+    float k = exp(-pow(length(dp) / 0.065, 2.0)) * uMouseOn;
+    suv = uv - normalize(dp + 1e-6) * big / uRes * 0.026 * k;
+    shade = -k * 0.7;
   } else {
-    reveal = (1.0 - smoothstep(0.05, 0.2, d)) * uMouseOn * 0.75;
+    /* magnet: the picture drawn in toward the cursor, its lines closing up
+       round it and the ink there a little fuller; on the mark only, the
+       paper around it stays bare (27 Oct, Krish) */
+    float k = exp(-pow(length(dp) / 0.085, 2.0)) * uMouseOn;
+    suv = uv + normalize(dp + 1e-6) * big / uRes * 0.018 * k;
+    pull = (uv.y - uMouse.y) * uRes.y * 0.45 * k;
+    shade = k * 0.16;
+    inkOnly = 1.0;
   }
 `
 
@@ -86,6 +129,13 @@ export abstract class DeckStage extends Stage {
   private onDone: (() => void) | null = null
   private mouseOn = 0
   private overCanvas = false
+  private res = new THREE.Vector2()
+  /* the repel and the magnet follow the cursor on a spring, a touch under
+     damped, so they catch up quickly and settle with a small wobble; the
+     other effects drift after the slow pointer */
+  private springy = false
+  private spot = new THREE.Vector2(-9, -9)
+  private spotV = new THREE.Vector2()
 
   constructor(canvas: HTMLCanvasElement, first: SceneId) {
     super(canvas, 35)
@@ -131,7 +181,8 @@ export abstract class DeckStage extends Stage {
   }
 
   setEffect(e: Effect) {
-    if (this.pass) this.pass.uniforms.uEffect.value = ['ripple', 'magnify', 'reveal'].indexOf(e)
+    if (this.pass) this.pass.uniforms.uEffect.value = EFFECTS.findIndex((x) => x.id === e)
+    this.springy = e === 'repel' || e === 'magnet'
   }
 
   setPalette(p: 'light' | 'dark' | 'blue') {
@@ -165,9 +216,18 @@ export abstract class DeckStage extends Stage {
     const u = this.pass.uniforms
     u.uTime.value = this.time
     const p = this.pointer
-    this.mouseOn += ((this.pointerIn && this.overCanvas ? 1 : 0) - this.mouseOn) * (1 - Math.exp(-1.8 * dt))
+    const on = this.pointerIn && this.overCanvas ? 1 : 0
+    this.mouseOn += (on - this.mouseOn) * (1 - Math.exp(-(this.springy ? 4 : 1.1) * dt))
     u.uMouseOn.value = this.mouseOn
-    u.uMouse.value.set(p.x * 0.5 + 0.5, p.y * 0.5 + 0.5)
+    if (this.springy) {
+      const tx = this.pointerTarget.x * 0.5 + 0.5
+      const ty = this.pointerTarget.y * 0.5 + 0.5
+      if (this.spot.x < -1) this.spot.set(tx, ty)
+      this.spotV.x += ((tx - this.spot.x) * 70 - this.spotV.x * 11) * dt
+      this.spotV.y += ((ty - this.spot.y) * 70 - this.spotV.y * 11) * dt
+      this.spot.addScaledVector(this.spotV, dt)
+      u.uMouse.value.copy(this.spot)
+    } else u.uMouse.value.set(p.x * 0.5 + 0.5, p.y * 0.5 + 0.5)
 
     /* the scenes run at half pace and lean only gently toward the cursor */
     const t = this.time * PACE
@@ -175,14 +235,15 @@ export abstract class DeckStage extends Stage {
     const r = this.renderer
     r.setClearColor(0x000000, 1)
     const a = this.get(this.current)
-    a.update(t, sp)
+    const res = this.res.set(this.ta.width, this.ta.height)
+    a.update(t, sp, res)
     r.setRenderTarget(this.ta)
     r.clear()
     r.render(a.scene, a.camera)
 
     if (this.next) {
       const b = this.get(this.next)
-      b.update(t, sp)
+      b.update(t, sp, res)
       r.setRenderTarget(this.tb)
       r.clear()
       r.render(b.scene, b.camera)

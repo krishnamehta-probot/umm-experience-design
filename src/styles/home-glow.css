@@ -1,0 +1,295 @@
+/* ============================================================================
+   HOME · GLOW — the live hero in Stacks' styling (pages/HomeGlow.tsx)
+
+   The reference's look, measured at 1325 x 747 and scaled with the screen:
+   a 1076-wide column, a pale ground with faint ruled sides, a pill over a
+   very large centred headline, small uppercase labels with tracking, pill
+   buttons, the glow (a WebGL shader, Wash.tsx) rising from the bottom
+   centre. Brand font only.
+   ========================================================================== */
+
+.hg {
+  --hg-col: min(1076px, calc(100vw - 2 * clamp(16px, 4vw, 48px)));
+  --hg-paper: #f8f8f6;
+  --hg-quiet: #5b5a60;
+  --hg-line: rgb(16 14 20 / 0.07);
+
+  position: relative;
+  height: 100svh;
+  min-height: 680px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--hg-paper);
+  color: var(--umm-ink);
+  font-family: var(--umm-font-body);
+}
+
+/* the shader, filling the hero behind everything */
+.hw {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* faint ruled lines down both sides, fading toward the middle */
+.hg__lines {
+  position: absolute;
+  inset: 28% 0 0;
+  z-index: -2;
+  background: repeating-linear-gradient(to bottom, var(--hg-line) 0 1px, transparent 1px 13px);
+  -webkit-mask-image: linear-gradient(to right, #000 4%, transparent 26%, transparent 74%, #000 96%),
+    linear-gradient(to bottom, transparent, #000 20%, #000 60%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, #000 4%, transparent 26%, transparent 74%, #000 96%),
+    linear-gradient(to bottom, transparent, #000 20%, #000 60%, transparent);
+  mask-composite: intersect;
+}
+
+/* small uppercase with tracking: the reference's mono labels, in Mosvita */
+.hg-btn,
+.hg-pill {
+  font-family: var(--umm-font-body);
+  font-weight: var(--umm-weight-medium, 500);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* --- nav ------------------------------------------------------------------- */
+
+.hg-nav {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: var(--hg-col);
+  margin: 0 auto;
+  padding-top: 18px;
+}
+
+.hg-nav__logo img {
+  display: block;
+  width: auto;
+  height: 17px;
+}
+
+.hg-nav__links {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+  margin-right: 12px;
+  font-size: 0.875rem;
+  color: var(--hg-quiet);
+}
+
+.hg-nav__links a:hover {
+  color: var(--umm-ink);
+}
+
+/* --- buttons --------------------------------------------------------------- */
+
+.hg-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  height: 44px;
+  padding: 0 28px;
+  border-radius: var(--umm-r-pill);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.hg-btn--sm {
+  height: 28px;
+  padding: 0 13px;
+  font-size: 0.6875rem;
+}
+
+.hg-btn--ink {
+  background: #161616;
+  color: #fff;
+}
+
+/* --- the hero --------------------------------------------------------------- */
+
+.hg__hero {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--hg-col);
+  margin: 0 auto;
+  padding-top: clamp(36px, 7vh, 64px);
+  text-align: center;
+}
+
+.hg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 14px 0 7px;
+  border-radius: var(--umm-r-pill);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08), 0 4px 14px -8px rgb(16 14 20 / 0.2);
+  font-size: 0.6875rem;
+}
+
+.hg-pill__orb {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 8%, var(--umm-tone) 50%, color-mix(in oklab, var(--umm-tone) 40%, #0c0c0c) 100%);
+}
+
+.hg__title {
+  display: grid;
+  margin: clamp(18px, 3vh, 26px) 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(3rem, 6.6vw, 6.75rem);
+  font-weight: var(--umm-weight-medium, 500);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+/* the four pillars, where the reference's lead sits */
+.hg__pillars {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 0;
+  margin: clamp(20px, 3.4vh, 30px) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  color: var(--hg-quiet);
+}
+
+.hg__pillars li + li::before {
+  content: '/';
+  margin: 0 0.6em;
+  opacity: 0.4;
+}
+
+/* the ask bar: a white pill with the black button inside it */
+.hg-ask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(560px, 100%);
+  margin-top: clamp(24px, 4vh, 34px);
+  padding: 6px 6px 6px 22px;
+  border-radius: var(--umm-r-pill);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(16 14 20 / 0.06), 0 14px 34px -16px rgb(16 14 20 / 0.25);
+}
+
+.hg-ask input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  font: inherit;
+  font-size: 1rem;
+  color: inherit;
+}
+
+.hg-ask input::placeholder {
+  color: var(--hg-quiet);
+}
+
+/* the six questions, as the reference's white pills */
+.hg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 900px;
+  margin: clamp(22px, 4vh, 36px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px 0 16px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(255 255 255 / 0.78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.07), 0 6px 18px -12px rgb(16 14 20 / 0.3);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: background-color 0.6s var(--umm-ease-out), transform 0.6s var(--umm-ease-out);
+}
+
+.hg-chip svg {
+  opacity: 0.45;
+  transition: opacity 0.6s;
+}
+
+.hg-chip:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.hg-chip:hover svg {
+  opacity: 1;
+}
+
+/* --- into RAGe: the page fades to the glow's colour ------------------------ */
+
+.hg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: var(--umm-tone);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s var(--umm-ease-in-out) 0.2s;
+}
+
+.hg[data-phase='leaving']::after {
+  opacity: 1;
+}
+
+/* --- smaller screens ------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hg-pill {
+    height: auto;
+    min-height: 28px;
+    max-width: 100%;
+    padding-block: 5px;
+    text-align: left;
+  }
+
+  .hg-nav__links {
+    display: none;
+  }
+
+  .hg-nav .hg-btn {
+    margin-left: auto;
+  }
+
+  .hg-chip {
+    height: auto;
+    min-height: 38px;
+    padding-block: 8px;
+    white-space: normal;
+    text-align: left;
+  }
+
+  .hg-ask .hg-btn {
+    padding: 0 18px;
+  }
+}
