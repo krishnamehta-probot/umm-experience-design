@@ -14,9 +14,9 @@
    The rows give and take with the screen; when a short screen can't hold
    it all, the page grows rather than letting one piece slide over another.
 
-   The film plays inside the U, and the scroll grows the U until the film
+   The film plays inside a shape (the U), and the scroll grows it until the film
    covers the screen: .hf__run is the runway, .hf__page holds on it (useGrow
-   in HomeFinal.tsx sizes both and places the U as it grows).
+   in HomeFinal.tsx sizes both and places the shape as it grows).
    ========================================================================== */
 
 .hf {
@@ -122,16 +122,17 @@
   white-space: normal;
 }
 
-/* the film inside the U (umm-u.svg), the quarter-circle shape from the mark.
+/* the film inside its shape (the U from the mark by default; HomeFinal's
+   SHAPES), the box taking the shape's proportions (--ar).
    At rest it comes in behind the copy and the mark, never over them; while
-   the scroll grows it, it is over everything (useGrow). Ink fills the U
+   the scroll grows it, it is over everything (useGrow). Ink fills the shape
    until the film's first frame arrives. */
 .hf__film {
   --h: clamp(120px, 19vh, 190px);
   grid-area: film;
   position: relative;
   z-index: 0;
-  width: calc(var(--h) * 1.5);
+  width: calc(var(--h) * var(--ar, 1.5));
   height: var(--h);
 }
 
@@ -162,7 +163,7 @@
   transform: none;
 }
 
-/* as the U grows over the hero, the rest of it fades */
+/* as the shape grows over the hero, the rest of it fades */
 .hf__page[data-growing] :is(.hm-nav, .hf__stage, .hf__title, .hf__ask, .hf__pillars) {
   filter: opacity(var(--fade, 1));
 }
@@ -351,10 +352,10 @@
 /* --- the film's entrance ---------------------------------------------------------
    Hidden until its turn (data-on, set by Film), then one of three:
 
-     sweep   the U opens like a fan about its own centre, the big quarter
-             first and then the small one
-     unfold  the U is drawn open from left to right as it glides into place
-     drop    the U falls from above the screen, gathering speed, lands,
+     sweep   the shape opens like a fan about its own centre (the U's big
+             quarter first, then its small one)
+     unfold  the shape is drawn open from left to right as it glides into place
+     drop    the shape falls from above the screen, gathering speed, lands,
              rebounds a little and settles
 
    In every one the still starts a touch large and settles as it lands. */
@@ -369,12 +370,16 @@
   initial-value: 360deg;
 }
 
-/* sweep: the U's centre is (230, 0) in its 690 x 460 drawing, a third of the
-   way along its top edge, and both pieces lie below it; so the fan turns
-   from pointing right, round through straight down, to pointing left */
+/* sweep: a fan about the shape's own centre (--px, --py), from --fan-from
+   through --fan-to, which covers the shape exactly. The U's centre is
+   (230, 0) in its 690 x 460 drawing, a third of the way along its top edge,
+   both pieces below it, so its fan turns from pointing right, round through
+   straight down, to pointing left. */
 .hf__film[data-film='sweep'][data-on] .hf__u {
-  -webkit-mask-image: var(--u), conic-gradient(from 90deg at 33.333% 0, #000 var(--hf-fan), transparent var(--hf-fan));
-  mask-image: var(--u), conic-gradient(from 90deg at 33.333% 0, #000 var(--hf-fan), transparent var(--hf-fan));
+  -webkit-mask-image:
+    var(--u), conic-gradient(from var(--fan-from) at var(--px) var(--py), #000 var(--hf-fan), transparent var(--hf-fan));
+  mask-image:
+    var(--u), conic-gradient(from var(--fan-from) at var(--px) var(--py), #000 var(--hf-fan), transparent var(--hf-fan));
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   animation: hf-fan 1.5s cubic-bezier(0.65, 0, 0.25, 1) both;
@@ -385,7 +390,7 @@
     --hf-fan: 0deg;
   }
   to {
-    --hf-fan: 185deg;
+    --hf-fan: var(--fan-to, 185deg);
   }
 }
 

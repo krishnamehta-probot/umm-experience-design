@@ -10,6 +10,9 @@ import { reducedMotion } from '@/components/home/gl'
 import { useDeck } from '@/components/home/useDeck'
 import { useRage } from '@/components/home/useRage'
 import uUrl from '@/assets/home/umm-u.svg'
+import quarterUrl from '@/assets/home/film-quarter.svg'
+import archUrl from '@/assets/home/film-arch.svg'
+import circleUrl from '@/assets/home/film-circle.svg'
 import '@/styles/home-final.css'
 
 /* ============================================================================
@@ -23,10 +26,11 @@ import '@/styles/home-final.css'
 
    Krish asked (27 Oct) for the layouts as options, so the Options dock has
    four (the boss's composition with the mark raised above the ask bar is
-   the default), the grey or a pure white ground, three ways for the film
-   to come in, the two cursor effects, and a replay of the whole entrance.
-   The choices are kept in ?layout=, ?ground=, ?film= and ?cursor=, and a
-   link carrying them opens on them with or without the dock. The dock shows only with ?options, so the
+   the default), the grey or a pure white ground, four shapes for the film
+   (the U, a quarter ring, an arch, a circle), three ways for it to come
+   in, the two cursor effects, and a replay of the whole entrance. The
+   choices are kept in ?layout=, ?ground=, ?shape=, ?film= and ?cursor=,
+   and a link carrying them opens on them with or without the dock. The dock shows only with ?options, so the
    plain link is the page as it will ship.
 
    The film sits inside the U, the quarter-circle shape from the mark, as a
@@ -79,17 +83,17 @@ const FILMS: { id: FilmIn; label: string; hint: string }[] = [
   {
     id: 'sweep',
     label: 'Quarter sweep',
-    hint: 'The U opens like a fan about its own centre, the big quarter first and then the small one, the film’s still inside it.',
+    hint: 'The shape opens like a fan about its own centre (the U: the big quarter, then the small one), the film’s still inside it.',
   },
   {
     id: 'unfold',
     label: 'Unfold',
-    hint: 'The U is drawn open from left to right, gliding into place, the film’s still inside it.',
+    hint: 'The shape is drawn open from left to right, gliding into place, the film’s still inside it.',
   },
   {
     id: 'drop',
     label: 'Drop',
-    hint: 'The U falls from the top of the screen and lands with a small bounce, the film’s still inside it.',
+    hint: 'The shape falls from the top of the screen and lands with a small bounce, the film’s still inside it.',
   },
 ]
 
@@ -105,10 +109,97 @@ const FILM_AT = 2200
  *  Worth choosing again when the eye film lands at public/home/eye.mp4. */
 const STILL_AT = 3.5
 
-/** The U's drawing (umm-u.svg), and its deepest point: the middle of the big
- *  quarter ring, half its 230-unit thickness from either edge, which the
- *  scroll grows the U out of, so the film covers the screen as it ends. */
-const U = { w: 690, h: 460, fx: 474 / 690, fy: 244 / 460, depth: 115 }
+type Shape = 'u' | 'quarter' | 'arch' | 'circle'
+
+/**
+ * The shapes the film plays in, each with what the page needs of it:
+ *   w, h        its drawing's size (the box's proportions follow it)
+ *   fx, fy      its deepest point, the place furthest from any edge, as a
+ *   depth       share of the box, and how far that is in drawing units; the
+ *               scroll grows the shape out of it, so the film covers the
+ *               screen as the growing ends
+ *   px, py      the centre the sweep entrance fans about, and the angle the
+ *   from, to    fan starts at and turns through (0 is straight up, turning
+ *               clockwise), covering the shape exactly
+ */
+const SHAPES: {
+  id: Shape
+  label: string
+  hint: string
+  url: string
+  w: number
+  h: number
+  fx: number
+  fy: number
+  depth: number
+  px: string
+  py: string
+  from: number
+  to: number
+}[] = [
+  {
+    id: 'u',
+    label: 'U',
+    hint: 'The U from the mark: two quarter circles about one centre.',
+    url: uUrl,
+    w: 690,
+    h: 460,
+    fx: 474 / 690,
+    fy: 244 / 460,
+    depth: 115,
+    px: '33.333%',
+    py: '0%',
+    from: 90,
+    to: 185,
+  },
+  {
+    id: 'quarter',
+    label: 'Quarter',
+    hint: 'One quarter ring, the stroke the mark’s letters are drawn with.',
+    url: quarterUrl,
+    w: 460,
+    h: 460,
+    fx: 216 / 460,
+    fy: 216 / 460,
+    depth: 115,
+    px: '100%',
+    py: '100%',
+    from: 270,
+    to: 95,
+  },
+  {
+    id: 'arch',
+    label: 'Arch',
+    hint: 'An arch, like a doorway into the work.',
+    url: archUrl,
+    w: 400,
+    h: 520,
+    fx: 0.5,
+    fy: 320 / 520,
+    depth: 200,
+    px: '50%',
+    py: '100%',
+    from: 270,
+    to: 185,
+  },
+  {
+    id: 'circle',
+    label: 'Circle',
+    hint: 'A round window.',
+    url: circleUrl,
+    w: 460,
+    h: 460,
+    fx: 0.5,
+    fy: 0.5,
+    depth: 230,
+    px: '50%',
+    py: '50%',
+    from: 0,
+    to: 360,
+  },
+]
+
+const shapeOf = (id: string | undefined) => SHAPES.find((x) => x.id === id) ?? SHAPES[0]
 
 /** How far the hero holds while the U grows, in screen heights */
 const RUNWAY = 1.3
@@ -119,10 +210,12 @@ const pick = <T extends string>(v: string | null, from: { id: T }[], or: T) =>
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
-/** The film inside the U, held on its still (STILL_AT). Its entrance waits
- *  `delay` ms and for the U to be on screen (on a phone it can be below the
- *  fold), then plays; the film itself is set going by the scroll (useGrow). */
-function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
+/** The film inside its shape, held on its still (STILL_AT). Its entrance
+ *  waits `delay` ms and for the shape to be on screen (on a phone it can be
+ *  below the fold), then plays; the film itself is set going by the scroll
+ *  (useGrow). */
+function Film({ mode, shape, delay }: { mode: FilmIn; shape: Shape; delay: number }) {
+  const sh = shapeOf(shape)
   const ref = useRef<HTMLDivElement>(null)
   const video = useRef<HTMLVideoElement>(null)
   const [on, setOn] = useState(false)
@@ -139,7 +232,7 @@ function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
       if (done || !ready || !seen) return
       done = true
       io.disconnect()
-      /* the drop starts above the top of the screen, wherever the U sits */
+      /* the drop starts above the top of the screen, wherever the shape sits */
       const r = el.getBoundingClientRect()
       el.style.setProperty('--fall', `${-Math.round(r.top + r.height + 24)}px`)
       setOn(true)
@@ -168,8 +261,23 @@ function Film({ mode, delay }: { mode: FilmIn; delay: number }) {
   }, [mode, delay])
 
   return (
-    <div className="hf__film" ref={ref} data-film={mode} data-on={on || undefined}>
-      <div className="hf__u" style={{ '--u': `url("${uUrl}")` } as CSSProperties}>
+    <div
+      className="hf__film"
+      ref={ref}
+      data-film={mode}
+      data-shape={shape}
+      data-on={on || undefined}
+      style={
+        {
+          '--ar': sh.w / sh.h,
+          '--px': sh.px,
+          '--py': sh.py,
+          '--fan-from': `${sh.from}deg`,
+          '--fan-to': `${sh.to}deg`,
+        } as CSSProperties
+      }
+    >
+      <div className="hf__u" style={{ '--u': `url("${sh.url}")` } as CSSProperties}>
         {/* the eye film is not on the live site yet: drop it at
             public/home/eye.mp4 and it plays; until then, the live reel */}
         <video
@@ -249,6 +357,7 @@ function useGrow(run: RefObject<HTMLElement | null>, page: RefObject<HTMLDivElem
       grown = true
 
       const k = easeInOut(clamp01(p / 0.92))
+      const U = shapeOf(film.dataset.shape)
       const box = film.getBoundingClientRect()
       const w0 = box.width
       const h0 = box.height
@@ -302,7 +411,7 @@ function useGrow(run: RefObject<HTMLElement | null>, page: RefObject<HTMLDivElem
 }
 
 /** The page itself. Mounted afresh to replay the entrance. */
-function Hero({ film, filmRun, cursor }: { film: FilmIn; filmRun: number; cursor: Cursor }) {
+function Hero({ film, shape, filmRun, cursor }: { film: FilmIn; shape: Shape; filmRun: number; cursor: Cursor }) {
   const rage = useRage({ leave: 1500 })
   const [canvas, engine] = useScene((c) => {
     const s = new PrintScene(c, 'logo', { style: 'engrave', palette: 'light', grain: 3, effect: cursor })
@@ -362,7 +471,7 @@ function Hero({ film, filmRun, cursor }: { film: FilmIn; filmRun: number; cursor
           </div>
 
           {/* a film option picked in the dock plays its entrance again at once */}
-          <Film key={`${film}-${filmRun}`} mode={film} delay={filmRun ? 250 : FILM_AT} />
+          <Film key={`${film}-${shape}-${filmRun}`} mode={film} shape={shape} delay={filmRun ? 250 : FILM_AT} />
         </div>
 
         <Pillars className="hf__pillars" />
@@ -377,6 +486,9 @@ export function HomeFinal() {
   )
   const [ground, setGround] = useState<Ground>(() =>
     pick(new URLSearchParams(window.location.search).get('ground'), GROUNDS, 'grey'),
+  )
+  const [shape, setShape] = useState<Shape>(() =>
+    pick(new URLSearchParams(window.location.search).get('shape'), SHAPES, 'u'),
   )
   const [film, setFilm] = useState<FilmIn>(() =>
     pick(new URLSearchParams(window.location.search).get('film'), FILMS, 'sweep'),
@@ -394,13 +506,13 @@ export function HomeFinal() {
     window.history.replaceState(
       null,
       '',
-      `/home-final?options&layout=${layout}&ground=${ground}&film=${film}&cursor=${cursor}`,
+      `/home-final?options&layout=${layout}&ground=${ground}&shape=${shape}&film=${film}&cursor=${cursor}`,
     )
-  }, [review, layout, ground, film, cursor])
+  }, [review, layout, ground, shape, film, cursor])
 
   return (
     <main className="hm ha hf" data-layout={layout} data-ground={ground} data-palette="light" data-dark="false">
-      <Hero key={run} film={film} filmRun={filmRun} cursor={cursor} />
+      <Hero key={run} film={film} shape={shape} filmRun={filmRun} cursor={cursor} />
 
       {review && (
         <aside className="ha-dock" data-open={open} aria-label="Homepage options">
@@ -412,7 +524,17 @@ export function HomeFinal() {
               <Seg label="Layout" items={LAYOUTS} value={layout} onPick={setLayout} />
               <Seg label="Background" items={GROUNDS} value={ground} onPick={setGround} />
               <Seg
-                label="Film"
+                label="Film shape"
+                items={SHAPES}
+                value={shape}
+                onPick={(x) => {
+                  window.scrollTo({ top: 0, behavior: 'instant' })
+                  setShape(x)
+                  setFilmRun((n) => n + 1)
+                }}
+              />
+              <Seg
+                label="Film entrance"
                 items={FILMS}
                 value={film}
                 onPick={(f) => {
