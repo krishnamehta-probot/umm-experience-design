@@ -23,9 +23,10 @@ import '@/styles/home-final.css'
 
    Krish asked (27 Oct) for the layouts as options, so the Options dock has
    four (the boss's composition with the mark raised above the ask bar is
-   the default), three ways for the film to come in, the two cursor
-   effects, and a replay of the whole entrance. The choices are kept in
-   ?layout=, ?film= and ?cursor=. The dock shows only with ?options, so the
+   the default), the grey or a pure white ground, three ways for the film
+   to come in, the two cursor effects, and a replay of the whole entrance.
+   The choices are kept in ?layout=, ?ground=, ?film= and ?cursor=, and a
+   link carrying them opens on them with or without the dock. The dock shows only with ?options, so the
    plain link is the page as it will ship.
 
    The film sits inside the U, the quarter-circle shape from the mark, as a
@@ -63,6 +64,13 @@ const LAYOUTS: { id: Layout; label: string; hint: string }[] = [
     label: 'Mark left',
     hint: 'The mark top left and the film top right; the headline under the mark, the questions as a list beside it.',
   },
+]
+
+type Ground = 'grey' | 'white'
+
+const GROUNDS: { id: Ground; label: string; hint: string }[] = [
+  { id: 'grey', label: 'Grey', hint: 'The live homepage’s grey ground, #DEDEDE.' },
+  { id: 'white', label: 'White', hint: 'Pure white: the engraving and the outlines of the questions carry the page.' },
 ]
 
 type FilmIn = 'sweep' | 'unfold' | 'drop'
@@ -367,6 +375,9 @@ export function HomeFinal() {
   const [layout, setLayout] = useState<Layout>(() =>
     pick(new URLSearchParams(window.location.search).get('layout'), LAYOUTS, 'stack'),
   )
+  const [ground, setGround] = useState<Ground>(() =>
+    pick(new URLSearchParams(window.location.search).get('ground'), GROUNDS, 'grey'),
+  )
   const [film, setFilm] = useState<FilmIn>(() =>
     pick(new URLSearchParams(window.location.search).get('film'), FILMS, 'sweep'),
   )
@@ -380,11 +391,15 @@ export function HomeFinal() {
 
   useEffect(() => {
     if (!review) return
-    window.history.replaceState(null, '', `/home-final?options&layout=${layout}&film=${film}&cursor=${cursor}`)
-  }, [review, layout, film, cursor])
+    window.history.replaceState(
+      null,
+      '',
+      `/home-final?options&layout=${layout}&ground=${ground}&film=${film}&cursor=${cursor}`,
+    )
+  }, [review, layout, ground, film, cursor])
 
   return (
-    <main className="hm ha hf" data-layout={layout} data-palette="light" data-dark="false">
+    <main className="hm ha hf" data-layout={layout} data-ground={ground} data-palette="light" data-dark="false">
       <Hero key={run} film={film} filmRun={filmRun} cursor={cursor} />
 
       {review && (
@@ -395,6 +410,7 @@ export function HomeFinal() {
           {open && (
             <div className="ha-dock__body">
               <Seg label="Layout" items={LAYOUTS} value={layout} onPick={setLayout} />
+              <Seg label="Background" items={GROUNDS} value={ground} onPick={setGround} />
               <Seg
                 label="Film"
                 items={FILMS}

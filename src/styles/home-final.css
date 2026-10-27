@@ -30,6 +30,12 @@
   position: relative;
 }
 
+/* the pure white ground (?ground=white); the grey is the live homepage's,
+   from .ha. On white the questions read by their outlines. */
+.hf[data-ground='white'] {
+  background: #fff;
+}
+
 .hf__page {
   --hf-gap: clamp(16px, 3vh, 36px);
   position: sticky;
