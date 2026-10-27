@@ -10,9 +10,9 @@ import { reducedMotion } from '@/components/home/gl'
 import { useDeck } from '@/components/home/useDeck'
 import { useRage } from '@/components/home/useRage'
 import uUrl from '@/assets/home/umm-u.svg'
-import quarterUrl from '@/assets/home/film-quarter.svg'
-import archUrl from '@/assets/home/film-arch.svg'
-import circleUrl from '@/assets/home/film-circle.svg'
+import sparkleUrl from '@/assets/home/film-sparkle.svg'
+import pinchUrl from '@/assets/home/film-pinch.svg'
+import softUrl from '@/assets/home/film-soft.svg'
 import '@/styles/home-final.css'
 
 /* ============================================================================
@@ -27,8 +27,8 @@ import '@/styles/home-final.css'
    Krish asked (27 Oct) for the layouts as options, so the Options dock has
    four (the boss's composition with the mark raised above the ask bar is
    the default), the grey or a pure white ground, four shapes for the film
-   (the U, a quarter ring, an arch, a circle), three ways for it to come
-   in, the two cursor effects, and a replay of the whole entrance. The
+   (the U, and the three sparkles Krish drew: sharp, pinched square, soft),
+   three ways for it to come in, the two cursor effects, and a replay of the whole entrance. The
    choices are kept in ?layout=, ?ground=, ?shape=, ?film= and ?cursor=,
    and a link carrying them opens on them with or without the dock. The dock shows only with ?options, so the
    plain link is the page as it will ship.
@@ -109,11 +109,13 @@ const FILM_AT = 2200
  *  Worth choosing again when the eye film lands at public/home/eye.mp4. */
 const STILL_AT = 3.5
 
-type Shape = 'u' | 'quarter' | 'arch' | 'circle'
+type Shape = 'u' | 'sparkle' | 'pinch' | 'soft'
 
 /**
  * The shapes the film plays in, each with what the page needs of it:
  *   w, h        its drawing's size (the box's proportions follow it)
+ *   size        the box's height as a share of the film's height: the
+ *               sparkles are cut in at the sides, so they sit a little taller
  *   fx, fy      its deepest point, the place furthest from any edge, as a
  *   depth       share of the box, and how far that is in drawing units; the
  *               scroll grows the shape out of it, so the film covers the
@@ -129,6 +131,7 @@ const SHAPES: {
   url: string
   w: number
   h: number
+  size: number
   fx: number
   fy: number
   depth: number
@@ -144,6 +147,7 @@ const SHAPES: {
     url: uUrl,
     w: 690,
     h: 460,
+    size: 1,
     fx: 474 / 690,
     fy: 244 / 460,
     depth: 115,
@@ -153,45 +157,48 @@ const SHAPES: {
     to: 185,
   },
   {
-    id: 'quarter',
-    label: 'Quarter',
-    hint: 'One quarter ring, the stroke the mark’s letters are drawn with.',
-    url: quarterUrl,
-    w: 460,
-    h: 460,
-    fx: 216 / 460,
-    fy: 216 / 460,
-    depth: 115,
-    px: '100%',
-    py: '100%',
-    from: 270,
-    to: 95,
-  },
-  {
-    id: 'arch',
-    label: 'Arch',
-    hint: 'An arch, like a doorway into the work.',
-    url: archUrl,
+    id: 'sparkle',
+    label: 'Sparkle',
+    hint: 'Four sharp points, the sides drawn in between them.',
+    url: sparkleUrl,
     w: 400,
-    h: 520,
-    fx: 0.5,
-    fy: 320 / 520,
-    depth: 200,
-    px: '50%',
-    py: '100%',
-    from: 270,
-    to: 185,
-  },
-  {
-    id: 'circle',
-    label: 'Circle',
-    hint: 'A round window.',
-    url: circleUrl,
-    w: 460,
-    h: 460,
+    h: 400,
+    size: 1.12,
     fx: 0.5,
     fy: 0.5,
-    depth: 230,
+    depth: 80,
+    px: '50%',
+    py: '50%',
+    from: 0,
+    to: 360,
+  },
+  {
+    id: 'pinch',
+    label: 'Pinch',
+    hint: 'A square with its four sides drawn in, its corners sharp.',
+    url: pinchUrl,
+    w: 400,
+    h: 400,
+    size: 1.06,
+    fx: 0.5,
+    fy: 0.5,
+    depth: 116,
+    px: '50%',
+    py: '50%',
+    from: 0,
+    to: 360,
+  },
+  {
+    id: 'soft',
+    label: 'Soft sparkle',
+    hint: 'Four rounded points over a fuller middle.',
+    url: softUrl,
+    w: 400,
+    h: 400,
+    size: 1.12,
+    fx: 0.5,
+    fy: 0.5,
+    depth: 100,
     px: '50%',
     py: '50%',
     from: 0,
@@ -270,6 +277,7 @@ function Film({ mode, shape, delay }: { mode: FilmIn; shape: Shape; delay: numbe
       style={
         {
           '--ar': sh.w / sh.h,
+          '--hs': sh.size,
           '--px': sh.px,
           '--py': sh.py,
           '--fan-from': `${sh.from}deg`,
