@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { asciiChips, eyeFilm, homeHero } from '@/content/home'
 import { IconArrowUpRight } from '@/components/icons'
-import { AskBar, HomeNav, Pillars, useScene } from '@/components/home/HomeParts'
+import { AskBar, Pillars, useScene } from '@/components/home/HomeParts'
+import { MegaNav } from '@/components/home/MegaNav'
 import { Seg } from '@/components/home/LiveHero'
 import { EFFECTS, type Effect } from '@/components/home/ascii/DeckStage'
 import { PrintScene } from '@/components/home/ascii/PrintScene'
@@ -448,7 +449,7 @@ function Hero({ film, shape, filmRun, cursor }: { film: FilmIn; shape: Shape; fi
   return (
     <section className="hf__run" ref={run}>
       <div className="hf__page" ref={page} data-phase={rage.phase} data-in={entered || undefined}>
-        <HomeNav />
+        <MegaNav />
 
         <div className="hf__body">
           <div className="hf__stage">

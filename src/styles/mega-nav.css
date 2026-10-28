@@ -1,0 +1,239 @@
+/* ============================================================================
+   MEGA NAV — the live site's nav (MegaNav.tsx)
+
+   Measured off umm.digital at 1440 wide: a 5px pill of 40px titles in
+   Mosvita 600 at 16px; the white hover pill slides in 0.4s; each panel is
+   900 × 400, radius 20, 20px in, opening 5px under the pill with an 0.8s
+   fade. Columns are 259px apart by 40 (the UMM AI panel: 295, 281, 281,
+   no gap). Links are 18px with 0.025em tracking, an icon box ahead of each.
+   The one change from the live site: the panel is white glass, not black.
+   ========================================================================== */
+
+.hm-nav.mn {
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.mn .hm-nav__logo img {
+  width: 145px;
+  height: auto;
+}
+
+.mn__menu {
+  position: relative;
+}
+
+/* Get in Touch at the live size: a 39px pill and orb, 15px type */
+.mn .umm-split {
+  --split-h: 39px;
+}
+
+.mn .umm-split__pill {
+  padding-inline: 24px;
+  font-size: 15px;
+}
+
+/* --- the pill ------------------------------------------------------------ */
+
+.mn__bar {
+  position: relative;
+  display: flex;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  border-radius: 100px;
+}
+
+/* the glass sits on a layer of its own, so the panel below can be glass too */
+.mn__bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(240 238 245 / 0.75);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* the white pill under the title being pointed at */
+.mn__bar::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: var(--x);
+  width: var(--w);
+  height: 40px;
+  border-radius: 100px;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s;
+}
+
+.mn__menu[data-open] .mn__bar::after {
+  opacity: 1;
+}
+
+.mn__bar li {
+  position: relative;
+  z-index: 1;
+}
+
+.mn__title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 100px;
+  background: none;
+  color: #121212;
+  font: 600 16px/24px var(--umm-font-display);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mn__spark {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+/* --- the panels ---------------------------------------------------------- */
+
+.mn__drop {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  width: 900px;
+  padding-top: 5px;
+}
+
+.mn__menu:not([data-open]) .mn__drop {
+  pointer-events: none;
+}
+
+.mn__panel {
+  display: none;
+  box-sizing: border-box;
+  height: 400px;
+  padding: 20px;
+  border: 1px solid rgb(255 255 255 / 0.05);
+  border-radius: 20px;
+  /* the live site's glass, white instead of 90% black: enough white to
+     hold the ink type over the mark and the black ask bar */
+  background: rgb(255 255 255 / 0.74);
+  -webkit-backdrop-filter: blur(32px) saturate(140%);
+  backdrop-filter: blur(32px) saturate(140%);
+}
+
+.mn__panel[data-open] {
+  display: grid;
+  grid-template-columns: repeat(3, 259px);
+  align-items: start;
+  gap: 40px;
+  animation: mn-in 0.8s both;
+}
+
+.mn__panel[data-kind='ai'] {
+  grid-template-columns: 295px 281px 281px;
+  gap: 0;
+}
+
+@keyframes mn-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.mn__lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  padding: 10px;
+}
+
+.mn__panel[data-kind='ai'] .mn__lead {
+  padding-right: 30px;
+}
+
+.mn__mark {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 50px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.mn__render {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.mn__list {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin: 0;
+  padding: 95px 10px 10px;
+  list-style: none;
+}
+
+.mn__panel[data-kind='ai'] .mn__list {
+  gap: 30px;
+  margin-top: 100px;
+  padding-top: 10px;
+}
+
+.mn__link {
+  display: flex;
+  align-items: center;
+  color: #121212;
+  font: 400 18px/1.4 var(--umm-font-display);
+  letter-spacing: 0.025em;
+  transition: color 0.3s;
+}
+
+.mn__link:is(:hover, :focus-visible) {
+  color: var(--accent, #121212);
+}
+
+.mn__icon {
+  flex: none;
+  width: 34px;
+  margin-right: 5px;
+}
+
+.mn__panel[data-kind='ai'] .mn__icon {
+  width: 31px;
+}
+
+.mn__icon img {
+  display: block;
+}
+
+.mn__card {
+  display: block;
+  margin-top: 30px;
+  padding: 10px;
+}
+
+.mn__card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* the live site folds the pill away below 1025px */
+@media (max-width: 1024px) {
+  .hm-nav.mn {
+    grid-template-columns: 1fr auto;
+  }
+  .mn__menu {
+    display: none;
+  }
+}
