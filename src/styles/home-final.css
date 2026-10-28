@@ -50,6 +50,23 @@
   inset: auto;
 }
 
+/* the paper behind everything (Backdrop.ts): under every piece of the hero,
+   above only the ground */
+.hf__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: opacity 2s var(--umm-ease-out) 0.8s;
+}
+
+.hf__page:not([data-in]) .hf__bg {
+  opacity: 0;
+}
+
 .hf__body {
   display: grid;
   gap: var(--hf-gap) clamp(28px, 4vw, 80px);
@@ -164,7 +181,7 @@
 }
 
 /* as the shape grows over the hero, the rest of it fades */
-.hf__page[data-growing] :is(.hm-nav, .hf__stage, .hf__title, .hf__ask, .hf__pillars) {
+.hf__page[data-growing] :is(.hf__bg, .hm-nav, .hf__stage, .hf__title, .hf__ask, .hf__pillars) {
   filter: opacity(var(--fade, 1));
 }
 

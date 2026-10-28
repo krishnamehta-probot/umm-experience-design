@@ -3,6 +3,7 @@ import { asciiChips, eyeFilm, homeHero } from '@/content/home'
 import { IconArrowUpRight } from '@/components/icons'
 import { AskBar, Pillars, useScene } from '@/components/home/HomeParts'
 import { MegaNav } from '@/components/home/MegaNav'
+import { Backdrop, BACKDROPS, type BackdropMode } from '@/components/home/Backdrop'
 import { Seg } from '@/components/home/LiveHero'
 import { EFFECTS, type Effect } from '@/components/home/ascii/DeckStage'
 import { PrintScene } from '@/components/home/ascii/PrintScene'
@@ -29,8 +30,10 @@ import '@/styles/home-final.css'
    four (the boss's composition with the mark raised above the ask bar is
    the default), the grey or a pure white ground, four shapes for the film
    (the U, and the three sparkles Krish drew: sharp, pinched square, soft),
-   three ways for it to come in, the two cursor effects, and a replay of the whole entrance. The
-   choices are kept in ?layout=, ?ground=, ?shape=, ?film= and ?cursor=,
+   three ways for it to come in, the two cursor effects, four backdrops
+   (28 Oct: the paper answering the cursor, Backdrop.ts), and a replay of
+   the whole entrance. The choices are kept in ?layout=, ?ground=, ?shape=,
+   ?film=, ?cursor= and ?bg=,
    and a link carrying them opens on them with or without the dock. The dock shows only with ?options, so the
    plain link is the page as it will ship.
 
@@ -419,8 +422,46 @@ function useGrow(run: RefObject<HTMLElement | null>, page: RefObject<HTMLDivElem
   }, [run, page])
 }
 
+/** The backdrop for the life of its canvas; the mode changes in place. */
+function useBackdrop(
+  canvas: RefObject<HTMLCanvasElement | null>,
+  page: RefObject<HTMLDivElement | null>,
+  mode: BackdropMode,
+) {
+  const bd = useRef<Backdrop | null>(null)
+  const first = useRef(mode)
+  useEffect(() => {
+    const c = canvas.current
+    if (!c) return
+    try {
+      bd.current = new Backdrop(c, first.current, () => page.current?.querySelector<HTMLElement>('.hf__stage') ?? null)
+    } catch {
+      return
+    }
+    return () => {
+      bd.current?.dispose()
+      bd.current = null
+    }
+  }, [canvas, page])
+  useEffect(() => {
+    bd.current?.setMode(mode)
+  }, [mode])
+}
+
 /** The page itself. Mounted afresh to replay the entrance. */
-function Hero({ film, shape, filmRun, cursor }: { film: FilmIn; shape: Shape; filmRun: number; cursor: Cursor }) {
+function Hero({
+  film,
+  shape,
+  filmRun,
+  cursor,
+  backdrop,
+}: {
+  film: FilmIn
+  shape: Shape
+  filmRun: number
+  cursor: Cursor
+  backdrop: BackdropMode
+}) {
   const rage = useRage({ leave: 1500 })
   const [canvas, engine] = useScene((c) => {
     const s = new PrintScene(c, 'logo', { style: 'engrave', palette: 'light', grain: 3, effect: cursor })
@@ -436,6 +477,8 @@ function Hero({ film, shape, filmRun, cursor }: { film: FilmIn; shape: Shape; fi
   const run = useRef<HTMLElement>(null)
   const page = useRef<HTMLDivElement>(null)
   useGrow(run, page)
+  const paper = useRef<HTMLCanvasElement>(null)
+  useBackdrop(paper, page, backdrop)
 
   /* the pieces come in once the first frame is painted */
   const [entered, setEntered] = useState(false)
@@ -449,6 +492,7 @@ function Hero({ film, shape, filmRun, cursor }: { film: FilmIn; shape: Shape; fi
   return (
     <section className="hf__run" ref={run}>
       <div className="hf__page" ref={page} data-phase={rage.phase} data-in={entered || undefined}>
+        <canvas ref={paper} className="hf__bg" aria-hidden="true" />
         <MegaNav />
 
         <div className="hf__body">
@@ -505,6 +549,11 @@ export function HomeFinal() {
   const [cursor, setCursor] = useState<Cursor>(() =>
     pick(new URLSearchParams(window.location.search).get('cursor'), CURSORS, 'magnet'),
   )
+  const [backdrop, setBackdrop] = useState<BackdropMode>(() =>
+    pick(new URLSearchParams(window.location.search).get('bg'), BACKDROPS, 'emboss'),
+  )
+  /* a backdrop shows while its option is hovered in the dock */
+  const [peek, setPeek] = useState<BackdropMode | null>(null)
   const [run, setRun] = useState(0)
   const [filmRun, setFilmRun] = useState(0)
   const [open, setOpen] = useState(false)
@@ -515,13 +564,13 @@ export function HomeFinal() {
     window.history.replaceState(
       null,
       '',
-      `/home-final?options&layout=${layout}&ground=${ground}&shape=${shape}&film=${film}&cursor=${cursor}`,
+      `/home-final?options&layout=${layout}&ground=${ground}&shape=${shape}&film=${film}&cursor=${cursor}&bg=${backdrop}`,
     )
-  }, [review, layout, ground, shape, film, cursor])
+  }, [review, layout, ground, shape, film, cursor, backdrop])
 
   return (
     <main className="hm ha hf" data-layout={layout} data-ground={ground} data-palette="light" data-dark="false">
-      <Hero key={run} film={film} shape={shape} filmRun={filmRun} cursor={cursor} />
+      <Hero key={run} film={film} shape={shape} filmRun={filmRun} cursor={cursor} backdrop={peek ?? backdrop} />
 
       {review && (
         <aside className="ha-dock" data-open={open} aria-label="Homepage options">
@@ -532,6 +581,7 @@ export function HomeFinal() {
             <div className="ha-dock__body">
               <Seg label="Layout" items={LAYOUTS} value={layout} onPick={setLayout} />
               <Seg label="Background" items={GROUNDS} value={ground} onPick={setGround} />
+              <Seg label="Backdrop" items={BACKDROPS} value={backdrop} onPick={setBackdrop} onPeek={setPeek} />
               <Seg
                 label="Film shape"
                 items={SHAPES}
