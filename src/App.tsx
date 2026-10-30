@@ -12,6 +12,7 @@ const StyleguidePage = lazy(() =>
 const PhonePreview = lazy(() => import('./pages/PhonePreview').then((m) => ({ default: m.PhonePreview })))
 const HomeShowcase = lazy(() => import('./pages/HomeShowcase').then((m) => ({ default: m.HomeShowcase })))
 const HomeFinal = lazy(() => import('./pages/HomeFinal').then((m) => ({ default: m.HomeFinal })))
+const HomeFlank = lazy(() => import('./pages/HomeFlank').then((m) => ({ default: m.HomeFlank })))
 const AiAutomationPage = lazy(() =>
   import('./pages/AiAutomationPage').then((m) => ({ default: m.AiAutomationPage })),
 )
@@ -46,6 +47,8 @@ const FilmRenderPage = lazy(() =>
  *                -print, -particles, -glow and -blush open it on that version
  *   /home-final  the homepage the boss chose (26 Oct): print, engraving,
  *                the UMM mark, in its own layout with nothing on the mark
+ *   /home-tiles, /home-glass, /home-window  three new marks for Santosh
+ *                (30 Oct), the questions left and right of the ask bar
  *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
@@ -71,6 +74,14 @@ export function App() {
     return (
       <Suspense fallback={null}>
         <HomeFinal />
+      </Suspense>
+    )
+  }
+  const flanks = { '/home-tiles': 'tiles', '/home-glass': 'glass', '/home-window': 'window' } as const
+  if (path in flanks) {
+    return (
+      <Suspense fallback={null}>
+        <HomeFlank initial={flanks[path as keyof typeof flanks]} />
       </Suspense>
     )
   }
