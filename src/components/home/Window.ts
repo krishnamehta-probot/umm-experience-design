@@ -8,11 +8,11 @@ import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngi
    The page is a sheet of paper with the mark cut clean through it, and the
    film lies behind the sheet, seen only through the letters: held on a
    still at rest, it plays once the dive has brought it to the middle of the
-   screen (Krish, 30 Oct), and holds again on the way back up. The cut has
-   depth: its edge throws a soft shadow into the letters on the side the light
-   comes from and catches a thin line of light on the far side, and the film
-   sits a little further back than the paper, so it shifts against the
-   letters as the cursor moves. The cursor is the light.
+   screen (Krish, 30 Oct), and holds again on the way back up. At rest the
+   still stays put: nothing behind the letters moves until the dive. The cut
+   has depth: its edge throws a soft shadow into the letters on the side the
+   light comes from and catches a thin line of light on the far side. The
+   cursor is the light; without one, the light rests above the mark.
 
    Scrolling dives into the mark: the hero holds while the letters grow out of
    the deepest point of the u's quarter ring, which drifts to the middle of
@@ -73,7 +73,8 @@ export class Window implements MarkEngine {
   private pointer = { x: 0, y: 0, on: false }
   private look: { x: number; y: number } | null = null
   private light = { x: 0, y: 0 }
-  private par = { x: 0, y: 0 }
+  /* where the light rests when there is no cursor */
+  private home = { x: 0, y: 0 }
   private t0 = performance.now()
   private last = performance.now()
   private leaveAt = -1
@@ -174,7 +175,8 @@ export class Window implements MarkEngine {
     this.pad = Math.ceil(60 * this.dpr)
     this.shade = inverse(ds, this.pad, 22 * this.dpr, 'rgba(8,6,12,0.9)')
     this.shine = inverse(ds, this.pad, 1.2 * this.dpr, 'rgba(255,255,255,0.95)')
-    if (!this.pointer.on) this.light = { x: this.rest.x + MARK_W * m.s * 0.2, y: this.rest.y - 120 }
+    this.home = { x: this.rest.x + MARK_W * m.s * 0.2, y: this.rest.y - 120 }
+    if (!this.pointer.on) this.light = { ...this.home }
     this.wake()
   }
 
@@ -241,15 +243,11 @@ export class Window implements MarkEngine {
       this.grown = false
     }
 
-    /* the light: the question being rested on, else the cursor, else a
-       slow drift above the mark */
+    /* the light: the question being rested on, else the cursor, else at
+       rest above the mark */
     const mw = MARK_W * rest.s
     const mh = MARK_H * rest.s
-    const drift = {
-      x: rest.x + mw * (0.5 + Math.sin(t * 0.19) * 0.45),
-      y: rest.y - mh * (0.25 + Math.sin(t * 0.13 + 2) * 0.2),
-    }
-    const at = this.look ?? (this.pointer.on ? this.pointer : this.calm ? this.light : drift)
+    const at = this.look ?? (this.pointer.on ? this.pointer : this.home)
     const kl = 1 - Math.exp(-dt * 2.5)
     this.light.x += (at.x - this.light.x) * kl
     this.light.y += (at.y - this.light.y) * kl
@@ -263,13 +261,6 @@ export class Window implements MarkEngine {
     const s = rest.s * Math.pow(s1 / rest.s, k)
     const ox = d0x + (cx - d0x) * k - MARK_DEEP.x * s
     const oy = d0y + (cy - d0y) * k - MARK_DEEP.y * s
-
-    /* the film sits behind the paper: it shifts against the cut */
-    const lx = (this.light.x - (rest.x + mw / 2)) / Math.max(1, mw / 2)
-    const ly = (this.light.y - (rest.y + mh / 2)) / Math.max(1, mh)
-    const kp = 1 - Math.exp(-dt * 1.8)
-    this.par.x += (Math.max(-1.2, Math.min(1.2, lx)) * -0.025 * vw - this.par.x) * kp
-    this.par.y += (Math.max(-1.2, Math.min(1.2, ly)) * -0.03 * vh - this.par.y) * kp
 
     /* in: the letters print in ink, then open onto the film */
     const ink = this.calm ? 1 : easeOut(clamp01((t - 0.15) / 0.9))
@@ -290,19 +281,12 @@ export class Window implements MarkEngine {
     ctx.fillRect(ox, oy, MARK_W * s, MARK_H * s)
 
     if (video.readyState >= 2 && video.videoWidth) {
-      /* the film covers the screen, a touch larger at rest for the shift */
-      const zoom = 1 + 0.07 * (1 - k)
-      const cover = Math.max(vw / video.videoWidth, vh / video.videoHeight) * zoom
+      /* the film covers the screen, fixed behind the page */
+      const cover = Math.max(vw / video.videoWidth, vh / video.videoHeight)
       const fw = video.videoWidth * cover
       const fh = video.videoHeight * cover
       ctx.globalAlpha = open
-      ctx.drawImage(
-        video,
-        -pr.left + (vw - fw) / 2 + this.par.x * (1 - k),
-        -pr.top + (vh - fh) / 2 + this.par.y * (1 - k),
-        fw,
-        fh,
-      )
+      ctx.drawImage(video, -pr.left + (vw - fw) / 2, -pr.top + (vh - fh) / 2, fw, fh)
     }
 
     /* the cut's edge: a soft shadow on the side of the light, a thin line of
