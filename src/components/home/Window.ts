@@ -3,16 +3,16 @@ import { reducedMotion } from './gl'
 import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngine, type MarkHost } from './mark'
 
 /* ============================================================================
-   WINDOW — the UMM mark cut out of the page, the film behind it (/home-window)
+   WINDOW — the UMM mark, and the film inside it on the dive (/home-window)
 
-   The page is a sheet of paper with the mark cut clean through it, and the
-   film lies behind the sheet, seen only through the letters: held on a
-   still at rest, it plays once the dive has brought it to the middle of the
-   screen (Krish, 30 Oct), and holds again on the way back up. At rest the
-   still stays put: nothing behind the letters moves until the dive. The cut
-   has depth: its edge throws a soft shadow into the letters on the side the
-   light comes from and catches a thin line of light on the far side. The
-   cursor is the light; without one, the light rests above the mark.
+   At the top of the page the mark is solid black (Krish, 30 Oct: "it should
+   always be black in top"). Scrolling dives into it, and only as the dive
+   brings the letters to the middle of the screen does the film fade in
+   inside them and play; scrolling back up pauses it and the mark goes black
+   again. As the film shows, the letters read as cut through the page: the
+   edge throws a soft shadow in on the side the light comes from and
+   catches a thin line of light on the far side. The cursor is the light;
+   without one, the light rests above the mark.
 
    Scrolling dives into the mark: the hero holds while the letters grow out of
    the deepest point of the u's quarter ring, which drifts to the middle of
@@ -26,9 +26,11 @@ const RUNWAY = 1.3
 /** the still the film holds until the dive (s): in the live reel, the
  *  collage of work tilted across the frame, which fills every letter */
 const STILL_AT = 19.5
-/** how far into the dive the film plays, and pauses again on the way back */
-const PLAY_AT = 0.55
-const PAUSE_AT = 0.4
+/** how far into the dive the film fades in (and plays), and is in full;
+ *  it pauses again below PAUSE_AT on the way back up */
+const FILM_FROM = 0.3
+const FILM_TO = 0.55
+const PAUSE_AT = 0.25
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -226,7 +228,7 @@ export class Window implements MarkEngine {
     const k = easeInOut(clamp01(p / 0.92))
 
     /* the film plays only once it is in the middle of the screen */
-    if (!this.playing && p >= PLAY_AT && !this.calm) {
+    if (!this.playing && p >= FILM_FROM && !this.calm) {
       this.playing = true
       video.play().catch(() => {})
     } else if (this.playing && p < PAUSE_AT) {
@@ -262,9 +264,10 @@ export class Window implements MarkEngine {
     const ox = d0x + (cx - d0x) * k - MARK_DEEP.x * s
     const oy = d0y + (cy - d0y) * k - MARK_DEEP.y * s
 
-    /* in: the letters print in ink, then open onto the film */
+    /* in: the letters print in black; the film shows only on the dive */
     const ink = this.calm ? 1 : easeOut(clamp01((t - 0.15) / 0.9))
-    const open = this.calm ? 1 : easeOut(clamp01((t - 1.1) / 1.6))
+    const film = clamp01((p - FILM_FROM) / (FILM_TO - FILM_FROM))
+    const open = film * film * (3 - 2 * film)
 
     const d = this.dpr
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -276,13 +279,17 @@ export class Window implements MarkEngine {
     ctx.clip(this.path)
     ctx.setTransform(d, 0, 0, d, 0, 0)
 
-    ctx.globalAlpha = ink
+    /* the black gives way as the film comes in, so no black fringe is left
+       along the letters' edges once the film is in full */
+    const ready = video.readyState >= 2 && video.videoWidth > 0
+    ctx.globalAlpha = ink * (ready ? 1 - open : 1)
     ctx.fillStyle = INK
     ctx.fillRect(ox, oy, MARK_W * s, MARK_H * s)
 
-    if (video.readyState >= 2 && video.videoWidth) {
-      /* the film covers the screen, fixed behind the page */
-      const cover = Math.max(vw / video.videoWidth, vh / video.videoHeight)
+    if (ready) {
+      /* the film covers the screen, fixed behind the page, a little over
+         so the reel's own edge rows stay off it */
+      const cover = Math.max(vw / video.videoWidth, vh / video.videoHeight) * 1.02
       const fw = video.videoWidth * cover
       const fh = video.videoHeight * cover
       ctx.globalAlpha = open
@@ -291,7 +298,7 @@ export class Window implements MarkEngine {
 
     /* the cut's edge: a soft shadow on the side of the light, a thin line of
        light on the far side; both go as the letters grow past the screen */
-    const depth = (1 - clamp01(k * 4)) * ink
+    const depth = (1 - clamp01(k * 2.5)) * open
     if (depth > 0.01 && this.shade && this.shine) {
       const dx = rest.x + mw / 2 - this.light.x
       const dy = rest.y + mh / 2 - this.light.y

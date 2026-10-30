@@ -22,8 +22,8 @@ import '@/styles/home-flank.css'
      tiles   /home-tiles   the mark as a board of quarter-circle tiles that
                            turn over into a picture of each question
      glass   /home-glass   the mark as a thick piece of glass, lit by the cursor
-     window  /home-window  the mark cut out of the page, the film behind it;
-                           scrolling dives through it into the film
+     window  /home-window  the mark in black; scrolling dives into it, and the
+                           film fades in and plays as it fills the screen
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
@@ -49,7 +49,7 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
     id: 'window',
     label: 'Window',
-    hint: 'The mark cut out of the page, the film playing behind it. Scroll to dive through the mark into the film.',
+    hint: 'The mark in black. Scroll to dive into it: as it fills the screen the film fades in inside it and plays.',
   },
 ]
 
