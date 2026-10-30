@@ -5,7 +5,7 @@ import { AskBar, Pillars } from '@/components/home/HomeParts'
 import { MegaNav } from '@/components/home/MegaNav'
 import { Seg } from '@/components/home/LiveHero'
 import { useRage } from '@/components/home/useRage'
-import { Glow } from '@/components/home/Glow'
+import { Glow, SHADERS, TONES, type Shader, type Tone } from '@/components/home/Glow'
 import type { Focus, Ground, MarkEngine, MarkHost } from '@/components/home/mark'
 import markUrl from '@/assets/home/umm-mark.svg'
 import '@/styles/home-flank.css'
@@ -26,10 +26,11 @@ import '@/styles/home-flank.css'
                            scrolling dives through it into the film
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts), loaded
-   only for its own page. Under all three, by default, the white ground with
-   a magenta glow rising behind the ask bar (Glow.ts, Krish's reference of
-   30 Oct); the live homepage's grey is the other ground, kept in ?ground=.
-   ?options adds a dock to switch between them.
+   only for its own page. Under all three, a shader on white (Glow.ts, from
+   Krish's reference of 30 Oct): a glow, a mesh, an aurora, silk or a halo,
+   in one palette or turning through them all; or the live homepage's grey.
+   They are kept in ?bg= and ?tone=, and ?options adds a dock to switch
+   between everything.
    ========================================================================== */
 
 export type Version = 'tiles' | 'glass' | 'window'
@@ -52,10 +53,16 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
   },
 ]
 
-const GROUNDS: { id: Ground; label: string; hint: string }[] = [
-  { id: 'glow', label: 'Glow', hint: 'White, with a magenta glow rising behind the ask bar that leans toward the cursor.' },
-  { id: 'grey', label: 'Grey', hint: 'The live homepage’s grey ground, #DEDEDE.' },
+/** the shaders, and the live homepage's plain grey */
+type Bg = Shader | 'none'
+
+const BGS: { id: Bg; label: string; hint: string }[] = [
+  ...SHADERS,
+  { id: 'none', label: 'Grey', hint: 'No shader: the live homepage’s grey ground, #DEDEDE.' },
 ]
+
+const pick = <T extends string>(v: string | null, from: { id: T }[], or: T) =>
+  from.some((x) => x.id === v) ? (v as T) : or
 
 export const VERSION_PATHS: Record<Version, string> = {
   tiles: '/home-tiles',
@@ -79,7 +86,8 @@ const SIDES = [
   { side: 'right', chips: asciiChips.slice(3), from: 3 },
 ] as const
 
-function Hero({ version, ground }: { version: Version; ground: Ground }) {
+function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
+  const ground: Ground = bg === 'none' ? 'grey' : 'glow'
   const rage = useRage({ leave: 1500 })
   const run = useRef<HTMLElement>(null)
   const page = useRef<HTMLDivElement>(null)
@@ -110,18 +118,27 @@ function Hero({ version, ground }: { version: Version; ground: Ground }) {
     }
   }, [version, ground])
 
-  /* the glow behind everything, when the ground is the glow */
+  /* the shader behind everything, unless the ground is the grey; a change
+     of shader or palette is made in place */
+  const glow = useRef<Glow | null>(null)
+  const first = useRef({ bg, tone })
   useEffect(() => {
-    if (ground !== 'glow' || !layer.current || !page.current) return
+    const { bg: b, tone: t } = first.current
+    if (ground !== 'glow' || b === 'none' || !layer.current || !page.current) return
     const pg = page.current
-    let glow: Glow | null = null
     try {
-      glow = new Glow(layer.current, pg, () => pg.querySelector<HTMLElement>('.hx__bar'))
+      glow.current = new Glow(layer.current, pg, () => pg.querySelector<HTMLElement>('.hx__bar'), b, t)
     } catch {
       return
     }
-    return () => glow?.dispose()
+    return () => {
+      glow.current?.dispose()
+      glow.current = null
+    }
   }, [ground])
+  useEffect(() => {
+    if (bg !== 'none') glow.current?.set(bg, tone)
+  }, [bg, tone])
 
   useEffect(() => {
     if (rage.phase === 'leaving') engine.current?.leave()
@@ -211,21 +228,36 @@ function Hero({ version, ground }: { version: Version; ground: Ground }) {
 
 export function HomeFlank({ initial }: { initial: Version }) {
   const [version, setVersion] = useState<Version>(initial)
-  const [ground, setGround] = useState<Ground>(() =>
-    new URLSearchParams(window.location.search).get('ground') === 'grey' ? 'grey' : 'glow',
-  )
+  const [bg, setBg] = useState<Bg>(() => {
+    const q = new URLSearchParams(window.location.search)
+    return q.get('ground') === 'grey' ? 'none' : pick(q.get('bg'), BGS, 'glow')
+  })
+  const [tone, setTone] = useState<Tone>(() => pick(new URLSearchParams(window.location.search).get('tone'), TONES, 'rotate'))
+  /* a shader or palette shows while its option is hovered in the dock (the
+     grey is not previewed: it changes the page beneath the mark) */
+  const [peekBg, setPeekBg] = useState<Bg | null>(null)
+  const [peekTone, setPeekTone] = useState<Tone | null>(null)
+  const shown = peekBg && (peekBg === 'none') === (bg === 'none') ? peekBg : bg
   const [run, setRun] = useState(0)
   const [open, setOpen] = useState(false)
   const [review] = useState(() => new URLSearchParams(window.location.search).has('options'))
 
   useEffect(() => {
-    const q = [review && 'options', ground === 'grey' && 'ground=grey'].filter(Boolean).join('&')
+    const q = [review && 'options', bg !== 'glow' && `bg=${bg}`, tone !== 'rotate' && bg !== 'none' && `tone=${tone}`]
+      .filter(Boolean)
+      .join('&')
     window.history.replaceState(null, '', `${VERSION_PATHS[version]}${q ? `?${q}` : ''}`)
-  }, [review, version, ground])
+  }, [review, version, bg, tone])
 
   return (
-    <main className="hm ha hx" data-version={version} data-ground={ground} data-palette="light" data-dark="false">
-      <Hero key={`${version}-${ground}-${run}`} version={version} ground={ground} />
+    <main
+      className="hm ha hx"
+      data-version={version}
+      data-ground={bg === 'none' ? 'grey' : 'glow'}
+      data-palette="light"
+      data-dark="false"
+    >
+      <Hero key={`${version}-${bg === 'none'}-${run}`} version={version} bg={shown} tone={peekTone ?? tone} />
 
       {review && (
         <aside className="ha-dock" data-open={open} aria-label="Homepage options">
@@ -243,7 +275,10 @@ export function HomeFlank({ initial }: { initial: Version }) {
                   setVersion(v)
                 }}
               />
-              <Seg label="Ground" items={GROUNDS} value={ground} onPick={setGround} />
+              <Seg label="Shader" items={BGS} value={bg} onPick={setBg} onPeek={setPeekBg} />
+              {bg !== 'none' && (
+                <Seg label="Colour" items={TONES} value={tone} onPick={setTone} onPeek={setPeekTone} />
+              )}
               <button
                 type="button"
                 className="hx-replay"

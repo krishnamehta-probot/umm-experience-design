@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js'
 import { reducedMotion } from './gl'
-import { GLOW_GLSL, glowNow } from './Glow'
+import { SHADER_GLSL, glowNow } from './Glow'
 import { MARK_H, MARK_PATHS, MARK_W, markPath, type Focus, type MarkEngine, type MarkHost } from './mark'
 
 /* ============================================================================
@@ -23,7 +23,7 @@ import { MARK_H, MARK_PATHS, MARK_W, markPath, type Focus, type MarkEngine, type
 const BEVEL = 22
 const DEPTH = 110
 
-/* the paper: the ground (the grey, #DEDEDE, linear 0.7305; or the glow,
+/* the paper: the ground (the grey, #DEDEDE, linear 0.7305; or the shader,
    the same as the page's own, Glow.ts), its hairlines, and the mark's shadow
    (a blurred silhouette, uSil) offset away from the light */
 const PAPER_FRAG = /* glsl */ `
@@ -35,17 +35,13 @@ uniform vec2 uOff;
 uniform float uOn;
 uniform float uGlow;
 uniform vec2 uOrigin;
-uniform vec2 uGC;
-uniform vec2 uGR;
-uniform vec3 uGM;
-uniform float uGT;
-${GLOW_GLSL}
+${SHADER_GLSL}
 vec3 toLinear(vec3 c) {
   return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
 }
 void main() {
   vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uDpr;
-  vec3 col = uGlow > 0.5 ? toLinear(glowAt(p + uOrigin, uGC, uGR, uGM, uGT)) : vec3(0.7305);
+  vec3 col = uGlow > 0.5 ? toLinear(shaderAt(p + uOrigin)) : vec3(0.7305);
 
   /* hairlines on the grey, strongest around the mark and gone by the
      stage's edges (the glow has none) */
@@ -153,10 +149,15 @@ export class GlassMark implements MarkEngine {
           uOn: { value: 0 },
           uGlow: { value: host.ground === 'glow' ? 1 : 0 },
           uOrigin: { value: new THREE.Vector2() },
-          uGC: { value: new THREE.Vector2() },
-          uGR: { value: new THREE.Vector2(1, 1) },
-          uGM: { value: new THREE.Vector3() },
-          uGT: { value: 0 },
+          sMode: { value: 0 },
+          sA: { value: new THREE.Vector3(1, 1, 1) },
+          sB: { value: new THREE.Vector3(1, 1, 1) },
+          sC: { value: new THREE.Vector3(1, 1, 1) },
+          sAnchor: { value: new THREE.Vector2() },
+          sSize: { value: new THREE.Vector2(1, 1) },
+          sView: { value: 1 },
+          sMouse: { value: new THREE.Vector3() },
+          sTime: { value: 0 },
         },
         vertexShader: 'void main() { gl_Position = vec4(position.xy, 0.9999, 1.0); }',
         fragmentShader: PAPER_FRAG,
@@ -337,14 +338,20 @@ export class GlassMark implements MarkEngine {
     u.uOff.value.set(this.off.x, this.off.y)
     u.uOn.value = e * (1 - l)
     if (u.uGlow.value) {
-      /* the glow where the page's own is, from where this canvas sits */
+      /* the page's own field, from where this canvas sits in it */
+      const g = glowNow
       const pr = this.page.getBoundingClientRect()
       const cr = this.canvas.getBoundingClientRect()
       u.uOrigin.value.set(cr.left - pr.left, cr.top - pr.top)
-      u.uGC.value.set(glowNow.cx, glowNow.cy)
-      u.uGR.value.set(glowNow.rx, glowNow.ry)
-      u.uGM.value.set(glowNow.mx, glowNow.my, glowNow.on)
-      u.uGT.value = glowNow.t
+      u.sMode.value = g.mode
+      u.sA.value.fromArray(g.a)
+      u.sB.value.fromArray(g.b)
+      u.sC.value.fromArray(g.c)
+      u.sAnchor.value.set(g.ax, g.ay)
+      u.sSize.value.set(g.w, g.h)
+      u.sView.value = g.view
+      u.sMouse.value.set(g.mx, g.my, g.on)
+      u.sTime.value = g.t
     }
 
     this.renderer.render(this.scene, this.camera)

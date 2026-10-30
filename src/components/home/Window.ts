@@ -5,8 +5,10 @@ import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngi
 /* ============================================================================
    WINDOW — the UMM mark cut out of the page, the film behind it (/home-window)
 
-   The page is a sheet of grey paper with the mark cut clean through it, and
-   the film plays behind the sheet, seen only through the letters. The cut has
+   The page is a sheet of paper with the mark cut clean through it, and the
+   film lies behind the sheet, seen only through the letters: held on a
+   still at rest, it plays once the dive has brought it to the middle of the
+   screen (Krish, 30 Oct), and holds again on the way back up. The cut has
    depth: its edge throws a soft shadow into the letters on the side the light
    comes from and catches a thin line of light on the far side, and the film
    sits a little further back than the paper, so it shifts against the
@@ -21,8 +23,12 @@ import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngi
 const INK = '#100e14'
 /** how far the hero holds while the visitor dives, in screen heights */
 const RUNWAY = 1.3
-/** the still the film shows when motion is reduced (s) */
-const STILL_AT = 3.5
+/** the still the film holds until the dive (s): in the live reel, the
+ *  collage of work tilted across the frame, which fills every letter */
+const STILL_AT = 19.5
+/** how far into the dive the film plays, and pauses again on the way back */
+const PLAY_AT = 0.55
+const PAUSE_AT = 0.4
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -74,6 +80,7 @@ export class Window implements MarkEngine {
   private raf = 0
   private dead = false
   private grown = false
+  private playing = false
   private ro: ResizeObserver
 
   constructor(host: MarkHost) {
@@ -98,11 +105,7 @@ export class Window implements MarkEngine {
       s.type = type
       v.appendChild(s)
     }
-    if (this.calm) {
-      v.addEventListener('loadedmetadata', () => (v.currentTime = Math.min(STILL_AT, v.duration - 0.1)), { once: true })
-    } else {
-      v.play().catch(() => {})
-    }
+    v.addEventListener('loadedmetadata', () => (v.currentTime = Math.min(STILL_AT, v.duration - 0.1)), { once: true })
 
     this.ro = new ResizeObserver(() => this.layout())
     this.ro.observe(host.page)
@@ -189,7 +192,7 @@ export class Window implements MarkEngine {
 
   private onVisible = () => {
     if (document.hidden) this.video.pause()
-    else if (!this.calm) this.video.play().catch(() => {})
+    else if (this.playing) this.video.play().catch(() => {})
     this.wake()
   }
 
@@ -219,6 +222,15 @@ export class Window implements MarkEngine {
     let p = runway > 0 ? clamp01((pin - host.run.getBoundingClientRect().top) / runway) : 0
     if (this.leaveAt >= 0) p = Math.max(p, easeInOut(clamp01((t - this.leaveAt) / 1.3)))
     const k = easeInOut(clamp01(p / 0.92))
+
+    /* the film plays only once it is in the middle of the screen */
+    if (!this.playing && p >= PLAY_AT && !this.calm) {
+      this.playing = true
+      video.play().catch(() => {})
+    } else if (this.playing && p < PAUSE_AT) {
+      this.playing = false
+      video.pause()
+    }
 
     host.page.style.setProperty('--fade', (1 - clamp01(p * 2.4)).toFixed(3))
     if (p > 0.002) {
