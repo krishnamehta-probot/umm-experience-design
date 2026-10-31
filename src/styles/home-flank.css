@@ -940,10 +940,11 @@
 /* ============================================================================
    WORK RING — /home-ring (Ring.ts)
 
-   Ten frames of the reel on a ring in the mark's band, turning; Ring.ts sets
-   the card size (--w, --h), places the cards round the ring and fades them
-   by how far they face away. The front card grows flat over the page into
-   the film.
+   UMM's case studies on a ring in the mark's band, presented a card at a
+   time; Ring.ts sets the card size (--w, --h), places the cards round the
+   ring, fades them by how far they face away and marks the one at the front
+   (data-front), which shows its title. The front card grows flat over the
+   page into the film.
    ========================================================================== */
 
 .hx__ring-scene {
@@ -973,14 +974,23 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 18px;
   /* the cards round the back show nothing reversed */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   display: block;
   background: #111;
-  box-shadow: 0 30px 60px -32px rgb(16 14 20 / 0.6);
+  box-shadow:
+    0 44px 70px -44px rgb(16 14 20 / 0.7),
+    0 12px 24px -16px rgb(16 14 20 / 0.35);
+  color: #fff;
+  text-decoration: none;
+  font-size: clamp(10.5px, calc(var(--h, 190px) * 0.064), 17px);
   -webkit-user-drag: none;
+}
+
+.hx__ring-card[data-front] {
+  cursor: pointer;
 }
 
 .hx__ring-card > img {
@@ -991,16 +1001,38 @@
   pointer-events: none;
 }
 
+/* the shade the title sits on, up from the foot of the front card */
+.hx__ring-card::before {
+  content: '';
+  position: absolute;
+  inset: 30% 0 0;
+  background: linear-gradient(to top, rgb(10 9 14 / 0.86), rgb(10 9 14 / 0.5) 48%, rgb(10 9 14 / 0));
+  opacity: 0;
+  transition: opacity 0.7s var(--umm-ease-out);
+  pointer-events: none;
+}
+
+/* a glass edge and a little light across the top of every card */
+.hx__ring-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(150deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 36%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+  pointer-events: none;
+}
+
 /* the client's logo on a small frosted tag in the corner */
 .hx__ring-tag {
   position: absolute;
-  left: 7%;
-  bottom: 8%;
+  left: 6%;
+  top: 7%;
   display: flex;
   align-items: center;
-  max-width: 62%;
-  height: 17%;
-  padding: 0 7%;
+  max-width: 58%;
+  height: 15%;
+  padding: 0 6%;
   border-radius: 999px;
   background: rgb(255 255 255 / 0.86);
   -webkit-backdrop-filter: blur(8px);
@@ -1020,6 +1052,74 @@
   object-fit: contain;
 }
 
+/* the title, rising in while the card holds the front */
+.hx__ring-cap {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 7%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.45em 0.9em;
+  opacity: 0;
+  transform: translateY(0.7em);
+  transition:
+    opacity 0.5s var(--umm-ease-out),
+    transform 0.8s var(--umm-ease-out);
+  pointer-events: none;
+}
+
+.hx__ring-card[data-front]::before,
+.hx__ring-card[data-front] .hx__ring-cap {
+  opacity: 1;
+  transform: none;
+}
+
+.hx__ring-card[data-front] .hx__ring-cap {
+  transition-delay: 0.12s;
+}
+
+.hx__ring-kicker {
+  grid-column: 1 / -1;
+  font-size: 0.66em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.hx__ring-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  font-weight: 500;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.hx__ring-go {
+  display: grid;
+  place-items: center;
+  width: 2.3em;
+  height: 2.3em;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--umm-ink);
+  transition: transform 0.5s var(--umm-ease-out);
+}
+
+.hx__ring-go svg {
+  width: 46%;
+  height: 46%;
+}
+
+.hx__ring-card[data-front]:hover .hx__ring-go {
+  transform: rotate(45deg);
+}
+
 .hx__ring-grow {
   position: absolute;
   z-index: 30;
@@ -1029,7 +1129,7 @@
   pointer-events: none;
 }
 
-.hx__ring-grow :is(video, img) {
+.hx__ring-grow > video {
   position: absolute;
   inset: 0;
   display: block;
@@ -1038,13 +1138,27 @@
   object-fit: cover;
 }
 
-.hx__ring-grow img {
+/* the flat copy of the front card, its title fading as it grows */
+.hx__ring-grow .hx__ring-card {
+  border-radius: 0;
+  box-shadow: none;
   transition: opacity 0.6s var(--umm-ease-out);
+}
+
+.hx__ring-grow .hx__ring-card::after {
+  content: none;
+}
+
+.hx__ring-grow :is(.hx__ring-tag, .hx__ring-cap),
+.hx__ring-grow .hx__ring-card::before {
+  opacity: var(--cap, 1);
+  transform: none;
+  transition: none;
 }
 
 @media (max-width: 640px) {
   .hx[data-version='ring'] .hx__stage {
-    aspect-ratio: 1.7 / 1;
+    aspect-ratio: 1.25 / 1;
   }
 }
 
