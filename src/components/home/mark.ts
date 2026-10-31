@@ -50,8 +50,6 @@ export type MarkHost = {
   layer: HTMLElement
   run: HTMLElement
   ground: Ground
-  /** the film-peek layout's film at rest: playing in the peek, or a still */
-  film?: 'play' | 'still'
 }
 
 /** Where the mark sits in a box: contained, centred, `fill` of it at most */

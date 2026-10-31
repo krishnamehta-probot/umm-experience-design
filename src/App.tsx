@@ -51,6 +51,9 @@ const FilmRenderPage = lazy(() =>
  *                (30 Oct), the questions left and right of the ask bar
  *   /home-peek   the same, with no wordmark: the reel peeks up from the
  *                foot of the hero and grows to full screen (31 Oct)
+ *   /home-doors, /home-prompt, /home-ring  three heroes each a different
+ *                idea (31 Oct): doors opening onto the film, a giant prompt,
+ *                a turning ring of work
  *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
@@ -84,6 +87,9 @@ export function App() {
     '/home-glass': 'glass',
     '/home-window': 'window',
     '/home-peek': 'peek',
+    '/home-doors': 'doors',
+    '/home-prompt': 'prompt',
+    '/home-ring': 'ring',
   } as const
   if (path in flanks) {
     return (

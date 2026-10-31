@@ -508,3 +508,535 @@
     animation: none;
   }
 }
+
+/* ============================================================================
+   DOORS — /home-doors (Doors.ts)
+
+   Two doors cover the hero, the headline split across the seam, the left
+   questions on the left door and the right ones on the right, the ask bar
+   over the seam like a handle. Doors.ts sets the numbers: --hx-gap (the
+   crack), --hx-nl / --hx-nr (a door eased back for a question on it),
+   --hx-open (0 shut, 1 open), --hx-leak (the light's colour) and --hx-spill
+   (how much of it spills onto the doors). Behind them: the shader, which
+   shows through the crack, and under that the film.
+   ========================================================================== */
+
+.hx__doors {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  perspective: 2000px;
+}
+
+.hx__door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 50%;
+  padding: calc(96px + 9vh) clamp(18px, 1.6vw, 30px) clamp(24px, 4.4vh, 52px);
+  background: #fff;
+  will-change: transform;
+  animation: hx-door 1.8s var(--umm-ease-out) 0.15s backwards;
+}
+
+@keyframes hx-door {
+  from {
+    opacity: 0;
+  }
+}
+
+.hx[data-ground='grey'] .hx__door {
+  background: #dedede;
+}
+
+.hx__door--a {
+  left: 0;
+  padding-left: var(--hm-gutter);
+  align-items: flex-end;
+  transform-origin: 0 50%;
+  transform: translateX(calc(-1 * (var(--hx-gap, 8px) / 2 + var(--hx-nl, 0px)) - var(--hx-open, 0) * 56vw))
+    rotateY(calc(var(--hx-open, 0) * 34deg));
+}
+
+.hx__door--b {
+  right: 0;
+  padding-right: var(--hm-gutter);
+  align-items: flex-start;
+  transform-origin: 100% 50%;
+  transform: translateX(calc(var(--hx-gap, 8px) / 2 + var(--hx-nr, 0px) + var(--hx-open, 0) * 56vw))
+    rotateY(calc(var(--hx-open, 0) * -34deg));
+}
+
+/* the light through the crack, spilling onto the doors' inner edges */
+.hx__door::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(90px, 13vw, 220px);
+  pointer-events: none;
+  opacity: calc(var(--hx-spill, 0.3) * (1 - var(--hx-open, 0)));
+}
+
+.hx__door--a::after {
+  right: 0;
+  background: linear-gradient(to left, rgb(var(--hx-leak, 226 61 164) / 0.4), rgb(var(--hx-leak, 226 61 164) / 0));
+}
+
+.hx__door--b::after {
+  left: 0;
+  background: linear-gradient(to right, rgb(var(--hx-leak, 226 61 164) / 0.4), rgb(var(--hx-leak, 226 61 164) / 0));
+}
+
+/* the doors darken a little as they swing away */
+.hx__door::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: calc(var(--hx-open, 0) * 0.35);
+  pointer-events: none;
+}
+
+.hx__half,
+.hx__whole {
+  position: relative;
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-weight: var(--umm-weight-light);
+  font-size: clamp(2.4rem, 4.6vw, 5.8rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+
+.hx__half {
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.hx__half span {
+  display: block;
+  transition: transform 1.4s var(--umm-ease-out) 0.7s;
+}
+
+.hx__page:not([data-in]) .hx__half span {
+  transform: translateY(110%);
+}
+
+.hx__whole {
+  display: none;
+}
+
+.hx__whole span {
+  display: block;
+}
+
+.hx__door .hx__chips {
+  align-self: auto;
+}
+
+.hx__door--a .hx__chips {
+  align-self: flex-start;
+}
+
+.hx__door--b .hx__chips {
+  align-self: flex-end;
+}
+
+/* the ask bar over the seam, like a handle */
+.hx__seam {
+  position: absolute;
+  top: 54%;
+  left: 50%;
+  width: min(560px, 38vw);
+  translate: -50% -50%;
+}
+
+/* the film behind it all, under the shader that shows through the crack */
+.hx__doors-film {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background: var(--umm-ink);
+}
+
+.hx__doors-film video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* phones: the doors are top and bottom, opening up and down */
+@media (max-width: 760px) {
+  .hx__door {
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 50%;
+    padding-inline: 16px;
+  }
+  .hx__door--a {
+    top: 0;
+    bottom: auto;
+    justify-content: flex-end;
+    align-items: stretch;
+    padding-top: calc(80px + 2vh);
+    padding-bottom: 46px;
+    transform-origin: 50% 0;
+    transform: translateY(calc(-1 * (var(--hx-gap, 8px) / 2 + var(--hx-nl, 0px)) - var(--hx-open, 0) * 56svh))
+      rotateX(calc(var(--hx-open, 0) * -30deg));
+  }
+  .hx__door--b {
+    top: auto;
+    bottom: 0;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding-top: 50px;
+    transform-origin: 50% 100%;
+    transform: translateY(calc(var(--hx-gap, 8px) / 2 + var(--hx-nr, 0px) + var(--hx-open, 0) * 56svh))
+      rotateX(calc(var(--hx-open, 0) * 30deg));
+  }
+  .hx__door::after {
+    top: auto;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 110px;
+  }
+  .hx__door--a::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgb(var(--hx-leak, 226 61 164) / 0.4), rgb(var(--hx-leak, 226 61 164) / 0));
+  }
+  .hx__door--b::after {
+    top: 0;
+    background: linear-gradient(to bottom, rgb(var(--hx-leak, 226 61 164) / 0.4), rgb(var(--hx-leak, 226 61 164) / 0));
+  }
+  .hx__half {
+    display: none;
+  }
+  .hx__whole {
+    display: block;
+    font-size: clamp(2.2rem, 10.5vw, 3rem);
+    white-space: normal;
+  }
+  .hx__door--a .hx__chips {
+    order: -1;
+    margin-bottom: auto;
+  }
+  .hx__door--a .hx__chips,
+  .hx__door--b .hx__chips {
+    align-self: stretch;
+  }
+  .hx__seam {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    top: 50%;
+    translate: 0 -50%;
+  }
+}
+
+/* ============================================================================
+   PROMPT — /home-prompt (PromptFilm.ts)
+
+   The hero is the prompt: a line of the headline over a giant field that
+   types the six questions by itself (useDemo) until the visitor types their
+   own; its round send button is a window onto the film, which opens out of
+   it on the scroll. The questions sit under it, left and right.
+   ========================================================================== */
+
+.hx__prompt {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 0.7fr);
+  row-gap: clamp(18px, 3.4vh, 40px);
+  padding: var(--hx-gap) var(--hm-gutter) clamp(24px, 4.4vh, 52px);
+}
+
+.hx__eyebrow {
+  grid-row: 2;
+  position: relative;
+  z-index: 6;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--umm-font-display);
+  font-weight: var(--umm-weight-light);
+  font-size: clamp(1.1rem, 1.7vw, 1.75rem);
+  letter-spacing: -0.02em;
+}
+
+.hx__eyebrow span {
+  display: block;
+  transition: transform 1.3s var(--umm-ease-out) 0.3s;
+}
+
+.hx__page:not([data-in]) .hx__eyebrow span {
+  transform: translateY(110%);
+}
+
+.hx__big {
+  grid-row: 3;
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(16px, 2.4vw, 40px);
+  transition: opacity 1.2s var(--umm-ease-out) 0.5s;
+}
+
+.hx__page:not([data-in]) .hx__big {
+  opacity: 0;
+}
+
+.hx__big-field {
+  position: relative;
+}
+
+.hx__big-input,
+.hx__big-demo {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 2.12em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--umm-ink);
+  font-family: var(--umm-font-display);
+  font-weight: var(--umm-weight-light);
+  font-size: clamp(2.4rem, 5.6vw, 6.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  resize: none;
+  outline: none;
+}
+
+.hx__big-input {
+  caret-color: var(--umm-ink);
+}
+
+.hx__big-demo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hx__big-demo[data-focused] {
+  color: rgb(16 14 20 / 0.28);
+}
+
+.hx__caret {
+  display: inline-block;
+  width: 0.05em;
+  height: 0.86em;
+  margin-left: 0.06em;
+  vertical-align: -0.1em;
+  background: currentColor;
+  animation: hx-blink 1.05s steps(1) infinite;
+}
+
+@keyframes hx-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.hx__big-go-wrap {
+  position: relative;
+  width: clamp(64px, 6.6vw, 108px);
+  aspect-ratio: 1;
+  margin-bottom: 0.15em;
+  border-radius: 50%;
+}
+
+/* the button is transparent: the film shows through it from the layer */
+.hx__big-go {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.28),
+    0 26px 50px -22px rgb(16 14 20 / 0.7);
+}
+
+.hx__big-go svg {
+  filter: drop-shadow(0 1px 6px rgb(0 0 0 / 0.55));
+  transition: transform 0.5s var(--umm-ease-out);
+}
+
+.hx__big-go:is(:hover, :focus-visible) svg {
+  transform: translate(3px, -3px);
+}
+
+.hx__prompt-chips {
+  grid-row: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.hx__prompt-chips .hx__chips {
+  align-self: auto;
+  margin-top: 0;
+}
+
+/* the film, over the screen, cut to a circle about the send button */
+.hx__circle {
+  position: absolute;
+  overflow: hidden;
+  background: var(--umm-ink);
+  pointer-events: none;
+}
+
+.hx__circle video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 760px) {
+  .hx__prompt {
+    grid-template-rows: minmax(0, 0.6fr) auto auto auto minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+  .hx__big {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hx__big-input,
+  .hx__big-demo {
+    height: 3.15em;
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+  .hx__big-go-wrap {
+    justify-self: end;
+    width: 64px;
+  }
+  .hx__prompt-chips {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+
+/* ============================================================================
+   WORK RING — /home-ring (Ring.ts)
+
+   Ten frames of the reel on a ring in the mark's band, turning; Ring.ts sets
+   the card size (--w, --h), places the cards round the ring and fades them
+   by how far they face away. The front card grows flat over the page into
+   the film.
+   ========================================================================== */
+
+.hx__ring-scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  perspective: 1500px;
+  perspective-origin: 50% 35%;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.hx__ring-scene:active {
+  cursor: grabbing;
+}
+
+.hx__ring {
+  position: relative;
+  width: var(--w, 300px);
+  height: var(--h, 190px);
+  transform-style: preserve-3d;
+}
+
+.hx__ring-card {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  /* the cards round the back show nothing reversed */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: #111;
+  box-shadow: 0 30px 60px -32px rgb(16 14 20 / 0.6);
+}
+
+.hx__ring-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.hx__ring-grow {
+  position: absolute;
+  z-index: 30;
+  display: none;
+  overflow: hidden;
+  background: var(--umm-ink);
+  pointer-events: none;
+}
+
+.hx__ring-grow :is(video, img) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hx__ring-grow img {
+  transition: opacity 0.6s var(--umm-ease-out);
+}
+
+@media (max-width: 640px) {
+  .hx[data-version='ring'] .hx__stage {
+    aspect-ratio: 1.7 / 1;
+  }
+}
+
+/* the prompt fades as the film comes over it */
+.hx__page[data-growing] :is(.hx__eyebrow, .hx__big) {
+  filter: opacity(var(--fade, 1));
+}
+
+.hx__page:not([data-phase='idle']) .hx__eyebrow {
+  opacity: 0;
+  transition: opacity 0.9s var(--umm-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx__door,
+  .hx__half span,
+  .hx__eyebrow span,
+  .hx__big {
+    animation: none;
+    transition-duration: 0.01s;
+    transition-delay: 0s;
+  }
+  .hx__caret {
+    animation: none;
+  }
+}

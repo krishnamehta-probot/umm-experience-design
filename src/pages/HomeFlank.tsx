@@ -1,10 +1,19 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { asciiChips, homeHero } from '@/content/home'
 import { IconArrowUpRight } from '@/components/icons'
 import { AskBar, Pillars } from '@/components/home/HomeParts'
 import { MegaNav } from '@/components/home/MegaNav'
 import { Seg } from '@/components/home/LiveHero'
-import { useRage } from '@/components/home/useRage'
+import { useRage, type Rage } from '@/components/home/useRage'
+import { reducedMotion } from '@/components/home/gl'
 import { Glow, SHADERS, TONES, type Shader, type Tone } from '@/components/home/Glow'
 import type { Focus, Ground, MarkEngine, MarkHost } from '@/components/home/mark'
 import markUrl from '@/assets/home/umm-mark.svg'
@@ -32,7 +41,22 @@ import '@/styles/home-flank.css'
                            the reel peeks up from its foot as a wide card that
                            grows to fill the screen as the visitor scrolls
 
-   Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts), loaded
+   He then asked (31 Oct) for three heroes each a different idea outright,
+   none of them the wordmark across the top, every one ending in the film
+   full screen, playing from its start (reel.ts):
+
+     doors   /home-doors   the hero as two doors, the headline split across
+                           the seam and the coloured light leaking through
+                           it; the questions on the left door and the right;
+                           scrolling swings them open onto the film
+     prompt  /home-prompt  the hero as one giant prompt that types the
+                           questions itself and takes the visitor's own; the
+                           film opens out of its round send button
+     ring    /home-ring    UMM's work on a turning ring of cards across the
+                           top; scrolling grows the front card into the film
+
+   Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
+   Doors.ts, PromptFilm.ts, Ring.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
    Krish's reference of 30 Oct): a glow, a mesh, an aurora, silk or a halo,
    in one palette or turning through them all; or the live homepage's grey.
@@ -40,9 +64,24 @@ import '@/styles/home-flank.css'
    between everything.
    ========================================================================== */
 
-export type Version = 'tiles' | 'glass' | 'window' | 'peek'
+export type Version = 'doors' | 'prompt' | 'ring' | 'tiles' | 'glass' | 'window' | 'peek'
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
+  {
+    id: 'doors',
+    label: 'Doors',
+    hint: 'Two doors, the headline split across the seam and coloured light leaking through it. Scroll and they swing open onto the film.',
+  },
+  {
+    id: 'prompt',
+    label: 'Prompt',
+    hint: 'One giant prompt that types the questions by itself and takes your own. Scroll and the film opens out of its send button.',
+  },
+  {
+    id: 'ring',
+    label: 'Work ring',
+    hint: 'UMM’s work on a slowly turning ring of cards; drag it round. Scroll and the front card grows into the film.',
+  },
   {
     id: 'tiles',
     label: 'Kinetic tiles',
@@ -65,13 +104,6 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
   },
 ]
 
-type Film = 'play' | 'still'
-
-const FILMS: { id: Film; label: string; hint: string }[] = [
-  { id: 'play', label: 'Plays in the peek', hint: 'The reel plays, muted, in the card from the start.' },
-  { id: 'still', label: 'Still until full', hint: 'The card holds a still of the reel and plays it once it fills the screen.' },
-]
-
 /** the shaders, and the live homepage's plain grey */
 type Bg = Shader | 'none'
 
@@ -84,6 +116,9 @@ const pick = <T extends string>(v: string | null, from: { id: T }[], or: T) =>
   from.some((x) => x.id === v) ? (v as T) : or
 
 export const VERSION_PATHS: Record<Version, string> = {
+  doors: '/home-doors',
+  prompt: '/home-prompt',
+  ring: '/home-ring',
   tiles: '/home-tiles',
   glass: '/home-glass',
   window: '/home-window',
@@ -93,6 +128,9 @@ export const VERSION_PATHS: Record<Version, string> = {
 type Make = (host: MarkHost) => MarkEngine
 
 const ENGINES: Record<Version, () => Promise<Make>> = {
+  doors: () => import('@/components/home/Doors').then((m) => (h: MarkHost) => new m.Doors(h)),
+  prompt: () => import('@/components/home/PromptFilm').then((m) => (h: MarkHost) => new m.PromptFilm(h)),
+  ring: () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
   tiles: () => import('@/components/home/Tiles').then((m) => (h: MarkHost) => new m.Tiles(h)),
   glass: () => import('@/components/home/GlassMark').then((m) => (h: MarkHost) => new m.GlassMark(h)),
   window: () => import('@/components/home/Window').then((m) => (h: MarkHost) => new m.Window(h)),
@@ -107,7 +145,7 @@ const SIDES = [
   { side: 'right', chips: asciiChips.slice(3), from: 3 },
 ] as const
 
-function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Tone; film: Film }) {
+function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
   const ground: Ground = bg === 'none' ? 'grey' : 'glow'
   const rage = useRage({ leave: 1500 })
   const run = useRef<HTMLElement>(null)
@@ -125,7 +163,7 @@ function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Ton
       .then((make) => {
         if (!alive || !run.current || !page.current || !layer.current || !stage.current) return
         try {
-          made = make({ run: run.current, page: page.current, layer: layer.current, stage: stage.current, ground, film })
+          made = make({ run: run.current, page: page.current, layer: layer.current, stage: stage.current, ground })
           engine.current = made
         } catch {
           setFlat(true)
@@ -137,7 +175,7 @@ function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Ton
       made?.dispose()
       engine.current = null
     }
-  }, [version, ground, film])
+  }, [version, ground])
 
   /* the shader behind everything, unless the ground is the grey; a change
      of shader or palette is made in place */
@@ -148,7 +186,7 @@ function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Ton
     if (ground !== 'glow' || b === 'none' || !layer.current || !page.current) return
     const pg = page.current
     try {
-      glow.current = new Glow(layer.current, pg, () => pg.querySelector<HTMLElement>('.hx__bar'), b, t)
+      glow.current = new Glow(layer.current, pg, () => pg.querySelector<HTMLElement>('.hx__bar, .hx__big-field'), b, t)
     } catch {
       return
     }
@@ -177,15 +215,21 @@ function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Ton
   /* resting on a question (or tabbing to one) shows it to the mark */
   const timer = useRef(0)
   useEffect(() => () => window.clearTimeout(timer.current), [])
+  /* the question rested on, for the prompt to type */
+  const [hot, setHot] = useState<string | null>(null)
   const show = (i: number, side: Focus['side'], el: HTMLElement, wait: number) => {
     const r = el.getBoundingClientRect()
     const q: Focus = { i, side, x: r.left + r.width / 2, y: r.top + r.height / 2 }
     window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => engine.current?.focus(q), wait)
+    timer.current = window.setTimeout(() => {
+      engine.current?.focus(q)
+      setHot(asciiChips[i].q)
+    }, wait)
   }
   const hide = () => {
     window.clearTimeout(timer.current)
     engine.current?.focus(null)
+    setHot(null)
   }
 
   const chips = ({ side, chips: list, from }: (typeof SIDES)[number]) => (
@@ -218,32 +262,172 @@ function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Ton
         <div className="hx__layer" ref={layer} />
         <MegaNav />
 
-        <div className="hx__body">
-          <div className="hx__stage" ref={stage}>
-            {flat && <img className="hx__flat" src={markUrl} alt="" />}
+        {version === 'doors' ? (
+          <div className="hx__doors" ref={stage}>
+            <div className="hx__door hx__door--a">
+              <p className="hx__half" aria-hidden="true">
+                <span>{homeHero.title[0]}</span>
+              </p>
+              <p className="hx__whole" aria-hidden="true">
+                {homeHero.title.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </p>
+              {chips(SIDES[0])}
+            </div>
+            <div className="hx__door hx__door--b">
+              <p className="hx__half" aria-hidden="true">
+                <span>{homeHero.title[1]}</span>
+              </p>
+              {chips(SIDES[1])}
+            </div>
+            <h1 className="hm-sr">{homeHero.title.join(' ')}</h1>
+            <div className="hx__ask hx__seam">
+              <AskBar rage={rage} className="ha__ask hx__bar" />
+            </div>
           </div>
+        ) : version === 'prompt' ? (
+          <PromptBody rage={rage} stage={stage} hot={hot} chips={chips} />
+        ) : (
+          <div className="hx__body">
+            <div className="hx__stage" ref={stage}>
+              {flat && <img className="hx__flat" src={markUrl} alt="" />}
+            </div>
 
-          {chips(SIDES[0])}
+            {chips(SIDES[0])}
 
-          <div className="hx__ask">
-            <AskBar rage={rage} className="ha__ask hx__bar" />
+            <div className="hx__ask">
+              <AskBar rage={rage} className="ha__ask hx__bar" />
+            </div>
+
+            {chips(SIDES[1])}
+
+            {/* each line rises out of its own mask */}
+            <h1 className="hm-title hx__title">
+              {homeHero.title.map((line) => (
+                <span key={line}>
+                  <span>{line}</span>
+                </span>
+              ))}
+            </h1>
           </div>
+        )}
 
-          {chips(SIDES[1])}
-
-          {/* each line rises out of its own mask */}
-          <h1 className="hm-title hx__title">
-            {homeHero.title.map((line) => (
-              <span key={line}>
-                <span>{line}</span>
-              </span>
-            ))}
-          </h1>
-        </div>
-
-        <Pillars className="hx__pillars" />
+        {version !== 'doors' && version !== 'prompt' && <Pillars className="hx__pillars" />}
       </div>
     </section>
+  )
+}
+
+/** The prompt's own words while it waits: the bar's question, then each of
+ *  the six, typed, held and taken back in turn; a question rested on is
+ *  typed at once and held. */
+function useDemo(active: boolean, hot: string | null) {
+  const [text, setText] = useState('')
+  useEffect(() => {
+    if (!active) return
+    const seq = hot ? [hot] : [homeHero.placeholder, ...asciiChips.map((c) => c.q)]
+    if (reducedMotion()) {
+      setText(seq[0])
+      return
+    }
+    let alive = true
+    let t = 0
+    let i = 0
+    const later = (fn: () => void, ms: number) => {
+      t = window.setTimeout(() => alive && fn(), ms)
+    }
+    const type = (s: string, n: number) => {
+      setText(s.slice(0, n))
+      if (n < s.length) later(() => type(s, n + 1), hot ? 14 : 42 + Math.random() * 34)
+      else if (!hot) later(() => untype(s, n), 2100)
+    }
+    const untype = (s: string, n: number) => {
+      setText(s.slice(0, n))
+      if (n > 0) later(() => untype(s, n - 1), 13)
+      else {
+        i = (i + 1) % seq.length
+        later(() => type(seq[i], 1), 420)
+      }
+    }
+    later(() => type(seq[0], 1), hot ? 0 : 900)
+    return () => {
+      alive = false
+      window.clearTimeout(t)
+    }
+  }, [active, hot])
+  return text
+}
+
+/** The prompt hero: a line of the headline, the giant prompt with its round
+ *  send button (a window onto the film, PromptFilm.ts), the questions left
+ *  and right under it. */
+function PromptBody({
+  rage,
+  stage,
+  hot,
+  chips,
+}: {
+  rage: Rage
+  stage: RefObject<HTMLDivElement | null>
+  hot: string | null
+  chips: (s: (typeof SIDES)[number]) => ReactNode
+}) {
+  const [focused, setFocused] = useState(false)
+  const demo = useDemo(!rage.value && !focused, hot)
+  return (
+    <div className="hx__prompt">
+      <h1 className="hx__eyebrow">
+        <span>{homeHero.title.join(' ')}</span>
+      </h1>
+      <form
+        className="hx__big"
+        data-phase={rage.phase}
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (rage.phase === 'idle') rage.go(rage.value, { typed: true })
+        }}
+      >
+        <label className="hm-sr" htmlFor="hx-big">
+          {homeHero.placeholder}
+        </label>
+        <div className="hx__big-field">
+          <textarea
+            id="hx-big"
+            className="hx__big-input"
+            rows={2}
+            value={rage.value}
+            spellCheck={false}
+            autoComplete="off"
+            readOnly={rage.phase !== 'idle'}
+            onChange={(e) => rage.setValue(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                e.currentTarget.form?.requestSubmit()
+              }
+            }}
+          />
+          {!rage.value && (
+            <div className="hx__big-demo" data-focused={focused || undefined} aria-hidden="true">
+              {focused ? homeHero.placeholder : demo}
+              {!focused && <span className="hx__caret" />}
+            </div>
+          )}
+        </div>
+        <div className="hx__big-go-wrap" ref={stage}>
+          <button type="submit" className="hx__big-go" aria-label="Ask RAGe">
+            <IconArrowUpRight size={30} strokeWidth={1.75} />
+          </button>
+        </div>
+      </form>
+      <div className="hx__prompt-chips">
+        {chips(SIDES[0])}
+        {chips(SIDES[1])}
+      </div>
+    </div>
   )
 }
 
@@ -259,7 +443,6 @@ export function HomeFlank({ initial }: { initial: Version }) {
   const [peekBg, setPeekBg] = useState<Bg | null>(null)
   const [peekTone, setPeekTone] = useState<Tone | null>(null)
   const shown = peekBg && (peekBg === 'none') === (bg === 'none') ? peekBg : bg
-  const [film, setFilm] = useState<Film>(() => pick(new URLSearchParams(window.location.search).get('film'), FILMS, 'play'))
   const [run, setRun] = useState(0)
   const [open, setOpen] = useState(false)
   const [review] = useState(() => new URLSearchParams(window.location.search).has('options'))
@@ -269,12 +452,11 @@ export function HomeFlank({ initial }: { initial: Version }) {
       review && 'options',
       bg !== 'glow' && `bg=${bg}`,
       tone !== 'rotate' && bg !== 'none' && `tone=${tone}`,
-      version === 'peek' && film !== 'play' && `film=${film}`,
     ]
       .filter(Boolean)
       .join('&')
     window.history.replaceState(null, '', `${VERSION_PATHS[version]}${q ? `?${q}` : ''}`)
-  }, [review, version, bg, tone, film])
+  }, [review, version, bg, tone])
 
   return (
     <main
@@ -284,7 +466,7 @@ export function HomeFlank({ initial }: { initial: Version }) {
       data-palette="light"
       data-dark="false"
     >
-      <Hero key={`${version}-${bg === 'none'}-${run}`} version={version} bg={shown} tone={peekTone ?? tone} film={film} />
+      <Hero key={`${version}-${bg === 'none'}-${run}`} version={version} bg={shown} tone={peekTone ?? tone} />
 
       {review && (
         <aside className="ha-dock" data-open={open} aria-label="Homepage options">
@@ -302,17 +484,6 @@ export function HomeFlank({ initial }: { initial: Version }) {
                   setVersion(v)
                 }}
               />
-              {version === 'peek' && (
-                <Seg
-                  label="Film"
-                  items={FILMS}
-                  value={film}
-                  onPick={(f) => {
-                    window.scrollTo({ top: 0, behavior: 'instant' })
-                    setFilm(f)
-                  }}
-                />
-              )}
               <Seg label="Shader" items={BGS} value={bg} onPick={setBg} onPeek={setPeekBg} />
               {bg !== 'none' && (
                 <Seg label="Colour" items={TONES} value={tone} onPick={setTone} onPeek={setPeekTone} />

@@ -1,6 +1,6 @@
-import { eyeFilm } from '@/content/home'
 import { reducedMotion } from './gl'
 import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngine, type MarkHost } from './mark'
+import { ReelPlayer, makeReel } from './reel'
 
 /* ============================================================================
    WINDOW — the UMM mark, and the film inside it on the dive (/home-window)
@@ -8,8 +8,8 @@ import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngi
    At the top of the page the mark is solid black (Krish, 30 Oct: "it should
    always be black in top"). Scrolling dives into it, and only as the dive
    brings the letters to the middle of the screen does the film fade in
-   inside them and play; scrolling back up pauses it and the mark goes black
-   again. As the film shows, the letters read as cut through the page: the
+   inside them, playing from its start once it fills the screen; scrolling
+   back up pauses it and the mark goes black again. As the film shows, the letters read as cut through the page: the
    edge throws a soft shadow in on the side the light comes from and
    catches a thin line of light on the far side. The cursor is the light;
    without one, the light rests above the mark.
@@ -23,14 +23,10 @@ import { MARK_DEEP, MARK_H, MARK_W, fitMark, markPath, type Focus, type MarkEngi
 const INK = '#100e14'
 /** how far the hero holds while the visitor dives, in screen heights */
 const RUNWAY = 1.3
-/** the still the film holds until the dive (s): in the live reel, the
- *  collage of work tilted across the frame, which fills every letter */
-const STILL_AT = 19.5
-/** how far into the dive the film fades in (and plays), and is in full;
- *  it pauses again below PAUSE_AT on the way back up */
+/** how far into the dive the film fades in, and is in full; it plays from
+ *  its start once the screen is full of it (reel.ts) */
 const FILM_FROM = 0.3
 const FILM_TO = 0.55
-const PAUSE_AT = 0.25
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -62,7 +58,8 @@ function inverse(s: number, pad: number, blur: number, colour: string) {
 export class Window implements MarkEngine {
   private canvas = document.createElement('canvas')
   private ctx = this.canvas.getContext('2d')!
-  private video = document.createElement('video')
+  private video = makeReel(0)
+  private reel = new ReelPlayer(this.video, 0.85, 0.6, 0)
   private path = markPath()
   private host: MarkHost
   private calm = reducedMotion()
@@ -83,7 +80,6 @@ export class Window implements MarkEngine {
   private raf = 0
   private dead = false
   private grown = false
-  private playing = false
   private ro: ResizeObserver
 
   constructor(host: MarkHost) {
@@ -91,24 +87,6 @@ export class Window implements MarkEngine {
     this.canvas.className = 'hx__window'
     this.canvas.setAttribute('aria-hidden', 'true')
     host.layer.appendChild(this.canvas)
-
-    const v = this.video
-    v.muted = true
-    v.loop = true
-    v.playsInline = true
-    v.preload = 'auto'
-    v.setAttribute('muted', '')
-    v.setAttribute('playsinline', '')
-    for (const [src, type] of [
-      ['/home/eye.mp4', 'video/mp4'],
-      [eyeFilm, 'video/webm'],
-    ]) {
-      const s = document.createElement('source')
-      s.src = src
-      s.type = type
-      v.appendChild(s)
-    }
-    v.addEventListener('loadedmetadata', () => (v.currentTime = Math.min(STILL_AT, v.duration - 0.1)), { once: true })
 
     this.ro = new ResizeObserver(() => this.layout())
     this.ro.observe(host.page)
@@ -142,10 +120,7 @@ export class Window implements MarkEngine {
     window.removeEventListener('pointermove', this.onMove)
     document.documentElement.removeEventListener('pointerleave', this.onLeave)
     document.removeEventListener('visibilitychange', this.onVisible)
-    this.video.pause()
-    this.video.removeAttribute('src')
-    this.video.replaceChildren()
-    this.video.load()
+    this.reel.dispose()
     const { run, page } = this.host
     run.style.removeProperty('height')
     page.style.removeProperty('top')
@@ -195,8 +170,7 @@ export class Window implements MarkEngine {
   }
 
   private onVisible = () => {
-    if (document.hidden) this.video.pause()
-    else if (this.playing) this.video.play().catch(() => {})
+    this.reel.visible(!document.hidden)
     this.wake()
   }
 
@@ -227,14 +201,8 @@ export class Window implements MarkEngine {
     if (this.leaveAt >= 0) p = Math.max(p, easeInOut(clamp01((t - this.leaveAt) / 1.3)))
     const k = easeInOut(clamp01(p / 0.92))
 
-    /* the film plays only once it is in the middle of the screen */
-    if (!this.playing && p >= FILM_FROM && !this.calm) {
-      this.playing = true
-      video.play().catch(() => {})
-    } else if (this.playing && p < PAUSE_AT) {
-      this.playing = false
-      video.pause()
-    }
+    /* the film plays, from its start, once it fills the screen */
+    if (!this.calm) this.reel.update(p)
 
     host.page.style.setProperty('--fade', (1 - clamp01(p * 2.4)).toFixed(3))
     if (p > 0.002) {

@@ -1,6 +1,6 @@
-import { eyeFilm } from '@/content/home'
 import { reducedMotion } from './gl'
 import type { MarkEngine, MarkHost } from './mark'
+import { ReelPlayer, makeReel } from './reel'
 
 /* ============================================================================
    PEEK — the film peeking up from the foot of the hero (/home-peek)
@@ -15,19 +15,14 @@ import type { MarkEngine, MarkHost } from './mark'
 
    The card's place at rest is the stage (the last row of the hero); the
    card itself lies over the page in its layer, so it can grow past the
-   page's edges. The film either plays in the peek, muted, or (?film=still)
-   holds a still until the card fills the screen.
+   page's edges. The film holds a still in the peek and plays from its
+   start once the card fills the screen (reel.ts).
    ========================================================================== */
 
 /** how far the hero holds while the card grows, in screen heights */
 const RUNWAY = 1.2
 /** the card's corners at rest (px) */
 const RADIUS = 28
-/** the still the film holds, in the live reel the collage of work (s) */
-const STILL_AT = 19.5
-/** when a held film starts, and stops again on the way back up */
-const PLAY_AT = 0.6
-const PAUSE_AT = 0.45
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -35,10 +30,9 @@ const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t 
 export class Peek implements MarkEngine {
   private host: MarkHost
   private card = document.createElement('div')
-  private video = document.createElement('video')
+  private video = makeReel()
+  private reel = new ReelPlayer(this.video)
   private calm = reducedMotion()
-  private hold: boolean
-  private playing = false
   private grown = false
   private leaveAt = -1
   private raf = 0
@@ -47,33 +41,9 @@ export class Peek implements MarkEngine {
 
   constructor(host: MarkHost) {
     this.host = host
-    this.hold = host.film === 'still' || this.calm
     this.card.className = 'hx__peek'
     this.card.setAttribute('aria-hidden', 'true')
-
-    const v = this.video
-    v.muted = true
-    v.loop = true
-    v.playsInline = true
-    v.preload = 'auto'
-    v.setAttribute('muted', '')
-    v.setAttribute('playsinline', '')
-    for (const [src, type] of [
-      ['/home/eye.mp4', 'video/mp4'],
-      [eyeFilm, 'video/webm'],
-    ]) {
-      const s = document.createElement('source')
-      s.src = src
-      s.type = type
-      v.appendChild(s)
-    }
-    if (this.hold) {
-      v.addEventListener('loadedmetadata', () => (v.currentTime = Math.min(STILL_AT, v.duration - 0.1)), { once: true })
-    } else {
-      this.playing = true
-      v.play().catch(() => {})
-    }
-    this.card.appendChild(v)
+    this.card.appendChild(this.video)
     host.layer.appendChild(this.card)
 
     this.ro = new ResizeObserver(this.layout)
@@ -99,9 +69,7 @@ export class Peek implements MarkEngine {
     window.removeEventListener('resize', this.layout)
     window.removeEventListener('scroll', this.queue)
     document.removeEventListener('visibilitychange', this.onVisible)
-    this.video.pause()
-    this.video.replaceChildren()
-    this.video.load()
+    this.reel.dispose()
     const { run, page } = this.host
     run.style.removeProperty('height')
     page.style.removeProperty('top')
@@ -125,10 +93,7 @@ export class Peek implements MarkEngine {
     if (!this.raf && !this.dead) this.raf = requestAnimationFrame(this.paint)
   }
 
-  private onVisible = () => {
-    if (document.hidden) this.video.pause()
-    else if (this.playing) this.video.play().catch(() => {})
-  }
+  private onVisible = () => this.reel.visible(!document.hidden)
 
   /* --- the card ------------------------------------------------------------- */
 
@@ -186,16 +151,8 @@ export class Peek implements MarkEngine {
     this.video.style.height = `${fh.toFixed(1)}px`
     this.video.style.top = `${Math.min(0, (seen - fh) / 2).toFixed(1)}px`
 
-    /* a held film plays once the card fills the screen */
-    if (this.hold && !this.calm) {
-      if (!this.playing && p >= PLAY_AT) {
-        this.playing = true
-        this.video.play().catch(() => {})
-      } else if (this.playing && p < PAUSE_AT) {
-        this.playing = false
-        this.video.pause()
-      }
-    }
+    /* the film plays, from its start, once the card fills the screen */
+    if (!this.calm) this.reel.update(p)
 
     if (more) this.queue()
   }
