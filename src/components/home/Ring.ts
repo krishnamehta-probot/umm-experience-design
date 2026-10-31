@@ -5,18 +5,39 @@ import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, ru
 /* ============================================================================
    RING — UMM's work on a turning ring (/home-ring)
 
-   Ten frames of the reel (public/home/work), each a piece of UMM's work, stand
-   on a ring seen a little from above, turning slowly where the wordmark used
-   to be: the nearest cards large and bright, those round the back small and
-   dim. The cursor leans the turn its way, resting on a question on the left
-   or the right spins it that way, and the ring can be dragged round.
+   Twelve of UMM's case studies, as the live site's case-study cards show
+   them (the render, the client's logo; public/home/cases), stand on a ring
+   seen a little from above, turning slowly where the wordmark used to be:
+   the nearest cards large and bright, those round the back hidden. The
+   cursor leans the turn its way, resting on a question on the left or the
+   right spins it that way, the ring can be dragged round, and a card clicked
+   opens its case study.
 
    Scrolling stops the ring with a card at the front and grows that card,
    flat, to fill the screen, where it gives way to the film playing from its
-   start; asking grows it the same way.
+   start (Krish, 31 Oct); asking grows it the same way.
    ========================================================================== */
 
-const CARDS = Array.from({ length: 10 }, (_, i) => `/home/work/w${String(i + 1).padStart(2, '0')}.webp`)
+/** the case studies, by their slug on umm.digital, and their titles there */
+const CASES: [string, string][] = [
+  ['mohawk-recover', 'Reimagining Sustainability Through Digital Transformation'],
+  ['biocon-group', 'Unified Digital Transformation for Global Biotech'],
+  ['lyca-eshop', '15% increase in average order value'],
+  ['penny-co', 'Engineering a High-Performance Digital Platform for a FinTech Innovator'],
+  ['habari', 'A Digital Gateway for Tanzania’s Fastest Internet'],
+  ['iadeptive', 'Positioning as a Technology Leader in AI & DevOps'],
+  ['aladdin-commercial', 'Reengineering Product Discovery for Commercial Flooring Professionals'],
+  ['kulkuf', 'Building a Digital Ecosystem for Blockchain and Digital Finance'],
+  ['coco-coir', 'Crafting a Modern E-Commerce Experience for Sustainable Home Products'],
+  ['yiksi', 'Building a Digital Gateway Between Mobile Money and the Crypto Economy'],
+  ['academy-of-beauty', 'Building a Digital Experience for the Next Generation of Beauty Professionals'],
+  ['steward', 'Building the Digital Foundation for Smarter Energy Management'],
+]
+const CARDS = CASES.map(([slug]) => `/home/cases/${slug}.webp`)
+/** the logos drawn in white, which sit on a dark tag instead */
+const LIGHT = new Set(['penny-co', 'lyca-eshop', 'habari'])
+/** the live cards' proportions (1024 x 829) */
+const ASPECT = 1024 / 829
 const N = CARDS.length
 const STEP = 360 / N
 /** how far the hero holds while the card grows, in screen heights */
@@ -32,7 +53,7 @@ export class Ring implements MarkEngine {
   private host: MarkHost
   private scene = document.createElement('div')
   private ring = document.createElement('div')
-  private cards: HTMLDivElement[] = []
+  private cards: HTMLAnchorElement[] = []
   private grow = document.createElement('div')
   private growImg = document.createElement('img')
   private video = makeReel()
@@ -45,6 +66,8 @@ export class Ring implements MarkEngine {
   private speed = SPIN
   private pointer = { x: 0, on: false }
   private drag: { x: number; turn: number; t: number; v: number } | null = null
+  /* a drag that moved, so its click is not a click on a card */
+  private dragged = false
   private side: Focus['side'] | null = null
   private front = 0
   private leaveAt = -1
@@ -60,18 +83,34 @@ export class Ring implements MarkEngine {
     this.scene.className = 'hx__ring-scene'
     this.scene.setAttribute('aria-hidden', 'true')
     this.ring.className = 'hx__ring'
-    for (const src of CARDS) {
-      const c = document.createElement('div')
+    for (const [slug, title] of CASES) {
+      const c = document.createElement('a')
       c.className = 'hx__ring-card'
+      c.href = `https://umm.digital/casestudies/${slug}/`
+      c.title = title
+      c.tabIndex = -1
+      c.draggable = false
       const img = document.createElement('img')
-      img.src = src
+      img.src = `/home/cases/${slug}.webp`
       img.alt = ''
       img.decoding = 'async'
       img.draggable = false
-      c.appendChild(img)
+      /* the client's logo on a small frosted tag, as legible on the dark
+         renders as on the light ones */
+      const tag = document.createElement('span')
+      tag.className = 'hx__ring-tag'
+      if (LIGHT.has(slug)) tag.dataset.dark = ''
+      const logo = document.createElement('img')
+      logo.src = `/home/cases/${slug}-logo.webp`
+      logo.alt = ''
+      logo.decoding = 'async'
+      logo.draggable = false
+      tag.appendChild(logo)
+      c.append(img, tag)
       this.ring.appendChild(c)
       this.cards.push(c)
     }
+    this.scene.addEventListener('click', this.onClick, true)
     this.scene.appendChild(this.ring)
     host.stage.appendChild(this.scene)
 
@@ -114,6 +153,7 @@ export class Ring implements MarkEngine {
     this.host.stage.removeEventListener('pointerdown', this.onDown)
     window.removeEventListener('pointerup', this.onUp)
     document.removeEventListener('visibilitychange', this.onVisible)
+    this.scene.removeEventListener('click', this.onClick, true)
     this.reel.dispose()
     releaseRunway(this.host.run, this.host.page)
     this.scene.remove()
@@ -126,13 +166,13 @@ export class Ring implements MarkEngine {
     holdRunway(this.host.run, this.host.page, this.calm ? 0 : RUNWAY)
     const sr = this.host.stage.getBoundingClientRect()
     /* cards most of the band tall, the ring as wide as the band allows */
-    this.h = Math.max(70, sr.height * 0.62)
-    this.w = this.h * 1.6
+    this.h = Math.max(70, sr.height * 0.66)
+    this.w = this.h * ASPECT
     const fit = (this.w / 2 / Math.tan(Math.PI / N)) * 1.12
     this.r = Math.min(fit, sr.width * (sr.width < 700 ? 0.95 : 0.62))
     if (this.r < fit) {
       this.w = (this.r / 1.12) * Math.tan(Math.PI / N) * 2
-      this.h = this.w / 1.6
+      this.h = this.w / ASPECT
     }
     const s = this.scene.style
     s.setProperty('--w', `${this.w.toFixed(1)}px`)
@@ -148,6 +188,7 @@ export class Ring implements MarkEngine {
   private onMove = (e: PointerEvent) => {
     if (this.drag) {
       const now = performance.now()
+      if (Math.abs(e.clientX - this.drag.x) > 6) this.dragged = true
       const turn = this.drag.turn + (e.clientX - this.drag.x) * 0.22
       this.drag.v = ((turn - this.turn) / Math.max(1, now - this.drag.t)) * 1000
       this.drag.t = now
@@ -164,7 +205,17 @@ export class Ring implements MarkEngine {
 
   private onDown = (e: PointerEvent) => {
     if (this.grown || this.calm) return
+    this.dragged = false
     this.drag = { x: e.clientX, turn: this.turn, t: performance.now(), v: 0 }
+  }
+
+  /** a card opens its case study, unless the ring was being dragged */
+  private onClick = (e: MouseEvent) => {
+    if (this.dragged || this.grown) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    this.dragged = false
   }
 
   private onUp = () => {

@@ -977,16 +977,47 @@
   /* the cards round the back show nothing reversed */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  display: block;
   background: #111;
   box-shadow: 0 30px 60px -32px rgb(16 14 20 / 0.6);
+  -webkit-user-drag: none;
 }
 
-.hx__ring-card img {
+.hx__ring-card > img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   pointer-events: none;
+}
+
+/* the client's logo on a small frosted tag in the corner */
+.hx__ring-tag {
+  position: absolute;
+  left: 7%;
+  bottom: 8%;
+  display: flex;
+  align-items: center;
+  max-width: 62%;
+  height: 17%;
+  padding: 0 7%;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.86);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px -10px rgb(16 14 20 / 0.45);
+  pointer-events: none;
+}
+
+.hx__ring-tag[data-dark] {
+  background: rgb(16 14 20 / 0.72);
+}
+
+.hx__ring-tag img {
+  display: block;
+  max-width: 100%;
+  height: 62%;
+  object-fit: contain;
 }
 
 .hx__ring-grow {
