@@ -401,3 +401,110 @@
     transition-delay: 0s;
   }
 }
+
+/* ============================================================================
+   FILM PEEK — /home-peek (Peek.ts)
+
+   No wordmark. The headline, centred and large, and under it the ask bar with
+   its questions either side, hold the middle of the screen; the stage is the
+   foot of the hero, where the reel peeks up as a wide card cut off by the
+   edge of the screen. The card itself lies over the page (in .hx__layer) so
+   the scroll can grow it to the whole screen; the stage only gives its place.
+   ========================================================================== */
+
+.hx[data-version='peek'] .hx__body {
+  grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    '.     .     .'
+    'title title title'
+    'left  ask   right'
+    '.     .     .'
+    'stage stage stage';
+  row-gap: clamp(20px, 3.4vh, 44px);
+}
+
+.hx[data-version='peek'] .hx__title {
+  justify-self: center;
+  align-self: auto;
+  text-align: center;
+  font-size: clamp(2.8rem, 6.2vw, 6.6rem);
+  letter-spacing: -0.05em;
+}
+
+.hx[data-version='peek'] .hx__stage {
+  min-height: 0;
+  height: clamp(120px, 21vh, 230px);
+}
+
+/* the pillars give way to the film */
+.hx[data-version='peek'] .hx__pillars {
+  display: none;
+}
+
+.hx__peek {
+  position: absolute;
+  overflow: hidden;
+  background: var(--umm-ink);
+  /* the card rises into its place once the copy is in */
+  animation: hx-peek 1.6s var(--umm-ease-out) 0.9s backwards;
+}
+
+.hx__peek video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+@keyframes hx-peek {
+  from {
+    transform: translateY(60%);
+  }
+}
+
+@media (max-width: 1000px) {
+  .hx[data-version='peek'] .hx__body {
+    grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      '.     .'
+      'title title'
+      'ask   ask'
+      'left  right'
+      '.     .'
+      'stage stage';
+  }
+  .hx[data-version='peek'] .hx__stage {
+    aspect-ratio: auto;
+    max-height: none;
+    height: clamp(160px, 30vh, 380px);
+  }
+  .hx[data-version='peek'] .hx__title {
+    font-size: clamp(2.6rem, 7.4vw, 4.4rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .hx[data-version='peek'] .hx__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 0.6fr) auto auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas: '.' 'title' 'ask' 'left' 'right' '.' 'stage';
+    row-gap: 18px;
+  }
+  .hx[data-version='peek'] .hx__title {
+    font-size: clamp(2.3rem, 11vw, 3rem);
+  }
+  .hx[data-version='peek'] .hx__chips--right {
+    margin-top: -10px;
+  }
+  .hx[data-version='peek'] .hx__stage {
+    height: clamp(150px, 26vh, 240px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx__peek {
+    animation: none;
+  }
+}

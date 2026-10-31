@@ -25,7 +25,14 @@ import '@/styles/home-flank.css'
      window  /home-window  the mark in black; scrolling dives into it, and the
                            film fades in and plays as it fills the screen
 
-   Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts), loaded
+   On 31 Oct Santosh turned from the wordmark across the top, so a fourth
+   layout drops it:
+
+     peek    /home-peek    the headline and the ask bar hold the screen, and
+                           the reel peeks up from its foot as a wide card that
+                           grows to fill the screen as the visitor scrolls
+
+   Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
    Krish's reference of 30 Oct): a glow, a mesh, an aurora, silk or a halo,
    in one palette or turning through them all; or the live homepage's grey.
@@ -33,7 +40,7 @@ import '@/styles/home-flank.css'
    between everything.
    ========================================================================== */
 
-export type Version = 'tiles' | 'glass' | 'window'
+export type Version = 'tiles' | 'glass' | 'window' | 'peek'
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
@@ -51,6 +58,18 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
     label: 'Window',
     hint: 'The mark in black. Scroll to dive into it: as it fills the screen the film fades in inside it and plays.',
   },
+  {
+    id: 'peek',
+    label: 'Film peek',
+    hint: 'No wordmark: the headline and ask bar hold the screen, the reel peeks up from the foot as a card, and scrolling grows it to full screen.',
+  },
+]
+
+type Film = 'play' | 'still'
+
+const FILMS: { id: Film; label: string; hint: string }[] = [
+  { id: 'play', label: 'Plays in the peek', hint: 'The reel plays, muted, in the card from the start.' },
+  { id: 'still', label: 'Still until full', hint: 'The card holds a still of the reel and plays it once it fills the screen.' },
 ]
 
 /** the shaders, and the live homepage's plain grey */
@@ -68,6 +87,7 @@ export const VERSION_PATHS: Record<Version, string> = {
   tiles: '/home-tiles',
   glass: '/home-glass',
   window: '/home-window',
+  peek: '/home-peek',
 }
 
 type Make = (host: MarkHost) => MarkEngine
@@ -76,6 +96,7 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   tiles: () => import('@/components/home/Tiles').then((m) => (h: MarkHost) => new m.Tiles(h)),
   glass: () => import('@/components/home/GlassMark').then((m) => (h: MarkHost) => new m.GlassMark(h)),
   window: () => import('@/components/home/Window').then((m) => (h: MarkHost) => new m.Window(h)),
+  peek: () => import('@/components/home/Peek').then((m) => (h: MarkHost) => new m.Peek(h)),
 }
 
 /** How long a question must be rested on before the mark answers it (ms) */
@@ -86,7 +107,7 @@ const SIDES = [
   { side: 'right', chips: asciiChips.slice(3), from: 3 },
 ] as const
 
-function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
+function Hero({ version, bg, tone, film }: { version: Version; bg: Bg; tone: Tone; film: Film }) {
   const ground: Ground = bg === 'none' ? 'grey' : 'glow'
   const rage = useRage({ leave: 1500 })
   const run = useRef<HTMLElement>(null)
@@ -104,7 +125,7 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
       .then((make) => {
         if (!alive || !run.current || !page.current || !layer.current || !stage.current) return
         try {
-          made = make({ run: run.current, page: page.current, layer: layer.current, stage: stage.current, ground })
+          made = make({ run: run.current, page: page.current, layer: layer.current, stage: stage.current, ground, film })
           engine.current = made
         } catch {
           setFlat(true)
@@ -116,7 +137,7 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
       made?.dispose()
       engine.current = null
     }
-  }, [version, ground])
+  }, [version, ground, film])
 
   /* the shader behind everything, unless the ground is the grey; a change
      of shader or palette is made in place */
@@ -238,16 +259,22 @@ export function HomeFlank({ initial }: { initial: Version }) {
   const [peekBg, setPeekBg] = useState<Bg | null>(null)
   const [peekTone, setPeekTone] = useState<Tone | null>(null)
   const shown = peekBg && (peekBg === 'none') === (bg === 'none') ? peekBg : bg
+  const [film, setFilm] = useState<Film>(() => pick(new URLSearchParams(window.location.search).get('film'), FILMS, 'play'))
   const [run, setRun] = useState(0)
   const [open, setOpen] = useState(false)
   const [review] = useState(() => new URLSearchParams(window.location.search).has('options'))
 
   useEffect(() => {
-    const q = [review && 'options', bg !== 'glow' && `bg=${bg}`, tone !== 'rotate' && bg !== 'none' && `tone=${tone}`]
+    const q = [
+      review && 'options',
+      bg !== 'glow' && `bg=${bg}`,
+      tone !== 'rotate' && bg !== 'none' && `tone=${tone}`,
+      version === 'peek' && film !== 'play' && `film=${film}`,
+    ]
       .filter(Boolean)
       .join('&')
     window.history.replaceState(null, '', `${VERSION_PATHS[version]}${q ? `?${q}` : ''}`)
-  }, [review, version, bg, tone])
+  }, [review, version, bg, tone, film])
 
   return (
     <main
@@ -257,7 +284,7 @@ export function HomeFlank({ initial }: { initial: Version }) {
       data-palette="light"
       data-dark="false"
     >
-      <Hero key={`${version}-${bg === 'none'}-${run}`} version={version} bg={shown} tone={peekTone ?? tone} />
+      <Hero key={`${version}-${bg === 'none'}-${run}`} version={version} bg={shown} tone={peekTone ?? tone} film={film} />
 
       {review && (
         <aside className="ha-dock" data-open={open} aria-label="Homepage options">
@@ -275,6 +302,17 @@ export function HomeFlank({ initial }: { initial: Version }) {
                   setVersion(v)
                 }}
               />
+              {version === 'peek' && (
+                <Seg
+                  label="Film"
+                  items={FILMS}
+                  value={film}
+                  onPick={(f) => {
+                    window.scrollTo({ top: 0, behavior: 'instant' })
+                    setFilm(f)
+                  }}
+                />
+              )}
               <Seg label="Shader" items={BGS} value={bg} onPick={setBg} onPeek={setPeekBg} />
               {bg !== 'none' && (
                 <Seg label="Colour" items={TONES} value={tone} onPick={setTone} onPeek={setPeekTone} />

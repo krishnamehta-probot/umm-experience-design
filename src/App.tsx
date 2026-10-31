@@ -49,6 +49,8 @@ const FilmRenderPage = lazy(() =>
  *                the UMM mark, in its own layout with nothing on the mark
  *   /home-tiles, /home-glass, /home-window  three new marks for Santosh
  *                (30 Oct), the questions left and right of the ask bar
+ *   /home-peek   the same, with no wordmark: the reel peeks up from the
+ *                foot of the hero and grows to full screen (31 Oct)
  *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
@@ -77,7 +79,12 @@ export function App() {
       </Suspense>
     )
   }
-  const flanks = { '/home-tiles': 'tiles', '/home-glass': 'glass', '/home-window': 'window' } as const
+  const flanks = {
+    '/home-tiles': 'tiles',
+    '/home-glass': 'glass',
+    '/home-window': 'window',
+    '/home-peek': 'peek',
+  } as const
   if (path in flanks) {
     return (
       <Suspense fallback={null}>

@@ -44,7 +44,15 @@ export type Ground = 'glow' | 'grey'
 /** The elements a mark draws in: its stage, the page (the hero), a layer
  *  over the whole page under its copy, and the runway the page is held on
  *  as the visitor scrolls; and the ground it stands on */
-export type MarkHost = { stage: HTMLElement; page: HTMLElement; layer: HTMLElement; run: HTMLElement; ground: Ground }
+export type MarkHost = {
+  stage: HTMLElement
+  page: HTMLElement
+  layer: HTMLElement
+  run: HTMLElement
+  ground: Ground
+  /** the film-peek layout's film at rest: playing in the peek, or a still */
+  film?: 'play' | 'still'
+}
 
 /** Where the mark sits in a box: contained, centred, `fill` of it at most */
 export function fitMark(w: number, h: number, fill = 0.94) {
