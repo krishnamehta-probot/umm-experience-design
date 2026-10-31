@@ -55,6 +55,18 @@ import '@/styles/home-flank.css'
      ring    /home-ring    UMM's work on a turning ring of cards across the
                            top; scrolling grows the front card into the film
 
+   Krish took to the ring (31 Oct) and asked for it laid out three more ways
+   (Ring.ts, its looks):
+
+     ring-hero     /home-ring-hero     the ring as the hero: the full width,
+                                       large cards running off both edges,
+                                       the headline on one line above it and
+                                       the front card's title under it
+     ring-inside   /home-ring-inside   inside the ring: the cards curve round
+                                       the visitor, the headline in the middle
+     ring-horizon  /home-ring-horizon  the headline and ask bar on top, the
+                                       ring low and half under the fold
+
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
@@ -64,7 +76,20 @@ import '@/styles/home-flank.css'
    between everything.
    ========================================================================== */
 
-export type Version = 'doors' | 'prompt' | 'ring' | 'tiles' | 'glass' | 'window' | 'peek'
+export type Version =
+  | 'doors'
+  | 'prompt'
+  | 'ring'
+  | 'ring-hero'
+  | 'ring-inside'
+  | 'ring-horizon'
+  | 'tiles'
+  | 'glass'
+  | 'window'
+  | 'peek'
+
+/** the ring's three later layouts: no pillars, the ring has their room */
+const RING_LAYOUTS: Version[] = ['ring-hero', 'ring-inside', 'ring-horizon']
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
@@ -81,6 +106,21 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
     id: 'ring',
     label: 'Work ring',
     hint: 'UMM’s work on a slowly turning ring of cards; drag it round. Scroll and the front card grows into the film.',
+  },
+  {
+    id: 'ring-hero',
+    label: 'Ring · hero',
+    hint: 'The ring as the hero: full width, large cards running off both edges, the front card’s title under it.',
+  },
+  {
+    id: 'ring-inside',
+    label: 'Ring · inside',
+    hint: 'Inside the ring: the cards curve round you on both sides, the headline in the middle.',
+  },
+  {
+    id: 'ring-horizon',
+    label: 'Ring · horizon',
+    hint: 'The headline and ask bar on top; the ring low on the screen, half under the fold, seen from above.',
   },
   {
     id: 'tiles',
@@ -119,6 +159,9 @@ export const VERSION_PATHS: Record<Version, string> = {
   doors: '/home-doors',
   prompt: '/home-prompt',
   ring: '/home-ring',
+  'ring-hero': '/home-ring-hero',
+  'ring-inside': '/home-ring-inside',
+  'ring-horizon': '/home-ring-horizon',
   tiles: '/home-tiles',
   glass: '/home-glass',
   window: '/home-window',
@@ -131,6 +174,9 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   doors: () => import('@/components/home/Doors').then((m) => (h: MarkHost) => new m.Doors(h)),
   prompt: () => import('@/components/home/PromptFilm').then((m) => (h: MarkHost) => new m.PromptFilm(h)),
   ring: () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
+  'ring-hero': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'hero')),
+  'ring-inside': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'inside')),
+  'ring-horizon': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'horizon')),
   tiles: () => import('@/components/home/Tiles').then((m) => (h: MarkHost) => new m.Tiles(h)),
   glass: () => import('@/components/home/GlassMark').then((m) => (h: MarkHost) => new m.GlassMark(h)),
   window: () => import('@/components/home/Window').then((m) => (h: MarkHost) => new m.Window(h)),
@@ -313,7 +359,9 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
           </div>
         )}
 
-        {version !== 'doors' && version !== 'prompt' && <Pillars className="hx__pillars" />}
+        {version !== 'doors' && version !== 'prompt' && !RING_LAYOUTS.includes(version) && (
+          <Pillars className="hx__pillars" />
+        )}
       </div>
     </section>
   )

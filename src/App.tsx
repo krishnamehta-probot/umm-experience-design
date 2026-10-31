@@ -54,6 +54,8 @@ const FilmRenderPage = lazy(() =>
  *   /home-doors, /home-prompt, /home-ring  three heroes each a different
  *                idea (31 Oct): doors opening onto the film, a giant prompt,
  *                a turning ring of work
+ *   /home-ring-hero, /home-ring-inside, /home-ring-horizon  the ring laid
+ *                out three more ways (31 Oct)
  *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
@@ -90,6 +92,9 @@ export function App() {
     '/home-doors': 'doors',
     '/home-prompt': 'prompt',
     '/home-ring': 'ring',
+    '/home-ring-hero': 'ring-hero',
+    '/home-ring-inside': 'ring-inside',
+    '/home-ring-horizon': 'ring-horizon',
   } as const
   if (path in flanks) {
     return (
