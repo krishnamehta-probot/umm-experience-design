@@ -67,6 +67,12 @@ import '@/styles/home-flank.css'
      ring-horizon  /home-ring-horizon  the headline and ask bar on top, the
                                        ring low and half under the fold
 
+   The questions either side of the bar did not land with everyone (Krish,
+   2 Nov), so the ring across the top is also kept with all six under it:
+
+     ring-under    /home-ring-under    /home-ring, the six questions centred
+                                       under the ask bar in two rows
+
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
@@ -80,6 +86,7 @@ export type Version =
   | 'doors'
   | 'prompt'
   | 'ring'
+  | 'ring-under'
   | 'ring-hero'
   | 'ring-inside'
   | 'ring-horizon'
@@ -106,6 +113,11 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
     id: 'ring',
     label: 'Work ring',
     hint: 'UMM’s work on a slowly turning ring of cards; drag it round. Scroll and the front card grows into the film.',
+  },
+  {
+    id: 'ring-under',
+    label: 'Ring · questions under',
+    hint: 'The work ring across the top, with all six questions centred under the ask bar instead of either side of it.',
   },
   {
     id: 'ring-hero',
@@ -159,6 +171,7 @@ export const VERSION_PATHS: Record<Version, string> = {
   doors: '/home-doors',
   prompt: '/home-prompt',
   ring: '/home-ring',
+  'ring-under': '/home-ring-under',
   'ring-hero': '/home-ring-hero',
   'ring-inside': '/home-ring-inside',
   'ring-horizon': '/home-ring-horizon',
@@ -174,6 +187,7 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   doors: () => import('@/components/home/Doors').then((m) => (h: MarkHost) => new m.Doors(h)),
   prompt: () => import('@/components/home/PromptFilm').then((m) => (h: MarkHost) => new m.PromptFilm(h)),
   ring: () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
+  'ring-under': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
   'ring-hero': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'hero')),
   'ring-inside': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'inside')),
   'ring-horizon': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'horizon')),
@@ -340,13 +354,28 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
               {flat && <img className="hx__flat" src={markUrl} alt="" />}
             </div>
 
-            {chips(SIDES[0])}
+            {version === 'ring-under' ? (
+              <>
+                <div className="hx__ask">
+                  <AskBar rage={rage} className="ha__ask hx__bar" />
+                </div>
+                {/* all six under the bar, the left three then the right */}
+                <div className="hx__under">
+                  {chips(SIDES[0])}
+                  {chips(SIDES[1])}
+                </div>
+              </>
+            ) : (
+              <>
+                {chips(SIDES[0])}
 
-            <div className="hx__ask">
-              <AskBar rage={rage} className="ha__ask hx__bar" />
-            </div>
+                <div className="hx__ask">
+                  <AskBar rage={rage} className="ha__ask hx__bar" />
+                </div>
 
-            {chips(SIDES[1])}
+                {chips(SIDES[1])}
+              </>
+            )}
 
             {/* each line rises out of its own mask */}
             <h1 className="hm-title hx__title">

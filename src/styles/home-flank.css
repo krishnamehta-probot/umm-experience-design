@@ -1346,3 +1346,77 @@
     animation: none;
   }
 }
+
+/* ============================================================================
+   QUESTIONS UNDER — /home-ring-under
+
+   /home-ring with the six questions centred under the ask bar, in two rows
+   (the left three, then the right three), the bar itself centred above them:
+
+     nav
+     the ring
+     the ask bar
+     three questions
+     three questions
+     headline
+     pillars
+   ========================================================================== */
+
+.hx[data-version='ring-under'] .hx__body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  grid-template-areas: 'stage' 'ask' 'under' 'title';
+}
+
+.hx[data-version='ring-under'] .hx__ask {
+  justify-self: center;
+  width: min(620px, 100%);
+}
+
+.hx__under {
+  grid-area: under;
+  position: relative;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* close under the bar, one group with it */
+  margin-top: calc(14px - var(--hx-gap));
+}
+
+.hx__under .hx__chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-self: auto;
+  max-width: 100%;
+}
+
+/* they rise in under the bar, rather than from the sides */
+.hx__page:not([data-in]) .hx__under li {
+  transform: translateY(10px);
+}
+
+/* tablets and phones: the ring at its own size, any room to spare above the
+   headline, as on /home-ring */
+@media (max-width: 1000px) {
+  .hx[data-version='ring-under'] .hx__body {
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hx[data-version='ring-under'] .hx__stage {
+    aspect-ratio: 1.7 / 1;
+  }
+  .hx__under .hx__chips--right {
+    margin-top: 0;
+  }
+  .hx[data-version='ring-under'] .hx__ask {
+    width: 100%;
+  }
+  .hx__under .hx__chips li {
+    max-width: 100%;
+  }
+}
