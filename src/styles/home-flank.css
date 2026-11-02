@@ -1420,3 +1420,71 @@
     max-width: 100%;
   }
 }
+
+/* ============================================================================
+   RING AT THE BOTTOM — /home-ring-bottom
+
+   The headline centred at the top, the ask bar with the six questions under
+   it (as on /home-ring-under), and the work ring along the bottom, taking
+   whatever height is left:
+
+     nav
+     headline, centred
+     the ask bar
+     three questions
+     three questions
+     the ring
+   ========================================================================== */
+
+.hx[data-version='ring-bottom'] .hx__body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  grid-template-areas: 'title' 'ask' 'under' 'stage';
+  padding-bottom: clamp(16px, 3vh, 36px);
+}
+
+.hx[data-version='ring-bottom'] .hx__title {
+  justify-self: center;
+  align-self: start;
+  text-align: center;
+  margin-bottom: clamp(4px, 1.4vh, 16px);
+}
+
+.hx[data-version='ring-bottom'] .hx__ask {
+  justify-self: center;
+  width: min(620px, 100%);
+}
+
+.hx[data-version='ring-bottom'] .hx__stage {
+  min-height: 220px;
+}
+
+/* the ring's tilt sits it low in its band: lifted a little off the foot */
+.hx[data-version='ring-bottom'] .hx__ring-scene {
+  padding-bottom: clamp(20px, 7vh, 80px);
+}
+
+/* tablets and phones: the ring at its own size, at the foot; on a tall
+   screen the room to spare goes a third above the headline and the rest
+   between the questions and the ring */
+@media (max-width: 1000px) {
+  .hx[data-version='ring-bottom'] .hx__body {
+    grid-template-rows: minmax(0, 0.5fr) auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas: '.' 'title' 'ask' 'under' '.' 'stage';
+  }
+  .hx[data-version='ring-bottom'] .hx__stage {
+    min-height: 0;
+  }
+  .hx[data-version='ring-bottom'] .hx__ring-scene {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .hx[data-version='ring-bottom'] .hx__stage {
+    aspect-ratio: 1.7 / 1;
+  }
+  .hx[data-version='ring-bottom'] .hx__ask {
+    width: 100%;
+  }
+}

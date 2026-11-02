@@ -72,6 +72,9 @@ import '@/styles/home-flank.css'
 
      ring-under    /home-ring-under    /home-ring, the six questions centred
                                        under the ask bar in two rows
+     ring-bottom   /home-ring-bottom   the headline centred at the top, the
+                                       ask bar and the six questions under
+                                       it, the ring along the bottom
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts), loaded
@@ -87,6 +90,7 @@ export type Version =
   | 'prompt'
   | 'ring'
   | 'ring-under'
+  | 'ring-bottom'
   | 'ring-hero'
   | 'ring-inside'
   | 'ring-horizon'
@@ -96,7 +100,10 @@ export type Version =
   | 'peek'
 
 /** the ring's three later layouts: no pillars, the ring has their room */
-const RING_LAYOUTS: Version[] = ['ring-hero', 'ring-inside', 'ring-horizon']
+const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-hero', 'ring-inside', 'ring-horizon']
+
+/** the layouts with the six questions under the ask bar, not either side */
+const UNDER: Version[] = ['ring-under', 'ring-bottom']
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
@@ -118,6 +125,11 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
     id: 'ring-under',
     label: 'Ring · questions under',
     hint: 'The work ring across the top, with all six questions centred under the ask bar instead of either side of it.',
+  },
+  {
+    id: 'ring-bottom',
+    label: 'Ring · at the bottom',
+    hint: 'The headline centred at the top, the ask bar and its six questions under it, and the work ring along the bottom.',
   },
   {
     id: 'ring-hero',
@@ -172,6 +184,7 @@ export const VERSION_PATHS: Record<Version, string> = {
   prompt: '/home-prompt',
   ring: '/home-ring',
   'ring-under': '/home-ring-under',
+  'ring-bottom': '/home-ring-bottom',
   'ring-hero': '/home-ring-hero',
   'ring-inside': '/home-ring-inside',
   'ring-horizon': '/home-ring-horizon',
@@ -188,6 +201,7 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   prompt: () => import('@/components/home/PromptFilm').then((m) => (h: MarkHost) => new m.PromptFilm(h)),
   ring: () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
   'ring-under': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
+  'ring-bottom': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
   'ring-hero': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'hero')),
   'ring-inside': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'inside')),
   'ring-horizon': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'horizon')),
@@ -354,7 +368,7 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
               {flat && <img className="hx__flat" src={markUrl} alt="" />}
             </div>
 
-            {version === 'ring-under' ? (
+            {UNDER.includes(version) ? (
               <>
                 <div className="hx__ask">
                   <AskBar rage={rage} className="ha__ask hx__bar" />
