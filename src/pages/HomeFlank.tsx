@@ -75,6 +75,10 @@ import '@/styles/home-flank.css'
      ring-bottom   /home-ring-bottom   the headline centred at the top, the
                                        ask bar and the six questions under
                                        it, the ring along the bottom
+     ring-side     /home-ring-side     the work on the left as a wheel
+                                       turning top to bottom; the headline,
+                                       the ask bar and the six questions
+                                       under it on the right
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts), loaded
@@ -91,6 +95,7 @@ export type Version =
   | 'ring'
   | 'ring-under'
   | 'ring-bottom'
+  | 'ring-side'
   | 'ring-hero'
   | 'ring-inside'
   | 'ring-horizon'
@@ -100,10 +105,10 @@ export type Version =
   | 'peek'
 
 /** the ring's three later layouts: no pillars, the ring has their room */
-const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-hero', 'ring-inside', 'ring-horizon']
+const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon']
 
 /** the layouts with the six questions under the ask bar, not either side */
-const UNDER: Version[] = ['ring-under', 'ring-bottom']
+const UNDER: Version[] = ['ring-under', 'ring-bottom', 'ring-side']
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
@@ -130,6 +135,11 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
     id: 'ring-bottom',
     label: 'Ring · at the bottom',
     hint: 'The headline centred at the top, the ask bar and its six questions under it, and the work ring along the bottom.',
+  },
+  {
+    id: 'ring-side',
+    label: 'Ring · work on the left',
+    hint: 'The case studies on the left as a wheel turning top to bottom; the headline, ask bar and questions on the right.',
   },
   {
     id: 'ring-hero',
@@ -185,6 +195,7 @@ export const VERSION_PATHS: Record<Version, string> = {
   ring: '/home-ring',
   'ring-under': '/home-ring-under',
   'ring-bottom': '/home-ring-bottom',
+  'ring-side': '/home-ring-side',
   'ring-hero': '/home-ring-hero',
   'ring-inside': '/home-ring-inside',
   'ring-horizon': '/home-ring-horizon',
@@ -202,6 +213,7 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   ring: () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
   'ring-under': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
   'ring-bottom': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h)),
+  'ring-side': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'vertical')),
   'ring-hero': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'hero')),
   'ring-inside': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'inside')),
   'ring-horizon': () => import('@/components/home/Ring').then((m) => (h: MarkHost) => new m.Ring(h, 'horizon')),

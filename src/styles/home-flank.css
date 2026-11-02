@@ -1488,3 +1488,88 @@
     width: 100%;
   }
 }
+
+/* ============================================================================
+   WORK ON THE LEFT — /home-ring-side
+
+   Two columns: on the left the case studies as a wheel turning top to
+   bottom (Ring.ts, the vertical look), its cards fading out at the top and
+   the foot of the column; on the right, centred in the height, the
+   headline, the ask bar and the six questions under it. On phones the wheel
+   comes first, in a band, and the rest under it.
+   ========================================================================== */
+
+.hx[data-version='ring-side'] .hx__body {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+  grid-template-areas:
+    'stage .'
+    'stage title'
+    'stage ask'
+    'stage under'
+    'stage .';
+  padding-bottom: clamp(16px, 3vh, 36px);
+}
+
+.hx[data-version='ring-side'] .hx__stage {
+  min-height: 420px;
+}
+
+.hx[data-version='ring-side'] .hx__title {
+  align-self: auto;
+  font-size: clamp(2.4rem, 4.2vw, 4.6rem);
+  margin-bottom: clamp(4px, 1.4vh, 16px);
+}
+
+.hx[data-version='ring-side'] .hx__ask {
+  justify-self: start;
+  width: min(620px, 100%);
+}
+
+.hx[data-version='ring-side'] .hx__under {
+  align-items: flex-start;
+}
+
+.hx[data-version='ring-side'] .hx__under .hx__chips {
+  justify-content: flex-start;
+}
+
+/* the wheel faces the page's right; its cards fade at the column's top and
+   foot */
+.hx__ring-scene[data-look='vertical'] {
+  perspective-origin: 50% 50%;
+  -webkit-mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
+}
+
+@media (max-width: 1000px) {
+  .hx[data-version='ring-side'] .hx__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .hx[data-version='ring-side'] .hx__stage {
+    aspect-ratio: auto;
+    max-height: none;
+    min-height: 480px;
+  }
+  .hx[data-version='ring-side'] .hx__title {
+    font-size: clamp(2.2rem, 5.2vw, 3.2rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .hx[data-version='ring-side'] .hx__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    grid-template-areas: 'stage' 'title' 'ask' 'under' '.';
+  }
+  .hx[data-version='ring-side'] .hx__stage {
+    min-height: 0;
+    height: clamp(280px, 40svh, 360px);
+  }
+  .hx[data-version='ring-side'] .hx__title {
+    font-size: clamp(2rem, 9.4vw, 2.6rem);
+  }
+  .hx[data-version='ring-side'] .hx__ask {
+    width: 100%;
+  }
+}

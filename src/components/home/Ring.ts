@@ -27,12 +27,15 @@ import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, ru
                                   middle with the cards ahead faint behind it
      horizon  /home-ring-horizon  low on the screen, half under its foot,
                                   seen from above like a turntable
+     vertical /home-ring-side     a wheel standing on the left, turning
+                                  top to bottom, angled a little toward the
+                                  headline and questions on the right
 
    The three new ones carry twice as many places as cases (each case twice,
    half the ring apart, never in sight together), so the ring is wide.
    ========================================================================== */
 
-export type Look = 'ring' | 'hero' | 'inside' | 'horizon'
+export type Look = 'ring' | 'hero' | 'inside' | 'horizon' | 'vertical'
 
 /** the case studies, by their slug on umm.digital, and their titles there */
 const CASES: [string, string][] = [
@@ -62,8 +65,9 @@ const SPIN = 5
 const LEAN = 9
 const PUSH = 34
 /** places round the ring, and its tilt (deg), for each look */
-const SLOTS: Record<Look, number> = { ring: 12, hero: 24, inside: 18, horizon: 24 }
-const TILT: Record<Look, number> = { ring: -5, hero: -3, inside: 0, horizon: -10 }
+const SLOTS: Record<Look, number> = { ring: 12, hero: 24, inside: 18, horizon: 24, vertical: 12 }
+/* the wheel's tilt is about the upright, turning it toward the page's right */
+const TILT: Record<Look, number> = { ring: -5, hero: -3, inside: 0, horizon: -10, vertical: -10 }
 /** the room under the hero ring for the front card's title */
 const CAPTION = 48
 
@@ -95,8 +99,8 @@ export class Ring implements MarkEngine {
   private eye = 1500
   private turn = -140
   private speed = SPIN
-  private pointer = { x: 0, on: false }
-  private drag: { x: number; turn: number; t: number; v: number } | null = null
+  private pointer = { x: 0, y: 0, on: false }
+  private drag: { x: number; y: number; turn: number; t: number; v: number } | null = null
   /* a drag that moved, so its click is not a click on a card */
   private dragged = false
   private side: Focus['side'] | null = null
@@ -232,6 +236,13 @@ export class Ring implements MarkEngine {
         this.w = (this.r / 1.12) * half * 2
         this.h = this.w / ASPECT
       }
+    } else if (this.look === 'vertical') {
+      /* the wheel stands in its column: the cards most of its width, the
+         front one under half its height, its neighbours cut by the fades */
+      this.w = Math.min(widest(0.6, 0.62), sr.height * 0.5 * ASPECT)
+      this.h = this.w / ASPECT
+      this.r = (this.h / 2 / half) * 1.12
+      this.eye = 1600
     } else if (this.look === 'inside') {
       /* the eye at the ring's middle: a card's size on screen is set by the
          eye's distance alone, so that is what is fitted */
@@ -259,8 +270,9 @@ export class Ring implements MarkEngine {
       this.pace = Math.min(1, Math.max(0.3, 720 / this.r))
     }
     const out = this.look === 'inside' ? -this.r : this.r
+    const axis = this.look === 'vertical' ? 'rotateX' : 'rotateY'
     this.cards.forEach((c, i) => {
-      c.style.transform = `rotateY(${(i * this.step).toFixed(2)}deg) translateZ(${out.toFixed(1)}px)`
+      c.style.transform = `${axis}(${(i * this.step).toFixed(2)}deg) translateZ(${out.toFixed(1)}px)`
     })
     this.wake()
   }
@@ -270,17 +282,22 @@ export class Ring implements MarkEngine {
   private onMove = (e: PointerEvent) => {
     if (this.drag) {
       const now = performance.now()
-      if (Math.abs(e.clientX - this.drag.x) > 6) this.dragged = true
-      /* the new looks follow the finger; the first turns faster than it */
+      const dx = e.clientX - this.drag.x
+      const dy = e.clientY - this.drag.y
+      if (Math.hypot(dx, dy) > 6) this.dragged = true
+      /* the new looks follow the finger; the first turns faster than it.
+         The wheel follows the mouse up and down (a finger's up and down
+         scrolls the page, so its side to side turns it) */
       const k = this.look === 'ring' ? 0.22 : 80 / (this.look === 'inside' ? this.eye : this.r)
-      const turn = this.drag.turn + (e.clientX - this.drag.x) * k
+      const along = this.look !== 'vertical' ? dx : e.pointerType === 'mouse' ? -dy : dx
+      const turn = this.drag.turn + along * k
       this.drag.v = ((turn - this.turn) / Math.max(1, now - this.drag.t)) * 1000
       this.drag.t = now
       this.turn = turn
       return
     }
     if (e.pointerType !== 'mouse') return
-    this.pointer = { x: e.clientX / window.innerWidth, on: true }
+    this.pointer = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight, on: true }
   }
 
   private onLeave = () => {
@@ -291,7 +308,7 @@ export class Ring implements MarkEngine {
     if (this.grown || this.calm) return
     if ((e.target as Element).closest('.hx__ring-caption')) return
     this.dragged = false
-    this.drag = { x: e.clientX, turn: this.turn, t: performance.now(), v: 0 }
+    this.drag = { x: e.clientX, y: e.clientY, turn: this.turn, t: performance.now(), v: 0 }
   }
 
   /** a card opens its case study, unless the ring was being dragged */
@@ -361,9 +378,12 @@ export class Ring implements MarkEngine {
       const target = -this.front * step
       this.turn += wrap(target - this.turn) * (1 - Math.exp(-dt * 6))
     } else if (!this.drag && !this.calm) {
-      const lean =
-        this.side === 'left' ? -PUSH : this.side === 'right' ? PUSH : this.pointer.on ? (this.pointer.x - 0.5) * 2 * LEAN : 0
-      this.speed += ((SPIN + lean) * this.pace - this.speed) * (1 - Math.exp(-dt * 1.6))
+      /* the wheel turns top to bottom, and the cursor's height leans it */
+      const vertical = this.look === 'vertical'
+      const at = vertical ? this.pointer.y : this.pointer.x
+      const lean = this.side === 'left' ? -PUSH : this.side === 'right' ? PUSH : this.pointer.on ? (at - 0.5) * 2 * LEAN : 0
+      const way = vertical ? -1 : 1
+      this.speed += ((SPIN + lean) * this.pace * way - this.speed) * (1 - Math.exp(-dt * 1.6))
       this.turn += this.speed * dt
     }
     if (p <= 0.002) this.front = ((Math.round(-this.turn / step) % this.n) + this.n) % this.n
@@ -376,11 +396,16 @@ export class Ring implements MarkEngine {
     const spin = `rotateX(${tilt}deg) rotateY(${shown.toFixed(2)}deg)`
     /* tilting the ring about its far-off middle drops the front cards; the
        wide rings are lifted back so the front card sits in its band */
-    const lift = this.look === 'ring' ? '' : `translateY(${(this.r * Math.sin((tilt * Math.PI) / 180)).toFixed(1)}px) `
+    const shift = this.r * Math.sin((tilt * Math.PI) / 180)
+    const lift = this.look === 'ring' ? '' : `translateY(${shift.toFixed(1)}px) `
     this.ring.style.transform =
       this.look === 'inside'
         ? `translateZ(${this.eye.toFixed(1)}px) ${spin}`
-        : `${lift}translateZ(${(-this.r).toFixed(1)}px) ${spin}`
+        : this.look === 'vertical'
+          ? /* the wheel turned toward the right, set back so its front card
+               stays in its column */
+            `translateX(${(-shift).toFixed(1)}px) translateZ(${(-this.r).toFixed(1)}px) rotateY(${tilt}deg) rotateX(${shown.toFixed(2)}deg)`
+          : `${lift}translateZ(${(-this.r).toFixed(1)}px) ${spin}`
     this.scene.style.opacity = (e * (1 - clamp01(k * 3))).toFixed(3)
 
     this.cards.forEach((c, i) => {

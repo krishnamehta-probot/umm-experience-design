@@ -59,6 +59,8 @@ const FilmRenderPage = lazy(() =>
  *   /home-ring-under  the ring with all six questions under the ask bar
  *   /home-ring-bottom  the headline at the top, the bar and questions, the
  *                ring along the bottom
+ *   /home-ring-side  the work as a wheel on the left, the headline, bar and
+ *                questions on the right
  *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
@@ -97,6 +99,7 @@ export function App() {
     '/home-ring': 'ring',
     '/home-ring-under': 'ring-under',
     '/home-ring-bottom': 'ring-bottom',
+    '/home-ring-side': 'ring-side',
     '/home-ring-hero': 'ring-hero',
     '/home-ring-inside': 'ring-inside',
     '/home-ring-horizon': 'ring-horizon',
