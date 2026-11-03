@@ -83,12 +83,13 @@ import '@/styles/home-flank.css'
    From the Lovable heroes (3 Nov) Krish picked the 14th, "Kinetic Tiles",
    and asked for it made far better: particles from all over the screen
    building the mark, the case studies marbled through it, quickly, then the
-   headline, ask bar and questions centred at the top as there (Marble.ts):
+   headline, ask bar and questions centred as there (Marble.ts):
 
-     marble        /home-marble        the particles gather into the mark in
-                                       the middle, the work's colour runs
-                                       into it, and it glides to the foot as
-                                       the copy rises in above it
+     marble        /home-marble        tiles fly in from all over into the
+                                       mark in the middle, the work runs
+                                       through it as veined marble, and it
+                                       lets go as the headline rises; then
+                                       the hero alone
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts, Marble.ts), loaded
@@ -115,9 +116,8 @@ export type Version =
   | 'peek'
   | 'marble'
 
-/** the ring's later layouts and the marble: no pillars, the work has their
- *  room */
-const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon', 'marble']
+/** the ring's later layouts: no pillars, the ring has their room */
+const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon']
 
 /** the layouts with the six questions under the ask bar, not either side */
 const UNDER: Version[] = ['ring-under', 'ring-bottom', 'ring-side', 'marble']
@@ -126,7 +126,7 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
     id: 'marble',
     label: 'Particle mark · marble',
-    hint: 'Particles fly in from all over the screen and build the UMM mark; the case studies marble through it, one into the next, as it settles at the foot under the headline, ask bar and questions.',
+    hint: 'Tiles fly in from all over the screen and build the UMM mark; the case studies run through it as veined marble, then it lets go as the headline, ask bar and questions rise. Replay it below.',
   },
   {
     id: 'doors',
