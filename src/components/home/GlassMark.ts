@@ -153,6 +153,8 @@ export class GlassMark implements MarkEngine {
           sA: { value: new THREE.Vector3(1, 1, 1) },
           sB: { value: new THREE.Vector3(1, 1, 1) },
           sC: { value: new THREE.Vector3(1, 1, 1) },
+          sD: { value: new THREE.Vector3(1, 1, 1) },
+          sE: { value: new THREE.Vector3(1, 1, 1) },
           sAnchor: { value: new THREE.Vector2() },
           sSize: { value: new THREE.Vector2(1, 1) },
           sView: { value: 1 },
@@ -347,6 +349,8 @@ export class GlassMark implements MarkEngine {
       u.sA.value.fromArray(g.a)
       u.sB.value.fromArray(g.b)
       u.sC.value.fromArray(g.c)
+      u.sD.value.fromArray(g.d)
+      u.sE.value.fromArray(g.e)
       u.sAnchor.value.set(g.ax, g.ay)
       u.sSize.value.set(g.w, g.h)
       u.sView.value = g.view

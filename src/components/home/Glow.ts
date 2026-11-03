@@ -22,6 +22,16 @@ import { reducedMotion } from './gl'
               thinning out into the white (the canvas shown unsmoothed)
      fluted   the colours seen through a pane of ribbed glass
 
+   and, from the Lovable heroes' third, "Flow" (Krish, 3 Nov):
+
+     flow     bands of colour across the screen, white at the top down to the
+              deepest at the foot, their edges frayed and swaying, a fine
+              bright thread along each, a fine grain over all
+
+   The flow takes five colours, so every palette has five: the deep one, the
+   light one and the accent, then two more for the flow's bands (by default
+   the accent's way to the deep one, and a pale of the deep one).
+
    The cursor leans each a little and brings up a touch more light where it
    is. The colours come from a palette (TONES) or, by default, turn through
    them all ('rotate'), easing from one to the next.
@@ -31,7 +41,7 @@ import { reducedMotion } from './gl'
    reading the same values from `glowNow`, so the glass bends the same light.
    ========================================================================== */
 
-export type Shader = 'glow' | 'mesh' | 'aurora' | 'silk' | 'halo' | 'grain' | 'dither' | 'fluted'
+export type Shader = 'glow' | 'mesh' | 'aurora' | 'silk' | 'halo' | 'grain' | 'dither' | 'fluted' | 'flow'
 
 export const SHADERS: { id: Shader; label: string; hint: string }[] = [
   { id: 'glow', label: 'Glow', hint: 'A bloom of colour rising from below the ask bar, its edge slowly drawn about.' },
@@ -42,18 +52,27 @@ export const SHADERS: { id: Shader; label: string; hint: string }[] = [
   { id: 'grain', label: 'Grain', hint: 'A broad gradient rising from below the ask bar, with a fine film grain over it.' },
   { id: 'dither', label: 'Dither', hint: 'The glow drawn in pixels: ordered dots of colour thinning out into the white.' },
   { id: 'fluted', label: 'Fluted glass', hint: 'The colours seen through a pane of ribbed glass, each rib bending them.' },
+  {
+    id: 'flow',
+    label: 'Flow',
+    hint: 'Bands of colour across the screen, white at the top to the deepest at the foot, swaying, a bright thread along each.',
+  },
 ]
 
-export type Tone = 'rotate' | 'magenta' | 'violet' | 'ocean' | 'mint' | 'sunset' | 'pastel'
+export type Tone = 'rotate' | 'magenta' | 'violet' | 'ocean' | 'mint' | 'sunset' | 'pastel' | 'spectrum'
 
-/** each palette: a deep colour, a lighter one, and an accent */
-const PALETTES: Record<Exclude<Tone, 'rotate'>, [string, string, string]> = {
+/** each palette: a deep colour, a lighter one, and an accent; and, for the
+ *  flow's bands, two more where the palette names them */
+const PALETTES: Record<Exclude<Tone, 'rotate'>, string[]> = {
   magenta: ['#e23da4', '#f59fd6', '#9b5cff'],
   violet: ['#6b4cff', '#b9a8ff', '#e05bff'],
   ocean: ['#1f6bff', '#8ec9ff', '#14cfc0'],
   mint: ['#10c49a', '#a8f0d4', '#b7e83a'],
   sunset: ['#ff5a36', '#ffb27a', '#ff4fa3'],
-  pastel: ['#ffc4f2', '#d1e7ff', '#f0ff70'],
+  /* the brand's five: blossom, sky, citrus, then coral and sun */
+  pastel: ['#ffc4f2', '#d1e7ff', '#f0ff70', '#ffc3c4', '#ffe58f'],
+  /* the Flow reference's bands: ember, sky, lilac, then rose and sun */
+  spectrum: ['#ff662e', '#99ccff', '#c7b3ff', '#ff999e', '#ffd97a'],
 }
 
 export const TONES: { id: Tone; label: string; hint: string }[] = [
@@ -64,10 +83,11 @@ export const TONES: { id: Tone; label: string; hint: string }[] = [
   { id: 'mint', label: 'Mint', hint: 'Jade and mint, a touch of lime.' },
   { id: 'sunset', label: 'Sunset', hint: 'Coral and peach, a touch of pink.' },
   { id: 'pastel', label: 'Pastel', hint: 'The brand pastels: pink, sky and lime, soft on the white.' },
+  { id: 'spectrum', label: 'Spectrum', hint: 'The Flow hero’s colours: sky, lilac, rose, ember and sun.' },
 ]
 
 /** the order 'rotate' turns through */
-const ROTATION: Exclude<Tone, 'rotate' | 'pastel'>[] = ['magenta', 'violet', 'ocean', 'mint', 'sunset']
+const ROTATION: Exclude<Tone, 'rotate' | 'pastel' | 'spectrum'>[] = ['magenta', 'violet', 'ocean', 'mint', 'sunset']
 /** how long each palette holds in the rotation, and how long it eases (s) */
 const HOLD = 7
 const EASE = 3
@@ -77,6 +97,8 @@ uniform float sMode;
 uniform vec3 sA;
 uniform vec3 sB;
 uniform vec3 sC;
+uniform vec3 sD;
+uniform vec3 sE;
 uniform vec2 sAnchor;
 uniform vec2 sSize;
 uniform float sView;
@@ -245,6 +267,42 @@ vec3 flutedMode(vec2 p) {
   return clamp(col * (1.0 + shade * (0.3 + colour)) + edge * (0.25 + colour), 0.0, 1.0);
 }
 
+/* the Flow's own noise, as in the reference: five octaves, each turned */
+float ffbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  mat2 R = mat2(0.8, 0.6, -0.6, 0.8);
+  for (int i = 0; i < 5; i++) {
+    v += a * gn(p);
+    p = R * p * 2.02;
+    a *= 0.5;
+  }
+  return v;
+}
+
+/* bands of colour across the first screen: white at the top, then the light
+   colour, the accent, the fourth, the deep one and the fifth at the foot,
+   their edges frayed by noise and swaying, a fine bright thread running
+   along each, the top washed back to white for the nav, a grain over all */
+vec3 flowMode(vec2 p) {
+  float t = sTime;
+  vec2 uv = vec2(p.x / sSize.x, 1.0 - p.y / sView);
+  vec2 q = vec2(p.x / sView, uv.y);
+  float mx = mix(0.5, sMouse.x / sSize.x, sMouse.z);
+  float y = uv.y + sin(q.x * 2.2 + t * 0.35) * 0.12 + (ffbm(q * 1.4 + vec2(t * 0.07, 0.0)) - 0.5) * 0.5
+    + (mx - 0.5) * 0.1 * sin(q.x * 3.0);
+  vec3 paper = vec3(0.992, 0.984, 0.968);
+  vec3 c = paper;
+  c = mix(c, sB, 1.0 - smoothstep(0.6, 0.85, y));
+  c = mix(c, sC, 1.0 - smoothstep(0.42, 0.6, y));
+  c = mix(c, sD, 1.0 - smoothstep(0.3, 0.45, y));
+  c = mix(c, sA, 1.0 - smoothstep(0.12, 0.3, y));
+  c = mix(c, sE, 1.0 - smoothstep(-0.05, 0.12, y));
+  c += pow(abs(sin(y * 14.0 - t * 0.6)), 40.0) * 0.18;
+  c = mix(c, paper, smoothstep(0.75, 1.0, uv.y) * 0.7);
+  return c + (gh(floor(p) + fract(t * 7.0) * 61.0) - 0.5) * 0.035;
+}
+
 /* the field at a point of the page (CSS px, y down), in sRGB */
 vec3 shaderAt(vec2 p) {
   if (sMode < 0.5) return glowMode(p);
@@ -254,7 +312,8 @@ vec3 shaderAt(vec2 p) {
   if (sMode < 4.5) return haloMode(p);
   if (sMode < 5.5) return grainMode(p);
   if (sMode < 6.5) return ditherMode(p);
-  return flutedMode(p);
+  if (sMode < 7.5) return flutedMode(p);
+  return flowMode(p);
 }
 `
 
@@ -264,6 +323,8 @@ export const glowNow = {
   a: [1, 1, 1],
   b: [1, 1, 1],
   c: [1, 1, 1],
+  d: [1, 1, 1],
+  e: [1, 1, 1],
   ax: 0,
   ay: 0,
   w: 1,
@@ -295,10 +356,20 @@ void main() {
 `
 
 const SCALE = 0.5
-const UNIFORMS = ['uRes', 'uScale', 'sMode', 'sA', 'sB', 'sC', 'sAnchor', 'sSize', 'sView', 'sMouse', 'sTime']
+/* the flow's threads and grain are fine, so it is drawn at full resolution */
+const scaleOf = (mode: Shader) => (mode === 'flow' ? 1 : SCALE)
+const UNIFORMS = ['uRes', 'uScale', 'sMode', 'sA', 'sB', 'sC', 'sD', 'sE', 'sAnchor', 'sSize', 'sView', 'sMouse', 'sTime']
 
 const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
 const smooth = (t: number) => t * t * (3 - 2 * t)
+const mixc = (a: number[], b: number[], f: number) => a.map((v, i) => v + (b[i] - v) * f)
+
+/** a palette's five colours: the two for the flow made up where it has none,
+ *  the accent's way to the deep one and a pale of the deep one */
+const five = (hex: string[]) => {
+  const c = hex.map(rgb)
+  return c.length >= 5 ? c : [...c, mixc(c[2], c[0], 0.5), mixc(c[0], [1, 1, 1], 0.55)]
+}
 
 export class Glow {
   private canvas = document.createElement('canvas')
@@ -312,7 +383,8 @@ export class Glow {
   private mode: Shader
   private tone: Tone
   /* the colours now, easing toward the palette's */
-  private cols = [rgb('#ffffff'), rgb('#ffffff'), rgb('#ffffff')]
+  private cols = five(['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'])
+  private scale = SCALE
   private pointer = { x: 0, y: 0, on: false }
   private m = { x: 0, y: 0, on: 0 }
   private last = performance.now()
@@ -326,6 +398,7 @@ export class Glow {
     this.anchor = anchor
     this.mode = mode
     this.tone = tone
+    this.scale = scaleOf(mode)
     this.cols = this.palette(performance.now() / 1000)
     this.canvas.className = 'hx__glow'
     this.canvas.setAttribute('aria-hidden', 'true')
@@ -368,6 +441,10 @@ export class Glow {
   set(mode: Shader, tone: Tone) {
     this.mode = mode
     this.tone = tone
+    if (scaleOf(mode) !== this.scale) {
+      this.scale = scaleOf(mode)
+      this.resize()
+    }
     this.wake()
   }
 
@@ -387,19 +464,19 @@ export class Glow {
 
   /** the palette's colours at time `t`: a fixed one, or the rotation */
   private palette(t: number) {
-    if (this.tone !== 'rotate') return PALETTES[this.tone].map(rgb)
-    if (this.calm) return PALETTES[ROTATION[0]].map(rgb)
+    if (this.tone !== 'rotate') return five(PALETTES[this.tone])
+    if (this.calm) return five(PALETTES[ROTATION[0]])
     const u = t / (HOLD + EASE)
     const i = Math.floor(u) % ROTATION.length
     const f = smooth(Math.max(0, (u - Math.floor(u)) * (HOLD + EASE) - HOLD) / EASE)
-    const from = PALETTES[ROTATION[i]].map(rgb)
-    const to = PALETTES[ROTATION[(i + 1) % ROTATION.length]].map(rgb)
-    return from.map((c, k) => c.map((v, j) => v + (to[k][j] - v) * f))
+    const from = five(PALETTES[ROTATION[i]])
+    const to = five(PALETTES[ROTATION[(i + 1) % ROTATION.length]])
+    return from.map((c, k) => mixc(c, to[k], f))
   }
 
   private resize() {
-    this.canvas.width = Math.max(1, Math.round(this.page.offsetWidth * SCALE))
-    this.canvas.height = Math.max(1, Math.round(this.page.offsetHeight * SCALE))
+    this.canvas.width = Math.max(1, Math.round(this.page.offsetWidth * this.scale))
+    this.canvas.height = Math.max(1, Math.round(this.page.offsetHeight * this.scale))
     this.wake()
   }
 
@@ -445,7 +522,7 @@ export class Glow {
     g.mode = SHADERS.findIndex((s) => s.id === this.mode)
     /* the dither's pixels shown as pixels, not smoothed */
     this.canvas.style.imageRendering = this.mode === 'dither' ? 'pixelated' : ''
-    ;[g.a, g.b, g.c] = this.cols
+    ;[g.a, g.b, g.c, g.d, g.e] = this.cols
     g.w = this.page.offsetWidth
     g.h = this.page.offsetHeight
     g.view = Math.min(g.h, window.innerHeight)
@@ -459,11 +536,13 @@ export class Glow {
     const { gl, u } = this
     gl.viewport(0, 0, this.canvas.width, this.canvas.height)
     gl.uniform2f(u.uRes, this.canvas.width, this.canvas.height)
-    gl.uniform1f(u.uScale, SCALE)
+    gl.uniform1f(u.uScale, this.scale)
     gl.uniform1f(u.sMode, g.mode)
     gl.uniform3fv(u.sA, g.a)
     gl.uniform3fv(u.sB, g.b)
     gl.uniform3fv(u.sC, g.c)
+    gl.uniform3fv(u.sD, g.d)
+    gl.uniform3fv(u.sE, g.e)
     gl.uniform2f(u.sAnchor, g.ax, g.ay)
     gl.uniform2f(u.sSize, g.w, g.h)
     gl.uniform1f(u.sView, g.view)

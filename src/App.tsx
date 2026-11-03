@@ -63,6 +63,8 @@ const FilmRenderPage = lazy(() =>
  *                questions on the right
  *   /home-marble the mark gathered from particles, the case studies
  *                marbled through it, under the headline, bar and questions
+ *   /home-flow   the Lovable heroes' third: the headline left, an Ask UMM
+ *                AI card right, over bands of colour flowing
  *   /phone       the three versions side by side in phone-sized frames
  *   /film        the "Our work" film alone on a 1920 x 1080 frame, for
  *                scripts/render-film.mjs to export to MP4
@@ -103,6 +105,7 @@ export function App() {
     '/home-ring-bottom': 'ring-bottom',
     '/home-ring-side': 'ring-side',
     '/home-marble': 'marble',
+    '/home-flow': 'flow',
     '/home-ring-hero': 'ring-hero',
     '/home-ring-inside': 'ring-inside',
     '/home-ring-horizon': 'ring-horizon',

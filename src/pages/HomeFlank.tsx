@@ -92,11 +92,21 @@ import '@/styles/home-flank.css'
                                        then the headline comes in word by
                                        word, and the hero is alone
 
+   And the Lovable heroes' third, "Flow", as it is (Krish, 3 Nov):
+
+     flow          /home-flow          the headline on the left, its letters
+                                       blurring in; on the right a glass card,
+                                       "Ask UMM AI", its bar typing the
+                                       questions, the six under it; behind,
+                                       bands of colour flowing (the flow shader)
+
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts, Marble.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
-   Krish's reference of 30 Oct): a glow, a mesh, an aurora, silk or a halo,
-   in one palette or turning through them all; or the live homepage's grey.
+   Krish's reference of 30 Oct): a glow, a mesh, an aurora, silk, a halo and
+   more, in one palette or turning through them all; or the live homepage's
+   grey. The dock no longer offers the glow or the mesh (Krish, 3 Nov), so
+   the pages that opened on the glow open on the grain, its nearest.
    They are kept in ?bg= and ?tone=, and ?options adds a dock to switch
    between everything.
    ========================================================================== */
@@ -116,10 +126,11 @@ export type Version =
   | 'window'
   | 'peek'
   | 'marble'
+  | 'flow'
 
 /** the versions the review dock offers for now (Krish, 3 Nov): the rest
  *  keep their pages but are left out of it */
-const OFFERED: Version[] = ['marble', 'peek', 'ring']
+const OFFERED: Version[] = ['marble', 'peek', 'ring', 'flow']
 
 /** the ring's later layouts: no pillars, the ring has their room */
 const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon']
@@ -128,6 +139,11 @@ const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-
 const UNDER: Version[] = ['ring-under', 'ring-bottom', 'ring-side', 'marble']
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
+  {
+    id: 'flow',
+    label: 'Flow',
+    hint: 'The headline on the left, an Ask UMM AI card on the right typing its questions, the six under it, over bands of colour flowing across the page.',
+  },
   {
     id: 'marble',
     label: 'Particle mark · marble',
@@ -208,13 +224,22 @@ const BGS: { id: Bg; label: string; hint: string }[] = [
   { id: 'none', label: 'Grey', hint: 'No shader: the live homepage’s grey ground, #DEDEDE.' },
 ]
 
+/** the grounds the dock offers: not the glow or the mesh (Krish, 3 Nov),
+ *  though a link may still ask for them */
+const HIDDEN_BGS: Bg[] = ['glow', 'mesh']
+const OFFERED_BGS = BGS.filter((b) => !HIDDEN_BGS.includes(b.id))
+
 const pick = <T extends string>(v: string | null, from: { id: T }[], or: T) =>
   from.some((x) => x.id === v) ? (v as T) : or
 
-/** the ground a page opens on where it is not the glow turning through every
- *  palette: the marble keeps the soft pastel wash of the hero it came from */
-const GROUND: Partial<Record<Version, { bg: Bg; tone: Tone }>> = { marble: { bg: 'silk', tone: 'pastel' } }
-const groundOf = (v: Version): { bg: Bg; tone: Tone } => GROUND[v] ?? { bg: 'glow', tone: 'rotate' }
+/** the ground a page opens on where it is not the grain turning through
+ *  every palette: the marble keeps the soft pastel wash of the hero it came
+ *  from, and the flow its own bands in their own colours */
+const GROUND: Partial<Record<Version, { bg: Bg; tone: Tone }>> = {
+  marble: { bg: 'silk', tone: 'pastel' },
+  flow: { bg: 'flow', tone: 'spectrum' },
+}
+const groundOf = (v: Version): { bg: Bg; tone: Tone } => GROUND[v] ?? { bg: 'grain', tone: 'rotate' }
 
 export const VERSION_PATHS: Record<Version, string> = {
   doors: '/home-doors',
@@ -231,9 +256,13 @@ export const VERSION_PATHS: Record<Version, string> = {
   window: '/home-window',
   peek: '/home-peek',
   marble: '/home-marble',
+  flow: '/home-flow',
 }
 
 type Make = (host: MarkHost) => MarkEngine
+
+/** a page with no mark of its own (the flow): nothing to show or play */
+const still: Make = () => ({ focus() {}, leave() {}, dispose() {} })
 
 const ENGINES: Record<Version, () => Promise<Make>> = {
   doors: () => import('@/components/home/Doors').then((m) => (h: MarkHost) => new m.Doors(h)),
@@ -250,6 +279,7 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   window: () => import('@/components/home/Window').then((m) => (h: MarkHost) => new m.Window(h)),
   peek: () => import('@/components/home/Peek').then((m) => (h: MarkHost) => new m.Peek(h)),
   marble: () => import('@/components/home/Marble').then((m) => (h: MarkHost) => new m.Marble(h)),
+  flow: () => Promise.resolve(still),
 }
 
 /** a line of the headline as words, each numbered through the whole
@@ -264,6 +294,27 @@ const words = (line: string, l: number) => {
       </span>
     </Fragment>
   ))
+}
+
+/** a line of the headline as letters, each blurring in on its own beat
+ *  (--c), the letters of a word held together so lines break between words */
+const letters = (line: string, from: number) => {
+  let n = from
+  return line.split(' ').map((w, i) => {
+    if (i > 0) n++
+    return (
+      <Fragment key={i}>
+        {i > 0 && ' '}
+        <span className="hx__flow-w">
+          {[...w].map((ch, j) => (
+            <span key={j} style={{ '--c': n++ } as CSSProperties}>
+              {ch}
+            </span>
+          ))}
+        </span>
+      </Fragment>
+    )
+  })
 }
 
 /** How long a question must be rested on before the mark answers it (ms) */
@@ -320,7 +371,13 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
     if (ground !== 'glow' || b === 'none' || !layer.current || !page.current) return
     const pg = page.current
     try {
-      glow.current = new Glow(layer.current, pg, () => pg.querySelector<HTMLElement>('.hx__bar, .hx__big-field'), b, t)
+      glow.current = new Glow(
+        layer.current,
+        pg,
+        () => pg.querySelector<HTMLElement>('.hx__bar, .hx__big-field, .hx__flow-ask'),
+        b,
+        t,
+      )
     } catch {
       return
     }
@@ -422,6 +479,8 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
           </div>
         ) : version === 'prompt' ? (
           <PromptBody rage={rage} stage={stage} hot={hot} chips={chips} />
+        ) : version === 'flow' ? (
+          <FlowBody rage={rage} stage={stage} />
         ) : (
           <div className="hx__body">
             <div className="hx__stage" ref={stage}>
@@ -467,7 +526,7 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
           </div>
         )}
 
-        {version !== 'doors' && version !== 'prompt' && !RING_LAYOUTS.includes(version) && (
+        {version !== 'doors' && version !== 'prompt' && version !== 'flow' && !RING_LAYOUTS.includes(version) && (
           <Pillars className="hx__pillars" />
         )}
       </div>
@@ -587,6 +646,96 @@ function PromptBody({
   )
 }
 
+/** The flow hero (the Lovable heroes' third): on the left a line of
+ *  introduction, the headline blurring in letter by letter and the pillars;
+ *  on the right a glass card, "Ask UMM AI", with the bar typing the questions
+ *  in turn inside a slowly turning ring of colour, and the six questions
+ *  under it, each a way into RAGe. */
+function FlowBody({ rage, stage }: { rage: Rage; stage: RefObject<HTMLDivElement | null> }) {
+  const [focused, setFocused] = useState(false)
+  const demo = useDemo(!rage.value && !focused, null)
+  /* the second line starts while the first is still coming in, as there */
+  const second = 10
+  return (
+    <div className="hx__flow">
+      <div className="hx__flow-copy">
+        <p className="hx__flow-kicker">We are built different</p>
+        <h1 className="hm-title hx__flow-title">
+          <span className="hm-sr">{homeHero.title.join(' ')}</span>
+          <span aria-hidden="true">{letters(homeHero.title[0], 0)}</span>
+          <span aria-hidden="true">{letters(homeHero.title[1], second)}</span>
+        </h1>
+        <ul className="hx__flow-pillars">
+          {homeHero.pillars.map((p, i) => (
+            <li key={p} style={{ '--i': i } as CSSProperties}>
+              {p} /
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="hx__flow-card" ref={stage}>
+        <div className="hx__flow-head">
+          <span className="hx__flow-live">
+            <i aria-hidden="true" />
+            Ask UMM AI
+          </span>
+          <span className="hx__flow-on">Online</span>
+        </div>
+        <form
+          className="hx__flow-ask"
+          data-phase={rage.phase}
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (rage.phase === 'idle') rage.go(rage.value, { typed: true })
+          }}
+        >
+          <span className="hx__flow-ring" aria-hidden="true" />
+          <div className="hx__flow-field">
+            <label className="hm-sr" htmlFor="hx-flow">
+              {homeHero.placeholder}
+            </label>
+            <input
+              id="hx-flow"
+              className="hx__flow-input"
+              value={rage.value}
+              placeholder={focused ? homeHero.placeholder : ''}
+              autoComplete="off"
+              readOnly={rage.phase !== 'idle'}
+              onChange={(e) => rage.setValue(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+            />
+            {!rage.value && !focused && (
+              <span className="hx__flow-demo" aria-hidden="true">
+                <span>
+                  {demo}
+                  <span className="hx__caret" />
+                </span>
+              </span>
+            )}
+            <button type="submit" className="hx__flow-go" aria-label="Ask RAGe">
+              <IconArrowUpRight size={18} strokeWidth={2} />
+            </button>
+          </div>
+        </form>
+        <ul className="hx__flow-qs" aria-label="Ask RAGe">
+          {asciiChips.map((c, i) => (
+            <li key={c.q} style={{ '--i': i } as CSSProperties}>
+              <button type="button" className="hx__flow-q" disabled={rage.busy} onClick={() => rage.go(c.q)}>
+                <span>{c.q}</span>
+                <span className="hx__flow-arrow" aria-hidden="true">
+                  →
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 export function HomeFlank({ initial }: { initial: Version }) {
   const [version, setVersion] = useState<Version>(initial)
   const [bg, setBg] = useState<Bg>(() => {
@@ -643,7 +792,7 @@ export function HomeFlank({ initial }: { initial: Version }) {
                   setVersion(v)
                 }}
               />
-              <Seg label="Shader" items={BGS} value={bg} onPick={setBg} onPeek={setPeekBg} />
+              <Seg label="Shader" items={OFFERED_BGS} value={bg} onPick={setBg} onPeek={setPeekBg} />
               {bg !== 'none' && (
                 <Seg label="Colour" items={TONES} value={tone} onPick={setTone} onPeek={setPeekTone} />
               )}
