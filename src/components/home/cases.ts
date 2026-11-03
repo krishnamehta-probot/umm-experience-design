@@ -1,9 +1,11 @@
 /* ============================================================================
-   CASES — the case studies the homepage heroes show (Ring.ts, Marble.ts)
+   CASES — the case studies the homepage heroes show (Ring.ts)
 
    Twelve of UMM's case studies, by their slug on umm.digital and their
    titles there; public/home/cases holds each one's render, as the live
-   site's case-study card shows it, and its client's logo.
+   site's case-study card shows it, and its client's logo (-logo.webp). The
+   hero does not show the logos (3 Nov: putting clients' logos up front is not done), only
+   the field each piece of work was in (INDUSTRY).
    ========================================================================== */
 
 export const CASES: [string, string][] = [
@@ -23,10 +25,22 @@ export const CASES: [string, string][] = [
 
 export const caseUrl = (slug: string) => `https://umm.digital/casestudies/${slug}/`
 export const caseImage = (slug: string) => `/home/cases/${slug}.webp`
-export const caseLogo = (slug: string) => `/home/cases/${slug}-logo.webp`
 
-/** the logos drawn in white, which sit on a dark tag instead */
-export const LIGHT = new Set(['penny-co', 'lyca-eshop', 'habari'])
+/** the field each case study's work was in, named without the client */
+export const INDUSTRY: Record<string, string> = {
+  'mohawk-recover': 'Sustainability',
+  'biocon-group': 'Biotech',
+  'lyca-eshop': 'E-commerce',
+  'penny-co': 'Fintech',
+  habari: 'Telecom',
+  iadeptive: 'AI & DevOps',
+  'aladdin-commercial': 'Commercial flooring',
+  kulkuf: 'Blockchain',
+  'coco-coir': 'Home goods',
+  yiksi: 'Mobile money',
+  'academy-of-beauty': 'Education',
+  steward: 'Energy',
+}
 
 /** the renders' proportions (the live cards, 1024 x 829) */
 export const CASE_ASPECT = 1024 / 829

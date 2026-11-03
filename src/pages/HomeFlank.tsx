@@ -117,6 +117,10 @@ export type Version =
   | 'peek'
   | 'marble'
 
+/** the versions the review dock offers for now (Krish, 3 Nov): the rest
+ *  keep their pages but are left out of it */
+const OFFERED: Version[] = ['marble', 'peek', 'ring']
+
 /** the ring's later layouts: no pillars, the ring has their room */
 const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon']
 
@@ -632,7 +636,7 @@ export function HomeFlank({ initial }: { initial: Version }) {
             <div className="ha-dock__body">
               <Seg
                 label="Version"
-                items={VERSIONS}
+                items={OFFERED.map((id) => VERSIONS.find((v) => v.id === id)!)}
                 value={version}
                 onPick={(v) => {
                   window.scrollTo({ top: 0, behavior: 'instant' })

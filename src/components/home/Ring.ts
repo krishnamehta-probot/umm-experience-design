@@ -1,5 +1,5 @@
 import { reducedMotion } from './gl'
-import { CASES, CASE_ASPECT, LIGHT, caseImage, caseUrl } from './cases'
+import { CASES, CASE_ASPECT, INDUSTRY, caseImage, caseUrl } from './cases'
 import type { Focus, MarkEngine, MarkHost } from './mark'
 import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, runwayAt } from './reel'
 
@@ -7,7 +7,8 @@ import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, ru
    RING — UMM's work on a turning ring (/home-ring and its three layouts)
 
    Twelve of UMM's case studies, as the live site's case-study cards show
-   them (the render, the client's logo; public/home/cases), stand on a ring
+   them (the render; public/home/cases), each tagged with the field the
+   work was in, not the client's logo (3 Nov), stand on a ring
    seen a little from above, turning slowly: the nearest cards large and
    bright, those round the back hidden. The cursor leans the turn its way,
    resting on a question on the left or the right spins it that way, the
@@ -119,17 +120,11 @@ export class Ring implements MarkEngine {
       img.alt = ''
       img.decoding = 'async'
       img.draggable = false
-      /* the client's logo on a small frosted tag, as legible on the dark
-         renders as on the light ones */
+      /* the field the work was in, on a small frosted tag, as legible on
+         the dark renders as on the light ones; no client's logo up front */
       const tag = document.createElement('span')
       tag.className = 'hx__ring-tag'
-      if (LIGHT.has(slug)) tag.dataset.dark = ''
-      const logo = document.createElement('img')
-      logo.src = `/home/cases/${slug}-logo.webp`
-      logo.alt = ''
-      logo.decoding = 'async'
-      logo.draggable = false
-      tag.appendChild(logo)
+      tag.textContent = INDUSTRY[slug] ?? ''
       c.append(img, tag)
       this.ring.appendChild(c)
       this.cards.push(c)

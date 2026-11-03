@@ -15,6 +15,13 @@ import { reducedMotion } from './gl'
      silk     a satin ribbon flowing across behind the bar
      halo     a ring of light around the bar, its colours turning round it
 
+   and, asked for as something more current (Krish, 3 Nov):
+
+     grain    a broad gradient rising from below, with a film grain over it
+     dither   the bloom drawn in pixels, ordered dots of the palette's colours
+              thinning out into the white (the canvas shown unsmoothed)
+     fluted   the colours seen through a pane of ribbed glass
+
    The cursor leans each a little and brings up a touch more light where it
    is. The colours come from a palette (TONES) or, by default, turn through
    them all ('rotate'), easing from one to the next.
@@ -24,7 +31,7 @@ import { reducedMotion } from './gl'
    reading the same values from `glowNow`, so the glass bends the same light.
    ========================================================================== */
 
-export type Shader = 'glow' | 'mesh' | 'aurora' | 'silk' | 'halo'
+export type Shader = 'glow' | 'mesh' | 'aurora' | 'silk' | 'halo' | 'grain' | 'dither' | 'fluted'
 
 export const SHADERS: { id: Shader; label: string; hint: string }[] = [
   { id: 'glow', label: 'Glow', hint: 'A bloom of colour rising from below the ask bar, its edge slowly drawn about.' },
@@ -32,6 +39,9 @@ export const SHADERS: { id: Shader; label: string; hint: string }[] = [
   { id: 'aurora', label: 'Aurora', hint: 'Curtains of light rising from the foot of the screen, swaying slowly.' },
   { id: 'silk', label: 'Silk', hint: 'A satin ribbon of colour flowing across behind the ask bar.' },
   { id: 'halo', label: 'Halo', hint: 'A ring of light around the ask bar, its colours turning slowly round it.' },
+  { id: 'grain', label: 'Grain', hint: 'A broad gradient rising from below the ask bar, with a fine film grain over it.' },
+  { id: 'dither', label: 'Dither', hint: 'The glow drawn in pixels: ordered dots of colour thinning out into the white.' },
+  { id: 'fluted', label: 'Fluted glass', hint: 'The colours seen through a pane of ribbed glass, each rib bending them.' },
 ]
 
 export type Tone = 'rotate' | 'magenta' | 'violet' | 'ocean' | 'mint' | 'sunset' | 'pastel'
@@ -178,13 +188,73 @@ vec3 haloMode(vec2 p) {
   return tint(col, a);
 }
 
+/* a broad gradient rising from below the bar, with a film grain over it */
+vec3 grainMode(vec2 p) {
+  vec2 gC = sAnchor + vec2(0.0, sView * 0.42);
+  vec2 gR = vec2(max(sSize.x * 0.62, 380.0), max(sView * 0.62, 340.0));
+  vec2 c = gC + (sMouse.xy - gC) * 0.06 * sMouse.z;
+  vec2 q = (p - c) / gR;
+  vec2 w = vec2(gfbm(q * 1.2 + vec2(sTime * 0.03, 0.0)), gfbm(q * 1.2 + vec2(5.2, -sTime * 0.025))) - 0.5;
+  q += w * 0.6;
+  float a = exp(-dot(q, q) * 1.6);
+  vec3 col = mix(vec3(1.0), sB, smoothstep(0.02, 0.35, a));
+  col = mix(col, sC, smoothstep(0.3, 0.7, a) * (0.55 + 0.45 * sin(q.x * 2.4 + sTime * 0.08)));
+  col = mix(col, sA, smoothstep(0.62, 0.98, a));
+  /* the grain: still, two pixels to a speck, heavier where the colour is */
+  float g = gh(floor(p * 0.5) + 0.37) - 0.5;
+  return col + g * (0.03 + 0.12 * a);
+}
+
+/* ordered dither: the levels of a 8 x 8 Bayer matrix */
+float bayer2(vec2 a) {
+  a = floor(a);
+  return fract(a.x / 2.0 + a.y * a.y * 0.75);
+}
+float bayer8(vec2 a) {
+  return (bayer2(0.25 * a) * 0.25 + bayer2(0.5 * a)) * 0.25 + bayer2(a);
+}
+
+/* the bloom drawn in pixels: white, then the light colour, the accent and
+   the deep one, in ordered dots that thin out at the edges */
+vec3 ditherMode(vec2 p) {
+  vec2 cell = floor(p / 4.0);
+  vec2 cp = cell * 4.0 + 2.0;
+  vec2 gC = sAnchor + vec2(0.0, sView * 0.3);
+  vec2 gR = vec2(max(sSize.x * 0.5, 340.0), max(sView * 0.55, 320.0));
+  vec2 q = (cp - gC) / gR;
+  vec2 w = vec2(gfbm(q * 1.5 + vec2(sTime * 0.04, 0.0)), gfbm(q * 1.5 + vec2(5.2, -sTime * 0.035))) - 0.5;
+  q += w * 0.7;
+  float a = max(0.0, exp(-dot(q, q) * 2.0) - 0.07) / 0.93 + 0.18 * near(cp, gR.x * 0.4);
+  float lv = clamp(floor(a * 3.2 + bayer8(cell)), 0.0, 3.0);
+  if (lv < 0.5) return vec3(1.0);
+  if (lv < 1.5) return sB;
+  if (lv < 2.5) return sC;
+  return sA;
+}
+
+/* the colours seen through ribbed glass: each rib pulls the field from
+   either side of it, shaded round its curve, a bright line at its edge */
+vec3 flutedMode(vec2 p) {
+  float rw = clamp(sSize.x / 48.0, 18.0, 40.0);
+  float f = fract(p.x / rw);
+  float bend = f - 0.5;
+  vec3 col = meshMode(vec2(p.x - bend * rw * 2.4, p.y + bend * 8.0));
+  float colour = 1.0 - min(min(col.r, col.g), col.b);
+  float shade = 0.07 * sin(f * 6.2832 + 1.4);
+  float edge = exp(-pow((f - 0.03) * 36.0, 2.0)) * 0.1;
+  return clamp(col * (1.0 + shade * (0.3 + colour)) + edge * (0.25 + colour), 0.0, 1.0);
+}
+
 /* the field at a point of the page (CSS px, y down), in sRGB */
 vec3 shaderAt(vec2 p) {
   if (sMode < 0.5) return glowMode(p);
   if (sMode < 1.5) return meshMode(p);
   if (sMode < 2.5) return auroraMode(p);
   if (sMode < 3.5) return silkMode(p);
-  return haloMode(p);
+  if (sMode < 4.5) return haloMode(p);
+  if (sMode < 5.5) return grainMode(p);
+  if (sMode < 6.5) return ditherMode(p);
+  return flutedMode(p);
 }
 `
 
@@ -373,6 +443,8 @@ export class Glow {
     const a = this.anchor()?.getBoundingClientRect()
     const g = glowNow
     g.mode = SHADERS.findIndex((s) => s.id === this.mode)
+    /* the dither's pixels shown as pixels, not smoothed */
+    this.canvas.style.imageRendering = this.mode === 'dither' ? 'pixelated' : ''
     ;[g.a, g.b, g.c] = this.cols
     g.w = this.page.offsetWidth
     g.h = this.page.offsetHeight
