@@ -17,8 +17,9 @@ import { ReelPlayer, makeReel } from './reel'
    only playing once it fills the screen. So at rest the card is a screen
    leaning back as it rises out of the page: the film's opening still in it
    (public/home/reel-still.webp, so it is never an empty black slab), drifting
-   slowly, its colours glowing onto the page round it, leaning a little to
-   the cursor. A frosted play button sits on it, "Scroll to watch the film",
+   slowly, its colours glowing onto the page round it. (It also leaned left
+   and right after the cursor; Krish found that cheap, so it no longer
+   does.) A play button sits on it, "Scroll to watch the film",
    and takes the visitor down to it on a click. Scrolling stands the card
    up, then grows it to the screen.
 
@@ -42,10 +43,9 @@ const RUNWAY = 1.2
 /** the card's corners at rest (px) */
 const RADIUS = 28
 /** how far the card leans back at rest, and with the cursor on its button
- *  (deg); how far it turns to the cursor */
+ *  (deg) */
 const TILT = 12
 const TILT_NEAR = 5
-const LEAN = 6
 const STILL = '/home/reel-still.webp'
 /** the trailer's frames: the opening still, then four more from the film */
 const FRAMES = [STILL, '/home/teaser/1.webp', '/home/teaser/2.webp', '/home/teaser/3.webp', '/home/teaser/4.webp']
@@ -66,9 +66,6 @@ export class Peek implements MarkEngine {
   private calm = reducedMotion()
   private grown = false
   private leaveAt = -1
-  /* the cursor across the screen (0 to 1), and the lean eased toward it */
-  private pointer = { x: 0.5, on: false }
-  private lean = 0
   private near = false
   private tilt = TILT
   private last = performance.now()
@@ -133,8 +130,6 @@ export class Peek implements MarkEngine {
     this.ro.observe(host.stage)
     window.addEventListener('resize', this.layout)
     window.addEventListener('scroll', this.queue, { passive: true })
-    window.addEventListener('pointermove', this.onMove, { passive: true })
-    document.documentElement.addEventListener('pointerleave', this.onLeave)
     document.addEventListener('visibilitychange', this.onVisible)
     this.layout()
   }
@@ -152,8 +147,6 @@ export class Peek implements MarkEngine {
     this.ro.disconnect()
     window.removeEventListener('resize', this.layout)
     window.removeEventListener('scroll', this.queue)
-    window.removeEventListener('pointermove', this.onMove)
-    document.documentElement.removeEventListener('pointerleave', this.onLeave)
     document.removeEventListener('visibilitychange', this.onVisible)
     this.reel.dispose()
     const { run, page } = this.host
@@ -187,17 +180,6 @@ export class Peek implements MarkEngine {
   private onVisible = () => this.reel.visible(!document.hidden)
 
   /* --- input ---------------------------------------------------------------- */
-
-  private onMove = (e: PointerEvent) => {
-    if (e.pointerType !== 'mouse' || this.calm) return
-    this.pointer = { x: e.clientX / window.innerWidth, on: true }
-    this.queue()
-  }
-
-  private onLeave = () => {
-    this.pointer.on = false
-    this.queue()
-  }
 
   private onNear = () => {
     this.near = true
@@ -270,17 +252,14 @@ export class Peek implements MarkEngine {
     c.borderRadius = `${(RADIUS * (1 - k)).toFixed(1)}px`
     c.zIndex = this.grown ? '30' : ''
 
-    /* leaning back at rest (less with the cursor on the play button), a
-       little toward the cursor; standing up as the scroll begins */
+    /* leaning back at rest (less with the cursor on the play button),
+       standing up as the scroll begins */
     const e = 1 - Math.exp(-dt * 4)
     const tiltTo = this.calm ? 0 : this.near ? TILT_NEAR : TILT
     this.tilt += (tiltTo - this.tilt) * e
-    const leanTo = this.pointer.on ? (this.pointer.x - 0.5) * 2 * LEAN : 0
-    this.lean += (leanTo - this.lean) * e
     const rx = this.tilt * (1 - up)
-    const ry = this.lean * (1 - up)
-    c.transform = `perspective(1500px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`
-    const settling = Math.abs(tiltTo - this.tilt) > 0.02 || Math.abs(leanTo - this.lean) > 0.02
+    c.transform = `perspective(1500px) rotateX(${rx.toFixed(2)}deg)`
+    const settling = Math.abs(tiltTo - this.tilt) > 0.02
 
     /* the glow under the card, fading as it grows */
     const gs = this.glow.style
