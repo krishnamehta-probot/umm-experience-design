@@ -20,7 +20,12 @@ import { reducedMotion } from './gl'
      grain    a broad gradient rising from below, with a film grain over it
      dither   the bloom drawn in pixels, ordered dots of the palette's colours
               thinning out into the white (the canvas shown unsmoothed)
-     fluted   the colours seen through a pane of ribbed glass
+     fluted   the colours seen through a pane of ribbed glass; made richer
+              at Krish's ask (3 Nov): wider rods, each bending what is
+              behind it more at its edges, the reds a little less than the
+              blues; lit as rods, a sheen following the cursor, the seams in
+              shade; behind, orbs of colour shaded like spheres, so the
+              stepping of their edges shows the glass
 
    and, from the Lovable heroes' third, "Flow" (Krish, 3 Nov):
 
@@ -51,7 +56,11 @@ export const SHADERS: { id: Shader; label: string; hint: string }[] = [
   { id: 'halo', label: 'Halo', hint: 'A ring of light around the ask bar, its colours turning slowly round it.' },
   { id: 'grain', label: 'Grain', hint: 'A broad gradient rising from below the ask bar, with a fine film grain over it.' },
   { id: 'dither', label: 'Dither', hint: 'The glow drawn in pixels: ordered dots of colour thinning out into the white.' },
-  { id: 'fluted', label: 'Fluted glass', hint: 'The colours seen through a pane of ribbed glass, each rib bending them.' },
+  {
+    id: 'fluted',
+    label: 'Fluted glass',
+    hint: 'Orbs of colour seen through a pane of ribbed glass, each rod bending them, a sheen on the rods following the cursor.',
+  },
   {
     id: 'flow',
     label: 'Flow',
@@ -254,17 +263,71 @@ vec3 ditherMode(vec2 p) {
   return sA;
 }
 
-/* the colours seen through ribbed glass: each rib pulls the field from
-   either side of it, shaded round its curve, a bright line at its edge */
+/* an orb of colour over what is under it, shaded like a sphere lit from the
+   upper left: the light colour at its crown, the deep one at its foot, a
+   little light round its rim */
+vec3 orb(vec3 under, vec2 q, vec2 c, float r, vec3 deep, vec3 light) {
+  vec2 d = (q - c) / r;
+  float l = length(d);
+  float lit = clamp(0.5 + 0.5 * dot(d, vec2(-0.55, -0.83)), 0.0, 1.0);
+  vec3 col = mix(deep, light, smoothstep(0.05, 1.0, lit));
+  col = mix(col, light, smoothstep(0.55, 0.98, l) * 0.3);
+  return mix(under, col, (1.0 - smoothstep(0.62, 1.0, l)) * 0.9);
+}
+
+/* what stands behind the fluted glass: a big orb behind the bar, a smaller
+   one of the accent above it and one of the fourth colour to the side, all
+   drifting slowly and leaning a little toward the cursor, over a faint wash
+   of the light colour; the warp frays their edges */
+vec3 flutedField(vec2 p, vec2 warp) {
+  float s = max(sSize.x, sView);
+  vec2 q = p / s + warp;
+  vec2 a = sAnchor / s;
+  float t = sTime;
+  vec2 m = (sMouse.xy / s - a) * 0.05 * sMouse.z;
+  vec3 col = mix(vec3(1.0), sB, 0.5 * exp(-dot(q - a, q - a) / 0.14));
+  col = orb(col, q, a + vec2(0.27 + 0.04 * cos(t * 0.07), 0.07 + 0.04 * sin(t * 0.09)) + m * 0.6, 0.12, sD, sE);
+  col = orb(col, q, a + vec2(-0.11 + 0.05 * sin(t * 0.08), 0.0 + 0.04 * cos(t * 0.06)) + m, 0.2, sA, sC);
+  col = orb(col, q, a + vec2(0.11 + 0.04 * sin(t * 0.1), -0.16 + 0.03 * cos(t * 0.12)) + m * 1.4, 0.075, sC, sB);
+  return col;
+}
+
+/* the field seen through a pane of fluted glass. Each rod draws in what is
+   behind it from either side, flipped, more strongly toward its edges, and
+   bends the reds a little less than the blues, so edges of colour fringe.
+   Each is lit as a rod: shaded round its curve, a sheen where it faces the
+   light (which comes from the side the cursor is on, brighter near it), the
+   seam between two in shade with a bright line where the next one begins,
+   and a fine frost over all. On the white the rods show only faintly. */
 vec3 flutedMode(vec2 p) {
-  float rw = clamp(sSize.x / 48.0, 18.0, 40.0);
+  float rw = clamp(sSize.x / 32.0, 28.0, 60.0);
   float f = fract(p.x / rw);
-  float bend = f - 0.5;
-  vec3 col = meshMode(vec2(p.x - bend * rw * 2.4, p.y + bend * 8.0));
+  float x = f * 2.0 - 1.0;
+  float nz = sqrt(max(1.0 - x * x, 0.0));
+  float k = -rw * (0.62 * x + 0.24 * x * x * x);
+  float s = max(sSize.x, sView);
+  vec2 qc = p / s;
+  vec2 warp = (vec2(gfbm(qc * 2.2 + sTime * 0.03), gfbm(qc * 2.2 + vec2(3.1, 1.7) - sTime * 0.025)) - 0.5) * 0.05;
+  vec3 col = vec3(
+    flutedField(vec2(p.x + k * 0.9, p.y), warp).r,
+    flutedField(vec2(p.x + k, p.y), warp).g,
+    flutedField(vec2(p.x + k * 1.1, p.y), warp).b
+  );
   float colour = 1.0 - min(min(col.r, col.g), col.b);
-  float shade = 0.07 * sin(f * 6.2832 + 1.4);
-  float edge = exp(-pow((f - 0.03) * 36.0, 2.0)) * 0.1;
-  return clamp(col * (1.0 + shade * (0.3 + colour)) + edge * (0.25 + colour), 0.0, 1.0);
+  float amt = 0.1 + 0.9 * colour;
+  float lx = mix(-0.4, (sMouse.x / sSize.x - 0.5) * 1.8, sMouse.z);
+  vec3 L = normalize(vec3(lx, 0.0, 1.0));
+  vec3 n = vec3(x, 0.0, nz);
+  float dif = dot(n, L);
+  float spec = pow(max(dot(n, normalize(L + vec3(0.0, 0.0, 1.0))), 0.0), 40.0);
+  spec *= 1.0 + 0.8 * near(p, s * 0.22);
+  float seam = smoothstep(0.84, 1.0, abs(x));
+  col *= 1.0 + (dif - 0.85) * 0.16 * amt;
+  col *= 1.0 - seam * 0.1 * amt;
+  col += spec * (0.06 + 0.3 * colour);
+  col += exp(-pow((f - 0.012) * 60.0, 2.0)) * 0.1 * amt;
+  col += (gh(floor(p) + 0.71) - 0.5) * 0.02;
+  return clamp(col, 0.0, 1.0);
 }
 
 /* the Flow's own noise, as in the reference: five octaves, each turned */
@@ -356,8 +419,9 @@ void main() {
 `
 
 const SCALE = 0.5
-/* the flow's threads and grain are fine, so it is drawn at full resolution */
-const scaleOf = (mode: Shader) => (mode === 'flow' ? 1 : SCALE)
+/* the flow's threads and grain and the fluted glass's rods are fine, so
+   those two are drawn at full resolution */
+const scaleOf = (mode: Shader) => (mode === 'flow' || mode === 'fluted' ? 1 : SCALE)
 const UNIFORMS = ['uRes', 'uScale', 'sMode', 'sA', 'sB', 'sC', 'sD', 'sE', 'sAnchor', 'sSize', 'sView', 'sMouse', 'sTime']
 
 const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
