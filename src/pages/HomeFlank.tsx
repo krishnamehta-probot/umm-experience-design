@@ -87,11 +87,10 @@ import '@/styles/home-flank.css'
    headline, ask bar and questions centred as there (Marble.ts):
 
      marble        /home-marble        tiles fly in from all over into the
-                                       mark in the middle, the brand's five
-                                       pastels run through it as veined
-                                       marble, and it scatters again as the
-                                       headline comes in word by word; then
-                                       the hero alone
+                                       mark in the middle, a reflection
+                                       crosses it, and it scatters again;
+                                       then the headline comes in word by
+                                       word, and the hero is alone
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
    Doors.ts, PromptFilm.ts, Ring.ts, Marble.ts), loaded
@@ -128,7 +127,7 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
     id: 'marble',
     label: 'Particle mark · marble',
-    hint: 'Tiles fly in from all over the screen and build the UMM mark, veined with the brand’s five pastels; then they scatter again as the headline comes in word by word. Replay it below.',
+    hint: 'Tiles fly in from all over the screen and build the UMM mark, a reflection crosses it, and they scatter again; then the headline comes in word by word. Replay it below.',
   },
   {
     id: 'doors',

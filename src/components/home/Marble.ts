@@ -2,41 +2,39 @@ import { MARK_H, MARK_W, markPath, type MarkEngine, type MarkHost } from './mark
 
 /* ============================================================================
    MARBLE — the entrance of /home-marble: the UMM mark gathered from
-   particles, veined like marble, then scattered again
+   particles, a reflection drawn across it, then scattered again
 
    From Krish's pick of the Lovable heroes (3 Nov, "Kinetic Tiles", the 14th):
    black tiles fly in from every side of the screen and from all over it,
    turning as they come, with a trail, and snap into the UMM mark in the
-   middle, a shimmer crossing it as it locks. Colour then runs into it as
-   veins through black marble, in the brand's five pastels only (Krish:
-   "keep it only like umm colors"). Then the mark lets go the way it came:
-   its tiles fly back out to places all over the screen and off its edges,
-   fading as they go, while the headline comes in word by word in its place
-   and the ask bar and the questions under it (the page's data-formed).
-   After that the page is the hero alone (Krish, 3 Nov: the mark kept at the
-   foot "is not required"), and the canvas stops.
+   middle. A reflection then crosses the black mark from one side to the
+   other, as light across polished stone (Krish, 3 Nov: no colours in it,
+   "simple reflection kind of effect"). Then the mark lets go the way it
+   came: its tiles fly back out to places all over the screen and off its
+   edges, fading as they go. Only once they have gone does the headline come
+   in, word by word, then the ask bar and the questions (the page's
+   data-formed). After that the page is the hero alone (the mark kept at
+   the foot "is not required"), and the canvas stops.
 
-   About four seconds in all: the flight in a little slower than the first
-   cut (Krish: "a little slow only"), the rest quick, so the visitor is not
-   left waiting. With reduced motion there is no entrance at all.
+   With reduced motion there is no entrance at all.
    ========================================================================== */
 
 /** tiles in the mark, by the width of the screen */
 const COUNT = { desk: 2000, tablet: 1500, phone: 900 }
 /** the mark's width, as a share of the screen's (14th: about 40%) */
 const WIDE = { desk: 0.4, phone: 0.74 }
-/** the entrance (s): all the tiles in by 1.65, the colour running in */
-const REVEAL_AT = 1.3
-const REVEAL = 0.7
-/** the mark lets go, and the copy comes in; each tile's flight out, and
- *  how far apart they leave */
-const GONE = 2.9
-const OUT = 1.0
-const OUT_SPREAD = 0.35
+/** the entrance (s): all the tiles in by 1.65, then the reflection across
+ *  the mark */
+const REFLECT_AT = 1.6
+const REFLECT = 1.05
+/** the mark lets go: each tile's flight out, and how far apart they leave */
+const GONE = 2.75
+const OUT = 0.85
+const OUT_SPREAD = 0.3
+/** the copy comes in once the tiles have all but gone */
+const FORMED = 3.75
 /** the trails fade over these */
 const TRAILS: [number, number] = [1.15, 1.55]
-/** the shimmer as the mark locks */
-const SHIMMER = 1.35
 const INK = [0.067, 0.063, 0.078]
 const MARK_K = MARK_W / MARK_H
 
@@ -53,36 +51,13 @@ uniform vec4 uBox;
 uniform float uSize;
 uniform float uSizeK;
 uniform float uAlpha;
-uniform float uFlowT;
-uniform float uReveal;
+uniform float uSweep;
 uniform vec3 uInk;
 out vec4 vCol;
 out float vSize;
 out float vRound;
 out float vAngle;
 out float vLit;
-
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float noise(vec2 p) {
-  vec2 i = floor(p), f = fract(p);
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
-}
-float fbm(vec2 p) {
-  float s = 0.0, a = 0.5;
-  for (int i = 0; i < 4; i++) { s += a * noise(p); p *= 2.03; a *= 0.5; }
-  return s;
-}
-/* the brand's five pastels, in a ring: blossom, coral, sun, citrus, sky;
-   each held, with only a short blend into the next */
-vec3 brand(float t) {
-  t = fract(t) * 5.0;
-  float i = floor(t);
-  float f = smoothstep(0.38, 0.62, fract(t));
-  vec3 a = i < 1.0 ? vec3(1.0, 0.769, 0.949) : i < 2.0 ? vec3(1.0, 0.765, 0.769) : i < 3.0 ? vec3(1.0, 0.898, 0.561) : i < 4.0 ? vec3(0.941, 1.0, 0.439) : vec3(0.820, 0.906, 1.0);
-  vec3 b = i < 1.0 ? vec3(1.0, 0.765, 0.769) : i < 2.0 ? vec3(1.0, 0.898, 0.561) : i < 3.0 ? vec3(0.941, 1.0, 0.439) : i < 4.0 ? vec3(0.820, 0.906, 1.0) : vec3(1.0, 0.769, 0.949);
-  return mix(a, b, f);
-}
 
 void main() {
   /* the flight: quick away, easing into its place, on a curve */
@@ -94,22 +69,13 @@ void main() {
   vec2 pos = mix(mix(aStart, ctrl, e), mix(ctrl, target, e), e);
   float landed = smoothstep(0.6, 1.0, p);
 
-  /* black marble, veined in the brand's pastels: broad bands bent by a
-     slow turbulence, each running from one pastel into the next along its
-     length, thin bright lines at their hearts */
-  vec2 m = aTarget * vec2(${MARK_K.toFixed(3)}, 1.0);
-  float turb = fbm(m * 1.4 + vec2(uFlowT * 0.35, -uFlowT * 0.22));
-  float wave = 0.5 + 0.5 * sin(m.x * 2.6 + m.y * 3.6 + turb * 7.0 + uFlowT * 0.9);
-  float vein = smoothstep(0.4, 0.95, wave);
-  float core = pow(wave, 22.0);
-  vec3 tint = brand(m.x * 0.28 - m.y * 0.12 + turb * 0.45 + uFlowT * 0.07);
-  /* the colour runs in from the u to the last m */
-  float rthr = 0.5 * fbm(m * 0.9 + 7.3) + 0.5 * aTarget.x;
-  float rev = smoothstep(rthr - 0.1, rthr + 0.1, uReveal * 1.35 - 0.2);
-  vec3 col = mix(uInk, tint, vein * rev) + core * rev * 0.3;
-  /* the shimmer crossing the mark as it locks */
-  col += 0.32 * exp(-pow((aTarget.x - (uTime - ${SHIMMER.toFixed(2)}) * 1.7) * 7.0, 2.0)) * landed;
-  col *= 0.94 + 0.12 * aRand.w;
+  /* the reflection: a slanted band of light crossing the black mark from
+     the u to the last m, a soft glow round a bright line, a fainter line
+     close behind it, as on polished stone */
+  float at = aTarget.x + (0.5 - aTarget.y) * 0.16 - uSweep;
+  float shine = (0.22 * exp(-at * at * 60.0) + 0.62 * exp(-at * at * 1400.0)
+    + 0.3 * exp(-pow(at + 0.06, 2.0) * 2600.0)) * landed;
+  vec3 col = uInk * (0.94 + 0.12 * aRand.w) + vec3(shine);
 
   /* letting go the way it came: each tile flies back out, slowly away and
      gathering speed, on a curve, to a place of its own all over the screen
@@ -123,8 +89,8 @@ void main() {
   /* turning in flight, square once in place */
   vAngle = aRand.z * 2.6 * (1.0 - e) * (1.0 - e) + go * aRand.z * 3.0;
   vRound = mix(0.5, 0.12, landed);
-  vLit = landed * rev * (1.0 - g);
-  float tile = uSize * 0.9 * mix(0.6 + 0.25 * aRand.w, 1.0, e) * mix(1.0, 0.55, go) * uSizeK;
+  vLit = landed * (1.0 - g);
+  float tile = uSize * 0.9 * mix(0.6 + 0.25 * aRand.w, 1.0, e) * mix(1.0, 0.55, go) * (1.0 + shine * 0.08) * uSizeK;
   vSize = max(1.0, tile * 1.42 * uDpr);
   gl_PointSize = vSize;
   vec2 clip = pos / uRes * 2.0 - 1.0;
@@ -157,7 +123,7 @@ void main() {
 }
 `
 
-const UNIFORMS = ['uRes', 'uDpr', 'uTime', 'uBox', 'uSize', 'uSizeK', 'uAlpha', 'uFlowT', 'uReveal', 'uInk'] as const
+const UNIFORMS = ['uRes', 'uDpr', 'uTime', 'uBox', 'uSize', 'uSizeK', 'uAlpha', 'uSweep', 'uInk'] as const
 
 type Box = { x: number; y: number; w: number; h: number }
 
@@ -364,7 +330,7 @@ export class Marble implements MarkEngine {
     if (this.dead || this.done || document.hidden) return
     const t = (performance.now() - this.t0) / 1000
 
-    if (!this.formed && t >= GONE) {
+    if (!this.formed && t >= FORMED) {
       this.formed = true
       this.host.page.setAttribute('data-formed', '')
     }
@@ -373,7 +339,10 @@ export class Marble implements MarkEngine {
       this.finish()
       return
     }
-    const reveal = Math.min(1, Math.max(0, (t - REVEAL_AT) / REVEAL))
+    /* the reflection's place along the mark, eased, from off its left to
+       off its right */
+    const r = Math.min(1, Math.max(0, (t - REFLECT_AT) / REFLECT))
+    const sweep = -0.3 + 1.6 * (r < 0.5 ? 2 * r * r : 1 - Math.pow(-2 * r + 2, 2) / 2)
 
     const gl = this.gl
     const u = this.u
@@ -388,9 +357,7 @@ export class Marble implements MarkEngine {
     gl.uniform1f(u.uDpr, this.dpr)
     gl.uniform4f(u.uBox, this.box.x, this.box.y, this.box.w, this.box.h)
     gl.uniform1f(u.uSize, this.size)
-    /* the marble flows slowly the whole time */
-    gl.uniform1f(u.uFlowT, t * 0.9)
-    gl.uniform1f(u.uReveal, reveal)
+    gl.uniform1f(u.uSweep, sweep)
     gl.uniform3f(u.uInk, INK[0], INK[1], INK[2])
     /* in flight each tile draws two fading copies of itself a moment
        behind: its trail */
