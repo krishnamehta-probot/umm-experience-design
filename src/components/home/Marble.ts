@@ -1,45 +1,42 @@
-import { CASES, CASE_ASPECT, caseImage } from './cases'
 import { MARK_H, MARK_W, markPath, type MarkEngine, type MarkHost } from './mark'
 
 /* ============================================================================
    MARBLE — the entrance of /home-marble: the UMM mark gathered from
-   particles, the work marbled through it, then gone
+   particles, veined like marble, then scattered again
 
    From Krish's pick of the Lovable heroes (3 Nov, "Kinetic Tiles", the 14th):
    black tiles fly in from every side of the screen and from all over it,
    turning as they come, with a trail, and snap into the UMM mark in the
    middle, a shimmer crossing it as it locks. Colour then runs into it as
-   veins through black marble, the case studies' own colours (their renders),
-   combed quickly from one case into the next. Then, as in the 14th, the mark
-   lets go: its tiles drift up and fade while the headline rises in its place
-   and the ask bar and the questions come in under it (the page's
-   data-formed). After that the page is the hero alone (Krish, 3 Nov: the
-   mark kept at the foot "is not required"), and the canvas stops.
+   veins through black marble, in the brand's five pastels only (Krish:
+   "keep it only like umm colors"). Then the mark lets go the way it came:
+   its tiles fly back out to places all over the screen and off its edges,
+   fading as they go, while the headline comes in word by word in its place
+   and the ask bar and the questions under it (the page's data-formed).
+   After that the page is the hero alone (Krish, 3 Nov: the mark kept at the
+   foot "is not required"), and the canvas stops.
 
-   About three seconds in all, quick on purpose ("so we are not leaving
-   time" for the visitor to drift off). With reduced motion there is no
-   entrance at all.
+   About four seconds in all: the flight in a little slower than the first
+   cut (Krish: "a little slow only"), the rest quick, so the visitor is not
+   left waiting. With reduced motion there is no entrance at all.
    ========================================================================== */
 
 /** tiles in the mark, by the width of the screen */
 const COUNT = { desk: 2000, tablet: 1500, phone: 900 }
 /** the mark's width, as a share of the screen's (14th: about 40%) */
 const WIDE = { desk: 0.4, phone: 0.74 }
-/** the entrance (s) */
-const REVEAL_AT = 0.95
-const REVEAL = 0.5
-/** the next case combed in at each of these, over MIX */
-const MIXES = [1.45, 1.9]
-const MIX = 0.42
-/** the mark lets go, and the copy comes in */
-const GONE = 2.3
-const FADE = 0.6
+/** the entrance (s): all the tiles in by 1.65, the colour running in */
+const REVEAL_AT = 1.3
+const REVEAL = 0.7
+/** the mark lets go, and the copy comes in; each tile's flight out, and
+ *  how far apart they leave */
+const GONE = 2.9
+const OUT = 1.0
+const OUT_SPREAD = 0.35
 /** the trails fade over these */
-const TRAILS: [number, number] = [0.85, 1.15]
+const TRAILS: [number, number] = [1.15, 1.55]
 /** the shimmer as the mark locks */
-const SHIMMER = 1.0
-/** the three cases it runs through, most colourful first */
-const SHOWN = ['biocon-group', 'mohawk-recover', 'iadeptive'].map((s) => CASES.findIndex(([slug]) => slug === s))
+const SHIMMER = 1.35
 const INK = [0.067, 0.063, 0.078]
 const MARK_K = MARK_W / MARK_H
 
@@ -47,6 +44,7 @@ const VERT = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 aTarget;
 in vec2 aStart;
+in vec2 aEnd;
 in vec4 aRand;
 uniform vec2 uRes;
 uniform float uDpr;
@@ -57,12 +55,7 @@ uniform float uSizeK;
 uniform float uAlpha;
 uniform float uFlowT;
 uniform float uReveal;
-uniform float uMix;
-uniform float uSeed;
-uniform float uImgK;
 uniform vec3 uInk;
-uniform sampler2D uA;
-uniform sampler2D uB;
 out vec4 vCol;
 out float vSize;
 out float vRound;
@@ -80,9 +73,15 @@ float fbm(vec2 p) {
   for (int i = 0; i < 4; i++) { s += a * noise(p); p *= 2.03; a *= 0.5; }
   return s;
 }
-vec3 boost(vec3 c) {
-  float l = dot(c, vec3(0.299, 0.587, 0.114));
-  return clamp(mix(vec3(l), c, 1.5), 0.0, 1.0);
+/* the brand's five pastels, in a ring: blossom, coral, sun, citrus, sky;
+   each held, with only a short blend into the next */
+vec3 brand(float t) {
+  t = fract(t) * 5.0;
+  float i = floor(t);
+  float f = smoothstep(0.38, 0.62, fract(t));
+  vec3 a = i < 1.0 ? vec3(1.0, 0.769, 0.949) : i < 2.0 ? vec3(1.0, 0.765, 0.769) : i < 3.0 ? vec3(1.0, 0.898, 0.561) : i < 4.0 ? vec3(0.941, 1.0, 0.439) : vec3(0.820, 0.906, 1.0);
+  vec3 b = i < 1.0 ? vec3(1.0, 0.765, 0.769) : i < 2.0 ? vec3(1.0, 0.898, 0.561) : i < 3.0 ? vec3(0.941, 1.0, 0.439) : i < 4.0 ? vec3(0.820, 0.906, 1.0) : vec3(1.0, 0.769, 0.949);
+  return mix(a, b, f);
 }
 
 void main() {
@@ -95,42 +94,42 @@ void main() {
   vec2 pos = mix(mix(aStart, ctrl, e), mix(ctrl, target, e), e);
   float landed = smoothstep(0.6, 1.0, p);
 
-  /* black marble, veined with the case's colours: broad bands bent by a
-     slow turbulence, thin bright lines at their hearts */
+  /* black marble, veined in the brand's pastels: broad bands bent by a
+     slow turbulence, each running from one pastel into the next along its
+     length, thin bright lines at their hearts */
   vec2 m = aTarget * vec2(${MARK_K.toFixed(3)}, 1.0);
   float turb = fbm(m * 1.4 + vec2(uFlowT * 0.35, -uFlowT * 0.22));
   float wave = 0.5 + 0.5 * sin(m.x * 2.6 + m.y * 3.6 + turb * 7.0 + uFlowT * 0.9);
-  float vein = smoothstep(0.42, 0.95, wave);
+  float vein = smoothstep(0.4, 0.95, wave);
   float core = pow(wave, 22.0);
-  vec2 q = vec2(aTarget.x, 0.5 + (aTarget.y - 0.5) * uImgK) + (turb - 0.5) * 0.08;
-  /* the next case combed in along a ragged front */
-  float thr = fbm(m * 1.1 + uSeed);
-  float local = smoothstep(thr - 0.08, thr + 0.08, uMix * 1.5 - 0.25);
-  vec3 cas = mix(boost(textureLod(uA, q, 1.5).rgb), boost(textureLod(uB, q, 1.5).rgb), local);
+  vec3 tint = brand(m.x * 0.28 - m.y * 0.12 + turb * 0.45 + uFlowT * 0.07);
   /* the colour runs in from the u to the last m */
   float rthr = 0.5 * fbm(m * 0.9 + 7.3) + 0.5 * aTarget.x;
   float rev = smoothstep(rthr - 0.1, rthr + 0.1, uReveal * 1.35 - 0.2);
-  vec3 col = mix(uInk, cas, vein * rev) + core * rev * 0.42;
+  vec3 col = mix(uInk, tint, vein * rev) + core * rev * 0.3;
   /* the shimmer crossing the mark as it locks */
   col += 0.32 * exp(-pow((aTarget.x - (uTime - ${SHIMMER.toFixed(2)}) * 1.7) * 7.0, 2.0)) * landed;
   col *= 0.94 + 0.12 * aRand.w;
 
-  /* letting go: each tile, from the u to the last m, drifts up, turns,
-     shrinks and fades as the headline rises */
-  float g = clamp((uTime - ${GONE.toFixed(2)} - aTarget.x * 0.22 - aRand.w * 0.1) / ${FADE.toFixed(2)}, 0.0, 1.0);
-  g = g * g * (3.0 - 2.0 * g);
-  pos += vec2((aRand.z - 0.3) * 40.0, -(30.0 + 70.0 * aRand.w)) * g;
+  /* letting go the way it came: each tile flies back out, slowly away and
+     gathering speed, on a curve, to a place of its own all over the screen
+     or off its edges, turning, shrinking and fading as it goes */
+  float g = clamp((uTime - ${GONE.toFixed(2)} - aRand.w * ${OUT_SPREAD.toFixed(2)} - aTarget.x * 0.1) / ${OUT.toFixed(2)}, 0.0, 1.0);
+  float go = g * g * g;
+  vec2 d2 = aEnd - pos;
+  vec2 ctrl2 = pos + d2 * 0.5 - vec2(-d2.y, d2.x) * aRand.z * 0.35;
+  pos = mix(mix(pos, ctrl2, go), mix(ctrl2, aEnd, go), go);
 
   /* turning in flight, square once in place */
-  vAngle = aRand.z * 2.6 * (1.0 - e) * (1.0 - e) + g * (aRand.w - 0.5) * 2.0;
+  vAngle = aRand.z * 2.6 * (1.0 - e) * (1.0 - e) + go * aRand.z * 3.0;
   vRound = mix(0.5, 0.12, landed);
-  vLit = landed * rev;
-  float tile = uSize * 0.9 * mix(0.6 + 0.25 * aRand.w, 1.0, e) * (1.0 - 0.6 * g) * uSizeK;
+  vLit = landed * rev * (1.0 - g);
+  float tile = uSize * 0.9 * mix(0.6 + 0.25 * aRand.w, 1.0, e) * mix(1.0, 0.55, go) * uSizeK;
   vSize = max(1.0, tile * 1.42 * uDpr);
   gl_PointSize = vSize;
   vec2 clip = pos / uRes * 2.0 - 1.0;
   gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
-  float alpha = uAlpha * smoothstep(0.0, 0.2, uTime) * mix(0.55, 1.0, e) * (1.0 - g);
+  float alpha = uAlpha * smoothstep(0.0, 0.2, uTime) * mix(0.55, 1.0, e) * (1.0 - smoothstep(0.45, 1.0, g));
   vCol = vec4(col, alpha);
 }
 `
@@ -158,10 +157,7 @@ void main() {
 }
 `
 
-const UNIFORMS = [
-  'uRes', 'uDpr', 'uTime', 'uBox', 'uSize', 'uSizeK', 'uAlpha', 'uFlowT', 'uReveal', 'uMix', 'uSeed', 'uImgK',
-  'uInk', 'uA', 'uB',
-] as const
+const UNIFORMS = ['uRes', 'uDpr', 'uTime', 'uBox', 'uSize', 'uSizeK', 'uAlpha', 'uFlowT', 'uReveal', 'uInk'] as const
 
 type Box = { x: number; y: number; w: number; h: number }
 
@@ -184,7 +180,6 @@ export class Marble implements MarkEngine {
   private count = 0
   /** the share of the mark's box the mark fills */
   private fill = 0.63
-  private tex: WebGLTexture[] = []
   private box: Box = { x: 0, y: 0, w: 1, h: 1 }
   private size = 6
   private dpr = 1
@@ -228,7 +223,6 @@ export class Marble implements MarkEngine {
     }
     this.layout()
     this.build()
-    this.load()
     this.wake()
   }
 
@@ -244,7 +238,6 @@ export class Marble implements MarkEngine {
     document.removeEventListener('visibilitychange', this.wake)
     this.host.page.removeAttribute('data-formed')
     const gl = this.gl
-    for (const t of this.tex) gl.deleteTexture(t)
     gl.deleteBuffer(this.buf)
     gl.deleteVertexArray(this.vao)
     gl.deleteProgram(this.prog)
@@ -261,8 +254,8 @@ export class Marble implements MarkEngine {
 
   /* --- the tiles ----------------------------------------------------------------- */
 
-  /** places in the mark on a square grid, and a start for each from anywhere
-   *  on the screen or just off its edges */
+  /** places in the mark on a square grid, and a start and an end for each,
+   *  from and to anywhere on the screen or just off its edges */
   private build() {
     const RW = 1000
     const RH = Math.round(RW / MARK_K)
@@ -289,34 +282,35 @@ export class Marble implements MarkEngine {
     }
     this.count = pts.length / 2
 
-    /* half come from off the edges, all round, half from anywhere on the
-       screen; most curve the same way, so they swirl in */
+    /* half come from (and go to) off the edges, all round, half anywhere on
+       the screen; most curve the same way, so they swirl in */
     const W = this.pw
     const H = Math.min(this.ph, window.innerHeight)
-    const data = new Float32Array(this.count * 8)
-    for (let i = 0; i < this.count; i++) {
-      const tx = pts[i * 2]
-      let sx: number
-      let sy: number
+    const somewhere = (): [number, number] => {
       if (Math.random() < 0.5) {
-        const out = 20 + Math.random() * 200
+        const out = 20 + Math.random() * 220
         const side = Math.floor(Math.random() * 4)
         const along = Math.random()
-        sx = side === 0 ? -out : side === 1 ? W + out : along * W
-        sy = side === 2 ? -out : side === 3 ? H + out : along * H
-      } else {
-        sx = Math.random() * W
-        sy = Math.random() * H
+        return [side === 0 ? -out : side === 1 ? W + out : along * W, side === 2 ? -out : side === 3 ? H + out : along * H]
       }
-      const o = i * 8
+      return [Math.random() * W, Math.random() * H]
+    }
+    const data = new Float32Array(this.count * 10)
+    for (let i = 0; i < this.count; i++) {
+      const tx = pts[i * 2]
+      const [sx, sy] = somewhere()
+      const [ex, ey] = somewhere()
+      const o = i * 10
       data[o] = tx
       data[o + 1] = pts[i * 2 + 1]
       data[o + 2] = sx
       data[o + 3] = sy
-      data[o + 4] = 0.04 + Math.random() * 0.22 + tx * 0.1
-      data[o + 5] = 0.6 + Math.random() * 0.28
-      data[o + 6] = (Math.random() - 0.5) * 1.1 + 0.3
-      data[o + 7] = Math.random()
+      data[o + 4] = ex
+      data[o + 5] = ey
+      data[o + 6] = 0.05 + Math.random() * 0.3 + tx * 0.12
+      data[o + 7] = 0.8 + Math.random() * 0.35
+      data[o + 8] = (Math.random() - 0.5) * 1.1 + 0.3
+      data[o + 9] = Math.random()
     }
 
     const gl = this.gl
@@ -326,40 +320,14 @@ export class Marble implements MarkEngine {
     const attr = (name: string, size: number, offset: number) => {
       const loc = gl.getAttribLocation(this.prog, name)
       gl.enableVertexAttribArray(loc)
-      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 32, offset)
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 40, offset)
     }
     attr('aTarget', 2, 0)
     attr('aStart', 2, 8)
-    attr('aRand', 4, 16)
+    attr('aEnd', 2, 16)
+    attr('aRand', 4, 24)
     gl.bindVertexArray(null)
     this.layout()
-  }
-
-  /** the three renders; until one arrives its veins run in the brand's
-   *  pastels */
-  private load() {
-    const gl = this.gl
-    const PASTEL = [255, 196, 242, 255, 209, 231, 255, 255, 240, 255, 112, 255, 255, 229, 143, 255]
-    SHOWN.forEach((at, i) => {
-      const t = gl.createTexture()!
-      this.tex[i] = t
-      gl.bindTexture(gl.TEXTURE_2D, t)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(PASTEL))
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT)
-      const img = new Image()
-      img.decoding = 'async'
-      img.onload = () => {
-        if (this.dead) return
-        gl.bindTexture(gl.TEXTURE_2D, t)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
-        gl.generateMipmap(gl.TEXTURE_2D)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-      }
-      img.src = caseImage(CASES[at][0])
-    })
   }
 
   /* --- size ---------------------------------------------------------------------- */
@@ -401,24 +369,11 @@ export class Marble implements MarkEngine {
       this.host.page.setAttribute('data-formed', '')
     }
     /* the last tile gone: the hero alone */
-    if (t > GONE + 0.22 + 0.1 + FADE + 0.1) {
+    if (t > GONE + OUT_SPREAD + 0.1 + OUT + 0.05) {
       this.finish()
       return
     }
-
-    /* which two cases, and how far the comb from one to the next */
-    let a = 0
-    let mix = 0
-    MIXES.forEach((at, i) => {
-      if (t >= at) {
-        a = i
-        mix = Math.min(1, (t - at) / MIX)
-      }
-    })
-    const b = Math.min(a + 1, this.tex.length - 1)
     const reveal = Math.min(1, Math.max(0, (t - REVEAL_AT) / REVEAL))
-    /* the marble flows, faster while a case is being combed in */
-    const flowT = t * 0.9 + MIXES.reduce((s, at) => s + Math.min(MIX, Math.max(0, t - at)) * 1.6, 0)
 
     const gl = this.gl
     const u = this.u
@@ -429,21 +384,13 @@ export class Marble implements MarkEngine {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
     gl.useProgram(this.prog)
     gl.bindVertexArray(this.vao)
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this.tex[a])
-    gl.activeTexture(gl.TEXTURE1)
-    gl.bindTexture(gl.TEXTURE_2D, this.tex[b])
-    gl.uniform1i(u.uA, 0)
-    gl.uniform1i(u.uB, 1)
     gl.uniform2f(u.uRes, this.pw, this.ph)
     gl.uniform1f(u.uDpr, this.dpr)
     gl.uniform4f(u.uBox, this.box.x, this.box.y, this.box.w, this.box.h)
     gl.uniform1f(u.uSize, this.size)
-    gl.uniform1f(u.uFlowT, flowT)
+    /* the marble flows slowly the whole time */
+    gl.uniform1f(u.uFlowT, t * 0.9)
     gl.uniform1f(u.uReveal, reveal)
-    gl.uniform1f(u.uMix, mix * mix * (3 - 2 * mix))
-    gl.uniform1f(u.uSeed, a * 13.7 + 3.1)
-    gl.uniform1f(u.uImgK, CASE_ASPECT / MARK_K)
     gl.uniform3f(u.uInk, INK[0], INK[1], INK[2])
     /* in flight each tile draws two fading copies of itself a moment
        behind: its trail */

@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useEffect,
   useRef,
   useState,
@@ -86,9 +87,10 @@ import '@/styles/home-flank.css'
    headline, ask bar and questions centred as there (Marble.ts):
 
      marble        /home-marble        tiles fly in from all over into the
-                                       mark in the middle, the work runs
-                                       through it as veined marble, and it
-                                       lets go as the headline rises; then
+                                       mark in the middle, the brand's five
+                                       pastels run through it as veined
+                                       marble, and it scatters again as the
+                                       headline comes in word by word; then
                                        the hero alone
 
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
@@ -126,7 +128,7 @@ const VERSIONS: { id: Version; label: string; hint: string }[] = [
   {
     id: 'marble',
     label: 'Particle mark · marble',
-    hint: 'Tiles fly in from all over the screen and build the UMM mark; the case studies run through it as veined marble, then it lets go as the headline, ask bar and questions rise. Replay it below.',
+    hint: 'Tiles fly in from all over the screen and build the UMM mark, veined with the brand’s five pastels; then they scatter again as the headline comes in word by word. Replay it below.',
   },
   {
     id: 'doors',
@@ -245,6 +247,20 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   window: () => import('@/components/home/Window').then((m) => (h: MarkHost) => new m.Window(h)),
   peek: () => import('@/components/home/Peek').then((m) => (h: MarkHost) => new m.Peek(h)),
   marble: () => import('@/components/home/Marble').then((m) => (h: MarkHost) => new m.Marble(h)),
+}
+
+/** a line of the headline as words, each numbered through the whole
+ *  headline (--w) for its turn to come in */
+const words = (line: string, l: number) => {
+  const before = homeHero.title.slice(0, l).reduce((n, x) => n + x.split(' ').length, 0)
+  return line.split(' ').map((w, i) => (
+    <Fragment key={i}>
+      {i > 0 && ' '}
+      <span className="hx__word" style={{ '--w': before + i } as CSSProperties}>
+        {w}
+      </span>
+    </Fragment>
+  ))
 }
 
 /** How long a question must be rested on before the mark answers it (ms) */
@@ -432,11 +448,16 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
               </>
             )}
 
-            {/* each line rises out of its own mask */}
+            {/* each line rises out of its own mask; on the marble, word by
+                word */}
             <h1 className="hm-title hx__title">
-              {homeHero.title.map((line) => (
+              {homeHero.title.map((line, l) => (
                 <span key={line}>
-                  <span>{line}</span>
+                  {version === 'marble' ? (
+                    <span>{words(line, l)}</span>
+                  ) : (
+                    <span>{line}</span>
+                  )}
                 </span>
               ))}
             </h1>

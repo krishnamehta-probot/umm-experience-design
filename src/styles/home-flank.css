@@ -1580,10 +1580,11 @@
    The 14th Lovable hero Krish picked, as it ends: the headline centred, the
    ask bar under it, the six questions under that in two rows, the pillars
    along the foot. Before that, the entrance: tiles fly in from all over the
-   screen into the UMM mark in the middle, the work marbled through it, and
-   the mark lets go as the headline rises (their canvas is in .hx__layer,
-   under the copy). Everything waits for the mark (data-formed), then comes in
-   quicker than on the other pages.
+   screen into the UMM mark in the middle, veined in the brand's pastels,
+   and scatter again as the headline comes in word by word (their canvas is
+   in .hx__layer, under the copy). Everything waits for the mark
+   (data-formed): the words first, each rising a little out of a blur, then
+   the bar, the questions and the pillars.
 
      nav
      headline, centred
@@ -1650,36 +1651,57 @@
   transform: translateY(10px);
 }
 
-.hx[data-version='marble'] .hx__page:not([data-formed]) .hx__title > span > span {
-  transform: translateY(110%);
+/* the headline word by word: the lines stay put, each word rises a little
+   out of a blur in its turn (--w) */
+.hx[data-version='marble'] .hx__page .hx__title > span {
+  overflow: visible;
+}
+
+.hx[data-version='marble'] .hx__page .hx__title > span > span {
+  transform: none;
+  transition: none;
+}
+
+.hm-title .hx__word {
+  display: inline-block;
+  transition:
+    transform 1s var(--umm-ease-out),
+    opacity 0.9s var(--umm-ease-out),
+    filter 0.9s var(--umm-ease-out);
+  transition-delay: calc(0.1s + var(--w, 0) * 0.16s);
+}
+
+.hx[data-version='marble'] .hx__page:not([data-formed]) .hx__word {
+  opacity: 0;
+  transform: translateY(0.35em);
+  filter: blur(12px);
 }
 
 .hx[data-version='marble'] .hm-nav {
-  transition-delay: 0.3s;
-}
-
-.hx[data-version='marble'] .hx__title > span > span {
-  transition: transform 0.9s var(--umm-ease-out) 0s;
-}
-
-.hx[data-version='marble'] .hx__title > span:last-child > span {
-  transition-delay: 0.12s;
+  transition-delay: 0.4s;
 }
 
 .hx[data-version='marble'] .hx__bar {
-  transition-delay: 0.3s, 0.3s, 0s;
+  transition-delay: 0.75s, 0.75s, 0s;
 }
 
 .hx[data-version='marble'] .hx__chips li {
-  transition-delay: calc(0.4s + var(--i, 0) * 0.055s);
+  transition-delay: calc(0.9s + var(--i, 0) * 0.06s);
 }
 
 .hx[data-version='marble'] .hx__pillars li {
-  transition-delay: 0.7s;
+  transition-delay: 1.25s;
 }
 
 @media (max-width: 640px) {
   .hx[data-version='marble'] .hx__ask {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-title .hx__word {
+    transition-duration: 0.01s;
+    transition-delay: 0s;
   }
 }
