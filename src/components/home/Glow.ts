@@ -19,7 +19,11 @@ import { reducedMotion } from './gl'
 
      grain    a broad gradient rising from below, with a film grain over it
      dither   the bloom drawn in pixels, ordered dots of the palette's colours
-              thinning out into the white (the canvas shown unsmoothed)
+              thinning out into the white (the canvas shown unsmoothed);
+              made a little nicer at Krish's ask (3 Nov): five steps, not
+              four, so the dots step more finely from the white, a tighter
+              edge so fewer stray dots reach the copy, and faint rings
+              going slowly out from the bar through the dots
      fluted   the mesh seen through a pane of fluted glass. Krish liked the
               first (3 Nov) and asked for it nicer; two passes lit the ribs
               as rods (orbs behind, then wide rods) and missed. It is now
@@ -256,8 +260,10 @@ float bayer8(vec2 a) {
   return (bayer2(0.25 * a) * 0.25 + bayer2(0.5 * a)) * 0.25 + bayer2(a);
 }
 
-/* the bloom drawn in pixels: white, then the light colour, the accent and
-   the deep one, in ordered dots that thin out at the edges */
+/* the bloom drawn in pixels: white, then a pale of the light colour, the
+   light colour, the accent and the deep one, in ordered dots that thin out
+   at the edges; through it faint rings go slowly out from the bar, each a
+   little denser band of dots, and the cursor brings up a few more */
 vec3 ditherMode(vec2 p) {
   vec2 cell = floor(p / 4.0);
   vec2 cp = cell * 4.0 + 2.0;
@@ -265,12 +271,16 @@ vec3 ditherMode(vec2 p) {
   vec2 gR = vec2(max(sSize.x * 0.5, 340.0), max(sView * 0.55, 320.0));
   vec2 q = (cp - gC) / gR;
   vec2 w = vec2(gfbm(q * 1.5 + vec2(sTime * 0.04, 0.0)), gfbm(q * 1.5 + vec2(5.2, -sTime * 0.035))) - 0.5;
-  q += w * 0.7;
-  float a = max(0.0, exp(-dot(q, q) * 2.0) - 0.07) / 0.93 + 0.18 * near(cp, gR.x * 0.4);
-  float lv = clamp(floor(a * 3.2 + bayer8(cell)), 0.0, 3.0);
+  q += w * 0.6;
+  float a = max(0.0, exp(-dot(q, q) * 2.2) - 0.12) / 0.88;
+  vec2 r = (cp - sAnchor) / vec2(gR.x, gR.y * 0.8);
+  a += 0.08 * sin(length(r) * 16.0 - sTime * 0.8) * smoothstep(0.04, 0.45, a);
+  a += 0.16 * near(cp, gR.x * 0.4) * smoothstep(0.0, 0.2, a + 0.05);
+  float lv = clamp(floor(a * 4.2 + bayer8(cell)), 0.0, 4.0);
   if (lv < 0.5) return vec3(1.0);
-  if (lv < 1.5) return sB;
-  if (lv < 2.5) return sC;
+  if (lv < 1.5) return mix(vec3(1.0), sB, 0.55);
+  if (lv < 2.5) return sB;
+  if (lv < 3.5) return sC;
   return sA;
 }
 
