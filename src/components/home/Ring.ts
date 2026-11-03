@@ -1,4 +1,5 @@
 import { reducedMotion } from './gl'
+import { CASES, CASE_ASPECT, LIGHT, caseImage, caseUrl } from './cases'
 import type { Focus, MarkEngine, MarkHost } from './mark'
 import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, runwayAt } from './reel'
 
@@ -37,27 +38,9 @@ import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, ru
 
 export type Look = 'ring' | 'hero' | 'inside' | 'horizon' | 'vertical'
 
-/** the case studies, by their slug on umm.digital, and their titles there */
-const CASES: [string, string][] = [
-  ['mohawk-recover', 'Reimagining Sustainability Through Digital Transformation'],
-  ['biocon-group', 'Unified Digital Transformation for Global Biotech'],
-  ['lyca-eshop', '15% increase in average order value'],
-  ['penny-co', 'Engineering a High-Performance Digital Platform for a FinTech Innovator'],
-  ['habari', 'A Digital Gateway for Tanzania’s Fastest Internet'],
-  ['iadeptive', 'Positioning as a Technology Leader in AI & DevOps'],
-  ['aladdin-commercial', 'Reengineering Product Discovery for Commercial Flooring Professionals'],
-  ['kulkuf', 'Building a Digital Ecosystem for Blockchain and Digital Finance'],
-  ['coco-coir', 'Crafting a Modern E-Commerce Experience for Sustainable Home Products'],
-  ['yiksi', 'Building a Digital Gateway Between Mobile Money and the Crypto Economy'],
-  ['academy-of-beauty', 'Building a Digital Experience for the Next Generation of Beauty Professionals'],
-  ['steward', 'Building the Digital Foundation for Smarter Energy Management'],
-]
-const CARDS = CASES.map(([slug]) => `/home/cases/${slug}.webp`)
-const caseUrl = (slug: string) => `https://umm.digital/casestudies/${slug}/`
-/** the logos drawn in white, which sit on a dark tag instead */
-const LIGHT = new Set(['penny-co', 'lyca-eshop', 'habari'])
-/** the live cards' proportions (1024 x 829) */
-const ASPECT = 1024 / 829
+const CARDS = CASES.map(([slug]) => caseImage(slug))
+/** the live cards' proportions */
+const ASPECT = CASE_ASPECT
 /** how far the hero holds while the card grows, in screen heights */
 const RUNWAY = 1.2
 /** the turn at rest (deg/s), and how much the cursor or a question adds */

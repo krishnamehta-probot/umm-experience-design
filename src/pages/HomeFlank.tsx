@@ -80,8 +80,18 @@ import '@/styles/home-flank.css'
                                        the ask bar and the six questions
                                        under it on the right
 
+   From the Lovable heroes (3 Nov) Krish picked the 14th, "Kinetic Tiles",
+   and asked for it made far better: particles from all over the screen
+   building the mark, the case studies marbled through it, quickly, then the
+   headline, ask bar and questions centred at the top as there (Marble.ts):
+
+     marble        /home-marble        the particles gather into the mark in
+                                       the middle, the work's colour runs
+                                       into it, and it glides to the foot as
+                                       the copy rises in above it
+
    Each mark is its own module (Tiles.ts, GlassMark.ts, Window.ts, Peek.ts,
-   Doors.ts, PromptFilm.ts, Ring.ts), loaded
+   Doors.ts, PromptFilm.ts, Ring.ts, Marble.ts), loaded
    only for its own page. Under all three, a shader on white (Glow.ts, from
    Krish's reference of 30 Oct): a glow, a mesh, an aurora, silk or a halo,
    in one palette or turning through them all; or the live homepage's grey.
@@ -103,14 +113,21 @@ export type Version =
   | 'glass'
   | 'window'
   | 'peek'
+  | 'marble'
 
-/** the ring's three later layouts: no pillars, the ring has their room */
-const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon']
+/** the ring's later layouts and the marble: no pillars, the work has their
+ *  room */
+const RING_LAYOUTS: Version[] = ['ring-bottom', 'ring-side', 'ring-hero', 'ring-inside', 'ring-horizon', 'marble']
 
 /** the layouts with the six questions under the ask bar, not either side */
-const UNDER: Version[] = ['ring-under', 'ring-bottom', 'ring-side']
+const UNDER: Version[] = ['ring-under', 'ring-bottom', 'ring-side', 'marble']
 
 const VERSIONS: { id: Version; label: string; hint: string }[] = [
+  {
+    id: 'marble',
+    label: 'Particle mark · marble',
+    hint: 'Particles fly in from all over the screen and build the UMM mark; the case studies marble through it, one into the next, as it settles at the foot under the headline, ask bar and questions.',
+  },
   {
     id: 'doors',
     label: 'Doors',
@@ -189,6 +206,11 @@ const BGS: { id: Bg; label: string; hint: string }[] = [
 const pick = <T extends string>(v: string | null, from: { id: T }[], or: T) =>
   from.some((x) => x.id === v) ? (v as T) : or
 
+/** the ground a page opens on where it is not the glow turning through every
+ *  palette: the marble keeps the soft pastel wash of the hero it came from */
+const GROUND: Partial<Record<Version, { bg: Bg; tone: Tone }>> = { marble: { bg: 'silk', tone: 'pastel' } }
+const groundOf = (v: Version): { bg: Bg; tone: Tone } => GROUND[v] ?? { bg: 'glow', tone: 'rotate' }
+
 export const VERSION_PATHS: Record<Version, string> = {
   doors: '/home-doors',
   prompt: '/home-prompt',
@@ -203,6 +225,7 @@ export const VERSION_PATHS: Record<Version, string> = {
   glass: '/home-glass',
   window: '/home-window',
   peek: '/home-peek',
+  marble: '/home-marble',
 }
 
 type Make = (host: MarkHost) => MarkEngine
@@ -221,6 +244,7 @@ const ENGINES: Record<Version, () => Promise<Make>> = {
   glass: () => import('@/components/home/GlassMark').then((m) => (h: MarkHost) => new m.GlassMark(h)),
   window: () => import('@/components/home/Window').then((m) => (h: MarkHost) => new m.Window(h)),
   peek: () => import('@/components/home/Peek').then((m) => (h: MarkHost) => new m.Peek(h)),
+  marble: () => import('@/components/home/Marble').then((m) => (h: MarkHost) => new m.Marble(h)),
 }
 
 /** How long a question must be rested on before the mark answers it (ms) */
@@ -245,6 +269,11 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
   useEffect(() => {
     let alive = true
     let made: MarkEngine | null = null
+    /* the plain mark, and any copy held for the mark's entrance let in */
+    const fail = () => {
+      page.current?.setAttribute('data-formed', '')
+      setFlat(true)
+    }
     ENGINES[version]()
       .then((make) => {
         if (!alive || !run.current || !page.current || !layer.current || !stage.current) return
@@ -252,10 +281,10 @@ function Hero({ version, bg, tone }: { version: Version; bg: Bg; tone: Tone }) {
           made = make({ run: run.current, page: page.current, layer: layer.current, stage: stage.current, ground })
           engine.current = made
         } catch {
-          setFlat(true)
+          fail()
         }
       })
-      .catch(() => alive && setFlat(true))
+      .catch(() => alive && fail())
     return () => {
       alive = false
       made?.dispose()
@@ -538,9 +567,11 @@ export function HomeFlank({ initial }: { initial: Version }) {
   const [version, setVersion] = useState<Version>(initial)
   const [bg, setBg] = useState<Bg>(() => {
     const q = new URLSearchParams(window.location.search)
-    return q.get('ground') === 'grey' ? 'none' : pick(q.get('bg'), BGS, 'glow')
+    return q.get('ground') === 'grey' ? 'none' : pick(q.get('bg'), BGS, groundOf(initial).bg)
   })
-  const [tone, setTone] = useState<Tone>(() => pick(new URLSearchParams(window.location.search).get('tone'), TONES, 'rotate'))
+  const [tone, setTone] = useState<Tone>(() =>
+    pick(new URLSearchParams(window.location.search).get('tone'), TONES, groundOf(initial).tone),
+  )
   /* a shader or palette shows while its option is hovered in the dock (the
      grey is not previewed: it changes the page beneath the mark) */
   const [peekBg, setPeekBg] = useState<Bg | null>(null)
@@ -551,10 +582,11 @@ export function HomeFlank({ initial }: { initial: Version }) {
   const [review] = useState(() => new URLSearchParams(window.location.search).has('options'))
 
   useEffect(() => {
+    const base = groundOf(version)
     const q = [
       review && 'options',
-      bg !== 'glow' && `bg=${bg}`,
-      tone !== 'rotate' && bg !== 'none' && `tone=${tone}`,
+      bg !== base.bg && `bg=${bg}`,
+      tone !== base.tone && bg !== 'none' && `tone=${tone}`,
     ]
       .filter(Boolean)
       .join('&')
