@@ -1710,3 +1710,13 @@
 .hx__marble-film {
   background: transparent;
 }
+
+/* on a narrow screen, the dark round the landscape film, under the tiles */
+.hx__marble-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--umm-ink);
+  opacity: 0;
+  pointer-events: none;
+}

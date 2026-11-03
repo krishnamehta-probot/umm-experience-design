@@ -22,7 +22,10 @@ import { ReelPlayer, clamp01, easeInOut, holdRunway, makeReel, releaseRunway, ru
    as a mosaic (public/home/reel-still.webp, the frame the reel holds; the
    film itself is on umm.digital and cannot be read into WebGL). The grid
    grows to fill the screen, the mosaic resolves into the film's own still,
-   and the film plays from its start (reel.ts). Asking does the same.
+   and the film plays from its start (reel.ts). Asking does the same. On a
+   screen taller than it is wide the film keeps its own landscape shape
+   (Krish, 3 Nov: "no need of vertical video"): the grid grows to the full
+   width, the screen darkens round it, and the film plays across it.
 
    With reduced motion there is no entrance and no film.
    ========================================================================== */
@@ -45,8 +48,11 @@ const FORMED = 3.75
 const TRAILS: [number, number] = [1.15, 1.55]
 /** how far the hero holds while the film is built, in screen heights */
 const RUNWAY = 1.5
-/** the grid the film is built in, as a share of the screen, before it grows */
-const CARD = { desk: 0.5, phone: 0.8 }
+/** the grid the film is built in, as a share of its full size, before it
+ *  grows: of the screen, or of the screen's width on a narrow screen */
+const CARD = { desk: 0.5, narrow: 0.64 }
+/** narrower than this (width over height), the film keeps its own shape */
+const NARROW = 1.2
 /** the film's still, and its proportions */
 const STILL = '/home/reel-still.webp'
 const STILL_K = 16 / 9
@@ -228,6 +234,8 @@ export class Marble implements MarkEngine {
   private grown = false
   private leaveAt = -1
   private grow = document.createElement('div')
+  /** the dark round the film on a narrow screen, under the tiles */
+  private dim = document.createElement('div')
   private video = makeReel()
   private reel = new ReelPlayer(this.video)
   private t0 = performance.now()
@@ -251,9 +259,11 @@ export class Marble implements MarkEngine {
     this.buf = gl.createBuffer()!
     this.tex = this.loadStill()
 
+    this.dim.className = 'hx__marble-dim'
+    this.dim.setAttribute('aria-hidden', 'true')
     this.canvas.className = 'hx__marble-gl'
     this.canvas.setAttribute('aria-hidden', 'true')
-    host.layer.appendChild(this.canvas)
+    host.layer.append(this.dim, this.canvas)
 
     /* the film, over the page, once the grid has filled the screen */
     this.grow.className = 'hx__ring-grow hx__marble-film'
@@ -299,6 +309,7 @@ export class Marble implements MarkEngine {
     gl.deleteProgram(this.prog)
     gl.getExtension('WEBGL_lose_context')?.loseContext()
     this.canvas.remove()
+    this.dim.remove()
     this.grow.remove()
   }
 
@@ -443,8 +454,10 @@ export class Marble implements MarkEngine {
     this.box = { x: (this.pw - w) / 2, y: (vh - h) / 2, w, h }
     if (this.count) {
       this.size = Math.sqrt((this.fill * w * h) / this.count)
-      /* the film's grid in the screen's own proportions, every tile a cell */
-      const k = document.documentElement.clientWidth / window.innerHeight
+      /* the film's grid in the screen's own proportions (the film's on a
+         narrow screen), every tile a cell */
+      const sk = document.documentElement.clientWidth / window.innerHeight
+      const k = sk < NARROW ? STILL_K : sk
       const c = Math.max(1, Math.round(Math.sqrt(this.count * k)))
       this.grid = { c, r: Math.max(1, Math.floor(this.count / c)) }
     }
@@ -547,6 +560,7 @@ export class Marble implements MarkEngine {
         this.grown = false
         page.removeAttribute('data-growing')
         g.display = 'none'
+        this.dim.style.opacity = '0'
         this.canvas.style.display = 'none'
       }
       this.reel.update(0)
@@ -559,18 +573,23 @@ export class Marble implements MarkEngine {
     }
 
     /* the screen, in the page's own pixels (the page is pinned), and the
-       grid's place in it: a card in the middle, growing to fill it */
+       grid's place in it: a card in the middle, growing to fill it; on a
+       narrow screen, to the film's own shape across its full width */
     const pr = page.getBoundingClientRect()
     const vw = document.documentElement.clientWidth
     const vh = window.innerHeight
     const sx = -pr.left
     const sy = -pr.top
-    const s0 = vw < 700 ? CARD.phone : CARD.desk
+    const narrow = vw / vh < NARROW
+    const W = vw
+    const H = narrow ? vw / STILL_K : vh
+    const s0 = narrow ? CARD.narrow : CARD.desk
     const k = easeInOut(clamp01((p - 0.36) / 0.44))
-    const fw = lerp(vw * s0, vw, k)
-    const fh = lerp(vh * s0, vh, k)
+    const fw = lerp(W * s0, W, k)
+    const fh = lerp(H * s0, H, k)
     const fx = sx + (vw - fw) / 2
     const fy = sy + (vh - fh) / 2
+    this.dim.style.opacity = narrow ? clamp01((p - 0.2) / 0.4).toFixed(3) : '0'
 
     const gl = this.gl
     const u = this.u
@@ -583,7 +602,7 @@ export class Marble implements MarkEngine {
     gl.uniform2f(u.uGrid, this.grid.c, this.grid.r)
     gl.uniform1f(u.uFill, lerp(0.88, 1.04, k))
     gl.uniform1f(u.uFilm, clamp01((p - 0.18) / 0.3))
-    gl.uniform1f(u.uTexK, vw / vh / STILL_K)
+    gl.uniform1f(u.uTexK, fw / fh / STILL_K)
     /* each tile the average of its patch of the still */
     gl.uniform1f(u.uLod, Math.max(0, Math.log2(this.texW / this.grid.c) - 0.5))
     gl.drawArrays(gl.POINTS, 0, this.count)
@@ -593,9 +612,9 @@ export class Marble implements MarkEngine {
        film from its start */
     g.display = 'block'
     g.left = `${sx.toFixed(1)}px`
-    g.top = `${sy.toFixed(1)}px`
-    g.width = `${vw}px`
-    g.height = `${vh}px`
+    g.top = `${(sy + (vh - H) / 2).toFixed(1)}px`
+    g.width = `${W}px`
+    g.height = `${H.toFixed(1)}px`
     g.opacity = clamp01((p - 0.74) / 0.1).toFixed(3)
     this.reel.update(p)
     return true
