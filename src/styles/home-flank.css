@@ -1705,3 +1705,8 @@
     transition-delay: 0s;
   }
 }
+
+/* the film over the tiles: clear until it has loaded, so the mosaic shows */
+.hx__marble-film {
+  background: transparent;
+}
