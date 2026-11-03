@@ -20,12 +20,14 @@ import { reducedMotion } from './gl'
      grain    a broad gradient rising from below, with a film grain over it
      dither   the bloom drawn in pixels, ordered dots of the palette's colours
               thinning out into the white (the canvas shown unsmoothed)
-     fluted   the colours seen through a pane of ribbed glass. Krish liked
-              it and asked for it nicer (3 Nov); the first pass (orbs behind
-              narrow rods) he did not take to, the rods "too close", so now:
-              wide rods, each bending the soft blooms behind it more at its
-              edges, the reds a little less than the blues; lit as rods, a
-              sheen following the cursor, the seams in shade
+     fluted   the mesh seen through a pane of fluted glass. Krish liked the
+              first (3 Nov) and asked for it nicer; two passes lit the ribs
+              as rods (orbs behind, then wide rods) and missed. It is now
+              built as the fluted glass designers use (after Paper Shaders'
+              Fluted Glass, Apache-2.0): flat flutes, each a prism sliding
+              the colour behind it across itself, a faint shade across each
+              and a hairline of light at its edge, a fine grain; the cursor
+              slides the colour through the flutes
 
    and, from the Lovable heroes' third, "Flow" (Krish, 3 Nov):
 
@@ -59,7 +61,7 @@ export const SHADERS: { id: Shader; label: string; hint: string }[] = [
   {
     id: 'fluted',
     label: 'Fluted glass',
-    hint: 'Soft colour seen through a pane of wide glass rods, each bending it, a sheen on the rods following the cursor.',
+    hint: 'The soft colour seen through a pane of fluted glass, each flute folding it; the cursor slides it through them.',
   },
   {
     id: 'flow',
@@ -152,13 +154,18 @@ vec3 glowMode(vec2 p) {
   return mix(col, sA, smoothstep(0.42, 0.95, a));
 }
 
-/* three blobs drifting and blending around the bar */
-vec3 meshMode(vec2 p) {
+/* the mesh's slow warp at a point, apart so it can be worked out once */
+vec2 meshWarp(vec2 p) {
+  vec2 q = p / max(sSize.x, sView);
+  return (vec2(gfbm(q * 2.0 + sTime * 0.03), gfbm(q * 2.0 + vec2(3.1, 1.7) - sTime * 0.025)) - 0.5) * 0.18;
+}
+
+/* three blobs drifting and blending around the bar, warped by w */
+vec3 meshAt(vec2 p, vec2 w) {
   float s = max(sSize.x, sView);
-  vec2 q = p / s;
+  vec2 q = p / s + w;
   vec2 qa = sAnchor / s;
   float t = sTime;
-  q += (vec2(gfbm(q * 2.0 + t * 0.03), gfbm(q * 2.0 + vec2(3.1, 1.7) - t * 0.025)) - 0.5) * 0.18;
   vec2 b1 = qa + vec2(-0.3 + 0.06 * sin(t * 0.11), 0.1 + 0.05 * cos(t * 0.09));
   vec2 b2 = qa + vec2(0.28 + 0.05 * cos(t * 0.08), 0.14 + 0.06 * sin(t * 0.12));
   vec2 b3 = qa + vec2(0.04 * sin(t * 0.07), 0.3 + 0.05 * sin(t * 0.1));
@@ -170,6 +177,10 @@ vec3 meshMode(vec2 p) {
   vec3 c = (sA * w1 + sC * w2 + sB * w3) / sum;
   float a = smoothstep(0.0, 0.9, sum) * 0.95 + 0.12 * near(p, s * 0.16);
   return tint(c, a);
+}
+
+vec3 meshMode(vec2 p) {
+  return meshAt(p, meshWarp(p));
 }
 
 /* curtains of light rising from the foot of the screen */
@@ -263,64 +274,34 @@ vec3 ditherMode(vec2 p) {
   return sA;
 }
 
-/* what stands behind the fluted glass: soft blooms of four of the
-   palette's colours drifting about the bar, one leaning a little toward the
-   cursor, blending where they meet, white beyond them; the warp frays them */
-vec3 flutedField(vec2 p, vec2 warp) {
-  float s = max(sSize.x, sView);
-  vec2 q = p / s + warp;
-  vec2 a = sAnchor / s;
-  float t = sTime;
-  vec2 b1 = a + vec2(-0.27 + 0.07 * sin(t * 0.11), 0.07 + 0.05 * cos(t * 0.09));
-  vec2 b2 = a + vec2(0.25 + 0.06 * cos(t * 0.08), 0.11 + 0.06 * sin(t * 0.12));
-  vec2 b3 = a + vec2(0.02 + 0.05 * sin(t * 0.07), 0.29 + 0.05 * sin(t * 0.1));
-  b3 += (sMouse.xy / s - b3) * 0.12 * sMouse.z;
-  vec2 b4 = a + vec2(0.04 * cos(t * 0.09), -0.2 + 0.04 * sin(t * 0.13));
-  float w1 = exp(-dot(q - b1, q - b1) / 0.065);
-  float w2 = exp(-dot(q - b2, q - b2) / 0.065);
-  float w3 = exp(-dot(q - b3, q - b3) / 0.09);
-  float w4 = exp(-dot(q - b4, q - b4) / 0.03);
-  float sum = w1 + w2 + w3 + w4 + 0.0001;
-  vec3 c = (sA * w1 + sC * w2 + sB * w3 + sD * w4) / sum;
-  return tint(c, smoothstep(0.0, 0.85, sum) * 0.96);
-}
-
-/* the field seen through a pane of fluted glass, its rods wide (about a
-   sixteenth of the page). Each draws in what is behind it from either side,
-   flipped, more strongly toward its edges, and bends the reds a little less
-   than the blues, so edges of colour fringe.
-   Each is lit as a rod: shaded round its curve, a sheen where it faces the
-   light (which comes from the side the cursor is on, brighter near it), the
-   seam between two in shade with a bright line where the next one begins,
-   and a fine frost over all. On the white the rods show only faintly. */
+/* the mesh through a pane of fluted glass (after Paper Shaders' Fluted
+   Glass, Apache-2.0, its "prism"). Each flute is flat glass that slides
+   what is behind it across itself: by half a flute at its left edge, back
+   by more and more toward its right, and smoothly back again in its last
+   stretch, so each shows a slice of the colour drawn out and folded, and the
+   flutes meet without a seam in the colour. Reds slide a little less than
+   blues. Across each, a faint shade deepening to the right; at its edge a
+   hairline of light; over all a fine grain. The cursor slides the colour
+   through the flutes a little. */
 vec3 flutedMode(vec2 p) {
-  float rw = clamp(sSize.x / 16.0, 56.0, 120.0);
-  float f = fract(p.x / rw);
-  float x = f * 2.0 - 1.0;
-  float nz = sqrt(max(1.0 - x * x, 0.0));
-  float k = -rw * (0.62 * x + 0.24 * x * x * x);
-  float s = max(sSize.x, sView);
-  vec2 qc = p / s;
-  vec2 warp = (vec2(gfbm(qc * 2.0 + sTime * 0.03), gfbm(qc * 2.0 + vec2(3.1, 1.7) - sTime * 0.025)) - 0.5) * 0.12;
+  float rw = clamp(sSize.x / 24.0, 44.0, 84.0);
+  float x = fract(p.x / rw);
+  float slide = (sMouse.x / sSize.x - 0.5) * 0.4 * sMouse.z;
+  float d = 0.5 - pow(1.5 * x, 3.0);
+  d = mix(0.5, d, smoothstep(0.0, 0.3, x) * (1.0 - smoothstep(0.7, 1.0, x))) - slide;
+  float k = d * 1.5 * rw;
+  vec2 w = meshWarp(p);
   vec3 col = vec3(
-    flutedField(vec2(p.x + k * 0.94, p.y), warp).r,
-    flutedField(vec2(p.x + k, p.y), warp).g,
-    flutedField(vec2(p.x + k * 1.06, p.y), warp).b
+    meshAt(vec2(p.x + k * 0.96, p.y), w).r,
+    meshAt(vec2(p.x + k, p.y), w).g,
+    meshAt(vec2(p.x + k * 1.04, p.y), w).b
   );
   float colour = 1.0 - min(min(col.r, col.g), col.b);
-  float amt = 0.1 + 0.9 * colour;
-  float lx = mix(-0.4, (sMouse.x / sSize.x - 0.5) * 1.8, sMouse.z);
-  vec3 L = normalize(vec3(lx, 0.0, 1.0));
-  vec3 n = vec3(x, 0.0, nz);
-  float dif = dot(n, L);
-  float spec = pow(max(dot(n, normalize(L + vec3(0.0, 0.0, 1.0))), 0.0), 40.0);
-  spec *= 1.0 + 0.8 * near(p, s * 0.22);
-  float seam = smoothstep(0.84, 1.0, abs(x));
-  col *= 1.0 + (dif - 0.85) * 0.16 * amt;
-  col *= 1.0 - seam * 0.1 * amt;
-  col += spec * (0.06 + 0.3 * colour);
-  col += exp(-pow((f - 0.012) * 60.0, 2.0)) * 0.1 * amt;
-  col += (gh(floor(p) + 0.71) - 0.5) * 0.02;
+  col *= 1.0 - (0.05 + 0.1 * colour) * pow(x, 1.3);
+  float hw = 1.5 / rw;
+  float line = 1.0 - smoothstep(0.0, hw, x) * (1.0 - smoothstep(1.0 - hw, 1.0, x));
+  col = mix(col, vec3(1.0), line * (0.18 + 0.5 * colour));
+  col += (gh(floor(p) + 0.71) - 0.5) * 0.03;
   return clamp(col, 0.0, 1.0);
 }
 
