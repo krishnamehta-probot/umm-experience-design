@@ -22,6 +22,15 @@ import { ReelPlayer, makeReel } from './reel'
    and takes the visitor down to it on a click. Scrolling stands the card
    up, then grows it to the screen.
 
+   That still was not enough to catch the eye (Krish, 3 Nov), so at rest the
+   card is now a trailer: the still and four more frames from the film
+   (public/home/teaser) each held a moment and slowly pushed in, dissolving
+   one into the next, the glow under the card taking each one's colours; a
+   light runs round the card's edge and a sheen crosses it now and then; it
+   floats a little; and a tag names it, "Our work · 0:43". None of this is the
+   film playing: that still waits until the card fills the screen. The
+   frames' timing is the CSS's (hx-teaser).
+
    The card's place at rest is the stage (the last row of the hero); the
    card itself lies over the page in its layer, so it can grow past the
    page's edges. The film plays from its start once the card fills the
@@ -34,10 +43,12 @@ const RUNWAY = 1.2
 const RADIUS = 28
 /** how far the card leans back at rest, and with the cursor on its button
  *  (deg); how far it turns to the cursor */
-const TILT = 16
-const TILT_NEAR = 8
-const LEAN = 5
+const TILT = 12
+const TILT_NEAR = 5
+const LEAN = 6
 const STILL = '/home/reel-still.webp'
+/** the trailer's frames: the opening still, then four more from the film */
+const FRAMES = [STILL, '/home/teaser/1.webp', '/home/teaser/2.webp', '/home/teaser/3.webp', '/home/teaser/4.webp']
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -47,6 +58,7 @@ export class Peek implements MarkEngine {
   private card = document.createElement('div')
   private film = document.createElement('div')
   private still = document.createElement('img')
+  private teaser = document.createElement('div')
   private glow = document.createElement('div')
   private play = document.createElement('div')
   private video = makeReel()
@@ -73,12 +85,37 @@ export class Peek implements MarkEngine {
     this.still.src = STILL
     this.still.alt = ''
     this.still.decoding = 'async'
-    this.film.append(this.video, this.still)
-    this.card.appendChild(this.film)
-    /* the still's colours, blurred, glowing onto the page under the card */
+    /* the trailer over the still, each frame on its turn (--k) */
+    this.teaser.className = 'hx__peek-teaser'
+    FRAMES.forEach((src, k) => {
+      const img = document.createElement('img')
+      img.src = src
+      img.alt = ''
+      img.decoding = 'async'
+      img.style.setProperty('--k', String(k))
+      this.teaser.appendChild(img)
+    })
+    this.film.append(this.video, this.still, this.teaser)
+    /* a sheen crossing the card, a light running round its edge, its tag */
+    const sheen = document.createElement('div')
+    sheen.className = 'hx__peek-sheen'
+    const edge = document.createElement('div')
+    edge.className = 'hx__peek-edge'
+    const tag = document.createElement('div')
+    tag.className = 'hx__peek-tag'
+    tag.innerHTML = '<i></i>Our work · 0:43'
+    this.card.append(this.film, sheen, edge, tag)
+    /* the frames' colours, blurred, glowing onto the page under the card,
+       each on its turn with the trailer */
     this.glow.className = 'hx__peek-glow'
     this.glow.setAttribute('aria-hidden', 'true')
     this.glow.style.backgroundImage = `url(${STILL})`
+    FRAMES.forEach((src, k) => {
+      const i = document.createElement('i')
+      i.style.backgroundImage = `url(${src})`
+      i.style.setProperty('--k', String(k))
+      this.glow.appendChild(i)
+    })
     host.layer.append(this.glow, this.card)
 
     /* the invitation, on the card: a frosted play button and its line */
@@ -252,7 +289,7 @@ export class Peek implements MarkEngine {
     gs.width = c.width
     gs.height = c.height
     gs.transform = c.transform
-    gs.opacity = ((this.near ? 0.75 : 0.55) * (1 - clamp01(p * 3))).toFixed(3)
+    gs.opacity = ((this.near ? 0.95 : 0.75) * (1 - clamp01(p * 3))).toFixed(3)
 
     /* the film is laid out as the full card would be, centred on the part
        of the card that is on screen: the peek shows the middle of the frame,

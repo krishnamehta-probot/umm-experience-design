@@ -438,7 +438,7 @@
 
 .hx[data-version='peek'] .hx__stage {
   min-height: 0;
-  height: clamp(130px, 23vh, 250px);
+  height: clamp(150px, 27vh, 290px);
   /* the card under it takes no clicks; the play button does */
   pointer-events: none;
 }
@@ -455,8 +455,10 @@
   /* it leans back about its foot, below the screen */
   transform-origin: 50% 100%;
   box-shadow: 0 -24px 70px -36px rgb(16 14 20 / 0.5);
-  /* the card rises into its place once the copy is in */
-  animation: hx-peek 1.6s var(--umm-ease-out) 0.9s backwards;
+  /* the card rises into its place once the copy is in, then floats */
+  animation:
+    hx-peek 1.6s var(--umm-ease-out) 0.9s backwards,
+    hx-float 7s ease-in-out 2.5s infinite;
 }
 
 /* a glossy edge along its top, a soft shade where the play button sits, and
@@ -506,10 +508,142 @@
   background-position: center;
   background-size: cover;
   transform-origin: 50% 100%;
-  filter: blur(46px) saturate(1.5);
+  filter: blur(56px) saturate(1.6);
   opacity: 0;
   pointer-events: none;
-  animation: hx-peek 1.6s var(--umm-ease-out) 0.9s backwards;
+  animation:
+    hx-peek 1.6s var(--umm-ease-out) 0.9s backwards,
+    hx-float 7s ease-in-out 2.5s infinite;
+}
+
+.hx__peek-glow > i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-position: center;
+  background-size: cover;
+}
+
+/* growing: no floating, the card goes straight to the screen */
+.hx__page[data-growing] :is(.hx__peek, .hx__peek-glow) {
+  animation: none;
+}
+
+/* the trailer: the still, then four more frames from the film, each held
+   about three seconds and slowly pushed in, dissolving into the next (each
+   comes in over the one before, which goes only once it is covered). Under
+   the card the glow takes each one's colours on the same beat. The film
+   itself still plays only once the card fills the screen. */
+.hx__peek-teaser {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.8s var(--umm-ease-out);
+}
+
+.hx__peek-film .hx__peek-teaser img,
+.hx__peek-glow > i {
+  opacity: 0;
+  animation: hx-teaser 16s linear infinite;
+  animation-delay: calc(var(--k, 0) * 3.2s);
+}
+
+.hx__peek-teaser img:nth-child(2) {
+  transform-origin: 30% 40%;
+}
+.hx__peek-teaser img:nth-child(3) {
+  transform-origin: 70% 35%;
+}
+.hx__peek-teaser img:nth-child(4) {
+  transform-origin: 40% 60%;
+}
+.hx__peek-teaser img:nth-child(5) {
+  transform-origin: 60% 45%;
+}
+
+.hx__page[data-growing] .hx__peek-teaser,
+.hx__peek[data-playing] .hx__peek-teaser {
+  opacity: 0;
+}
+
+/* a sheen crossing the card every few seconds */
+.hx__peek-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgb(255 255 255 / 0.12) 47%,
+    rgb(255 255 255 / 0.3) 50%,
+    rgb(255 255 255 / 0.08) 53%,
+    transparent 60%
+  );
+  background-repeat: no-repeat;
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  opacity: var(--fade, 1);
+  pointer-events: none;
+  animation: hx-sheen 7s var(--umm-ease-out) 2.8s infinite;
+}
+
+/* a light running round the card's edge */
+@property --hx-edge {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.hx__peek-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--hx-edge),
+    transparent 0deg 250deg,
+    rgb(209 231 255 / 0.9) 295deg,
+    #fff 322deg,
+    rgb(255 196 242 / 0.95) 342deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: var(--fade, 1);
+  pointer-events: none;
+  animation: hx-edge 6s linear infinite;
+}
+
+/* what it is: a tag in its corner */
+.hx__peek-tag {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(16 14 20 / 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  opacity: var(--fade, 1);
+}
+
+.hx__peek-tag i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff4d6d;
+  animation: hx-rec 1.6s ease-in-out infinite;
 }
 
 /* the invitation over the card */
@@ -599,6 +733,55 @@
   }
 }
 
+@keyframes hx-teaser {
+  0% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  4.5% {
+    opacity: 1;
+  }
+  27% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes hx-float {
+  50% {
+    translate: 0 -7px;
+  }
+}
+
+@keyframes hx-sheen {
+  0% {
+    background-position: 100% 0;
+  }
+  45%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@keyframes hx-edge {
+  to {
+    --hx-edge: 360deg;
+  }
+}
+
+@keyframes hx-rec {
+  50% {
+    opacity: 0.3;
+  }
+}
+
 @keyframes hx-drift {
   from {
     transform: scale(1.04) translate(-1%, 0.6%);
@@ -663,6 +846,12 @@
   .hx__peek-say {
     font-size: 0.84rem;
   }
+  .hx__peek-tag {
+    top: 14px;
+    left: 16px;
+    padding: 6px 11px;
+    font-size: 0.72rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -670,8 +859,15 @@
   .hx__peek-glow,
   .hx__peek-still,
   .hx__peek-play,
-  .hx__peek-btn::before {
+  .hx__peek-btn::before,
+  .hx__peek-film .hx__peek-teaser img,
+  .hx__peek-glow > i,
+  .hx__peek-sheen,
+  .hx__peek-tag i {
     animation: none;
+  }
+  .hx__peek-edge {
+    display: none;
   }
 }
 
