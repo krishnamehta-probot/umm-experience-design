@@ -7,6 +7,7 @@
      <slug>.webp        its card render, 1024 wide (the live card's poster)
      <slug>-s.webp      the same, 360 wide, for the small cards
      logo/<slug>.webp   its client's logo, as the live card sets it on top
+     icon/<industry>.webp  the industry's Cool Shape, for the uniform cards
 
    Three videos are local (public/casestudies/video), as Krish asked for to
    start with (5 Nov); the rest play from umm.digital. `colors` are the
@@ -294,6 +295,11 @@ export const casePoster = (slug: string) => `/casestudies/${slug}.webp`
 export const caseThumb = (slug: string) => `/casestudies/${slug}-s.webp`
 export const caseLogo = (slug: string) => `/casestudies/logo/${slug}.webp`
 export const caseLink = (slug: string) => `https://umm.digital/casestudies/${slug}/`
+
+/** the industry's Cool Shape (public/casestudies/icon, drawn by
+ *  scripts/render-industry-icons.mjs), bright or in UMM's pastels */
+export const industryIcon = (industry: string, pastel = false) =>
+  `/casestudies/icon/${industry.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, '-')}${pastel ? '-pastel' : ''}.webp`
 
 /** the live cards' proportions (1024 x 829) */
 export const CASE_RATIO = 1024 / 829

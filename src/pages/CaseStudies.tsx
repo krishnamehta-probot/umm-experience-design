@@ -8,6 +8,7 @@ import {
   caseLogo,
   casePoster,
   caseThumb,
+  industryIcon,
   type CaseStudy,
 } from '../content/caseStudies'
 import '../styles/case-studies.css'
@@ -44,6 +45,7 @@ import '../styles/case-studies.css'
 type Cards = 'original' | 'uniform'
 type Layout = 'diagonal' | 'level'
 type Bg = AmbientMode | 'plain'
+type Icons = 'bright' | 'pastel'
 
 const N = CASE_STUDIES.length
 /** how much larger the selected small card is */
@@ -174,23 +176,25 @@ function readOptions() {
     cards: pick<Cards>('cards', ['original', 'uniform'], 'original'),
     layout: pick<Layout>('layout', ['diagonal', 'level'], 'diagonal'),
     bg: pick<Bg>('bg', ['glow', 'field', 'plain'], 'glow'),
+    icons: pick<Icons>('icons', ['bright', 'pastel'], 'bright'),
   }
 }
 
 /* ------------------------------------------------------------ the faces */
 
-/** one card design for every case: the client, its field and its number,
- *  over a light wash of the case's own colours. Sized in cqw so the small
+/** one card design for every case: its number, its field, the client, and
+ *  its industry's Cool Shape (Krish, 5 Nov: sir likes those icons), in the
+ *  shapes' own bright colours or in UMM's pastels. Sized in cqw so the small
  *  card and the big one growing out of it look the same. */
-function Tile({ c, i }: { c: CaseStudy; i: number }) {
-  const [a, b] = LIFTED[i]
+function Tile({ c, i, icons }: { c: CaseStudy; i: number; icons: Icons }) {
   return (
-    <div className="cs-tile" style={{ '--ta': css(a), '--tb': css(b) } as CSSProperties}>
+    <div className="cs-tile">
       <div className="cs-tile__top">
         <span>{String(i + 1).padStart(2, '0')}</span>
         <span>{c.industry}</span>
       </div>
       <span className="cs-tile__name">{c.client}</span>
+      <img className="cs-tile__icon" src={industryIcon(c.industry, icons === 'pastel')} alt="" draggable={false} />
     </div>
   )
 }
@@ -211,12 +215,14 @@ function BigCard({
   c,
   i,
   cards,
+  icons,
   playing,
   setEl,
 }: {
   c: CaseStudy
   i: number
   cards: Cards
+  icons: Icons
   playing: boolean
   setEl: (el: HTMLDivElement | null) => void
 }) {
@@ -254,7 +260,7 @@ function BigCard({
         ) : (
           <>
             <div className="cs-big__tile">
-              <Tile c={c} i={i} />
+              <Tile c={c} i={i} icons={icons} />
             </div>
             <span className="cs-big__chip">
               <b>{c.client}</b>
@@ -308,6 +314,7 @@ export function CaseStudies() {
     q.set('cards', opt.cards)
     q.set('layout', opt.layout)
     q.set('bg', opt.bg)
+    q.set('icons', opt.icons)
     window.history.replaceState(null, '', `${window.location.pathname}?${q}`)
   }, [opt])
 
@@ -627,7 +634,7 @@ export function CaseStudies() {
               tabIndex={side === 'L' ? 0 : -1}
               aria-hidden={side === 'R' ? true : undefined}
             >
-              <span className="cs-card__in">{opt.cards === 'original' ? <Original c={cs} /> : <Tile c={cs} i={i} />}</span>
+              <span className="cs-card__in">{opt.cards === 'original' ? <Original c={cs} /> : <Tile c={cs} i={i} icons={opt.icons} />}</span>
               <span className="cs-card__ring" />
             </button>
           ))}
@@ -640,6 +647,7 @@ export function CaseStudies() {
           c={CASE_STUDIES[i]}
           i={i}
           cards={opt.cards}
+          icons={opt.icons}
           playing={still && i === near}
           setEl={(el) => {
             if (el) bigEls.current.set(i, el)
@@ -687,6 +695,23 @@ export function CaseStudies() {
                 ))}
               </div>
             </fieldset>
+            {opt.cards === 'uniform' && (
+              <fieldset className="ha-dock__set">
+                <legend>Icons</legend>
+                <div>
+                  {(
+                    [
+                      ['bright', 'Cool Shapes colours'],
+                      ['pastel', 'UMM pastels'],
+                    ] as const
+                  ).map(([v, l]) => (
+                    <button key={v} type="button" aria-pressed={opt.icons === v} onClick={() => set('icons', v)}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )}
             <fieldset className="ha-dock__set">
               <legend>Layout</legend>
               <div>

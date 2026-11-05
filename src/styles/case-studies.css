@@ -147,8 +147,8 @@
   pointer-events: none;
 }
 
-/* one design for every case: white, a wash of the case's colour in the
-   corner, its quarter circle (the shape the UMM mark is built from) */
+/* one design for every case: white, its number and field, the client,
+   and its industry's Cool Shape in the corner */
 .cs-tile {
   position: absolute;
   inset: 0;
@@ -157,22 +157,18 @@
   justify-content: space-between;
   padding: 8cqw;
   overflow: hidden;
-  background:
-    radial-gradient(120% 95% at 100% 0%, color-mix(in srgb, var(--tb) 55%, transparent) 0%, transparent 60%),
-    #ffffff;
+  background: #ffffff;
   color: var(--umm-ink);
   text-align: left;
   box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.07);
 }
-.cs-tile::after {
-  content: '';
+.cs-tile__icon {
   position: absolute;
-  right: 0;
-  bottom: 0;
+  right: 7cqw;
+  bottom: 7cqw;
   width: 36cqw;
   height: 36cqw;
-  border-radius: 100% 0 0 0;
-  background: var(--ta);
+  pointer-events: none;
 }
 .cs-tile__top {
   position: relative;
@@ -193,7 +189,7 @@
 .cs-tile__name {
   position: relative;
   z-index: 1;
-  max-width: 58cqw;
+  max-width: 50cqw;
   font-family: var(--umm-font-display);
   font-size: 12.5cqw;
   font-weight: 400;
