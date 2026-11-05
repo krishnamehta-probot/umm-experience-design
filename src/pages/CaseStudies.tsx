@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { Ambient, lift, type AmbientMode } from '../components/casestudies/Ambient'
+import { Ambient, lift } from '../components/casestudies/Ambient'
 import {
   CASE_RATIO,
   CASE_STUDIES,
@@ -37,15 +37,17 @@ import '../styles/case-studies.css'
                               the original too, since the boss is picky)
      ?layout=diagonal|level   the selected cards at the top left and the
                               foot right, as he drew it; or both level
-     ?bg=glow|field|plain     the light behind (Ambient.ts)
+     ?icons=bright|pastel     uniform cards: the industry's Cool Shape in
+                              its own bright colours or in UMM's pastels
+     ?tile=white|black        uniform cards: white or black (Krish, 5 Nov)
 
    On a phone the columns run across, along the top and the foot.
    ========================================================================== */
 
 type Cards = 'original' | 'uniform'
 type Layout = 'diagonal' | 'level'
-type Bg = AmbientMode | 'plain'
 type Icons = 'bright' | 'pastel'
+type TileTone = 'white' | 'black'
 
 const N = CASE_STUDIES.length
 /** how much larger the selected small card is */
@@ -175,8 +177,8 @@ function readOptions() {
   return {
     cards: pick<Cards>('cards', ['original', 'uniform'], 'original'),
     layout: pick<Layout>('layout', ['diagonal', 'level'], 'diagonal'),
-    bg: pick<Bg>('bg', ['glow', 'field', 'plain'], 'glow'),
     icons: pick<Icons>('icons', ['bright', 'pastel'], 'bright'),
+    tile: pick<TileTone>('tile', ['white', 'black'], 'white'),
   }
 }
 
@@ -186,9 +188,9 @@ function readOptions() {
  *  its industry's Cool Shape (Krish, 5 Nov: sir likes those icons), in the
  *  shapes' own bright colours or in UMM's pastels. Sized in cqw so the small
  *  card and the big one growing out of it look the same. */
-function Tile({ c, i, icons }: { c: CaseStudy; i: number; icons: Icons }) {
+function Tile({ c, i, icons, tone }: { c: CaseStudy; i: number; icons: Icons; tone: TileTone }) {
   return (
-    <div className="cs-tile">
+    <div className={`cs-tile is-${tone}`}>
       <div className="cs-tile__top">
         <span>{String(i + 1).padStart(2, '0')}</span>
         <span>{c.industry}</span>
@@ -216,6 +218,7 @@ function BigCard({
   i,
   cards,
   icons,
+  tone,
   playing,
   setEl,
 }: {
@@ -223,6 +226,7 @@ function BigCard({
   i: number
   cards: Cards
   icons: Icons
+  tone: TileTone
   playing: boolean
   setEl: (el: HTMLDivElement | null) => void
 }) {
@@ -260,7 +264,7 @@ function BigCard({
         ) : (
           <>
             <div className="cs-big__tile">
-              <Tile c={c} i={i} icons={icons} />
+              <Tile c={c} i={i} icons={icons} tone={tone} />
             </div>
             <span className="cs-big__chip">
               <b>{c.client}</b>
@@ -313,8 +317,9 @@ export function CaseStudies() {
     const q = new URLSearchParams(window.location.search)
     q.set('cards', opt.cards)
     q.set('layout', opt.layout)
-    q.set('bg', opt.bg)
+    q.delete('bg')
     q.set('icons', opt.icons)
+    q.set('tile', opt.tile)
     window.history.replaceState(null, '', `${window.location.pathname}?${q}`)
   }, [opt])
 
@@ -325,25 +330,27 @@ export function CaseStudies() {
     return () => window.removeEventListener('resize', on)
   }, [opt.layout])
 
-  /* the light behind */
+  /* the light behind: the glow (Krish, 5 Nov: the field lines and the plain
+     ground taken out of the options; Ambient.ts keeps the field mode) */
   useEffect(() => {
-    if (opt.bg === 'plain' || !stage.current) return
+    if (!stage.current) return
     let a: Ambient | null = null
     try {
-      a = new Ambient(stage.current, opt.bg)
+      a = new Ambient(stage.current, 'glow')
     } catch {
       return
     }
     ambient.current = a
+    a.setCard(geoRef.current.cx, geoRef.current.cy, geoRef.current.W, geoRef.current.H)
     return () => {
       a?.dispose()
       ambient.current = null
     }
-  }, [opt.bg])
+  }, [])
 
   useEffect(() => {
     ambient.current?.setCard(geo.cx, geo.cy, geo.W, geo.H)
-  }, [geo, opt.bg])
+  }, [geo])
 
   /* ------------------------------------------------------------ input */
 
@@ -570,7 +577,6 @@ export function CaseStudies() {
       className={`cs ${geo.vertical ? 'is-wide' : 'is-phone'} ${entering ? 'is-entering' : ''}`}
       ref={stage}
       data-cards={opt.cards}
-      data-bg={opt.bg}
       style={{ '--w': `${geo.w}px`, '--h': `${geo.h}px`, '--W': `${geo.W}px`, '--H': `${geo.H}px` } as CSSProperties}
     >
       <header
@@ -634,7 +640,7 @@ export function CaseStudies() {
               tabIndex={side === 'L' ? 0 : -1}
               aria-hidden={side === 'R' ? true : undefined}
             >
-              <span className="cs-card__in">{opt.cards === 'original' ? <Original c={cs} /> : <Tile c={cs} i={i} icons={opt.icons} />}</span>
+              <span className="cs-card__in">{opt.cards === 'original' ? <Original c={cs} /> : <Tile c={cs} i={i} icons={opt.icons} tone={opt.tile} />}</span>
               <span className="cs-card__ring" />
             </button>
           ))}
@@ -648,6 +654,7 @@ export function CaseStudies() {
           i={i}
           cards={opt.cards}
           icons={opt.icons}
+          tone={opt.tile}
           playing={still && i === near}
           setEl={(el) => {
             if (el) bigEls.current.set(i, el)
@@ -697,12 +704,29 @@ export function CaseStudies() {
             </fieldset>
             {opt.cards === 'uniform' && (
               <fieldset className="ha-dock__set">
-                <legend>Icons</legend>
+                <legend>Card colour</legend>
                 <div>
                   {(
                     [
-                      ['bright', 'Cool Shapes colours'],
-                      ['pastel', 'UMM pastels'],
+                      ['white', 'White'],
+                      ['black', 'Black'],
+                    ] as const
+                  ).map(([v, l]) => (
+                    <button key={v} type="button" aria-pressed={opt.tile === v} onClick={() => set('tile', v)}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+            {opt.cards === 'uniform' && (
+              <fieldset className="ha-dock__set">
+                <legend>Shapes</legend>
+                <div>
+                  {(
+                    [
+                      ['bright', 'Bright'],
+                      ['pastel', 'Pastel'],
                     ] as const
                   ).map(([v, l]) => (
                     <button key={v} type="button" aria-pressed={opt.icons === v} onClick={() => set('icons', v)}>
@@ -722,22 +746,6 @@ export function CaseStudies() {
                   ] as const
                 ).map(([v, l]) => (
                   <button key={v} type="button" aria-pressed={opt.layout === v} onClick={() => set('layout', v)}>
-                    {l}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset className="ha-dock__set">
-              <legend>Background</legend>
-              <div>
-                {(
-                  [
-                    ['glow', 'Glow'],
-                    ['field', 'Field lines'],
-                    ['plain', 'Plain'],
-                  ] as const
-                ).map(([v, l]) => (
-                  <button key={v} type="button" aria-pressed={opt.bg === v} onClick={() => set('bg', v)}>
                     {l}
                   </button>
                 ))}

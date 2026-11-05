@@ -10,7 +10,7 @@
    grain laid over in overlay, all inside the outline.
 
    Two sets: <slug>.webp in the Cool Shapes' own bright colours, and
-   <slug>-pastel.webp in UMM's pastels deepened just enough to hold on white.
+   <slug>-pastel.webp in UMM's own pastels.
 
      node scripts/render-industry-icons.mjs
    ========================================================================== */
@@ -29,10 +29,12 @@ const C = {
   cyan: '#00F0FF', pink: '#FF58E4', yellow: '#FFE53B', blue: '#3D6BFF', lime: '#A6F04A',
   violet: '#9C6BFF', orange: '#FF8A3D', mint: '#2FF0B4', coral: '#FF6B7D',
 }
-/* UMM's pastels, each nudged toward the bright colour it stands in for */
+/* UMM's own pastels, exactly (blossom, citrus, sky, sun, coral and the
+   lilac), each standing in for the bright colour nearest it (Krish, 5 Nov:
+   "the shapes need to be in pastel colours") */
 const P = {
-  cyan: '#9FD2FF', pink: '#FF9BEA', yellow: '#FFD95C', blue: '#A9C4FF', lime: '#E2F54F',
-  violet: '#C2ADFF', orange: '#FFAE9E', mint: '#A8EBD2', coral: '#FF9FA1',
+  cyan: '#D1E7FF', pink: '#FFC4F2', yellow: '#FFE58F', blue: '#D1E7FF', lime: '#F0FF70',
+  violet: '#DCCFFF', orange: '#FFC3C4', mint: '#F0FF70', coral: '#FFC3C4',
 }
 const SETS = {
   Telecom: ['cyan', 'pink', 'yellow', 'blue'],
