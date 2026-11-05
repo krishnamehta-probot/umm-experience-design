@@ -297,9 +297,10 @@ export const caseLogo = (slug: string) => `/casestudies/logo/${slug}.webp`
 export const caseLink = (slug: string) => `https://umm.digital/casestudies/${slug}/`
 
 /** the industry's Cool Shape (public/casestudies/icon, drawn by
- *  scripts/render-industry-icons.mjs), bright or in UMM's pastels */
-export const industryIcon = (industry: string, pastel = false) =>
-  `/casestudies/icon/${industry.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, '-')}${pastel ? '-pastel' : ''}.webp`
+ *  scripts/render-industry-icons.mjs): bright, in UMM's pastels, or flat in
+ *  a single pastel */
+export const industryIcon = (industry: string, set: 'bright' | 'pastel' | 'single' = 'bright') =>
+  `/casestudies/icon/${industry.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, '-')}${set === 'bright' ? '' : `-${set}`}.webp`
 
 /** the live cards' proportions (1024 x 829) */
 export const CASE_RATIO = 1024 / 829

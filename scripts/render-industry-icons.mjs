@@ -9,8 +9,9 @@
    ground, a pale yellow lift, blooms of colour blurred together, and a fine
    grain laid over in overlay, all inside the outline.
 
-   Two sets: <slug>.webp in the Cool Shapes' own bright colours, and
-   <slug>-pastel.webp in UMM's own pastels.
+   Three sets: <slug>.webp in the Cool Shapes' own bright colours,
+   <slug>-pastel.webp in UMM's own pastels, and <slug>-single.webp flat in
+   one of UMM's pastels.
 
      node scripts/render-industry-icons.mjs
    ========================================================================== */
@@ -52,7 +53,31 @@ const SETS = {
   Energy: ['yellow', 'orange', 'lime', 'pink'],
   Healthtech: ['mint', 'pink', 'cyan', 'yellow'],
 }
+/* one flat brand pastel per industry, for the single-colour set (Krish,
+   5 Nov: "I was asking for a single colour") */
+const SINGLE = {
+  Telecom: '#D1E7FF',
+  Fintech: '#F0FF70',
+  Media: '#FFC4F2',
+  Manufacturing: '#FFE58F',
+  Biotech: '#DCCFFF',
+  Technology: '#D1E7FF',
+  Hospitality: '#FFC3C4',
+  Healthcare: '#D1E7FF',
+  Ecommerce: '#FFC4F2',
+  'Real Estate': '#DCCFFF',
+  Gaming: '#F0FF70',
+  'Beauty & Wellness': '#FFC4F2',
+  Energy: '#FFE58F',
+  Healthtech: '#FFC3C4',
+}
 export const slugOf = (industry) => industry.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, '-')
+
+/** the outline alone, filled flat with one colour */
+const flat = (industry) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="360" height="360">${shapes[industry].parts
+    .map((p) => `<path fill="${SINGLE[industry]}" d="${p.d}"${p.evenodd ? ' fill-rule="evenodd" clip-rule="evenodd"' : ''}/>`)
+    .join('')}</svg>`
 
 const svg = (industry, pal, k) => {
   const [a, b, c, d] = SETS[industry].map((n) => pal[n])
@@ -89,8 +114,9 @@ const browser = await chromium.launch()
 const page = await browser.newPage({ deviceScaleFactor: 1 })
 let k = 0
 for (const industry of Object.keys(SETS)) {
-  for (const [suffix, pal] of [['', C], ['-pastel', P]]) {
-    await page.setContent(`<body style="margin:0;background:transparent">${svg(industry, pal, k)}</body>`)
+  for (const [suffix, pal] of [['', C], ['-pastel', P], ['-single', null]]) {
+    const art = pal ? svg(industry, pal, k) : flat(industry)
+    await page.setContent(`<body style="margin:0;background:transparent">${art}</body>`)
     const png = await page.locator('svg').screenshot({ omitBackground: true })
     const webp = await page.evaluate(async (b64) => {
       const img = new Image()
@@ -107,4 +133,4 @@ for (const industry of Object.keys(SETS)) {
   k++
 }
 await browser.close()
-console.log('wrote', Object.keys(SETS).length * 2, 'icons to', out)
+console.log('wrote', Object.keys(SETS).length * 3, 'icons to', out)

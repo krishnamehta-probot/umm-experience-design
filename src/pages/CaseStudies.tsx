@@ -37,8 +37,9 @@ import '../styles/case-studies.css'
                               the original too, since the boss is picky)
      ?layout=diagonal|level   the selected cards at the top left and the
                               foot right, as he drew it; or both level
-     ?icons=bright|pastel     uniform cards: the industry's Cool Shape in
-                              its own bright colours or in UMM's pastels
+     ?icons=bright|pastel|single  uniform cards: the industry's Cool Shape
+                              in its own bright colours, in UMM's pastels,
+                              or flat in one pastel
      ?tile=white|black        uniform cards: white or black (Krish, 5 Nov)
 
    On a phone the columns run across, along the top and the foot.
@@ -46,7 +47,7 @@ import '../styles/case-studies.css'
 
 type Cards = 'original' | 'uniform'
 type Layout = 'diagonal' | 'level'
-type Icons = 'bright' | 'pastel'
+type Icons = 'bright' | 'pastel' | 'single'
 type TileTone = 'white' | 'black'
 
 const N = CASE_STUDIES.length
@@ -177,7 +178,7 @@ function readOptions() {
   return {
     cards: pick<Cards>('cards', ['original', 'uniform'], 'original'),
     layout: pick<Layout>('layout', ['diagonal', 'level'], 'diagonal'),
-    icons: pick<Icons>('icons', ['bright', 'pastel'], 'bright'),
+    icons: pick<Icons>('icons', ['bright', 'pastel', 'single'], 'bright'),
     tile: pick<TileTone>('tile', ['white', 'black'], 'white'),
   }
 }
@@ -196,7 +197,7 @@ function Tile({ c, i, icons, tone }: { c: CaseStudy; i: number; icons: Icons; to
         <span>{c.industry}</span>
       </div>
       <span className="cs-tile__name">{c.client}</span>
-      <img className="cs-tile__icon" src={industryIcon(c.industry, icons === 'pastel')} alt="" draggable={false} />
+      <img className="cs-tile__icon" src={industryIcon(c.industry, icons)} alt="" draggable={false} />
     </div>
   )
 }
@@ -450,7 +451,7 @@ export function CaseStudies() {
         s.target = Math.abs(d) < 0.12 ? s.g0 : s.g0 + Math.sign(d) * Math.max(1, Math.round(Math.abs(d)))
         s.gesture = false
       }
-      s.p = calm.current ? s.target : s.p + (s.target - s.p) * (1 - Math.exp(-dt / 170))
+      s.p = calm.current ? s.target : s.p + (s.target - s.p) * (1 - Math.exp(-dt / 140))
       if (Math.abs(s.target - s.p) < 0.0004) s.p = s.target
 
       const n = Math.floor(s.p)
@@ -473,7 +474,6 @@ export function CaseStudies() {
         lastStill = rest
         setStill(rest)
       }
-      const moving = f > 0.0005 && f < 0.9995
 
       /* the columns */
       for (const side of ['L', 'R'] as const) {
@@ -483,9 +483,9 @@ export function CaseStudies() {
           const span = g.vertical ? g.vh : g.vw
           const pos = g.vertical ? r.y : r.x
           const off = pos < -g.pitch * 2 || pos > span + g.pitch * 2
-          /* the two cards flying as big ones are hidden in their columns */
-          const flying = moving && ((side === 'L' && i === b) || (side === 'R' && i === a))
-          el.style.visibility = off || flying ? 'hidden' : 'visible'
+          /* every card stays in its column the whole way (Krish, 5 Nov: the
+             gap a card left while it flew took too long to fill) */
+          el.style.visibility = off ? 'hidden' : 'visible'
           if (off) return
           const k = scaleOf(r.rel)
           el.style.transform = `translate(${r.x - g.w / 2}px, ${r.y - g.h / 2}px) scale(${k})`
@@ -494,15 +494,24 @@ export function CaseStudies() {
         })
       }
 
-      /* the big cards: a shrinking into its twin on the right, b growing
-         out of its card on the left */
-      const place = (el: HTMLDivElement | undefined, from: { x: number; y: number; k: number }, to: { x: number; y: number; k: number }, t: number, op0: number, op1: number) => {
+      /* the big cards: a shrinking into its twin on the right and fading
+         into it as it lands, b growing out of a copy of its card on the left,
+         which stays where it is */
+      const place = (
+        el: HTMLDivElement | undefined,
+        from: { x: number; y: number; k: number },
+        to: { x: number; y: number; k: number },
+        t: number,
+        op0: number,
+        op1: number,
+        fade: number,
+      ) => {
         if (!el) return
         const x = lerp(from.x, to.x, t)
         const y = lerp(from.y, to.y, t)
         const k = lerp(from.k, to.k, t)
         el.style.transform = `translate(${x - (g.W * k) / 2}px, ${y - (g.H * k) / 2}px) scale(${k})`
-        el.style.opacity = String(lerp(op0, op1, t))
+        el.style.opacity = String(lerp(op0, op1, t) * fade)
         const small = (1 - k) / (1 - g.w / g.W)
         el.style.setProperty('--small', String(clamp(small, 0, 1)))
         el.style.setProperty('--r', `${lerp(R_BIG, R_SMALL, clamp(small, 0, 1)) / k}px`)
@@ -522,8 +531,8 @@ export function CaseStudies() {
         elB.style.visibility = f < 0.0005 ? 'hidden' : 'visible'
         elB.style.zIndex = e < 0.5 ? '3' : '4'
       }
-      place(elA, centre, toA, e, 1, dimOf(ra.rel))
-      place(elB, fromB, centre, e, dimOf(lb.rel), 1)
+      place(elA, centre, toA, e, 1, dimOf(ra.rel), 1 - smooth(clamp((e - 0.72) / 0.28, 0, 1)))
+      place(elB, fromB, centre, e, dimOf(lb.rel), 1, smooth(clamp(e / 0.14, 0, 1)))
 
       /* the beams and the caption, lit only at rest */
       const settle = clamp(1 - Math.abs(s.p - Math.round(s.p)) * 6, 0, 1)
@@ -727,6 +736,7 @@ export function CaseStudies() {
                     [
                       ['bright', 'Bright'],
                       ['pastel', 'Pastel'],
+                      ['single', 'Single colour'],
                     ] as const
                   ).map(([v, l]) => (
                     <button key={v} type="button" aria-pressed={opt.icons === v} onClick={() => set('icons', v)}>
