@@ -1,0 +1,490 @@
+/* ============================================================================
+   CASE STUDIES — /casestudies (CaseStudies.tsx)
+   Positions are set per frame in JS (transform, opacity, --sel, --small,
+   --r); this file is the look. --w/--h are a small card's size, --W/--H the
+   big card's.
+   ========================================================================== */
+
+.cs {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #fbfbfc;
+  color: var(--umm-ink);
+  font-family: var(--umm-font-body);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cs-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------ the top */
+
+.cs-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 6;
+  height: 76px;
+  padding: 0 clamp(20px, 3.5vw, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.cs-top__title {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.cs-top__title h1 {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+.cs-top__title span,
+.cs-top__count span {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+.cs-top__count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.cs-top__count b {
+  font-family: var(--umm-font-display);
+  font-size: 26px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------- the columns */
+
+.cs-rail {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.cs.is-wide .cs-rail {
+  -webkit-mask-image: linear-gradient(transparent 0, #000 110px, #000 calc(100% - 50px), transparent 100%);
+  mask-image: linear-gradient(transparent 0, #000 110px, #000 calc(100% - 50px), transparent 100%);
+}
+.cs.is-phone .cs-rail {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+}
+
+.cs-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--w);
+  height: var(--h);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  will-change: transform;
+}
+.cs-card__in {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #e9e9ee;
+  container-type: inline-size;
+  box-shadow: 0 12px 26px -16px rgb(16 14 20 / 0.4);
+}
+.cs-card__ring {
+  position: absolute;
+  inset: -5px;
+  border: 1.5px solid var(--umm-ink);
+  border-radius: 14px;
+  opacity: var(--sel, 0);
+  pointer-events: none;
+}
+.cs-card:focus-visible {
+  outline: none;
+}
+.cs-card:focus-visible .cs-card__ring {
+  opacity: 1;
+  border-style: dashed;
+}
+
+/* ------------------------------------------------------------- faces */
+
+.cs-face__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* the live card's logo box: about a quarter of the card's width */
+.cs-face__logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26cqw;
+  height: 16cqw;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* one design for every case: white, a wash of the case's colour in the
+   corner, its quarter circle (the shape the UMM mark is built from) */
+.cs-tile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8cqw;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 95% at 100% 0%, color-mix(in srgb, var(--tb) 55%, transparent) 0%, transparent 60%),
+    #ffffff;
+  color: var(--umm-ink);
+  text-align: left;
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.07);
+}
+.cs-tile::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 36cqw;
+  height: 36cqw;
+  border-radius: 100% 0 0 0;
+  background: var(--ta);
+}
+.cs-tile__top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 4cqw;
+  font-size: 6.4cqw;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: rgb(16 14 20 / 0.6);
+}
+.cs-tile__top span:last-child {
+  text-align: right;
+}
+.cs-tile__name {
+  position: relative;
+  z-index: 1;
+  max-width: 58cqw;
+  font-family: var(--umm-font-display);
+  font-size: 12.5cqw;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+/* --------------------------------------------------------- the big card */
+
+.cs-big {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  width: var(--W);
+  height: var(--H);
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.cs-big__in {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--r, 22px);
+  background: #e9e9ee;
+  container-type: inline-size;
+  box-shadow:
+    0 50px 90px -50px rgb(16 14 20 / 0.55),
+    0 0 0 1px rgb(16 14 20 / 0.05);
+  -webkit-user-drag: none;
+}
+.cs-big__media {
+  position: absolute;
+  inset: 0;
+  opacity: clamp(0, calc(1 - var(--small, 0) * 1.6), 1);
+}
+.cs-big__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+.cs-big__video.is-on {
+  opacity: 1;
+  animation: cs-fade 0.7s ease both;
+}
+@keyframes cs-fade {
+  from {
+    opacity: 0;
+  }
+}
+/* the logo sits on the render; once the film plays it steps aside, and
+   comes back as the card shrinks to its column */
+.cs-big .cs-face__logo {
+  transition: opacity 0.6s ease;
+}
+.cs-big.is-playing .cs-face__logo {
+  opacity: clamp(0, calc((var(--small, 0) - 0.3) * 2), 1);
+}
+/* the uniform card shows its small face while it is small */
+.cs-big__tile {
+  position: absolute;
+  inset: 0;
+  opacity: clamp(0, calc((var(--small, 0) - 0.35) * 2), 1);
+}
+.cs-big__chip {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.84);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  color: var(--umm-ink);
+  font-size: 13px;
+  opacity: clamp(0, calc(1 - var(--small, 0) * 4), 1);
+}
+.cs-big__chip b {
+  font-weight: 500;
+}
+.cs-big__chip span {
+  color: var(--umm-ink-quiet);
+}
+
+/* ------------------------------------------------------------- beams */
+
+.cs-beams {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.cs-beams g {
+  transition: none;
+}
+.cs-beams__edge {
+  fill: none;
+  stroke: rgb(16 14 20 / 0.16);
+  stroke-width: 1;
+}
+.cs-beams__run {
+  fill: none;
+  stroke: rgb(16 14 20 / 0.55);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 7 100;
+  animation: cs-run 2.6s linear infinite;
+}
+@keyframes cs-run {
+  from {
+    stroke-dashoffset: 107;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ----------------------------------------------------------- caption */
+
+.cs-cap {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.cs-cap__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  animation: cs-cap 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.cs-cap__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+.cs-cap__meta i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.cs-cap__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-family: var(--umm-font-display);
+  font-size: clamp(18px, 1.7vw, 26px);
+  font-weight: 300;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+}
+.cs-cap__go {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--umm-ink);
+  color: var(--umm-paper);
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform 0.3s;
+}
+.cs-cap__go:hover {
+  transform: translateY(-1px);
+}
+@keyframes cs-cap {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* -------------------------------------------------------------- dock */
+
+.cs .cs-dock {
+  top: 18px;
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+  max-height: calc(100% - 40px);
+}
+
+/* ----------------------------------------------------------- entering */
+
+.cs.is-entering.is-wide .cs-rail--L {
+  animation: cs-from-foot 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.cs.is-entering.is-wide .cs-rail--R {
+  animation: cs-from-top 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.cs.is-entering.is-phone .cs-rail--L {
+  animation: cs-from-right 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.cs.is-entering.is-phone .cs-rail--R {
+  animation: cs-from-left 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.cs.is-entering .cs-big__in {
+  animation: cs-big-in 1.1s 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes cs-from-foot {
+  from {
+    opacity: 0;
+    transform: translateY(45vh);
+  }
+}
+@keyframes cs-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-45vh);
+  }
+}
+@keyframes cs-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(40vw);
+  }
+}
+@keyframes cs-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40vw);
+  }
+}
+@keyframes cs-big-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+/* ------------------------------------------------------------- phone */
+
+.cs.is-phone .cs-top {
+  height: 58px;
+}
+.cs.is-phone .cs-top__title h1,
+.cs.is-phone .cs-top__count b {
+  font-size: 20px;
+}
+.cs.is-phone .cs-top__title span {
+  display: none;
+}
+.cs.is-phone .cs-cap {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+.cs.is-phone .cs-cap__title {
+  font-size: 17px;
+}
+.cs.is-phone .cs-cap__go {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-beams__run {
+    animation: none;
+  }
+  .cs.is-entering .cs-rail,
+  .cs.is-entering .cs-big__in,
+  .cs-cap__text {
+    animation: none;
+  }
+}
+
+/* the logo reads larger on a small card, as on Krish's sketch; the big card
+   grows its logo toward that size as it shrinks, so the two meet */
+.cs-card .cs-face__logo {
+  width: 40cqw;
+  height: 24cqw;
+}
+.cs-big .cs-face__logo {
+  width: calc(26cqw + 14cqw * var(--small, 0));
+  height: calc(16cqw + 8cqw * var(--small, 0));
+}
