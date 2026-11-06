@@ -1,0 +1,1280 @@
+/* ============================================================================
+   THE FINAL FINTECH PAGE — 03 · financial journeys (FinalJourneys.tsx) and
+   the journeys' illustrations (JourneyArt.tsx)
+   ========================================================================== */
+
+.fj {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(16px, 2vw, 32px);
+  align-content: center;
+  align-items: stretch;
+  min-height: 100svh;
+  padding: clamp(28px, 5.6svh, 72px) var(--g);
+}
+
+/* left: the heading at the top, the connected view at the foot */
+.fj__intro {
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 0;
+  padding-right: clamp(0px, 1.2vw, 20px);
+}
+
+.fj__head {
+  display: grid;
+  justify-items: start;
+  gap: clamp(14px, 2.4svh, 24px);
+}
+
+.fj__lead {
+  max-width: 40ch;
+  font-size: clamp(14px, 1vw, 15.5px);
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+.fj__view {
+  display: grid;
+  gap: 8px;
+  padding: clamp(16px, 2.2svh, 22px) clamp(18px, 1.6vw, 24px);
+  border-radius: 22px;
+  background: #f4f4f7;
+}
+
+.fj__view-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.fj__view-k::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1658f2;
+  box-shadow: 0 0 0 3px rgb(22 88 242 / 0.16);
+}
+
+.fj__view p:last-child {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* right: the six journeys */
+.fj__list {
+  grid-column: 5 / -1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--umm-line);
+}
+
+.fj__item {
+  border-bottom: 1px solid var(--umm-line);
+}
+
+.fj__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: clamp(8px, 1.3svh, 12px) 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fj__num {
+  display: inline-grid;
+  place-items: center;
+  width: fit-content;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--umm-r-pill);
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+  font-size: 12px;
+  color: var(--umm-ink-quiet);
+  transition:
+    background-color 0.4s,
+    box-shadow 0.4s,
+    color 0.4s;
+}
+
+.fj__item[data-on] .fj__num {
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08);
+  color: var(--umm-ink);
+}
+
+.fj__label {
+  font-size: clamp(16px, 1.3vw, 20px);
+  letter-spacing: -0.015em;
+  color: var(--umm-ink-soft);
+  transition: color 0.3s;
+}
+
+.fj__item[data-on] .fj__label,
+.fj__row:hover .fj__label {
+  color: var(--umm-ink);
+}
+
+.fj__circle {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+  font-size: 15px;
+  transition:
+    background-color 0.4s,
+    color 0.4s,
+    box-shadow 0.4s;
+}
+
+.fj__circle .kit-arrow {
+  transition: rotate 0.4s var(--umm-ease-out);
+}
+
+.fj__row:hover .fj__circle {
+  box-shadow: inset 0 0 0 1px var(--umm-hairline);
+}
+
+.fj__item[data-on] .fj__circle {
+  background: var(--umm-ink);
+  box-shadow: none;
+  color: #fff;
+}
+
+.fj__row:focus-visible {
+  outline: 2px solid #1658f2;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* the line under the open row fills as it waits */
+.fj__bar {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #1658f2;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.fj__item[data-on] .fj__bar {
+  transform: scaleX(var(--p, 1));
+}
+
+.fj__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.6s var(--umm-ease-out);
+}
+
+.fj__item[data-on] .fj__panel {
+  grid-template-rows: 1fr;
+}
+
+.fj__clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* the open journey: its words, and its illustration beside them; a fixed
+   height so the section never changes size between journeys */
+.fj__card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+  height: clamp(280px, 39svh, 340px);
+  margin: 10px 0 12px;
+  padding: clamp(12px, 1.1vw, 16px);
+  border-radius: 22px;
+  background: #f4f4f7;
+}
+
+.fj__text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: clamp(6px, 0.9vw, 12px) 0 clamp(4px, 0.6vw, 8px) clamp(4px, 0.7vw, 10px);
+}
+
+.fj__text h3 {
+  margin: 0;
+  font-size: clamp(18px, 1.5vw, 23px);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.fj__text > p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.fj__ticks {
+  display: grid;
+  gap: 7px;
+  margin: auto 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid rgb(16 14 20 / 0.07);
+  list-style: none;
+}
+
+.fj__ticks li {
+  position: relative;
+  padding-left: 24px;
+  font-size: 13px;
+  line-height: 1.42;
+  color: var(--umm-ink-soft);
+}
+
+.fj__ticks li::before {
+  content: '';
+  position: absolute;
+  top: 0.18em;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.1);
+}
+
+.fj__ticks li::after {
+  content: '';
+  position: absolute;
+  top: calc(0.18em + 4.5px);
+  left: 4.5px;
+  width: 6px;
+  height: 3px;
+  border-left: 1.5px solid var(--umm-ink);
+  border-bottom: 1.5px solid var(--umm-ink);
+  rotate: -45deg;
+}
+
+/* --- the illustrations (JourneyArt.tsx) -------------------------------------------- */
+
+.ji {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  border-radius: 16px;
+  background:
+    radial-gradient(62% 58% at 20% 84%, color-mix(in srgb, var(--umm-tone) 95%, transparent), transparent 72%),
+    radial-gradient(56% 52% at 86% 14%, color-mix(in srgb, var(--umm-sky) 90%, transparent), transparent 72%),
+    radial-gradient(42% 44% at 74% 88%, color-mix(in srgb, var(--umm-lilac) 75%, transparent), transparent 72%),
+    #fff;
+}
+
+/* a faint dot grid, fading out to the edges */
+.ji::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgb(16 14 20 / 0.08) 1px, transparent 1.3px);
+  background-size: 14px 14px;
+  -webkit-mask-image: radial-gradient(75% 75% at 50% 50%, #000, transparent);
+  mask-image: radial-gradient(75% 75% at 50% 50%, #000, transparent);
+}
+
+/* the 36 × 28 em stage, scaled to fit the box */
+.ji__stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36em;
+  height: 28em;
+  font-size: min(calc(100cqw / 36), calc(100cqh / 28));
+  translate: -50% -50%;
+  color: var(--umm-ink);
+}
+
+.ji p,
+.ji ol,
+.ji ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* frosted glass cards */
+.ji-card {
+  position: absolute;
+  padding: 1.3em;
+  border-radius: 1.5em;
+  background: rgb(255 255 255 / 0.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.9),
+    0 1.4em 2.8em -1.4em rgb(16 14 20 / 0.24),
+    0 0.2em 0.6em -0.2em rgb(16 14 20 / 0.06);
+}
+
+.ji-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+}
+
+.ji-row--between {
+  justify-content: space-between;
+}
+
+.ji-k {
+  font-size: 1em;
+  line-height: 1.3;
+  color: var(--umm-ink-quiet);
+  white-space: nowrap;
+}
+
+.ji .ji-k--cap {
+  margin-top: 1.1em;
+  font-size: 0.82em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.ji .ji-big {
+  margin-top: 0.12em;
+  font-size: 2.5em;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.ji-big small {
+  margin-left: 0.04em;
+  font-size: 0.5em;
+  letter-spacing: -0.01em;
+  color: var(--umm-ink-quiet);
+}
+
+.ji-mid {
+  font-size: 1.35em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.02em;
+}
+
+.ji-sk {
+  display: block;
+  flex: none;
+  height: 0.62em;
+  border-radius: 1em;
+  background: rgb(16 14 20 / 0.08);
+}
+
+.ji-ava,
+.ji-node {
+  display: grid;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.06);
+}
+
+.ji-ava {
+  width: 2.6em;
+  height: 2.6em;
+}
+
+.ji-ava svg,
+.ji-node svg,
+.ji-kyc__photo svg {
+  width: 58%;
+  height: 58%;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* a ring that fills blue with a check */
+.ji-tick {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgb(16 14 20 / 0.14);
+}
+
+.ji-tick > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #1658f2;
+}
+
+.ji-tick svg,
+.ji-chip__tick svg,
+.ji-time b svg {
+  width: 72%;
+  height: 72%;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the outcome, a white pill floating over the scene */
+.ji-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 1.05em 0.5em 0.5em;
+  border-radius: 99em;
+  background: #fff;
+  box-shadow:
+    0 1em 2.2em -1em rgb(16 14 20 / 0.32),
+    inset 0 0 0 1px rgb(16 14 20 / 0.05);
+  font-size: 1.05em;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ji-chip__tick {
+  display: grid;
+  place-items: center;
+  width: 1.75em;
+  height: 1.75em;
+  border-radius: 50%;
+  background: var(--umm-tone);
+}
+
+.ji-chip__tick svg {
+  stroke: var(--umm-ink);
+}
+
+.ji-doc {
+  display: grid;
+  flex: none;
+  align-content: center;
+  gap: 0.28em;
+  width: 2.2em;
+  height: 2.7em;
+  padding: 0 0.45em;
+  border-radius: 0.45em;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.06);
+}
+
+.ji-doc i {
+  height: 0.2em;
+  border-radius: 1em;
+  background: rgb(16 14 20 / 0.28);
+}
+
+.ji-doc i:nth-child(2) {
+  width: 70%;
+}
+
+/* neo-banking */
+.ji-bankcard {
+  position: absolute;
+  top: 2.2em;
+  right: 1.8em;
+  width: 17em;
+  height: 10.7em;
+  border-radius: 1.3em;
+  rotate: 7deg;
+  background: linear-gradient(135deg, rgb(209 231 255 / 0.92), rgb(220 207 255 / 0.8) 55%, rgb(255 196 242 / 0.78));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.75),
+    0 1.4em 2.6em -1.2em rgb(16 14 20 / 0.25);
+}
+
+.ji-bankcard__chip {
+  position: absolute;
+  top: 1.4em;
+  left: 3.8em;
+  width: 2.4em;
+  height: 1.8em;
+  border-radius: 0.45em;
+  background: linear-gradient(135deg, #fff6d1, var(--umm-sun));
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.1);
+}
+
+.ji-bankcard__no {
+  position: absolute;
+  bottom: 1.3em;
+  left: 3.8em;
+  font-size: 1.05em;
+  letter-spacing: 0.12em;
+  color: var(--umm-ink-soft);
+}
+
+.ji-bankcard__mark {
+  position: absolute;
+  right: 1.3em;
+  bottom: 1.1em;
+  display: flex;
+}
+
+.ji-bankcard__mark i {
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+}
+
+.ji-bankcard__mark i + i {
+  margin-left: -0.75em;
+  background: rgb(16 14 20 / 0.14);
+}
+
+.ji-neo__app {
+  top: 3.6em;
+  left: 1.6em;
+  width: 20em;
+}
+
+.ji-neo__app .ji-k {
+  margin-top: 0.9em;
+}
+
+.ji-spark {
+  display: block;
+  width: 100%;
+  height: 4.4em;
+  margin-top: 0.5em;
+  overflow: visible;
+}
+
+.ji-spark__area {
+  fill: url(#ji-spark-fill);
+}
+
+.ji-spark__line {
+  fill: none;
+  stroke: #1658f2;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+
+.ji-tiles {
+  display: flex;
+  gap: 0.5em;
+  margin-top: 0.8em;
+}
+
+.ji-tile {
+  display: grid;
+  flex: 1;
+  gap: 0.45em;
+  padding: 0.6em 0.55em;
+  border-radius: 0.9em;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.05);
+  font-size: 0.86em;
+  white-space: nowrap;
+}
+
+.ji-tile i {
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 0.45em;
+  background: var(--umm-tone);
+}
+
+.ji-neo__sync {
+  right: 1.6em;
+  bottom: 3em;
+}
+
+/* onboarding & kyc */
+.ji-kyc__id {
+  top: 2.4em;
+  left: 1.6em;
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  width: 19em;
+  height: 11.4em;
+  overflow: hidden;
+}
+
+.ji-kyc__photo {
+  display: grid;
+  flex: none;
+  place-items: end center;
+  width: 6.4em;
+  height: 8.2em;
+  overflow: hidden;
+  border-radius: 1em;
+  background: var(--umm-tone);
+}
+
+.ji-kyc__photo svg {
+  width: 94%;
+  height: 94%;
+  margin-bottom: -0.6em;
+}
+
+.ji-kyc__lines {
+  display: grid;
+  flex: 1;
+  gap: 0.85em;
+}
+
+.ji-kyc__scan {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2.6em;
+  background: linear-gradient(180deg, rgb(22 88 242 / 0), rgb(22 88 242 / 0.14) 82%, rgb(22 88 242 / 0.85) 96%, rgb(22 88 242 / 0));
+  animation: ji-scan 2.8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.ji-kyc__doc {
+  top: 15.4em;
+  left: 3.4em;
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  width: 14em;
+  padding: 1em 1.1em;
+}
+
+.ji-kyc__doclines {
+  display: grid;
+  flex: 1;
+  gap: 0.6em;
+}
+
+.ji-kyc__steps {
+  top: 7.4em;
+  right: 1.6em;
+  width: 14.4em;
+}
+
+.ji .ji-kyc__steps ol {
+  display: grid;
+  gap: 0.75em;
+  margin-top: 0.9em;
+}
+
+.ji-kyc__steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  font-size: 1.1em;
+}
+
+.ji-kyc__done {
+  right: 2.4em;
+  bottom: 2.6em;
+}
+
+/* payments & remittance */
+.ji-pay__route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ji-pay__route path {
+  fill: none;
+  stroke: rgb(22 88 242 / 0.5);
+  stroke-width: 2;
+  stroke-dasharray: 5 7;
+  stroke-linecap: round;
+  animation: ji-dash 1.2s linear infinite;
+}
+
+.ji-pay__coin {
+  fill: #1658f2;
+  stroke: #fff;
+  stroke-width: 2.5;
+}
+
+.ji-node {
+  position: absolute;
+  width: 4.8em;
+  height: 4.8em;
+  margin: -2.4em 0 0 -2.4em;
+  box-shadow:
+    0 0 0 0.5em rgb(255 255 255 / 0.75),
+    0 1.2em 2.2em -1em rgb(16 14 20 / 0.3);
+}
+
+.ji-pay__from {
+  top: 9.2em;
+  left: 7.8em;
+}
+
+.ji-pay__to {
+  top: 9.2em;
+  left: 28.2em;
+}
+
+.ji-pay__card {
+  right: 3.4em;
+  bottom: 2.2em;
+  left: 3.4em;
+  padding: 1.3em 1.5em;
+}
+
+.ji-steps3 {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1.1em;
+}
+
+.ji-steps3__track {
+  position: absolute;
+  top: 0.5em;
+  left: 0.55em;
+  width: 66.66%;
+  height: 2px;
+  margin-top: -1px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(16 14 20 / 0.1);
+}
+
+.ji-steps3__track i {
+  position: absolute;
+  inset: 0;
+  background: #1658f2;
+  transform-origin: left;
+}
+
+.ji-steps3__s {
+  display: grid;
+  justify-items: start;
+  gap: 0.5em;
+  font-size: 0.95em;
+  color: var(--umm-ink-soft);
+}
+
+.ji-steps3__s b {
+  position: relative;
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  background: #1658f2;
+  box-shadow:
+    inset 0 0 0 2px #1658f2,
+    0 0 0 0.3em rgb(22 88 242 / 0.16);
+}
+
+.ji-pay__rec {
+  top: 1.2em;
+  right: 1.4em;
+}
+
+/* lending & risk */
+.ji-lend__app {
+  top: 2.2em;
+  left: 1.6em;
+  width: 19.6em;
+}
+
+.ji .ji-docs {
+  display: grid;
+  gap: 0.55em;
+  margin-top: 0.6em;
+}
+
+.ji-docs li {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.5em 0.6em;
+  border-radius: 0.9em;
+  background: rgb(255 255 255 / 0.75);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.05);
+  font-size: 1.02em;
+  white-space: nowrap;
+}
+
+.ji-docs .ji-tick {
+  margin-left: auto;
+}
+
+.ji-lend__gauge {
+  top: 4.4em;
+  right: 1.6em;
+  display: grid;
+  gap: 0.3em;
+  width: 12.6em;
+  padding: 1.2em;
+}
+
+.ji-lend__gauge svg {
+  width: 100%;
+  height: auto;
+  margin-bottom: 0.3em;
+}
+
+.ji-gauge__track,
+.ji-gauge__fill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.ji-gauge__track {
+  stroke: rgb(16 14 20 / 0.08);
+}
+
+.ji-gauge__fill {
+  stroke: #1658f2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0.3;
+}
+
+.ji-lend__ok {
+  right: 2.4em;
+  bottom: 4.4em;
+}
+
+/* insurance & claims */
+.ji-ins__claim {
+  top: 2.2em;
+  left: 1.6em;
+  width: 19.6em;
+}
+
+.ji-tag {
+  padding: 0.35em 0.75em;
+  border-radius: 99em;
+  background: var(--umm-tone);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.ji .ji-time {
+  display: grid;
+  margin-top: 1em;
+}
+
+.ji-time li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85em;
+  padding: 0.72em 0;
+  font-size: 1.1em;
+}
+
+.ji-time b {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px rgb(16 14 20 / 0.15);
+}
+
+.ji-time li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: calc(50% + 0.85em);
+  left: calc(0.85em - 1px);
+  width: 2px;
+  height: calc(100% - 1.7em);
+  background: rgb(16 14 20 / 0.12);
+}
+
+.ji-time li[data-state='done']::before {
+  background: #1658f2;
+}
+
+.ji-time li[data-state='done'] b {
+  background: #1658f2;
+  box-shadow: none;
+}
+
+.ji-time li[data-state='now'] b {
+  box-shadow: inset 0 0 0 2px #1658f2;
+}
+
+.ji-time li[data-state='now'] b::after {
+  content: '';
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: #1658f2;
+}
+
+.ji-time li[data-state='now'] b::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #1658f2;
+  animation: ji-ping 1.8s ease-out infinite;
+}
+
+.ji-time li[data-state='next'] {
+  color: var(--umm-ink-quiet);
+}
+
+.ji-ins__people {
+  top: 4.4em;
+  right: 1.6em;
+  display: grid;
+  gap: 0.8em;
+  width: 13em;
+  padding: 1.1em;
+}
+
+.ji-person {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  font-size: 1.02em;
+  white-space: nowrap;
+}
+
+.ji-ins__share {
+  right: 2em;
+  bottom: 4em;
+}
+
+/* fraud & financial operations */
+.ji-fr__list {
+  top: 2.2em;
+  left: 1.6em;
+  width: 20.4em;
+  padding-bottom: 1em;
+}
+
+.ji .ji-fr__list ul {
+  display: grid;
+  gap: 0.35em;
+  margin-top: 0.7em;
+}
+
+.ji-fr__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.5em 0.6em;
+  border-radius: 0.8em;
+}
+
+.ji-fr__list li[data-flag] {
+  background: color-mix(in srgb, var(--umm-coral) 70%, transparent);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08);
+}
+
+.ji-merch {
+  flex: none;
+  width: 2em;
+  height: 2em;
+  border-radius: 0.6em;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.06);
+}
+
+.ji-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.3em 0.65em;
+  border-radius: 99em;
+  background: #fff;
+  font-size: 0.86em;
+  font-weight: var(--umm-weight-medium);
+}
+
+.ji-flag::before {
+  content: '';
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  animation: ji-blink 1.2s ease-in-out infinite alternate;
+}
+
+.ji-amt {
+  margin-left: auto;
+  font-size: 1.02em;
+  font-weight: var(--umm-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ji-fr__risk {
+  top: 3.6em;
+  right: 1.6em;
+  display: grid;
+  justify-items: center;
+  gap: 0.6em;
+  width: 11.6em;
+  padding: 1.3em 1.2em 1.1em;
+}
+
+.ji-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 7.2em;
+  height: 7.2em;
+}
+
+.ji-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+}
+
+.ji-ring b {
+  font-size: 2.2em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.04em;
+}
+
+.ji-ring__track,
+.ji-ring__fill {
+  fill: none;
+  stroke-width: 6;
+}
+
+.ji-ring__track {
+  stroke: rgb(16 14 20 / 0.08);
+}
+
+.ji-ring__fill {
+  stroke: #1658f2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0.18;
+}
+
+.ji-fr__esc {
+  right: 1.6em;
+  bottom: 3.4em;
+}
+
+/* --- the illustrations' motion: in as their journey opens, then a slow float ------ */
+
+.fj__item[data-on] .ji [data-pop] {
+  animation: ji-pop 0.7s var(--umm-ease-out) calc(var(--d, 0) * 1ms) both;
+}
+
+.fj__item[data-on] .ji__stage > [data-pop] {
+  animation:
+    ji-pop 0.7s var(--umm-ease-out) calc(var(--d, 0) * 1ms) both,
+    ji-float var(--fl, 6s) ease-in-out calc(var(--d, 0) * 1ms + 700ms) infinite alternate;
+}
+
+.ji__stage > :nth-child(2) {
+  --fl: 7.2s;
+}
+
+.ji__stage > :nth-child(3) {
+  --fl: 5.4s;
+}
+
+.ji__stage > :nth-child(4) {
+  --fl: 6.6s;
+}
+
+.fj__item[data-on] .ji-tick > [data-pop] {
+  animation-name: ji-tick;
+  animation-duration: 0.45s;
+}
+
+.fj__item[data-on] .ji-spark__line {
+  animation: ji-draw 1.5s var(--umm-ease-out) 0.5s both;
+}
+
+.fj__item[data-on] .ji-gauge__fill {
+  animation: ji-draw 1.5s var(--umm-ease-out) 0.7s both;
+}
+
+.fj__item[data-on] .ji-ring__fill {
+  animation: ji-draw 1.5s var(--umm-ease-out) 0.7s both;
+}
+
+.fj__item[data-on] .ji-steps3__track i {
+  animation: ji-grow 1.4s ease-in-out 0.5s both;
+}
+
+.fj__item[data-on] .ji-steps3__s b {
+  animation: ji-dot 0.35s ease-out calc(var(--d, 0) * 1ms) both;
+}
+
+@keyframes ji-pop {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+
+@keyframes ji-tick {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+}
+
+@keyframes ji-float {
+  to {
+    translate: 0 -0.45em;
+  }
+}
+
+@keyframes ji-draw {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+}
+
+@keyframes ji-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes ji-dot {
+  from {
+    background: #fff;
+    box-shadow:
+      inset 0 0 0 2px rgb(16 14 20 / 0.15),
+      0 0 0 0 rgb(22 88 242 / 0);
+  }
+}
+
+@keyframes ji-scan {
+  from {
+    translate: 0 -2.6em;
+  }
+  to {
+    translate: 0 11.4em;
+  }
+}
+
+@keyframes ji-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes ji-ping {
+  from {
+    opacity: 0.7;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1.9;
+  }
+}
+
+@keyframes ji-blink {
+  to {
+    opacity: 0.25;
+  }
+}
+
+/* --- shorter and smaller screens ------------------------------------------------------ */
+
+@media (max-height: 820px) and (min-width: 901px) {
+  .fj__text > p {
+    font-size: 13.5px;
+  }
+  .fj__ticks li {
+    font-size: 12.5px;
+  }
+  .fj__view p:last-child {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+  .fj__intro {
+    grid-column: 1 / span 5;
+  }
+  .fj__list {
+    grid-column: 6 / -1;
+  }
+  .fj__card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    height: auto;
+  }
+  .fj__card .ji {
+    height: 240px;
+  }
+}
+
+@media (max-width: 900px) {
+  .fj {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 28px;
+    min-height: 0;
+  }
+  .fj__intro,
+  .fj__list {
+    grid-column: 1 / -1;
+  }
+  .fj__card {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+  .fj__card .ji {
+    height: 250px;
+  }
+  .fj__row {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+}

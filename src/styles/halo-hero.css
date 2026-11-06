@@ -1,0 +1,335 @@
+/* ============================================================================
+   HALO HERO (HaloHero.tsx, HaloLight.ts, HaloRing.ts, WordFill.ts)
+
+   Centred copy; round it the halo; the foil word; the sectors along the foot.
+     .hx--halo   the halo as live light (or, "soft", the still's CSS blur)
+     .hx--orbit  a 3D band orbiting the headline over the soft blur, its far
+                 half on a canvas under the type, its near half on one over it
+
+   Stacking, back to front: the soft blur, the light or the ring's far half,
+   copy, foil word, the ring's near half, nav, review dock.
+   ========================================================================== */
+
+.hx {
+  position: relative;
+}
+
+.hx__stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hx .hm-nav {
+  position: relative;
+  inset: auto;
+  z-index: 5;
+}
+
+/* the halo as the still had it: the five pastels in a soft ring, blurred,
+   turning slowly. Under the orbit always; for the halo only as "soft", or
+   without WebGL */
+.hx__aura {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: min(86vw, 128svh);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--umm-sky),
+    var(--umm-blossom),
+    var(--umm-coral),
+    var(--umm-sun),
+    var(--umm-citrus),
+    var(--umm-sky)
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 50%, #000 66%, #000 74%, transparent 100%);
+  mask: radial-gradient(closest-side, transparent 50%, #000 66%, #000 74%, transparent 100%);
+  filter: blur(34px);
+  opacity: 0;
+  animation: hx-turn 60s linear infinite;
+  transition: opacity 1.6s ease 0.2s;
+}
+
+.hx--orbit .hx__stage[data-in] .hx__aura {
+  opacity: 0.62;
+}
+
+.hx--halo .hx__stage[data-in][data-soft] .hx__aura,
+.hx--halo .hx__stage[data-in][data-flatlight] .hx__aura {
+  opacity: 0.9;
+}
+
+@keyframes hx-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.hx__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hx__layer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* the light */
+.hx__layer--light {
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.8s ease 0.15s;
+}
+
+.hx__stage[data-in] .hx__layer--light {
+  opacity: 1;
+}
+
+.hx__stage[data-soft] .hx__layer--light {
+  opacity: 0;
+}
+
+/* the ring: its far half under the copy, its near half over it; it arrives
+   once three.js has loaded, rising into its orbit */
+.hx__layer--back {
+  z-index: 1;
+}
+.hx__layer--front {
+  z-index: 4;
+}
+
+.hx__layer--back,
+.hx__layer--front {
+  opacity: 0;
+  transform: translateY(3%) scale(0.96);
+  transition:
+    opacity 1.2s ease,
+    transform 1.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hx__stage[data-ring] .hx__layer--back,
+.hx__stage[data-ring] .hx__layer--front {
+  opacity: 1;
+  transform: none;
+}
+
+/* the foil word shows once its line has risen into place */
+.hx__layer--foil {
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.95s;
+}
+
+.hx__stage[data-in] .hx__layer--foil {
+  opacity: 1;
+}
+
+/* --- the copy ------------------------------------------------------------- */
+
+.hx__body {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 0 var(--hm-gutter);
+  text-align: center;
+}
+
+.hx__eyebrow {
+  margin: 0 0 clamp(22px, 4svh, 40px);
+  font-size: 13px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hx__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: min(clamp(34px, 5.2vw, 84px), 9.6svh);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.08;
+  letter-spacing: -0.034em;
+}
+
+.hx__line {
+  display: block;
+  overflow: hidden;
+  padding: 0 0.1em 0.18em;
+  margin: 0 -0.1em -0.18em;
+}
+
+.hx__line > span {
+  display: inline-block;
+  transform: translateY(112%);
+  transition: transform 1.05s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(0.12s + var(--i) * 0.11s);
+}
+
+.hx__stage[data-in] .hx__line > span {
+  transform: none;
+}
+
+.hx__base {
+  display: inline-block;
+  width: 0;
+  height: 0;
+}
+
+/* the word is drawn in foil over this copy of it */
+.hx__foil {
+  color: transparent;
+}
+
+.hx__stage[data-flat] .hx__foil {
+  color: inherit;
+}
+
+.hx__lead {
+  max-width: 34em;
+  margin: clamp(22px, 3.6svh, 36px) auto 0;
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* the orbit's near side passes under the headline: room for it */
+.hx--orbit .hx__lead {
+  margin-top: clamp(30px, 6svh, 64px);
+}
+
+.hx__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: clamp(20px, 3.4svh, 32px);
+}
+
+.hx__more {
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+}
+
+.hx__eyebrow,
+.hx__lead,
+.hx__actions,
+.hx__row {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hx__stage[data-in] :is(.hx__eyebrow, .hx__lead, .hx__actions, .hx__row) {
+  opacity: 1;
+  transform: none;
+}
+
+.hx__lead {
+  transition-delay: 0.45s;
+}
+.hx__actions {
+  transition-delay: 0.55s;
+}
+.hx__row {
+  transition-delay: 0.7s;
+}
+
+/* the homepage's slash row along the foot */
+.hx__row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 var(--hm-gutter) clamp(20px, 4svh, 36px);
+  list-style: none;
+  font-size: clamp(16px, 1.35vw, 20px);
+}
+
+/* --- the look switch (?options) ------------------------------------------- */
+
+.hx__dock {
+  position: absolute;
+  right: var(--hm-gutter);
+  bottom: 18px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(236 236 240 / 0.9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-size: 14px;
+}
+
+.hx__dock span {
+  padding: 0 10px 0 12px;
+  color: var(--umm-ink-soft);
+}
+
+.hx__dock button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--umm-r-pill);
+  background: transparent;
+  font: inherit;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  cursor: pointer;
+}
+
+.hx__dock button[aria-pressed='true'] {
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(16 14 20 / 0.12);
+}
+
+/* --- phones --------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hx__title {
+    font-size: clamp(32px, 9.4vw, 60px);
+  }
+
+  .hx__row {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx__aura {
+    animation: none;
+  }
+
+  .hx__line > span,
+  .hx__layer,
+  .hx__eyebrow,
+  .hx__lead,
+  .hx__actions,
+  .hx__row {
+    transition: none;
+  }
+}

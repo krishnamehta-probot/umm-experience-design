@@ -1,0 +1,445 @@
+/* ============================================================================
+   HOUSE HERO (HouseHero.tsx) — the industry hero in the house language
+
+   The headline at the service pages' size, its last word in a pastel pill,
+   a glass object of the industry's own, the site's nav and buttons. Three
+   layouts: card, centre, fluted. Kept as options (Krish, 2 Nov).
+   ========================================================================== */
+
+.hh {
+  position: relative;
+}
+
+.hh__stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hh .hm-nav {
+  position: relative;
+  inset: auto;
+  z-index: 3;
+}
+
+.hh__body {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+}
+
+/* --- the copy ------------------------------------------------------------- */
+
+.hh__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  margin: 0 0 clamp(14px, 2.4svh, 28px);
+  font-family: var(--umm-font-body);
+  font-size: clamp(11px, 0.85vw, 13px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.45;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hh__eyebrow svg {
+  flex: none;
+  width: 1.65em;
+  height: 1.65em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.hh__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: min(clamp(32px, 5.9vw, 92px), 10.8svh);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.06;
+  letter-spacing: -0.034em;
+}
+
+/* each line rises into place; the clip has room for the pill and the
+   descenders, taken back outside it */
+.hh__line {
+  display: block;
+  overflow: hidden;
+  padding: 0.1em 0.2em 0.2em;
+  margin: -0.1em -0.2em -0.2em;
+}
+
+.hh__line > span {
+  display: inline-block;
+  animation: hh-rise 1.05s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.15s + var(--i) * 0.11s);
+}
+
+.hh__chip {
+  display: inline-block;
+  padding: 0.02em 0.3em 0.06em;
+  margin-left: -0.1em;
+  border-radius: 0.5em;
+  background: var(--umm-tone);
+  color: var(--umm-ink);
+}
+
+/* a pill opening its own line: the words line up with the lines above, the
+   pill hangs out past them */
+.hh__line--chip .hh__chip {
+  margin-left: -0.3em;
+}
+
+.hh__lead {
+  max-width: 31em;
+  margin: clamp(18px, 3svh, 32px) 0 0;
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.hh__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: clamp(20px, 3.4svh, 34px);
+}
+
+.hh__more {
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+}
+
+.hh__eyebrow,
+.hh__lead,
+.hh__actions {
+  animation: hh-fade 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.hh__eyebrow {
+  animation-delay: 0.05s;
+}
+.hh__lead {
+  animation-delay: 0.45s;
+}
+.hh__actions {
+  animation-delay: 0.55s;
+}
+
+@keyframes hh-rise {
+  from {
+    transform: translateY(112%);
+  }
+}
+
+@keyframes hh-fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* --- the glass object ----------------------------------------------------- */
+
+.hh__object {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.hh__glass {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- card: copy left, a glass card right, the sectors floating round it --- */
+
+.hh--card .hh__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 72px);
+  padding: 0 var(--hm-gutter) clamp(24px, 5svh, 56px);
+}
+
+.hh--card .hh__object {
+  justify-self: center;
+  width: 100%;
+  max-width: min(40vw, 62svh);
+}
+
+.hh--card .hh__glass {
+  inset: -6%;
+}
+
+.hh__tag {
+  position: absolute;
+  z-index: 2;
+  padding: 0.5em 1.05em 0.56em;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-tone);
+  font-family: var(--umm-font-display);
+  font-size: clamp(14px, 1.3vw, 21px);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow: 0 14px 30px -16px rgb(16 14 20 / 0.35);
+  animation:
+    hh-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    hh-float 7s ease-in-out infinite;
+  animation-delay: calc(0.9s + var(--i) * 0.14s), calc(var(--i) * -2.3s);
+}
+
+.hh__tag:nth-of-type(1) {
+  left: 0;
+  top: 12%;
+  rotate: -8deg;
+}
+.hh__tag:nth-of-type(2) {
+  right: -4%;
+  top: 44%;
+  rotate: 7deg;
+}
+.hh__tag:nth-of-type(3) {
+  left: 12%;
+  bottom: 8%;
+  rotate: -4deg;
+}
+
+@keyframes hh-pop {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+
+@keyframes hh-float {
+  50% {
+    translate: 0 -9px;
+  }
+}
+
+/* --- centre: like the homepage, a glass shield over the headline ---------- */
+
+.hh--centre .hh__stage {
+  grid-template-rows: auto 1fr auto;
+}
+
+.hh--centre .hh__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--hm-gutter);
+  text-align: center;
+}
+
+.hh--centre .hh__object {
+  flex: none;
+  width: min(27svh, 280px);
+  margin-bottom: clamp(6px, 1.4svh, 16px);
+}
+
+.hh--centre .hh__glass {
+  inset: -12%;
+}
+
+.hh--centre .hh__eyebrow {
+  justify-content: center;
+}
+
+.hh--centre .hh__title {
+  font-size: min(clamp(32px, 5.4vw, 84px), 9.4svh);
+}
+
+.hh--centre .hh__lead {
+  max-width: 36em;
+  margin-inline: auto;
+}
+
+.hh--centre .hh__actions {
+  justify-content: center;
+}
+
+/* the homepage's slash row along the foot */
+.hh__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 var(--hm-gutter) clamp(20px, 4svh, 40px);
+  list-style: none;
+  font-size: clamp(16px, 1.4vw, 20px);
+  animation: hh-fade 0.9s 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* --- fluted: a dark rounded panel lit by the fluted light, a glass coin --- */
+
+.hh__panel {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  grid-template-rows: 1fr auto;
+  min-height: 0;
+  margin: clamp(8px, 1.4svh, 16px) var(--hm-gutter) var(--hm-gutter);
+  padding: clamp(28px, 4.2vw, 68px);
+  overflow: hidden;
+  border-radius: clamp(24px, 2.6vw, 40px);
+  background: var(--umm-ink);
+  color: #fff;
+}
+
+.hh__panel .cx-why__light {
+  z-index: -1;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.hh--fluted .hh__copy {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: end;
+}
+
+.hh--fluted .hh__object {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 46svh;
+}
+
+.hh--fluted .hh__glass {
+  inset: -4%;
+}
+
+.hh--fluted .hh__title {
+  font-size: min(clamp(32px, 5.2vw, 84px), 9.4svh);
+}
+
+.hh--fluted .hh__lead {
+  color: rgb(255 255 255 / 0.72);
+}
+
+.hh--fluted .hh__more {
+  color: #fff;
+}
+
+.hh__panel .umm-split .umm-split__pill,
+.hh__panel .umm-split .umm-split__orb {
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+.hh__sectors {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+  justify-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: hh-fade 0.9s 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.hh__sectors li {
+  padding: 0.55em 1.1em 0.6em;
+  border: 1px solid rgb(255 255 255 / 0.26);
+  border-radius: var(--umm-r-pill);
+  background: rgb(255 255 255 / 0.05);
+  font-size: 15px;
+  color: rgb(255 255 255 / 0.88);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* --- phones --------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hh__stage {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .hh__title,
+  .hh--centre .hh__title,
+  .hh--fluted .hh__title {
+    font-size: clamp(34px, 10.4vw, 64px);
+  }
+
+  .hh--card .hh__body {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    padding-top: 12px;
+  }
+
+  .hh--card .hh__object {
+    order: -1;
+    width: 72vw;
+    max-width: 360px;
+  }
+
+  .hh--centre .hh__object {
+    width: min(42vw, 220px);
+  }
+
+  .hh__row {
+    font-size: 15px;
+  }
+
+  .hh__panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    padding: 24px;
+  }
+
+  .hh--fluted .hh__object {
+    grid-column: 1;
+    grid-row: 1;
+    width: 56vw;
+  }
+
+  .hh--fluted .hh__copy {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .hh__sectors {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+    justify-content: flex-start;
+    margin-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hh__line > span,
+  .hh__eyebrow,
+  .hh__lead,
+  .hh__actions,
+  .hh__tag,
+  .hh__row,
+  .hh__sectors {
+    animation: none;
+  }
+}

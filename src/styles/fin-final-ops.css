@@ -1,0 +1,836 @@
+/* ============================================================================
+   THE FINAL FINTECH PAGE — 04 · beyond the transaction (FinalOps.tsx) and
+   its cards' scenes (OpsArt.tsx). The cards are the service cards
+   (.cx-svc in v2.css, with lib/cornerPeel.ts); this sizes them for the
+   section and sets them in Mosvita throughout.
+   ========================================================================== */
+
+.fo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100svh;
+  padding: clamp(28px, 5.6svh, 72px) var(--g);
+}
+
+.fo__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.4vw, 20px);
+  height: clamp(440px, 62svh, 580px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fo-card {
+  --notch: clamp(60px, 5vw, 74px);
+  --pad: clamp(18px, 1.7vw, 26px);
+}
+
+.fo-card .cx-svc__sheet {
+  gap: clamp(8px, 1.3svh, 12px);
+}
+
+.fo-card .cx-svc__index,
+.fo-card .cx-svc__label {
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fo-card .cx-svc__title {
+  font-size: clamp(20px, 1.65vw, 26px);
+  font-weight: var(--umm-weight-regular);
+}
+
+.fo-card .cx-svc__body {
+  font-size: clamp(13.5px, 0.98vw, 15px);
+  color: color-mix(in srgb, var(--umm-ink) 84%, transparent);
+}
+
+.fo-card__art {
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  min-height: 0;
+  padding: 4px 0;
+}
+
+.fo-card__name {
+  font-size: clamp(18px, 1.4vw, 22px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.fo-card .cx-svc__inc li {
+  font-size: clamp(13px, 0.95vw, 14px);
+}
+
+/* --- the scenes: ink outlines on white, the way the service cards draw ------- */
+
+.fo-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 250px;
+  overflow: visible;
+}
+
+.fo-art rect,
+.fo-art circle {
+  fill: #fff;
+  stroke: var(--umm-ink);
+  stroke-width: 1.8;
+}
+
+.fo-art path {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fo-art .fo-a {
+  fill: var(--fo-a);
+}
+
+.fo-art .fo-b {
+  fill: var(--fo-b);
+}
+
+.fo-art .fo-ink {
+  fill: var(--umm-ink);
+}
+
+.fo-art .fo-thin {
+  stroke-width: 1.5;
+  opacity: 0.45;
+}
+
+.fo-art .fo-faint {
+  stroke-width: 1.5;
+  opacity: 0.16;
+}
+
+.fo-art .fo-on-ink {
+  stroke: #fff;
+}
+
+.fo-art .fo-person circle {
+  fill: none;
+}
+
+.fo-art .fo-glyph rect {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.fo-art .fo-glyph path {
+  stroke-width: 1.5;
+}
+
+/* a dashed route, always running */
+.fo-art .fo-route {
+  stroke-width: 1.6;
+  stroke-dasharray: 3 5;
+  animation: fo-dash 1.4s linear infinite;
+}
+
+/* pieces that come in turn, stay, and go, on a six-second loop */
+.fo-art .fo-seq {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fo-seq 6s var(--t, 0s) infinite both;
+}
+
+.fo-art .fo-seq.fo-slide {
+  animation-name: fo-slide;
+}
+
+.fo-art .fo-seq.fo-pop {
+  animation-timing-function: var(--umm-ease-spring);
+}
+
+.fo-art .fo-type {
+  animation: fo-type 0.6s var(--t, 0s) infinite alternate;
+}
+
+/* the journey: progress running along it, each milestone lighting */
+.fo-art .fo-track {
+  stroke-width: 2.6;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0.087;
+  animation: fo-track 6s infinite;
+}
+
+.fo-art .fo-walker {
+  animation: fo-walk 6s infinite;
+}
+
+.fo-art .fo-node--1 {
+  animation: fo-n1 6s infinite;
+}
+
+.fo-art .fo-node--2 {
+  animation: fo-n2 6s infinite;
+}
+
+.fo-art .fo-node--3 {
+  animation: fo-n3 6s infinite;
+}
+
+.fo-art .fo-node--4 {
+  animation: fo-n4 6s infinite;
+}
+
+.fo-art .fo-bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fo-rise 6s var(--t, 0s) infinite both;
+}
+
+/* the monitor's trace, the spark, the fallback switch */
+.fo-art .fo-trace {
+  stroke-width: 2;
+  stroke-dasharray: 0.34 0.66;
+  animation: fo-trace 2.6s linear infinite;
+}
+
+.fo-art .fo-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fo-spin 9s linear infinite;
+}
+
+.fo-art .fo-knob {
+  animation: fo-knob 6s infinite;
+}
+
+@keyframes fo-dash {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes fo-seq {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  6%,
+  82% {
+    opacity: 1;
+    scale: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+
+@keyframes fo-slide {
+  0% {
+    opacity: 0;
+    translate: 9px 0;
+  }
+  6%,
+  82% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes fo-type {
+  to {
+    opacity: 0.25;
+    translate: 0 -1.6px;
+  }
+}
+
+@keyframes fo-track {
+  0%,
+  5% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  80%,
+  92% {
+    stroke-dashoffset: 0.087;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0.087;
+    opacity: 0;
+  }
+}
+
+@keyframes fo-walk {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  5% {
+    translate: 0 0;
+    opacity: 1;
+  }
+  80%,
+  92% {
+    translate: 168px 0;
+    opacity: 1;
+  }
+  100% {
+    translate: 168px 0;
+    opacity: 0;
+  }
+}
+
+@keyframes fo-n1 {
+  0%,
+  10% {
+    fill: #fff;
+  }
+  13%,
+  92% {
+    fill: var(--fo-a);
+  }
+}
+
+@keyframes fo-n2 {
+  0%,
+  33% {
+    fill: #fff;
+  }
+  36%,
+  92% {
+    fill: var(--fo-b);
+  }
+}
+
+@keyframes fo-n3 {
+  0%,
+  56% {
+    fill: #fff;
+  }
+  59%,
+  92% {
+    fill: var(--fo-a);
+  }
+}
+
+@keyframes fo-n4 {
+  0%,
+  79% {
+    fill: #fff;
+  }
+  82%,
+  92% {
+    fill: var(--fo-b);
+  }
+}
+
+@keyframes fo-rise {
+  0% {
+    scale: 1 0.1;
+  }
+  12%,
+  85% {
+    scale: 1 1;
+  }
+  95%,
+  100% {
+    scale: 1 0.1;
+  }
+}
+
+@keyframes fo-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fo-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes fo-knob {
+  0%,
+  40% {
+    translate: 0 0;
+  }
+  50%,
+  90% {
+    translate: 18px 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+/* --- smaller screens ---------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .fo__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 470px;
+    height: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .fo {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .fo__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 450px;
+  }
+}
+
+/* --- the scenes in fine line (OpsLine.tsx), after line Lottie animations ------
+   one hairline weight, lines drawing on and off like trim paths, eased, a
+   small overshoot on the dots, and secondary motion that never stops */
+
+.fl-art {
+  --fl-ink: rgb(16 14 20 / 0.84);
+  --fl-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 250px;
+  overflow: visible;
+}
+
+.fl-art path,
+.fl-art rect,
+.fl-art circle {
+  fill: none;
+  stroke: var(--fl-ink);
+  stroke-width: 0.95;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fl-art .fl-quiet {
+  stroke-opacity: 0.5;
+}
+
+.fl-art .fl-hair {
+  stroke-opacity: 0.16;
+}
+
+.fl-art .fl-soft {
+  fill: rgb(255 255 255 / 0.72);
+  stroke: none;
+}
+
+.fl-art .fl-a {
+  fill: var(--fo-a);
+  stroke: none;
+}
+
+.fl-art .fl-node {
+  fill: #fff;
+}
+
+.fl-art .fl-dot,
+.fl-art .fl-ink {
+  fill: var(--umm-ink);
+  stroke: none;
+}
+
+.fl-art .fl-on-ink {
+  stroke: #fff;
+  stroke-width: 1.2;
+}
+
+.fl-art .fl-curve {
+  stroke-width: 1.3;
+}
+
+/* drawn on, held, drawn off the way it came: Lottie's trim path */
+.fl-art .fl-draw {
+  stroke-dasharray: 1;
+  animation: fl-draw 8s var(--fl-ease) var(--t, 0s) infinite both;
+}
+
+.fl-art .fl-fade {
+  animation: fl-fade 8s var(--fl-ease) var(--t, 0s) infinite both;
+}
+
+.fl-art .fl-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fl-pop 8s var(--t, 0s) infinite both;
+}
+
+.fl-art .fl-dash {
+  stroke-dasharray: 2 3.2;
+  stroke-opacity: 0.6;
+  animation: fl-dash 1.6s linear infinite;
+}
+
+.fl-art .fl-type {
+  animation: fl-type 0.6s ease-in-out var(--t, 0s) infinite alternate;
+}
+
+.fl-art .fl-trace {
+  stroke-width: 1.3;
+  stroke-dasharray: 0.3 0.7;
+  animation: fl-trace 2.8s linear infinite;
+}
+
+.fl-art .fl-ping {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-opacity: 0.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fl-ping 2.4s ease-out infinite;
+}
+
+.fl-art .fl-orbit {
+  transform-box: view-box;
+  transform-origin: 186px 58px;
+  animation: fl-spin 6s linear infinite;
+}
+
+.fl-art .fl-arc {
+  stroke-width: 1.4;
+  stroke-dasharray: 0.2 0.8;
+}
+
+.fl-art .fl-spark {
+  stroke-width: 1.1;
+}
+
+/* the ring's three stops light as the arc comes round */
+.fl-art .fl-beat--1 {
+  animation:
+    fl-pop 8s var(--t, 0s) infinite both,
+    fl-beat 6s linear infinite;
+}
+
+.fl-art .fl-beat--2 {
+  animation:
+    fl-pop 8s var(--t, 0s) infinite both,
+    fl-beat 6s linear 2s infinite;
+}
+
+.fl-art .fl-beat--3 {
+  animation:
+    fl-pop 8s var(--t, 0s) infinite both,
+    fl-beat 6s linear 4s infinite;
+}
+
+@keyframes fl-draw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  14%,
+  80% {
+    stroke-dashoffset: 0;
+  }
+  94%,
+  100% {
+    stroke-dashoffset: -1;
+  }
+}
+
+@keyframes fl-fade {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  16%,
+  80% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fl-pop {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  5% {
+    opacity: 1;
+    scale: 1.14;
+  }
+  8%,
+  82% {
+    opacity: 1;
+    scale: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+
+@keyframes fl-dash {
+  to {
+    stroke-dashoffset: -10.4;
+  }
+}
+
+@keyframes fl-type {
+  to {
+    opacity: 0.25;
+    translate: 0 -1.4px;
+  }
+}
+
+@keyframes fl-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fl-ping {
+  0% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.2;
+  }
+}
+
+@keyframes fl-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes fl-beat {
+  0%,
+  6% {
+    fill: var(--umm-ink);
+  }
+  14%,
+  100% {
+    fill: #fff;
+  }
+}
+
+/* --- ?ops=panel: Panel's cards, from Krish's screenshot ------------------------ */
+
+.fp-ops {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.4vw, 20px);
+  height: clamp(440px, 62svh, 580px);
+}
+
+.fp-op {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 24px;
+  outline: none;
+}
+
+.fp-op:focus-visible {
+  box-shadow: 0 0 0 3px var(--umm-ink);
+}
+
+.fp-op__ground {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(90% 70% at 50% 0%, color-mix(in srgb, var(--umm-tone) 92%, #fff), transparent 72%),
+    radial-gradient(80% 60% at 100% 100%, color-mix(in srgb, var(--umm-lilac) 70%, #fff), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--umm-tone) 50%, #fff), #f3f3f6);
+}
+
+.fp-op__icon {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 74%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  filter: drop-shadow(0 30px 40px rgb(16 14 20 / 0.14)) saturate(1.25);
+  animation: fp-float 8s ease-in-out infinite alternate;
+  transition: scale 0.8s var(--umm-ease-out);
+}
+
+.fp-op[data-open] .fp-op__icon {
+  scale: 0.78;
+}
+
+.fp-op__top {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fp-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(255 255 255 / 0.86);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.fp-op__num {
+  font-size: 13px;
+  color: var(--umm-ink-soft);
+}
+
+.fp-op__foot {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.66);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 10px 30px -18px rgb(16 14 20 / 0.3);
+}
+
+.fp-op__foot h3 {
+  margin: 0;
+  padding-right: 44px;
+  font-size: clamp(18px, 1.5vw, 23px);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.fp-op__more {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.6s var(--umm-ease-out);
+}
+
+.fp-op[data-open] .fp-op__more {
+  grid-template-rows: 1fr;
+}
+
+.fp-op__more > div {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fp-op__more p {
+  padding-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.fp-ticks {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fp-ticks li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.fp-ticks li::before {
+  content: '';
+  position: absolute;
+  top: 0.2em;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.12);
+}
+
+.fp-ticks li::after {
+  content: '';
+  position: absolute;
+  top: calc(0.2em + 4px);
+  left: 4px;
+  width: 6px;
+  height: 3px;
+  border-left: 1.5px solid var(--umm-ink);
+  border-bottom: 1.5px solid var(--umm-ink);
+  rotate: -45deg;
+}
+
+.fp-op__hint {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  color: #fff;
+  font-size: 14px;
+  transition: rotate 0.5s var(--umm-ease-out);
+}
+
+.fp-op[data-open] .fp-op__hint {
+  rotate: 90deg;
+}
+
+@keyframes fp-float {
+  to {
+    translate: -50% -53%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .fp-ops {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    grid-auto-rows: 420px;
+  }
+}

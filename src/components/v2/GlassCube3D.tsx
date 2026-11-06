@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { prefersReducedMotion } from '@/lib/gsap'
+import { studio } from './glassStudio'
 
 /* ============================================================================
    GLASS CUBE — real 3D, after the homepage's glass-cube PNG
@@ -25,60 +26,10 @@ import { prefersReducedMotion } from '@/lib/gsap'
    studio and motion, cut as the four-point AI sparkle (✦), a thick slab with
    rounded edges and softened tips. It rocks rather than spins, so it never
    turns edge-on.
+
+   Fintech's options (2 Nov, HouseHero): a bank card with its chip cut
+   through, a shield with a tick cut through, and a coin with a raised rim.
    ========================================================================== */
-
-/** Draws a mesh into render targets (environment, transmission) but never to
- *  the screen. Three applies colorWrite/depthWrite after onBeforeRender, so
- *  flipping them here per draw is enough. */
-function offscreenOnly(mesh: THREE.Mesh) {
-  const mat = mesh.material as THREE.Material
-  mesh.onBeforeRender = (renderer) => {
-    const toTarget = renderer.getRenderTarget() !== null
-    mat.colorWrite = toTarget
-    mat.depthWrite = toTarget
-  }
-}
-
-/** A dark room with softbox strips. Brightness above 1 is kept: the targets
- *  are half-float, so the strips read as light sources, not white paint. */
-function studio(hidden: boolean) {
-  const g = new THREE.Group()
-  const add = (mesh: THREE.Mesh) => {
-    if (hidden) offscreenOnly(mesh)
-    g.add(mesh)
-  }
-
-  add(
-    new THREE.Mesh(
-      new THREE.BoxGeometry(24, 24, 24),
-      new THREE.MeshBasicMaterial({ color: 0x1c1e24, side: THREE.BackSide }),
-    ),
-  )
-
-  const strip = (w: number, h: number, hex: string, power: number, at: [number, number, number]) => {
-    const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(w, h),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(power), side: THREE.DoubleSide }),
-    )
-    m.position.set(...at)
-    m.lookAt(0, 0, 0)
-    add(m)
-  }
-
-  strip(10, 8, '#ffffff', 2.4, [0, 11, 1]) //       key, from above
-  strip(1.4, 15, '#ffffff', 6, [-10.5, 0, 3]) //    hard strip, left
-  strip(2.6, 15, '#ffffff', 3, [10.5, 1, -1]) //    softer strip, right
-  strip(7, 5, '#ffffff', 1.1, [1, 3, 11]) //        fill behind the camera
-  strip(12, 2.5, '#ffffff', 1.4, [0, -11, -3]) //   floor bounce
-  // what the glass shows inside: a faint grey wash with strips over it, two
-  // of them in palette
-  strip(16, 16, '#b4b9c2', 0.16, [0, 0, -11.8])
-  strip(0.3, 18, '#D1E7FF', 3.6, [-3.2, 0, -11.5])
-  strip(0.5, 18, '#ffffff', 3, [1.6, 0, -11.5])
-  strip(0.22, 18, '#FFC4F2', 2.6, [4.6, 0, -11.5])
-  strip(0.18, 18, '#ffffff', 3.4, [-6.5, 0, -11.5])
-  return g
-}
 
 /** The AI sparkle (✦), as a thick slab of glass with soft rounded edges, the
  *  way the cube is built: its rounded edges catch the studio's strips, and
@@ -283,13 +234,119 @@ function bagGeometry() {
   return geometry
 }
 
-export default function GlassCube3D({
-  coveredBy,
-  shape = 'cube',
-}: {
-  coveredBy?: string
-  shape?: 'cube' | 'sparkle' | 'cloud' | 'gear' | 'arrow' | 'bag'
-}) {
+/** The outline of a stroke along `pts`, `w` either side, mitred at the joins. */
+function stroke(pts: [number, number][], w: number) {
+  const v = pts.map(([x, y]) => new THREE.Vector2(x, y))
+  const left: THREE.Vector2[] = []
+  const right: THREE.Vector2[] = []
+  v.forEach((p, i) => {
+    const prev = i > 0 ? p.clone().sub(v[i - 1]).normalize() : null
+    const next = i < v.length - 1 ? v[i + 1].clone().sub(p).normalize() : null
+    const d = prev && next ? prev.clone().add(next).normalize() : (prev ?? next)!
+    const n = new THREE.Vector2(-d.y, d.x)
+    const k = prev && next ? w / n.dot(new THREE.Vector2(-prev.y, prev.x)) : w
+    left.push(p.clone().addScaledVector(n, k))
+    right.push(p.clone().addScaledVector(n, -k))
+  })
+  return [...left, ...right.reverse()]
+}
+
+/** Fintech, option A: a bank card, as a slab of glass, its chip cut through. */
+function cardGeometry() {
+  const W = 0.98
+  const H = 0.62
+  const R = 0.11
+  const shape = new THREE.Shape()
+  shape.moveTo(-W + R, -H)
+  shape.lineTo(W - R, -H)
+  shape.quadraticCurveTo(W, -H, W, -H + R)
+  shape.lineTo(W, H - R)
+  shape.quadraticCurveTo(W, H, W - R, H)
+  shape.lineTo(-W + R, H)
+  shape.quadraticCurveTo(-W, H, -W, H - R)
+  shape.lineTo(-W, -H + R)
+  shape.quadraticCurveTo(-W, -H, -W + R, -H)
+  const chip = new THREE.Path()
+  const [cx, cy, cw, ch, cr] = [-0.56, 0.06, 0.17, 0.13, 0.04]
+  chip.moveTo(cx - cw + cr, cy - ch)
+  chip.lineTo(cx + cw - cr, cy - ch)
+  chip.quadraticCurveTo(cx + cw, cy - ch, cx + cw, cy - ch + cr)
+  chip.lineTo(cx + cw, cy + ch - cr)
+  chip.quadraticCurveTo(cx + cw, cy + ch, cx + cw - cr, cy + ch)
+  chip.lineTo(cx - cw + cr, cy + ch)
+  chip.quadraticCurveTo(cx - cw, cy + ch, cx - cw, cy + ch - cr)
+  chip.lineTo(cx - cw, cy - ch + cr)
+  chip.quadraticCurveTo(cx - cw, cy - ch, cx - cw + cr, cy - ch)
+  shape.holes.push(chip)
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.2,
+    bevelEnabled: true,
+    bevelThickness: 0.1,
+    bevelSize: 0.06,
+    bevelSegments: 14,
+    curveSegments: 32,
+  })
+  geometry.center()
+  return geometry
+}
+
+/** Fintech, option B: a shield, as a slab of glass, a tick cut through it. */
+function shieldGeometry() {
+  const shape = new THREE.Shape()
+  shape.moveTo(0, 0.98)
+  shape.quadraticCurveTo(0.42, 0.78, 0.82, 0.8)
+  shape.quadraticCurveTo(0.86, 0.2, 0.7, -0.24)
+  shape.quadraticCurveTo(0.46, -0.78, 0, -1.02)
+  shape.quadraticCurveTo(-0.46, -0.78, -0.7, -0.24)
+  shape.quadraticCurveTo(-0.86, 0.2, -0.82, 0.8)
+  shape.quadraticCurveTo(-0.42, 0.78, 0, 0.98)
+  shape.holes.push(
+    new THREE.Path(
+      stroke(
+        [
+          [-0.34, 0.04],
+          [-0.08, -0.22],
+          [0.38, 0.3],
+        ],
+        0.085,
+      ),
+    ),
+  )
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.42,
+    bevelEnabled: true,
+    bevelThickness: 0.2,
+    bevelSize: 0.1,
+    bevelSegments: 16,
+    curveSegments: 48,
+  })
+  geometry.center()
+  return geometry
+}
+
+/** Fintech, option C: a coin, turned on a lathe: a raised rim round a
+ *  shallow face, the same on both sides. */
+function coinGeometry() {
+  const half: [number, number][] = [
+    [0, 0.1],
+    [0.7, 0.1],
+    [0.76, 0.17],
+    [0.92, 0.18],
+    [0.99, 0.12],
+    [1.0, 0],
+  ]
+  const profile = [...half, ...half.slice(0, -1).reverse().map(([r, y]) => [r, -y] as [number, number])].map(
+    ([r, y]) => new THREE.Vector2(r, y),
+  )
+  const geometry = new THREE.LatheGeometry(profile, 128)
+  geometry.rotateX(Math.PI / 2)
+  geometry.computeVertexNormals()
+  return geometry
+}
+
+export type GlassShape = 'cube' | 'sparkle' | 'cloud' | 'gear' | 'arrow' | 'bag' | 'card' | 'shield' | 'coin'
+
+export default function GlassCube3D({ coveredBy, shape = 'cube' }: { coveredBy?: string; shape?: GlassShape }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -338,7 +395,13 @@ export default function GlassCube3D({
               ? arrowGeometry()
               : shape === 'bag'
                 ? bagGeometry()
-                : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
+                : shape === 'card'
+                  ? cardGeometry()
+                  : shape === 'shield'
+                    ? shieldGeometry()
+                    : shape === 'coin'
+                      ? coinGeometry()
+                      : new RoundedBoxGeometry(1.5, 1.5, 1.5, 10, 0.17),
       new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         metalness: 0,
@@ -360,6 +423,9 @@ export default function GlassCube3D({
     if (shape === 'gear') cube.scale.setScalar(0.9)
     if (shape === 'arrow') cube.scale.setScalar(0.88)
     if (shape === 'bag') cube.scale.setScalar(0.92)
+    if (shape === 'card') cube.scale.setScalar(0.94)
+    if (shape === 'shield') cube.scale.setScalar(0.88)
+    if (shape === 'coin') cube.scale.setScalar(0.9)
     scene.add(cube)
 
     const resize = () => {
@@ -398,8 +464,10 @@ export default function GlassCube3D({
         /* held at a three-quarter view, like the cube, so its thickness and
            rounded edges show; it rocks rather than spins, so the slab never
            turns edge-on */
-        cube.rotation.x = 0.36 + lean.x * 0.6 + Math.sin(t * 0.6) * 0.05
-        cube.rotation.y = -0.5 + Math.sin(t * 0.32) * 0.3 + lean.y * 0.6 + Math.sin(turn) * 0.3
+        /* the flat ones (card, coin) turn further, or they read as a dark disc */
+        const [bx, by] = shape === 'coin' ? [0.32, -0.95] : shape === 'card' ? [0.55, -0.62] : [0.36, -0.5]
+        cube.rotation.x = bx + lean.x * 0.6 + Math.sin(t * 0.6) * 0.05
+        cube.rotation.y = by + Math.sin(t * 0.32) * 0.3 + lean.y * 0.6 + Math.sin(turn) * 0.3
         /* the gear turns slowly on its axle, as a gear does */
         cube.rotation.z = shape === 'gear' ? -t * 0.18 : 0.08 + Math.sin(t * 0.25) * 0.08
       } else {

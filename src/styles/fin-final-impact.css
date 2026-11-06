@@ -1,0 +1,418 @@
+/* ============================================================================
+   HOW AI IS IMPACTING <INDUSTRY> (FinalImpact.tsx) — the industry pages'
+   template: one full dark sheet, the shifts "From X to Y." in motion
+   ========================================================================== */
+
+.fi {
+  --sheet: clamp(10px, 1.1vw, 16px);
+  padding: var(--sheet);
+}
+
+.fi__in {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(14px, 2.4svh, 26px);
+  min-height: calc(100svh - 2 * var(--sheet));
+  padding: clamp(26px, 5svh, 64px) max(16px, calc(var(--g) - var(--sheet)));
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 32px;
+  background: #0b0a10;
+  color: #fff;
+}
+
+/* a fine grid, fading to the edges */
+.fi__in::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(70% 60% at 60% 40%, #000, transparent);
+  mask-image: radial-gradient(70% 60% at 60% 40%, #000, transparent);
+}
+
+/* the aura, taking on the colour of the shift in view: each pastel as a
+   light (a pastel at low opacity on ink reads grey) */
+.fi__in[data-umm-tone='sky'] {
+  --glow: #3d8bff;
+}
+
+.fi__in[data-umm-tone='blossom'] {
+  --glow: #d77cff;
+}
+
+.fi__in[data-umm-tone='sun'] {
+  --glow: #ffbe55;
+}
+
+.fi__in[data-umm-tone='citrus'] {
+  --glow: #b9ee45;
+}
+
+.fi__in[data-umm-tone='coral'] {
+  --glow: #ff8a94;
+}
+
+.fi__in[data-umm-tone='lilac'] {
+  --glow: #9f86ff;
+}
+
+.fi__aura {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.fi__aura i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  transition: background-color 1.4s ease;
+}
+
+.fi__aura i:first-child {
+  top: -22vw;
+  right: -12vw;
+  width: 56vw;
+  height: 56vw;
+  background: var(--glow, #3d8bff);
+  opacity: 0.26;
+  animation: fi-drift 18s ease-in-out infinite alternate;
+}
+
+.fi__aura i:last-child {
+  bottom: -26vw;
+  left: -10vw;
+  width: 46vw;
+  height: 46vw;
+  background: #1658f2;
+  opacity: 0.36;
+  animation: fi-drift 22s ease-in-out infinite alternate-reverse;
+}
+
+.fi__top,
+.fi__main {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(16px, 2vw, 32px);
+}
+
+.fi__top {
+  align-items: end;
+}
+
+.fi__head {
+  grid-column: 1 / span 8;
+  display: grid;
+  justify-items: start;
+  gap: clamp(14px, 2.4svh, 24px);
+}
+
+.fi__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 32px;
+  padding: 0 14px 0 12px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.fi__eyebrow::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #62c4ff;
+  box-shadow: 0 0 0 3px rgb(98 196 255 / 0.22);
+}
+
+.fi__title {
+  display: grid;
+  margin: 0;
+  font-size: min(clamp(32px, 3.6vw, 60px), 6.6svh);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+.fi__glow {
+  background: linear-gradient(90deg, #8fd0ff, #c9b8ff 50%, #ffc4f2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.fi__lead {
+  grid-column: 9 / -1;
+  padding-bottom: 0.3em;
+  font-size: clamp(14px, 1vw, 15.5px);
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.66);
+}
+
+.fi__main {
+  align-items: center;
+  min-height: clamp(280px, 40svh, 420px);
+}
+
+/* the four areas */
+.fi__areas {
+  grid-column: 1 / span 4;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.fi__areas button {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  width: 100%;
+  padding: clamp(13px, 2.2svh, 20px) 0;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  background: none;
+  color: rgb(255 255 255 / 0.45);
+  font: inherit;
+  font-size: clamp(16px, 1.3vw, 20px);
+  letter-spacing: -0.015em;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.fi__areas button span {
+  flex: none;
+  min-width: 2em;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgb(255 255 255 / 0.35);
+  transition: color 0.3s;
+}
+
+.fi__areas button:hover,
+.fi__areas button[aria-pressed='true'] {
+  color: #fff;
+}
+
+.fi__areas button[aria-pressed='true'] span {
+  color: var(--umm-tone);
+}
+
+.fi__areas button:focus-visible {
+  outline: 2px solid #62c4ff;
+  outline-offset: 2px;
+}
+
+.fi__areas i {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--umm-tone);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.fi__areas button[aria-pressed='true'] i {
+  transform: scaleX(var(--p, 1));
+}
+
+/* the shift: from, struck through; to, rising in light */
+.fi__shift {
+  grid-column: 6 / -1;
+  display: grid;
+  justify-items: start;
+  gap: clamp(10px, 1.8svh, 18px);
+}
+
+.fi__from {
+  margin: 0;
+  font-size: min(clamp(26px, 3vw, 48px), 5.4svh);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: rgb(255 255 255 / 0.4);
+  animation: fi-in 0.6s ease both;
+}
+
+.fi__from span {
+  background: linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)) no-repeat 0 58% / 100% 2px;
+  animation: fi-strike 0.8s cubic-bezier(0.6, 0, 0.2, 1) 0.45s both;
+}
+
+.fi__to {
+  margin: 0;
+  font-size: min(clamp(34px, 4.2vw, 68px), 7.4svh);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  background: linear-gradient(100deg, #fff 25%, #bfe3ff 62%, var(--umm-tone));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fi-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.7s both;
+}
+
+.fi__body {
+  max-width: 62ch;
+  font-size: clamp(14px, 1.02vw, 15.5px);
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.66);
+  animation: fi-in 0.7s ease 1s both;
+}
+
+.fi__change {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+  padding: 12px 18px 12px 16px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.06);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  animation: fi-in 0.7s ease var(--d, 1.2s) both;
+}
+
+.fi__change p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  font-size: clamp(14.5px, 1.05vw, 16px);
+  line-height: 1.4;
+}
+
+.fi__change b {
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-tone);
+}
+
+.fi__pulse {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  animation: fi-pulse 1.8s ease-out infinite;
+}
+
+/* the closing word */
+.fi__close {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 14px;
+  padding-top: clamp(14px, 2.2svh, 22px);
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.fi__close svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #8fd0ff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fi__close b {
+  font-size: clamp(15px, 1.15vw, 18px);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.fi__close p {
+  padding-left: clamp(8px, 2vw, 32px);
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.55);
+}
+
+@keyframes fi-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@keyframes fi-strike {
+  from {
+    background-size: 0% 2px;
+  }
+}
+
+@keyframes fi-rise {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+    filter: blur(8px);
+  }
+}
+
+@keyframes fi-drift {
+  to {
+    translate: -6vw 4vw;
+    scale: 1.1;
+  }
+}
+
+@keyframes fi-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--umm-tone) 70%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+@media (max-width: 1100px) {
+  .fi__close {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 6px;
+  }
+  .fi__close p {
+    grid-column: 2;
+    padding-left: 0;
+  }
+  .fi__close b {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 900px) {
+  .fi__in {
+    min-height: 0;
+    border-radius: 24px;
+  }
+  .fi__top,
+  .fi__main {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 18px;
+  }
+  .fi__head,
+  .fi__lead,
+  .fi__areas,
+  .fi__shift {
+    grid-column: 1 / -1;
+  }
+}

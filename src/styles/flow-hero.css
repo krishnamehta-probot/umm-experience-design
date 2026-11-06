@@ -1,0 +1,278 @@
+/* ============================================================================
+   FLOW HERO (FlowHero.tsx, FlowField.ts)
+
+   The colour field fills the whole stage under everything and is clipped
+   (clip-path, set from script) to a shape kept clear of the copy and the
+   base line. The copy sits on the white at the foot; the base line under it.
+   ========================================================================== */
+
+.fh {
+  position: relative;
+}
+
+.fh__stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.fh .hm-nav {
+  position: relative;
+  inset: auto;
+  z-index: 3;
+}
+
+/* --- the colour field ----------------------------------------------------- */
+
+.fh__field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  transition: opacity 1.4s ease 0.1s;
+}
+
+.fh__stage[data-in] .fh__field {
+  opacity: 1;
+}
+
+.fh__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* without WebGL: the brand's colours as a still gradient in the same shape */
+.fh__stage[data-flat] .fh__field {
+  background:
+    radial-gradient(60% 80% at 20% 10%, var(--umm-sky), transparent 70%),
+    radial-gradient(50% 70% at 70% 0%, var(--umm-blossom), transparent 70%),
+    radial-gradient(60% 80% at 100% 60%, var(--umm-sun), transparent 70%),
+    linear-gradient(120deg, var(--umm-citrus), var(--umm-coral));
+}
+
+/* a fine print grain over the colour */
+.fh__grain {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+}
+
+.fh[data-finish='grain'] .fh__grain,
+.fh[data-finish='silkgrain'] .fh__grain {
+  display: block;
+}
+
+/* on Night the nav sits on ink (on the slant and the wave): the logo turns
+   white and the nav's button inverts */
+.fh[data-palette='night']:is([data-shape='slant'], [data-shape='wave']) .hm-nav__logo {
+  filter: invert(1);
+}
+
+.fh[data-palette='night']:is([data-shape='slant'], [data-shape='wave']) .hm-nav__cta :is(.umm-split__pill, .umm-split__orb) {
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+/* --- the copy, on the white at the foot ----------------------------------- */
+
+.fh__body {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-items: end;
+  padding: 0 var(--hm-gutter) clamp(26px, 5svh, 56px);
+}
+
+.fh__copy {
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* with something beside the words (the route's card): the page's 12
+   columns, the words on 1–8, the card on 9–12, their feet level */
+.fh__body--aside {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--ip-gap, 24px);
+}
+
+.fh__body--aside > .fh__copy {
+  grid-column: 1 / span 8;
+}
+
+.fh__aside {
+  grid-column: 9 / span 4;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.9s ease 0.8s,
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s;
+}
+
+.fh__stage[data-in] .fh__aside {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 1100px) {
+  .fh__body--aside > .fh__copy {
+    grid-column: 1 / -1;
+  }
+
+  .fh__aside {
+    display: none;
+  }
+}
+
+.fh[data-copy='centre'] .fh__copy {
+  justify-self: center;
+  text-align: center;
+}
+
+.fh__eyebrow {
+  margin: 0 0 clamp(16px, 2.6svh, 26px);
+  font-size: 13px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.fh__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: min(clamp(34px, 5.4vw, 86px), 9.4svh);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.06;
+  letter-spacing: -0.034em;
+}
+
+.fh__line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+
+.fh__line > span {
+  display: inline-block;
+  transform: translateY(112%);
+  transition: transform 1.05s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(0.15s + var(--i) * 0.1s);
+}
+
+.fh__stage[data-in] .fh__line > span {
+  transform: none;
+}
+
+.fh__lead {
+  max-width: 32em;
+  margin: clamp(16px, 2.8svh, 28px) 0 0;
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.fh[data-copy='centre'] .fh__lead {
+  margin-inline: auto;
+}
+
+.fh__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: clamp(18px, 3svh, 28px);
+}
+
+.fh[data-copy='centre'] .fh__actions {
+  justify-content: center;
+}
+
+.fh__more {
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+}
+
+/* --- the base line -------------------------------------------------------- */
+
+.fh__base {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 var(--hm-gutter) clamp(18px, 3.4svh, 32px);
+  font-size: 15px;
+  color: var(--umm-ink-soft);
+}
+
+.fh__base p {
+  margin: 0;
+}
+
+/* --- arrival -------------------------------------------------------------- */
+
+.fh__eyebrow,
+.fh__lead,
+.fh__actions,
+.fh__base {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fh__lead {
+  transition-delay: 0.45s;
+}
+.fh__actions {
+  transition-delay: 0.55s;
+}
+.fh__base {
+  transition-delay: 0.7s;
+}
+
+.fh__stage[data-in] :is(.fh__eyebrow, .fh__lead, .fh__actions, .fh__base) {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- phones --------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .fh__title {
+    font-size: clamp(34px, 10.4vw, 64px);
+  }
+
+  .fh__base {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fh__field,
+  .fh__line > span,
+  .fh__eyebrow,
+  .fh__lead,
+  .fh__actions,
+  .fh__base {
+    transition: none;
+  }
+}

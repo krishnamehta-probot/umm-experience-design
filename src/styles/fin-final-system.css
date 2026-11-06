@@ -1,0 +1,839 @@
+/* ============================================================================
+   THE FINAL FINTECH PAGE — 05 · how it connects (FinalSystem.tsx)
+   ========================================================================== */
+
+.fs {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100svh;
+  padding: clamp(28px, 5.6svh, 72px) var(--g);
+}
+
+.fs .fr__top {
+  padding-bottom: clamp(4px, 1.2svh, 14px);
+}
+
+/* the journey picker, and the chosen journey in a sentence beside it */
+.fs__bar {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2vw, 32px);
+}
+
+.fs__sum {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: clamp(13.5px, 1vw, 15px);
+  line-height: 1.42;
+  color: var(--umm-ink-soft);
+  animation: fs-in 0.5s ease both;
+}
+
+.fs__pick {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: var(--umm-r-pill);
+  background: #f4f4f7;
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+}
+
+.fs__pick button {
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--umm-r-pill);
+  background: none;
+  color: var(--umm-ink-soft);
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    box-shadow 0.3s;
+}
+
+.fs__pick button:hover {
+  color: var(--umm-ink);
+}
+
+.fs__pick button[aria-selected='true'] {
+  background: #fff;
+  color: var(--umm-ink);
+  box-shadow:
+    0 1px 2px rgb(16 14 20 / 0.08),
+    0 6px 16px -8px rgb(16 14 20 / 0.25);
+}
+
+.fs__pick button:focus-visible,
+.fs__steps button:focus-visible,
+.fs__tools button:focus-visible {
+  outline: 2px solid #1658f2;
+  outline-offset: 2px;
+}
+
+.fs__main {
+  display: grid;
+  grid-template-columns: minmax(0, 8.2fr) minmax(0, 3.8fr);
+  gap: 12px;
+  height: clamp(396px, calc(100svh - 370px), 580px);
+}
+
+/* --- the system view ------------------------------------------------------------- */
+
+.fs__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6svh, 16px);
+  min-height: 0;
+  padding: clamp(14px, 1.4vw, 20px) clamp(16px, 1.6vw, 24px);
+  overflow: hidden;
+  border-radius: 22px;
+  background:
+    radial-gradient(60% 70% at 88% 0%, rgb(22 88 242 / 0.34), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, rgb(98 196 255 / 0.1), transparent 70%),
+    #0b0a10;
+  color: #fff;
+}
+
+.fs__stage-k {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.45);
+}
+
+/* live: the walkthrough is running */
+.fs__stage-k i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #62c4ff;
+  box-shadow: 0 0 0 3px rgb(98 196 255 / 0.2);
+  animation: fs-live 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes fs-live {
+  to {
+    opacity: 0.35;
+  }
+}
+
+.fs__lanes {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-template-columns: clamp(108px, 9.6vw, 140px) minmax(0, 1fr);
+  grid-template-rows: auto minmax(18px, 1fr) auto minmax(18px, 1fr) auto auto;
+  align-items: center;
+  column-gap: 14px;
+  min-height: 0;
+  animation: fs-in 0.5s ease both;
+}
+
+.fs__wires {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.fs__label,
+.fs__row,
+.fs__dir,
+.fs__gap,
+.fs__ctl {
+  position: relative;
+  z-index: 1;
+}
+
+.fs__label {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.fs__ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px 0 6px;
+  border-radius: var(--umm-r-pill);
+  background: linear-gradient(90deg, rgb(22 88 242 / 0.6), rgb(98 196 255 / 0.35));
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
+.fs-spark {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+
+.fs__row {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* AI assistance runs along the workflow lane */
+.fs__row--ai::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -7px;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #62c4ff, transparent) no-repeat;
+  background-size: 34% 100%;
+  animation: fs-sweep 3.4s linear infinite;
+  opacity: 0.8;
+}
+
+.fs__node {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #17161e;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  font-size: 13px;
+  line-height: 1.25;
+  color: rgb(255 255 255 / 0.6);
+  transition:
+    background-color 0.45s,
+    color 0.45s,
+    box-shadow 0.45s;
+}
+
+.fs__node:hover {
+  color: rgb(255 255 255 / 0.92);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+}
+
+.fs__node[data-on] {
+  background: #fff;
+  color: var(--umm-ink);
+  box-shadow:
+    0 0 0 4px rgb(98 196 255 / 0.18),
+    0 0 28px rgb(98 196 255 / 0.35);
+}
+
+.fs__node[data-warn] {
+  background: var(--umm-coral);
+  color: var(--umm-ink);
+  box-shadow:
+    0 0 0 4px rgb(255 195 196 / 0.22),
+    0 0 28px rgb(255 195 196 / 0.45);
+  animation: fs-warn 1.4s ease-in-out infinite alternate;
+}
+
+/* which way the case crosses each gap */
+.fs__dir {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.3;
+  color: rgb(255 255 255 / 0.3);
+}
+
+.fs__dir span {
+  transition: color 0.4s;
+}
+
+.fs__dir span[data-on] {
+  color: #8fd0ff;
+}
+
+.fs__gap {
+  align-self: stretch;
+}
+
+/* the identity and API spine the work passes through */
+.fs__gap--spine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.fs__gap--spine::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  border-top: 1px dashed rgb(255 255 255 / 0.14);
+}
+
+.fs__gap--spine b {
+  padding: 3px 10px;
+  border-radius: var(--umm-r-pill);
+  background: #17161e;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.5);
+  transition:
+    color 0.4s,
+    box-shadow 0.4s;
+}
+
+.fs__gap--spine[data-on] b {
+  color: #fff;
+  box-shadow:
+    inset 0 0 0 1px rgb(98 196 255 / 0.6),
+    0 0 18px rgb(98 196 255 / 0.25);
+}
+
+/* the controls along the foot */
+.fs__ctl {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  font-size: 11.5px;
+  color: rgb(255 255 255 / 0.4);
+}
+
+.fs__ctl b {
+  font-weight: var(--umm-weight-medium);
+  color: rgb(255 255 255 / 0.78);
+}
+
+/* the wires, and the case running along them */
+.fs-wire {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.13);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+  transition: stroke 0.3s;
+}
+
+.fs-wire[data-near] {
+  stroke: rgb(255 255 255 / 0.4);
+}
+
+.fs-wire--on {
+  stroke: rgb(98 196 255 / 0.9);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 6;
+  filter: drop-shadow(0 0 4px rgb(98 196 255 / 0.7));
+  animation: fs-flow 0.9s linear infinite;
+}
+
+.fs-wire--on[data-warn] {
+  stroke: var(--umm-coral);
+  filter: drop-shadow(0 0 4px rgb(255 195 196 / 0.7));
+}
+
+.fs-case {
+  fill: #fff;
+  filter: drop-shadow(0 0 5px #62c4ff) drop-shadow(0 0 12px rgb(22 88 242 / 0.9));
+}
+
+.fs-case[data-warn] {
+  filter: drop-shadow(0 0 5px var(--umm-coral)) drop-shadow(0 0 12px rgb(255 195 196 / 0.9));
+}
+
+/* --- how the work moves ------------------------------------------------------------ */
+
+.fs__player {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+}
+
+.fs__player-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fs__player-head p {
+  margin: 0;
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.fs__player-head b {
+  margin-right: 6px;
+  font-weight: var(--umm-weight-medium);
+  color: #fff;
+}
+
+.fs__tools {
+  display: flex;
+  gap: 6px;
+}
+
+.fs__exc-btn {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--umm-r-pill);
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.78);
+  font: inherit;
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.fs__exc-btn:hover {
+  background: rgb(255 255 255 / 0.15);
+}
+
+.fs__exc-btn[aria-pressed='true'] {
+  background: var(--umm-coral);
+  color: var(--umm-ink);
+}
+
+.fs__play {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--umm-ink);
+  cursor: pointer;
+}
+
+.fs__play svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fs__steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fs__steps button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 50px;
+  padding: 8px 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.6);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.4s,
+    color 0.4s;
+}
+
+.fs__steps button:hover {
+  background: rgb(255 255 255 / 0.11);
+  color: #fff;
+}
+
+.fs__steps i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  font-size: 11px;
+  font-style: normal;
+  transition:
+    background-color 0.4s,
+    color 0.4s;
+}
+
+.fs__steps button[data-done] i {
+  background: rgb(98 196 255 / 0.22);
+  box-shadow: none;
+  color: #bfe6ff;
+}
+
+.fs__steps button[aria-current] {
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+.fs__steps button[aria-current] i {
+  background: #1658f2;
+  box-shadow: none;
+  color: #fff;
+}
+
+.fs__steps em {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #1658f2;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.fs__steps button[aria-current] em {
+  transform: scaleX(var(--p, 1));
+}
+
+/* the exception path */
+.fs__excbox {
+  display: grid;
+  gap: 5px;
+  min-height: 50px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgb(255 195 196 / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(255 195 196 / 0.35);
+  animation: fs-in 0.4s ease both;
+}
+
+.fs__excbox p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fff;
+}
+
+.fs__excbox .fs__ctx {
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.6);
+}
+
+.fs__ctx b {
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-coral);
+}
+
+/* --- the side ---------------------------------------------------------------------- */
+
+.fs__side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  animation: fs-in 0.5s ease both;
+}
+
+.fs__k {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.fs__aicard,
+.fs__change {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: clamp(13px, 1.9svh, 18px) clamp(15px, 1.3vw, 20px);
+  border-radius: 22px;
+  background: #f4f4f7;
+}
+
+.fs__aicard {
+  gap: 5px;
+  background:
+    radial-gradient(80% 100% at 100% 0%, rgb(98 196 255 / 0.3), transparent 70%),
+    radial-gradient(70% 90% at 0% 100%, rgb(220 207 255 / 0.55), transparent 70%),
+    #eef4ff;
+  box-shadow: inset 0 0 0 1px rgb(22 88 242 / 0.12);
+}
+
+.fs__aicard .fs__k {
+  color: #1658f2;
+}
+
+.fs__aicard > b {
+  font-size: 15.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.01em;
+}
+
+.fs__aicard > p:not(.fs__k) {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.fs__aicard .fs__ops {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--umm-ink-quiet);
+}
+
+.fs__ops b {
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink-soft);
+}
+
+.fs__change {
+  flex: 1;
+}
+
+.fs__change ol {
+  display: grid;
+  gap: 9px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fs__change li {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  padding-left: 22px;
+}
+
+.fs__change li::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--umm-coral);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.12);
+}
+
+.fs__change li[data-k='1']::before {
+  background: #1658f2;
+  box-shadow: 0 0 0 3px rgb(22 88 242 / 0.16);
+}
+
+.fs__change li[data-k='2']::before {
+  background: var(--umm-citrus);
+}
+
+.fs__change li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 17px;
+  bottom: -7px;
+  left: 6px;
+  width: 1px;
+  background: rgb(16 14 20 / 0.14);
+}
+
+.fs__change small {
+  font-size: 11.5px;
+  color: var(--umm-ink-quiet);
+}
+
+.fs__change span {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.fs__note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--umm-ink-quiet);
+}
+
+@keyframes fs-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fs-flow {
+  to {
+    stroke-dashoffset: -11;
+  }
+}
+
+@keyframes fs-sweep {
+  from {
+    background-position: -40% 0;
+  }
+  to {
+    background-position: 140% 0;
+  }
+}
+
+@keyframes fs-warn {
+  to {
+    box-shadow:
+      0 0 0 6px rgb(255 195 196 / 0.12),
+      0 0 34px rgb(255 195 196 / 0.6);
+  }
+}
+
+/* --- shorter and smaller screens -------------------------------------------------- */
+
+@media (max-height: 820px) and (min-width: 1101px) {
+  .fs__stage {
+    gap: 8px;
+  }
+  .fs__node {
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .fs__label {
+    gap: 4px;
+    font-size: 10.5px;
+  }
+  .fs__ai {
+    height: 18px;
+  }
+  .fs__dir {
+    font-size: 10px;
+    line-height: 1.22;
+  }
+  .fs__ctl {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+  .fs__player {
+    gap: 8px;
+  }
+  .fs__steps button {
+    min-height: 40px;
+    padding: 6px 11px;
+    font-size: 12px;
+  }
+  .fs__aicard > p:not(.fs__k) {
+    font-size: 13px;
+  }
+  .fs__aicard .fs__ops {
+    font-size: 11.5px;
+  }
+  .fs__change span {
+    font-size: 13.5px;
+  }
+  .fs__change ol {
+    gap: 7px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .fs__bar {
+    flex-wrap: wrap;
+  }
+  .fs__main {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+  .fs__stage {
+    min-height: 560px;
+  }
+  .fs__side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .fs {
+    min-height: 0;
+  }
+  .fs__side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .fs__pick {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .fs__pick::-webkit-scrollbar {
+    display: none;
+  }
+  .fs__lanes {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 8px;
+  }
+  .fs__dir {
+    display: none;
+  }
+  .fs__gap {
+    min-height: 26px;
+  }
+  .fs__node {
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+  .fs__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fs__player-head {
+    flex-wrap: wrap;
+  }
+}

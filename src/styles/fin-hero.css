@@ -1,0 +1,631 @@
+/* ============================================================================
+   FIN HERO (FinHero.tsx) — version 3
+
+   The scene is drawn on a 60 × 56em board scaled to its box (container
+   units). Each piece has three layers: its place (which leans after the
+   pointer by its depth, --d), its arrival (at its own moment, --t), and its
+   float; the piece's own look sits inside.
+   ========================================================================== */
+
+/* the section label, as a pill with the section's colour beside it */
+.f3-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  margin: 0;
+  padding: 8px 14px 8px 11px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(255 255 255 / 0.8);
+  box-shadow:
+    inset 0 0 0 1px var(--umm-line),
+    0 1px 2px rgb(16 14 20 / 0.04);
+  font-size: 12px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink);
+}
+
+.f3-pill::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--umm-tone, var(--umm-ink));
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.3);
+}
+
+/* --- the stage ------------------------------------------------------------------ */
+
+.fnh {
+  position: relative;
+}
+
+.fnh__stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 680px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(38% 52% at 76% 50%, color-mix(in srgb, var(--umm-blossom) 34%, transparent), transparent 72%),
+    radial-gradient(34% 40% at 96% 96%, color-mix(in srgb, var(--umm-citrus) 34%, transparent), transparent 72%),
+    radial-gradient(46% 46% at 66% 2%, color-mix(in srgb, var(--umm-sky) 60%, transparent), transparent 72%),
+    #fff;
+}
+
+.fnh .hm-nav {
+  position: relative;
+  inset: auto;
+  z-index: 3;
+}
+
+.fnh__body {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(16px, 2vw, 32px);
+  align-items: center;
+  min-height: 0;
+  padding: 0 var(--hm-gutter);
+}
+
+.fnh__copy {
+  grid-column: 1 / span 6;
+  position: relative;
+  z-index: 2;
+}
+
+.fnh__pill {
+  margin-bottom: clamp(18px, 3svh, 30px);
+  opacity: 0;
+  transition: opacity 0.8s ease 0.1s;
+}
+
+.fnh__stage[data-in] .fnh__pill {
+  opacity: 1;
+}
+
+.fnh__title {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: min(clamp(38px, 5vw, 80px), 9.2svh);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+.fnh__line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.fnh__line > span {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 1.05s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(0.15s + var(--i) * 0.1s);
+}
+
+.fnh__stage[data-in] .fnh__line > span {
+  transform: none;
+}
+
+/* the question, lighter than the statement */
+.fnh__line--soft {
+  font-weight: var(--umm-weight-light);
+}
+
+.fnh__lead {
+  max-width: 31em;
+  margin: clamp(18px, 3svh, 28px) 0 0;
+  font-size: clamp(16px, 1.2vw, 18px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.fnh__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: clamp(20px, 3.4svh, 34px);
+}
+
+.fnh__more {
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+}
+
+.fnh__lead,
+.fnh__actions,
+.fnh__base {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fnh__lead {
+  transition-delay: 0.45s;
+}
+
+.fnh__actions {
+  transition-delay: 0.55s;
+}
+
+.fnh__base {
+  transition-delay: 0.75s;
+}
+
+.fnh__stage[data-in] :is(.fnh__lead, .fnh__actions, .fnh__base) {
+  opacity: 1;
+  transform: none;
+}
+
+.fnh__base {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 var(--hm-gutter) clamp(18px, 3.4svh, 32px);
+  font-size: 14px;
+  color: var(--umm-ink-soft);
+}
+
+.fnh__base p {
+  margin: 0;
+}
+
+/* --- the scene -------------------------------------------------------------------- */
+
+.fnh__art {
+  grid-column: 7 / span 6;
+  position: relative;
+  height: min(72svh, 660px);
+  container-type: size;
+  --px: 0;
+  --py: 0;
+}
+
+.fnh-board {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60em;
+  height: 56em;
+  font-size: min(calc(100cqw / 60), calc(100cqh / 56));
+  font-family: var(--umm-font-body);
+  color: var(--umm-ink);
+  line-height: 1.25;
+  translate: -50% -50%;
+}
+
+.fnh-l {
+  position: absolute;
+  translate: calc(var(--px) * var(--d) * 1em) calc(var(--py) * var(--d) * 1em);
+  transition: translate 0.9s var(--umm-ease-out);
+}
+
+.fnh-l__in {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(3em) scale(0.96);
+  transition:
+    opacity 0.8s ease var(--t),
+    transform 1.2s var(--umm-ease-out) var(--t);
+}
+
+.fnh__stage[data-in] .fnh-l__in {
+  opacity: 1;
+  transform: none;
+  animation: fnh-float calc(6s + var(--d) * 1.2s) ease-in-out infinite calc(var(--t) + 1.3s);
+}
+
+@keyframes fnh-float {
+  50% {
+    translate: 0 -0.8em;
+  }
+}
+
+.fnh-l--slab {
+  left: 11em;
+  top: 5em;
+  width: 40em;
+  height: 40em;
+}
+
+.fnh-l--slab .fnh-l__in {
+  transform: scale(0.86);
+}
+
+.fnh-l--route {
+  inset: 0;
+}
+
+.fnh-l--route .fnh-l__in {
+  transform: none;
+}
+
+.fnh-l--card {
+  left: 12em;
+  top: 17em;
+  width: 30em;
+  height: 19em;
+}
+
+.fnh-l--card .fnh-l__in {
+  transform: translate(5em, 6em) rotate(8deg);
+}
+
+.fnh-l--world {
+  left: 38em;
+  top: 7em;
+  width: 21em;
+  height: 16em;
+}
+
+.fnh-l--world .fnh-l__in {
+  transform: translateX(4em);
+}
+
+.fnh-l--paid {
+  left: 3em;
+  top: 37em;
+  width: 27em;
+  height: 9em;
+}
+
+.fnh-l--paid .fnh-l__in {
+  transform: translateX(-4em);
+}
+
+/* the glass tile */
+@property --a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 150deg;
+}
+
+.fnh-slab {
+  position: absolute;
+  inset: 0;
+  border-radius: 10em;
+  background:
+    radial-gradient(52% 44% at 26% 18%, rgb(255 255 255 / 0.85), transparent 70%),
+    radial-gradient(58% 58% at 88% 92%, color-mix(in srgb, var(--umm-sun) 92%, transparent), transparent 70%),
+    linear-gradient(var(--a), var(--umm-sky) 0%, color-mix(in srgb, var(--umm-blossom) 70%, var(--umm-sky)) 52%, var(--umm-blossom) 100%);
+  box-shadow:
+    inset 0 0 0 0.35em rgb(255 255 255 / 0.55),
+    inset 0 -3em 5em -3em rgb(16 14 20 / 0.12),
+    0 5em 8em -4em rgb(16 14 20 / 0.28);
+  rotate: -8deg;
+  animation: fnh-turn 16s ease-in-out infinite alternate;
+}
+
+.fnh-slab::before {
+  content: '';
+  position: absolute;
+  inset: 2.6em;
+  border-radius: 7.6em;
+  box-shadow: inset 0 0 0 0.14em rgb(255 255 255 / 0.55);
+}
+
+@keyframes fnh-turn {
+  from {
+    --a: 125deg;
+    rotate: -10deg;
+  }
+  to {
+    --a: 195deg;
+    rotate: -5deg;
+  }
+}
+
+/* the route round the scene, a dot running along it */
+.fnh-route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.fnh-route__line {
+  fill: none;
+  stroke: rgb(16 14 20 / 0.3);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 7;
+}
+
+.fnh-route__end {
+  fill: var(--umm-citrus);
+  stroke: rgb(16 14 20 / 0.4);
+  stroke-width: 1.2;
+}
+
+.fnh-route__run {
+  fill: var(--umm-ink);
+}
+
+/* the bank card */
+.fnh-card {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 1.8em;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(255 255 255 / 0.15), transparent 55%),
+    linear-gradient(150deg, #2c2734, var(--umm-ink) 62%);
+  box-shadow:
+    0 3.4em 5em -2.2em rgb(16 14 20 / 0.6),
+    inset 0 0 0 0.1em rgb(255 255 255 / 0.1);
+  transform: perspective(90em) rotateY(-16deg) rotateX(8deg) rotate(-8deg);
+}
+
+.fnh-card > * {
+  position: absolute;
+}
+
+/* the UMM quarter circles, faint, in its corner */
+.fnh-card__rings {
+  inset: 0;
+  background: repeating-radial-gradient(
+    circle at 100% 100%,
+    transparent 0 2.3em,
+    rgb(255 255 255 / 0.07) 2.3em 2.42em
+  );
+}
+
+.fnh-card::after {
+  content: '';
+  position: absolute;
+  inset: -30% -70%;
+  background: linear-gradient(105deg, transparent 42%, rgb(255 255 255 / 0.2) 50%, transparent 58%);
+  translate: -60% 0;
+  animation: fnh-sheen 6.5s ease-in-out infinite 2.2s;
+}
+
+@keyframes fnh-sheen {
+  0%,
+  55% {
+    translate: -60% 0;
+  }
+  100% {
+    translate: 60% 0;
+  }
+}
+
+.fnh-card__chip {
+  left: 2.8em;
+  top: 3.6em;
+  width: 4.4em;
+  height: 3.4em;
+  border-radius: 0.75em;
+  background:
+    linear-gradient(90deg, transparent 32%, rgb(16 14 20 / 0.18) 32% 35%, transparent 35% 65%, rgb(16 14 20 / 0.18) 65% 68%, transparent 68%),
+    linear-gradient(transparent 45%, rgb(16 14 20 / 0.18) 45% 52%, transparent 52%),
+    linear-gradient(135deg, var(--umm-sun), color-mix(in srgb, var(--umm-sun) 55%, #fff));
+}
+
+.fnh-card__wave {
+  left: 8em;
+  top: 3.8em;
+  width: 2.8em;
+  height: 2.8em;
+  fill: none;
+  stroke: rgb(255 255 255 / 0.7);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.fnh-card__mark {
+  right: 2.6em;
+  top: 2.6em;
+  font-size: 2.4em;
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+.fnh-card__name {
+  left: 2.8em;
+  bottom: 2.6em;
+  font-size: 1.25em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.18em;
+  color: #fff;
+}
+
+.fnh-card__dot {
+  right: 2.6em;
+  bottom: 2.3em;
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: -1.5em 0 0 color-mix(in srgb, var(--umm-sky) 85%, transparent);
+}
+
+/* your financial world */
+.fnh-world {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  padding: 2em 2em 2.2em;
+  border-radius: 1.8em;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow:
+    0 2.8em 5em -2.4em rgb(16 14 20 / 0.38),
+    inset 0 0 0 0.1em rgb(16 14 20 / 0.06);
+}
+
+.fnh-world small {
+  padding-bottom: 1.1em;
+  border-bottom: 0.1em solid var(--umm-line);
+  font-size: 1.05em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+}
+
+.fnh-world b {
+  font-size: 2em;
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.fnh-chip {
+  align-self: flex-start;
+  padding: 0.75em 1.3em;
+  border-radius: var(--umm-r-pill);
+  background: var(--umm-citrus);
+  font-size: 1.2em;
+  font-weight: var(--umm-weight-medium);
+  animation: fnh-glow 3.4s ease-in-out infinite 2.4s;
+}
+
+@keyframes fnh-glow {
+  50% {
+    box-shadow: 0 0 0 0.5em color-mix(in srgb, var(--umm-citrus) 45%, transparent);
+  }
+}
+
+/* payment received */
+.fnh-paid {
+  position: absolute;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1.4em;
+  align-items: center;
+  padding: 1.7em 1.9em;
+  border-radius: 1.8em;
+  background: #fff;
+  box-shadow:
+    0 2.8em 5em -2.4em rgb(16 14 20 / 0.4),
+    inset 0 0 0 0.1em rgb(16 14 20 / 0.06);
+}
+
+.fnh-paid__check {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 3.8em;
+  height: 3.8em;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: inset 0 0 0 0.1em rgb(16 14 20 / 0.2);
+}
+
+.fnh-paid__check svg {
+  width: 2.2em;
+  height: 2.2em;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.6s var(--umm-ease-out) 1.6s;
+}
+
+.fnh__stage[data-in] .fnh-paid__check svg {
+  stroke-dashoffset: 0;
+}
+
+.fnh-paid b {
+  font-size: 1.75em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.015em;
+}
+
+.fnh-paid small {
+  margin-top: 0.2em;
+  font-size: 1.25em;
+  color: var(--umm-ink-quiet);
+}
+
+.fnh-floor {
+  position: absolute;
+  left: 11em;
+  top: 49em;
+  width: 40em;
+  height: 4.4em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(16 14 20 / 0.14), transparent);
+}
+
+.fnh-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 53.4em;
+  font-size: 1.05em;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+/* --- phones and narrow windows ------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .fnh__stage {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .fnh__body {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+    padding-top: 28px;
+  }
+
+  .fnh__copy,
+  .fnh__art {
+    grid-column: 1 / -1;
+  }
+
+  .fnh__title {
+    font-size: clamp(36px, 10.6vw, 64px);
+  }
+
+  .fnh__art {
+    height: 96vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fnh-l,
+  .fnh-l__in,
+  .fnh__line > span,
+  .fnh__lead,
+  .fnh__actions,
+  .fnh__base {
+    transition: none;
+  }
+
+  .fnh-l__in,
+  .fnh-slab,
+  .fnh-card::after,
+  .fnh-chip {
+    animation: none !important;
+  }
+}

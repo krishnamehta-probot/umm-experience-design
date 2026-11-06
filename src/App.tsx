@@ -22,6 +22,8 @@ const GrowthPage = lazy(() => import('./pages/GrowthPage').then((m) => ({ defaul
 const UxCommercePage = lazy(() =>
   import('./pages/UxCommercePage').then((m) => ({ default: m.UxCommercePage })),
 )
+const FintechPage = lazy(() => import('./pages/FintechPage').then((m) => ({ default: m.FintechPage })))
+const FintechFinal = lazy(() => import('./pages/FintechFinal').then((m) => ({ default: m.FintechFinal })))
 const CaseConcepts = lazy(() => import('./pages/CaseConcepts').then((m) => ({ default: m.CaseConcepts })))
 const CaseStudies = lazy(() => import('./pages/CaseStudies').then((m) => ({ default: m.CaseStudies })))
 const FilmRenderPage = lazy(() =>
@@ -68,6 +70,10 @@ const FilmRenderPage = lazy(() =>
  *   /home-flow   the Lovable heroes' third: the headline left, an Ask UMM
  *                AI card right, over bands of colour flowing
  *   /phone       the three versions side by side in phone-sized frames
+ *   /fintech-banking-insurance  the first industry page (2 Nov): its own
+ *                design, the engraved ribbon hero, built section by section
+ *   /fintech-final  the final Fintech page (6 Nov), built section by section
+ *                from Krish's briefs; the hero first
  *   /casestudies  the case-study main page (5 Nov): Krish's two columns and
  *                one big card playing the film; ?cards ?layout ?bg
  *   /casestudies-concepts  six sketches for the case-study main page (5 Nov)
@@ -161,6 +167,20 @@ export function App() {
     return (
       <Suspense fallback={null}>
         <UxCommercePage />
+      </Suspense>
+    )
+  }
+  if (path === '/fintech-banking-insurance') {
+    return (
+      <Suspense fallback={null}>
+        <FintechPage />
+      </Suspense>
+    )
+  }
+  if (path === '/fintech-final') {
+    return (
+      <Suspense fallback={null}>
+        <FintechFinal />
       </Suspense>
     )
   }

@@ -1,0 +1,1493 @@
+/* ============================================================================
+   FIN PAGE — sections 02 to 10, version 3 (FinSections.tsx)
+
+   One screen per section. The page's 12 columns: headings on 1–7, their
+   paragraph on 9–12; cards in thirds; a list on 1–4 beside its panel on
+   5–12. Cards keep their parts on shared rows (subgrid), so titles, texts
+   and lists start level across a row. On white the cards carry the colour;
+   on a wash they are white.
+   ========================================================================== */
+
+.f3s {
+  --gap: clamp(14px, 1.6vw, 24px);
+  --r: clamp(18px, 1.6vw, 26px);
+  --cols: repeat(12, minmax(0, 1fr));
+  --line: rgb(16 14 20 / 0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100svh;
+  padding: clamp(40px, 6.4svh, 72px) var(--hm-gutter);
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+.f3s--sky {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--umm-sky) 36%, #fff), color-mix(in srgb, var(--umm-sky) 12%, #fff));
+}
+
+.f3s--lilac {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--umm-blossom) 20%, #fff), color-mix(in srgb, var(--umm-sky) 34%, #fff));
+}
+
+.f3s--citrus {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--umm-citrus) 18%, #fff), color-mix(in srgb, var(--umm-citrus) 4%, #fff));
+}
+
+.f3s--end {
+  min-height: 0;
+}
+
+/* --- type ----------------------------------------------------------------------- */
+
+.f3-label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.f3-label--ink {
+  color: var(--umm-ink);
+}
+
+.f3-h2 {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: min(clamp(30px, 3.5vw, 56px), 6.2svh);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+}
+
+.f3-h2 > span {
+  display: block;
+}
+
+/* the answer, lighter than the statement */
+.f3-h2__soft {
+  font-weight: var(--umm-weight-light);
+}
+
+.f3-h3 {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(19px, 1.5vw, 24px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.f3-h3--l {
+  font-size: clamp(22px, 1.9vw, 30px);
+  line-height: 1.12;
+  letter-spacing: -0.026em;
+}
+
+/* --- the head ---------------------------------------------------------------- */
+
+.f3-head {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--gap);
+  align-items: end;
+  margin-bottom: clamp(18px, 3.4svh, 36px);
+}
+
+.f3-head .f3-pill {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(14px, 2.4svh, 22px);
+}
+
+.f3-head .f3-h2 {
+  grid-column: 1 / span 7;
+}
+
+.f3-intro {
+  grid-column: 9 / span 4;
+  max-width: 30em;
+  margin: 0;
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* --- cards ---------------------------------------------------------------------- */
+
+.f3-cards {
+  display: grid;
+  column-gap: var(--gap);
+  row-gap: 0;
+}
+
+.f3-cards--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.f3-card {
+  display: grid;
+  grid-row: span var(--rows, 3);
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  padding: clamp(12px, 1.2vw, 18px) clamp(12px, 1.2vw, 18px) clamp(16px, 1.6vw, 22px);
+  border-radius: var(--r);
+  transition:
+    transform 0.6s var(--umm-ease-out),
+    box-shadow 0.6s var(--umm-ease-out);
+}
+
+.f3-card > :not(.sc) {
+  margin-inline: clamp(4px, 0.5vw, 8px);
+}
+
+.f3-card--tint {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--umm-tone) 58%, #fff), color-mix(in srgb, var(--umm-tone) 20%, #fff));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 1px 2px rgb(16 14 20 / 0.04);
+}
+
+.f3-card--white {
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 1px rgb(16 14 20 / 0.06),
+    0 22px 44px -32px rgb(16 14 20 / 0.3);
+}
+
+.f3-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 28px 50px -30px rgb(16 14 20 / 0.32);
+}
+
+.f3-card__scene {
+  height: clamp(150px, 22svh, 210px);
+  aspect-ratio: auto;
+  margin-bottom: clamp(14px, 2.2svh, 22px);
+  border-radius: calc(var(--r) - 6px);
+  background: rgb(255 255 255 / 0.5);
+}
+
+.f3-card__scene--s {
+  height: clamp(104px, 15svh, 150px);
+}
+
+.f3-card .f3-label {
+  margin-bottom: 8px;
+}
+
+.f3-card__body {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.f3-card .f3-points {
+  margin-top: 16px;
+}
+
+/* --- bullets ----------------------------------------------------------------------- */
+
+.f3-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.f3-points li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.f3-points svg {
+  margin-top: 0.25em;
+  color: var(--umm-ink);
+}
+
+/* --- a statement and its paragraph, under a block ----------------------------------- */
+
+.f3-pov {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--gap);
+  align-items: start;
+  margin-top: clamp(18px, 3.4svh, 36px);
+  padding-top: clamp(16px, 2.6svh, 26px);
+  border-top: 1px solid var(--umm-line);
+}
+
+.f3-pov > .f3-label {
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
+}
+
+.f3-pov__title {
+  grid-column: 1 / span 7;
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(22px, 2.2vw, 34px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.15;
+  letter-spacing: -0.026em;
+}
+
+.f3-pov__body {
+  grid-column: 9 / span 4;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.f3-pov--close {
+  border-top-color: var(--line);
+}
+
+/* --- a list of tabs beside its panel (03, 07) ---------------------------------------- */
+
+.f3-split {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--gap);
+  align-items: stretch;
+}
+
+.f3-split__side {
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.6svh, 26px);
+}
+
+.f3-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.f3-list__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+  width: 100%;
+  padding: clamp(10px, 1.6svh, 15px) 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  text-align: left;
+  color: var(--umm-ink-quiet);
+  cursor: pointer;
+  transition: color 0.35s ease;
+}
+
+.f3-list__row:hover {
+  color: var(--umm-ink-soft);
+}
+
+.f3-list__row[aria-selected='true'] {
+  color: var(--umm-ink);
+}
+
+/* under the one shown, a line fills while it is shown */
+.f3-list__row::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--umm-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.f3-list__row[aria-selected='true']::after {
+  transform: scaleX(var(--p, 1));
+}
+
+.f3-list__row:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 3px;
+}
+
+.f3-list__num {
+  min-width: 2ch;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.f3-list__arrow {
+  opacity: 0.45;
+  transition:
+    transform 0.45s var(--umm-ease-out),
+    opacity 0.45s ease;
+}
+
+.f3-list__row[aria-selected='true'] .f3-list__arrow {
+  opacity: 1;
+  transform: rotate(45deg);
+}
+
+.f3-list--big .f3-list__row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: clamp(14px, 2.4svh, 22px) 0;
+  font-size: clamp(24px, 2.4vw, 36px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.f3-aside {
+  margin-top: auto;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.06);
+}
+
+.f3-aside p:last-child {
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.f3-panel {
+  grid-column: 5 / span 8;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+  gap: clamp(18px, 2vw, 32px);
+  align-items: center;
+  padding: clamp(12px, 1.2vw, 18px);
+  border-radius: var(--r);
+  background: #fff;
+  box-shadow:
+    0 30px 60px -40px rgb(16 14 20 / 0.4),
+    inset 0 0 0 1px rgb(16 14 20 / 0.05);
+}
+
+/* a set height: the drawing sizes itself from its box */
+.f3-panel__scene {
+  align-self: center;
+  height: clamp(240px, 38svh, 380px);
+  aspect-ratio: auto;
+  border-radius: calc(var(--r) - 6px);
+}
+
+.f3-panel__text {
+  padding: 8px clamp(8px, 1vw, 16px) 8px 0;
+}
+
+.f3-panel__body {
+  margin: 12px 0 18px;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.f3-panel__text--mid .f3-panel__body {
+  margin-bottom: 0;
+}
+
+/* a block whose content changes in place */
+.f3-swap {
+  animation: f3-swap 0.65s var(--umm-ease-out) both;
+}
+
+@keyframes f3-swap {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* --- how it connects (05) --------------------------------------------------------- */
+
+.f3-sys__tabs .umm-tabs {
+  background: rgb(255 255 255 / 0.8);
+}
+
+.f3-sys {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--gap);
+  align-items: start;
+  margin-top: clamp(14px, 2.4svh, 24px);
+}
+
+.f3-sys__side {
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.f3-sys__main {
+  grid-column: 5 / span 8;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.f3-sys__summary {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.f3-ai {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--umm-sky) 75%, #fff),
+    color-mix(in srgb, var(--umm-blossom) 55%, #fff) 55%,
+    color-mix(in srgb, var(--umm-citrus) 55%, #fff)
+  );
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+
+.f3-ai__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--umm-ink);
+}
+
+.f3-live {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  animation: f3-live 2.4s ease-out infinite;
+}
+
+@keyframes f3-live {
+  from {
+    box-shadow: 0 0 0 0 rgb(16 14 20 / 0.4);
+  }
+  to {
+    box-shadow: 0 0 0 9px rgb(16 14 20 / 0);
+  }
+}
+
+.f3-ai .f3-h3 {
+  font-size: clamp(17px, 1.3vw, 20px);
+}
+
+.f3-ai__body {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.f3-ai__ops {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid rgb(16 14 20 / 0.12);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.f3-change {
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.06);
+}
+
+.f3-change ol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.f3-change li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 11px 7px;
+  border-radius: 11px;
+  background: var(--umm-veil);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.f3-change li[data-n='1'] {
+  background: color-mix(in srgb, var(--umm-sky) 60%, #fff);
+}
+
+.f3-change li[data-n='2'] {
+  background: color-mix(in srgb, var(--umm-citrus) 55%, #fff);
+}
+
+.f3-change li .f3-label {
+  font-size: 10px;
+}
+
+/* arrows in the gaps, never on a box */
+.f3-change li:not(:last-child)::after,
+.f3-steps li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: var(--umm-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.f3-change li:not(:last-child)::after {
+  left: 18px;
+  bottom: -12.5px;
+  width: 11px;
+  height: 11px;
+  rotate: 90deg;
+}
+
+/* the reference architecture: a pulse runs through it, box by box (--k) */
+.f3-dia {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow:
+    0 26px 50px -38px rgb(16 14 20 / 0.35),
+    inset 0 0 0 1px rgb(16 14 20 / 0.05);
+}
+
+.f3-dia__row,
+.f3-dia__controls {
+  display: grid;
+  grid-template-columns: clamp(96px, 9vw, 132px) minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+
+.f3-dia .f3-label {
+  font-size: 10px;
+  color: var(--umm-ink-quiet);
+}
+
+.f3-dia__nodes {
+  display: grid;
+  gap: 8px;
+}
+
+.f3-dia__nodes--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.f3-dia__nodes--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.f3-node {
+  display: flex;
+  align-items: center;
+  min-height: clamp(32px, 4.4svh, 42px);
+  padding: 6px 12px;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08);
+  font-size: 13.5px;
+  line-height: 1.25;
+  animation: f3-pulse 6.5s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 0.42s + 0.6s);
+}
+
+.f3-node--exp {
+  background: color-mix(in srgb, var(--umm-citrus) 50%, #fff);
+}
+
+.f3-node--flow {
+  background: color-mix(in srgb, var(--umm-sky) 65%, #fff);
+}
+
+.f3-node--sys {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--umm-hairline);
+}
+
+@keyframes f3-pulse {
+  5% {
+    box-shadow:
+      inset 0 0 0 1.5px var(--umm-ink),
+      0 0 0 5px color-mix(in srgb, var(--umm-ink) 8%, transparent);
+  }
+  14% {
+    box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08);
+  }
+}
+
+.f3-spine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: clamp(32px, 4.2svh, 38px);
+  margin: 0;
+  border-radius: 11px;
+  background: var(--umm-ink);
+  font-size: 13.5px;
+  color: #fff;
+  animation: f3-pulse-spine 6.5s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 0.42s + 0.6s);
+}
+
+.f3-spine i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+}
+
+@keyframes f3-pulse-spine {
+  5% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--umm-citrus) 80%, transparent);
+  }
+  14% {
+    box-shadow: none;
+  }
+}
+
+/* the links between rows: a short line with light running along it */
+.f3-dia__links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 3px 0 3px calc(clamp(96px, 9vw, 132px) + 12px);
+}
+
+.f3-dia__links--one {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.f3-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--umm-ink-soft);
+}
+
+.f3-link::before {
+  content: '';
+  flex: none;
+  width: 1.5px;
+  height: 18px;
+  background:
+    linear-gradient(var(--umm-ink), var(--umm-ink)) 0 -6px / 100% 6px no-repeat,
+    rgb(16 14 20 / 0.18);
+  animation: f3-flow 1.6s linear infinite;
+}
+
+.f3-link--up::before {
+  animation-direction: reverse;
+}
+
+.f3-link--both::before {
+  animation: f3-flow 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes f3-flow {
+  to {
+    background-position:
+      0 18px,
+      0 0;
+  }
+}
+
+.f3-dia__controls {
+  align-items: baseline;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--umm-line);
+  font-size: 13px;
+}
+
+/* how the work moves: four steps, lit in turn */
+.f3-steps {
+  padding: 10px 12px 12px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.78);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.05);
+}
+
+.f3-steps__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.f3-steps__head b {
+  font-weight: var(--umm-weight-medium);
+}
+
+.f3-steps ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.f3-steps li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px 8px;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08);
+  font-size: 13.5px;
+  line-height: 1.3;
+  animation: f3-step 6s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 1.2s + 0.4s);
+}
+
+@keyframes f3-step {
+  4%,
+  18% {
+    background: color-mix(in srgb, var(--umm-sun) 70%, #fff);
+    box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+  }
+  24% {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.08);
+  }
+}
+
+.f3-steps li:not(:last-child)::after {
+  top: 50%;
+  right: -19px;
+  margin-top: -6.5px;
+}
+
+.f3-steps__num {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--umm-ink-quiet);
+}
+
+.f3-exc {
+  display: grid;
+  grid-template-columns: clamp(96px, 9vw, 132px) minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: baseline;
+  padding: 9px 14px 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--umm-coral) 48%, #fff);
+}
+
+.f3-exc .f3-label {
+  font-size: 10px;
+  color: var(--umm-ink);
+}
+
+.f3-exc p:last-child {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.f3-exc .f3-ctx {
+  grid-column: 1 / -1;
+  padding: 6px 0 0;
+  border-top: 1px solid rgb(16 14 20 / 0.1);
+}
+
+.f3-ctx,
+.f3-fine {
+  margin: 0;
+  padding: 0 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.f3-ctx .f3-label {
+  margin-right: 8px;
+  font-size: 10px;
+}
+
+.f3-fine {
+  padding: 0 4px;
+  font-size: 11.5px;
+  color: var(--umm-ink-quiet);
+}
+
+/* --- relevant work (06) ------------------------------------------------------------------ */
+
+.f3-case {
+  display: grid;
+  grid-row: span 7;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  padding: 12px 12px 18px;
+  border-radius: var(--r);
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 1px var(--umm-line),
+    0 22px 44px -34px rgb(16 14 20 / 0.32);
+  transition:
+    transform 0.6s var(--umm-ease-out),
+    box-shadow 0.6s var(--umm-ease-out);
+}
+
+.f3-case:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 0 0 1px var(--umm-line),
+    0 30px 54px -32px rgb(16 14 20 / 0.36);
+}
+
+.f3-case > :not(.f3-case__visual) {
+  margin-inline: 8px;
+}
+
+.f3-case__visual {
+  display: grid;
+  place-items: end center;
+  height: clamp(150px, 22svh, 220px);
+  margin-bottom: 14px;
+  padding: 16px 16px 0;
+  overflow: hidden;
+  border-radius: calc(var(--r) - 6px);
+  background:
+    radial-gradient(70% 80% at 50% 100%, color-mix(in srgb, var(--umm-tone) 80%, transparent), transparent 75%),
+    color-mix(in srgb, var(--umm-tone) 30%, #fff);
+}
+
+.f3-case__visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  transition: transform 0.9s var(--umm-ease-out);
+}
+
+.f3-case:hover .f3-case__visual img {
+  transform: translateY(-6px) scale(1.02);
+}
+
+/* the link carries "view project" as its name; nothing over the picture */
+.f3-case__view {
+  display: none;
+}
+
+.f3-case .f3-label {
+  margin-bottom: 6px;
+  font-size: 10.5px;
+}
+
+.f3-case__name {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(26px, 2.4vw, 38px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.f3-case__title {
+  margin: 8px 0 0;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.f3-case__body {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.f3-case__role {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--umm-line);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.f3-case__role .f3-label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.f3-case__read {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  margin-top: 14px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--umm-ink);
+  font-size: 14.5px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: none;
+}
+
+/* --- how AI is impacting (08): four cards, one turned over at a time ------------------ */
+
+.f3-flip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.f3-flip__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: linear-gradient(170deg, color-mix(in srgb, var(--umm-tone) 55%, #fff), color-mix(in srgb, var(--umm-tone) 18%, #fff));
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+  transition:
+    transform 0.6s var(--umm-ease-out),
+    box-shadow 0.6s var(--umm-ease-out);
+}
+
+.f3-flip__card[data-open] {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 30px 54px -32px rgb(16 14 20 / 0.36);
+}
+
+.f3-flip__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: clamp(104px, 13svh, 128px);
+  padding: clamp(16px, 1.5vw, 22px) clamp(16px, 1.5vw, 22px) 10px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--umm-ink);
+  cursor: pointer;
+}
+
+.f3-flip__head .f3-label {
+  font-size: 10.5px;
+}
+
+.f3-flip__head .f3-h3 {
+  font-size: clamp(17px, 1.35vw, 21px);
+}
+
+.f3-flip__face {
+  position: relative;
+  height: clamp(236px, 30svh, 280px);
+  margin: 0 clamp(10px, 0.9vw, 14px) clamp(10px, 0.9vw, 14px);
+}
+
+.f3-flip__scene {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  border-radius: calc(var(--r) - 8px);
+  background: rgb(255 255 255 / 0.5);
+  transition:
+    opacity 0.5s ease,
+    scale 0.6s var(--umm-ease-out);
+}
+
+.f3-flip__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px 16px;
+  border-radius: calc(var(--r) - 8px);
+  background: #fff;
+  opacity: 0;
+  translate: 0 14px;
+  transition:
+    opacity 0.45s ease,
+    translate 0.6s var(--umm-ease-out);
+}
+
+.f3-flip__text p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.f3-flip__card[data-open] .f3-flip__text {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 0.12s;
+}
+
+.f3-flip__card[data-open] .f3-flip__scene {
+  opacity: 0;
+  scale: 0.94;
+}
+
+/* while it steps through, a line fills along the open card's foot */
+.f3-flip__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--umm-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.f3-flip__card[data-open] .f3-flip__bar {
+  transform: scaleX(var(--p, 0));
+}
+
+.f3-change-line {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.f3-change-line .f3-label {
+  font-size: 10.5px;
+  color: var(--umm-ink-quiet);
+}
+
+/* --- AI in financial services (09) ---------------------------------------------------------- */
+
+.f3-ai-card__num {
+  margin-bottom: 10px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--umm-ink-quiet);
+}
+
+/* the work's three steps, a dot lighting at each in turn */
+.f3-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--umm-tone) 42%, #fff);
+  list-style: none;
+}
+
+.f3-flow li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+
+.f3-flow li::before {
+  content: '';
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+  animation: f3-dot 4.8s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 0.7s + 0.6s);
+}
+
+@keyframes f3-dot {
+  6%,
+  30% {
+    background: var(--umm-ink);
+    box-shadow:
+      inset 0 0 0 1.5px var(--umm-ink),
+      0 0 0 4px rgb(255 255 255 / 0.8);
+  }
+  40% {
+    background: #fff;
+  }
+}
+
+.f3-flow li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(50% + 4.5px);
+  left: 3.75px;
+  width: 1.5px;
+  height: calc(100% + 0px);
+  background: rgb(16 14 20 / 0.3);
+}
+
+.f3-card--white .f3-card__body {
+  margin: 14px 0 16px;
+}
+
+.f3-card--white .f3-change-line {
+  align-self: end;
+}
+
+/* --- your next chapter (10) ------------------------------------------------------------------ */
+
+.f3-end {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: var(--gap);
+  align-items: center;
+  padding: clamp(28px, 4vw, 64px);
+  overflow: hidden;
+  border-radius: clamp(24px, 2.4vw, 36px);
+  background:
+    radial-gradient(48% 90% at 82% 50%, color-mix(in srgb, var(--umm-sky) 80%, transparent), transparent 72%),
+    linear-gradient(115deg, color-mix(in srgb, var(--umm-citrus) 62%, #fff), color-mix(in srgb, var(--umm-sun) 50%, #fff));
+}
+
+.f3-end__copy {
+  grid-column: 1 / span 6;
+}
+
+.f3-end .f3-pill {
+  margin-bottom: clamp(16px, 2.4svh, 22px);
+}
+
+.f3-end__body {
+  max-width: 30em;
+  margin: clamp(14px, 2svh, 20px) 0 clamp(22px, 3svh, 30px);
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.f3-end__scene {
+  grid-column: 7 / span 6;
+  height: clamp(240px, 34svh, 340px);
+  aspect-ratio: auto;
+}
+
+/* --- narrower windows ------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .f3-flip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .f3-split__side {
+    grid-column: 1 / span 5;
+  }
+
+  .f3-panel {
+    grid-column: 6 / span 7;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .f3-panel__scene {
+    height: 220px;
+  }
+}
+
+@media (max-width: 900px) {
+  .f3s {
+    min-height: 0;
+    padding: 64px var(--hm-gutter);
+  }
+
+  .f3-head,
+  .f3-pov,
+  .f3-split,
+  .f3-sys,
+  .f3-end {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .f3-head > *,
+  .f3-pov > *,
+  .f3-split > *,
+  .f3-sys > *,
+  .f3-end > * {
+    grid-column: 1 / -1;
+  }
+
+  .f3-intro,
+  .f3-pov__body {
+    margin-top: 14px;
+  }
+
+  .f3-cards--3,
+  .f3-flip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .f3-cards > * {
+    margin-bottom: var(--gap);
+  }
+
+  .f3-cards > :last-child {
+    margin-bottom: 0;
+  }
+
+  .f3-split,
+  .f3-sys {
+    row-gap: 24px;
+  }
+
+  .f3-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .f3-panel__scene {
+    height: 210px;
+  }
+
+  .f3-panel__text {
+    padding: 4px 6px 10px;
+  }
+
+  .f3-dia__row,
+  .f3-dia__controls,
+  .f3-exc {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 6px;
+  }
+
+  .f3-dia__row > span:empty {
+    display: none;
+  }
+
+  .f3-dia__links {
+    padding-left: 0;
+  }
+
+  .f3-dia__nodes--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .f3-steps ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .f3-steps li::after {
+    display: none;
+  }
+
+  .f3-end__scene {
+    height: 220px;
+    margin-top: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f3-swap,
+  .f3-live,
+  .f3-node,
+  .f3-spine,
+  .f3-link::before,
+  .f3-steps li,
+  .f3-flow li::before {
+    animation: none;
+  }
+
+  .f3-card,
+  .f3-case,
+  .f3-flip__card,
+  .f3-flip__scene,
+  .f3-flip__text {
+    transition: none;
+  }
+}
+
+/* version 3 sits in a wider frame, like the draft's */
+.ind[data-page='designed'] {
+  --hm-gutter: clamp(18px, 5.4vw, 104px);
+}
+
+/* the architecture holds the most: its section sits a little tighter */
+.f3s--dense {
+  padding-block: clamp(32px, 5svh, 56px);
+}
+
+.f3s--dense .f3-head {
+  margin-bottom: clamp(14px, 2svh, 20px);
+}
+
+.f3s--dense .f3-sys {
+  margin-top: clamp(12px, 1.6svh, 16px);
+}
+
+/* --- laptops with short screens: the same blocks, a little tighter, so each
+   section still fits its screen --------------------------------------------- */
+
+@media (min-width: 901px) and (max-height: 820px) {
+  .f3-points li {
+    padding: 6px 0;
+    font-size: 13.5px;
+  }
+
+  .f3-card__body,
+  .f3-case__body,
+  .f3-sys__summary {
+    font-size: 14px;
+  }
+
+  .f3-card__scene--s {
+    height: clamp(96px, 13svh, 120px);
+  }
+
+  .f3-case__visual {
+    height: clamp(130px, 20svh, 170px);
+  }
+
+  .f3-case__role {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .f3-case__read {
+    margin-top: 10px;
+  }
+
+  .f3-ai {
+    padding: 12px 14px;
+  }
+
+  .f3-ai__body {
+    font-size: 13.5px;
+  }
+
+  .f3-change {
+    padding: 10px 12px 12px;
+  }
+
+  .f3-change li {
+    padding: 4px 10px 5px;
+    font-size: 13.5px;
+  }
+
+  .f3-node,
+  .f3-spine,
+  .f3-steps li,
+  .f3-exc p:last-child {
+    font-size: 12.5px;
+  }
+
+  .f3-dia {
+    padding: 10px 12px;
+  }
+
+  .f3-dia__links {
+    padding-block: 1px;
+  }
+
+  .f3-link::before {
+    height: 14px;
+  }
+
+  .f3-steps li {
+    padding: 5px 9px 6px;
+  }
+
+  .f3-flip__face {
+    height: clamp(220px, 28svh, 250px);
+  }
+
+  .f3-flip__text p {
+    font-size: 13.5px;
+  }
+}
+
+/* --- phones: the impact cards show their text, no turning over ------------- */
+
+@media (max-width: 900px) {
+  .f3-flip__face {
+    height: auto;
+  }
+
+  .f3-flip__scene {
+    display: none;
+  }
+
+  .f3-flip__text {
+    position: relative;
+    inset: auto;
+    gap: 14px;
+    opacity: 1;
+    translate: none;
+  }
+
+  .f3-flip__card {
+    transform: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  .f3s--dense {
+    padding-block: 24px;
+  }
+
+  .f3s--dense .f3-h2 {
+    font-size: min(clamp(30px, 3.2vw, 50px), 5.6svh);
+  }
+
+  .f3s--dense .f3-head .f3-pill {
+    margin-bottom: 12px;
+  }
+
+  .f3-sys__tabs .umm-tabs__tab {
+    padding-block: 0.5rem;
+  }
+
+  .f3-change ol {
+    gap: 10px;
+  }
+
+  .f3-change li:not(:last-child)::after {
+    bottom: -10.5px;
+    width: 9px;
+    height: 9px;
+  }
+}

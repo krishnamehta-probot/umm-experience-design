@@ -1,0 +1,438 @@
+/* ============================================================================
+   THE FINAL FINTECH PAGE — 09 · AI in financial services (FinalAi.tsx) and
+   10 · the close (FinalContact.tsx)
+   ========================================================================== */
+
+.fx {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100svh;
+  padding: clamp(28px, 5.6svh, 72px) var(--g);
+}
+
+.fx__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.4vw, 20px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fx__card {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2svh, 18px);
+  padding: 10px 10px clamp(16px, 2.4svh, 22px);
+  border-radius: 24px;
+  background: #f4f4f7;
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.03);
+}
+
+/* the workflow: where the work comes from, the AI step, the person */
+.fx__flow {
+  --pt: clamp(18px, 3svh, 28px);
+  --node: clamp(46px, 6.6svh, 56px);
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  padding: var(--pt) 8px clamp(14px, 2.2svh, 20px);
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 18px;
+  background:
+    radial-gradient(90% 120% at 50% 0%, rgb(255 255 255 / 0.9), transparent 62%),
+    linear-gradient(160deg, color-mix(in srgb, var(--umm-tone) 55%, #fff), var(--umm-tone));
+}
+
+.fx__station {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.fx__node {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--node);
+  height: var(--node);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 8px 20px -10px rgb(16 14 20 / 0.28),
+    inset 0 0 0 1px rgb(16 14 20 / 0.06);
+}
+
+.fx__node svg {
+  width: 46%;
+  height: 46%;
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the AI step, glowing while the case is with it */
+.fx__station--2 .fx__node {
+  background: var(--umm-ink);
+  animation: fx-ai 5s var(--lag, 0s) infinite;
+}
+
+.fx__station--2 .fx__node svg {
+  stroke: #fff;
+}
+
+.fx__station small {
+  max-width: 13ch;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--umm-ink-soft);
+}
+
+/* the person's check */
+.fx__ok {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1658f2;
+  box-shadow: 0 0 0 2px #fff;
+  scale: 0;
+  animation: fx-ok 5s var(--lag, 0s) infinite;
+}
+
+.fx__ok::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 7px;
+  height: 3.5px;
+  border-bottom: 1.5px solid #fff;
+  border-left: 1.5px solid #fff;
+  rotate: -45deg;
+}
+
+.fx__line {
+  position: absolute;
+  top: calc(var(--pt) + var(--node) / 2);
+  right: calc(8px + (100% - 16px) / 6);
+  left: calc(8px + (100% - 16px) / 6);
+  border-top: 1px dashed rgb(16 14 20 / 0.28);
+}
+
+.fx__line i {
+  position: absolute;
+  top: -1.25px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: var(--umm-ink);
+  transform-origin: left;
+  animation: fx-line 5s cubic-bezier(0.65, 0, 0.35, 1) var(--lag, 0s) infinite;
+}
+
+/* the case, running from station to station; under the nodes, so it is
+   "inside" the AI step while that glows */
+.fx__case {
+  position: absolute;
+  top: calc(var(--pt) + var(--node) / 2 - 5px);
+  left: calc(8px + (100% - 16px) / 6 - 5px);
+  z-index: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1658f2;
+  box-shadow: 0 0 0 4px rgb(22 88 242 / 0.2);
+  animation: fx-case 5s cubic-bezier(0.65, 0, 0.35, 1) var(--lag, 0s) infinite;
+}
+
+.fx__text {
+  display: grid;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.fx__text h3 {
+  margin: 0;
+  font-size: clamp(19px, 1.5vw, 23px);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.fx__text p {
+  font-size: clamp(13.5px, 0.98vw, 14.5px);
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.fx__measure {
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+  padding: 0 10px;
+}
+
+.fx__measure > p {
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.fx__measure ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fx__measure li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 11px 0 9px;
+  border-radius: var(--umm-r-pill);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.fx__measure li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--umm-tone);
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.18);
+}
+
+/* the close: three steps, and how */
+.fx__close {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  padding: clamp(12px, 2svh, 18px) clamp(14px, 1.8vw, 24px);
+  border-radius: 22px;
+  background:
+    radial-gradient(60% 140% at 100% 0%, rgb(98 196 255 / 0.28), transparent 70%),
+    radial-gradient(50% 120% at 0% 100%, rgb(220 207 255 / 0.5), transparent 70%),
+    #eef4ff;
+  box-shadow: inset 0 0 0 1px rgb(22 88 242 / 0.1);
+}
+
+.fx__steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 30px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fx__steps li {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--umm-r-pill);
+  background: #fff;
+  box-shadow: 0 6px 16px -10px rgb(16 14 20 / 0.3);
+  font-size: clamp(14px, 1.05vw, 15.5px);
+  font-weight: var(--umm-weight-medium);
+  white-space: nowrap;
+}
+
+.fx__steps li:first-child {
+  background: var(--umm-ink);
+  color: #fff;
+}
+
+.fx__steps li:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  right: -22px;
+  color: var(--umm-ink-quiet);
+}
+
+.fx__close > p {
+  max-width: 64ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+@keyframes fx-case {
+  0% {
+    left: calc(8px + (100% - 16px) / 6 - 5px);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  36%,
+  58% {
+    left: calc(50% - 5px);
+  }
+  88% {
+    left: calc(8px + (100% - 16px) * 5 / 6 - 5px);
+    opacity: 1;
+  }
+  96%,
+  100% {
+    left: calc(8px + (100% - 16px) * 5 / 6 - 5px);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-line {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  36%,
+  58% {
+    transform: scaleX(0.5);
+  }
+  88%,
+  94% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-ai {
+  0%,
+  34%,
+  62%,
+  100% {
+    box-shadow:
+      0 8px 20px -10px rgb(16 14 20 / 0.28),
+      0 0 0 0 rgb(22 88 242 / 0);
+  }
+  42%,
+  54% {
+    box-shadow:
+      0 0 0 6px rgb(22 88 242 / 0.22),
+      0 0 30px rgb(98 196 255 / 0.8);
+  }
+}
+
+@keyframes fx-ok {
+  0%,
+  86% {
+    scale: 0;
+  }
+  90%,
+  97% {
+    scale: 1;
+  }
+  100% {
+    scale: 0;
+  }
+}
+
+@media (max-width: 1000px) {
+  .fx__cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fx__close {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .fx {
+    min-height: 0;
+  }
+}
+
+/* --- 10 · the close -------------------------------------------------------------- */
+
+.fct {
+  --sheet: clamp(10px, 1.1vw, 16px);
+  padding: var(--sheet);
+}
+
+.fct__panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: calc(100svh - 2 * var(--sheet));
+  padding: clamp(28px, 6svh, 72px) max(16px, calc(var(--g) - var(--sheet)));
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 32px;
+  background: #e4e4e8;
+}
+
+.fct__panel .ff-el3d {
+  z-index: 0;
+}
+
+.fct__copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  gap: clamp(16px, 3svh, 28px);
+  max-width: min(640px, 52%);
+  pointer-events: none;
+}
+
+.fct__copy > * {
+  pointer-events: auto;
+}
+
+.fct__copy .ff-eyebrow {
+  background: rgb(255 255 255 / 0.7);
+}
+
+.fct__title {
+  display: grid;
+  margin: 0;
+  font-size: min(clamp(40px, 5vw, 84px), 9svh);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.fct__body {
+  max-width: 44ch;
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+@media (max-width: 900px) {
+  .fct__panel {
+    align-items: flex-end;
+    min-height: 720px;
+  }
+  .fct__copy {
+    max-width: none;
+  }
+}

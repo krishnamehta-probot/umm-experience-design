@@ -1,0 +1,1506 @@
+/* ============================================================================
+   INDUSTRY PAGE — sections 02 to 10 (FintechSections.tsx, FinArt.tsx)
+
+   One 12-column grid for every block, so the edges agree down the page:
+   the section heads put the heading on columns 1–8 and the paragraph on
+   9–12; three cards take four columns each (the third starts where the
+   paragraph does); two-up blocks split at the middle; the case studies'
+   words start on column 9 again. Colour is a ground for the drawings and
+   the diagram's boxes; nothing is laid over a line of text.
+   ========================================================================== */
+
+.ip-sec {
+  --ip-cols: repeat(12, minmax(0, 1fr));
+  --ip-gap: clamp(16px, 2vw, 32px);
+  --ip-r: clamp(20px, 1.8vw, 28px);
+  --ip-lab: clamp(140px, 14vw, 210px);
+  --ip-pad: clamp(20px, 2.2vw, 32px);
+  position: relative;
+  padding: clamp(88px, 10vw, 150px) var(--hm-gutter);
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+/* a hairline between two white sections, inside the gutters */
+.ip-sec--rule::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--hm-gutter);
+  right: var(--hm-gutter);
+  border-top: 1px solid var(--umm-line);
+}
+
+.ip-sec--ground {
+  background: var(--umm-veil-raise);
+}
+
+/* --- type ------------------------------------------------------------------ */
+
+.ip-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.45;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.ip-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 clamp(20px, 2.2vw, 30px);
+  font-size: 13px;
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* the section's pastel, as a dot beside its name */
+.ip-eyebrow::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--umm-tone, var(--umm-ink));
+  box-shadow: inset 0 0 0 1px rgb(16 14 20 / 0.28);
+}
+
+.ip-h2 {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(36px, 4.4vw, 70px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.04;
+  letter-spacing: -0.036em;
+}
+
+.ip-h2 span {
+  display: block;
+}
+
+/* the heading's second line, quieter */
+.ip-h2 span + span {
+  color: var(--umm-ink-quiet);
+}
+
+.ip-h2--solid span + span {
+  color: inherit;
+}
+
+.ip-h3 {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(21px, 1.7vw, 27px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+}
+
+.ip-h3--l {
+  font-size: clamp(24px, 2.3vw, 36px);
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+}
+
+/* --- the section head ----------------------------------------------------- */
+
+.ip-head {
+  display: grid;
+  grid-template-columns: var(--ip-cols);
+  column-gap: var(--ip-gap);
+  align-items: end;
+  margin-bottom: clamp(44px, 5.4vw, 84px);
+}
+
+.ip-head .ip-eyebrow {
+  grid-column: 1 / -1;
+}
+
+.ip-head .ip-h2 {
+  grid-column: 1 / span 8;
+}
+
+.ip-intro {
+  grid-column: 9 / span 4;
+  max-width: 30em;
+  margin: 0;
+  font-size: clamp(16px, 1.2vw, 19px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* --- cards ------------------------------------------------------------------ */
+
+.ip-cards {
+  display: grid;
+  column-gap: var(--ip-gap);
+  row-gap: 0;
+}
+
+.ip-cards--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ip-cards--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Each card's parts sit on rows shared across its row of cards (subgrid):
+   the titles start level, the paragraphs start level, the bullets start
+   level, whatever any one card's words run to. --rows is the card's
+   number of parts. */
+.ip-card {
+  display: grid;
+  grid-row: span var(--rows, 3);
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  padding: 12px;
+  border: 1px solid var(--umm-line);
+  border-radius: var(--ip-r);
+  background: #fff;
+  transition: border-color var(--umm-dur) var(--umm-ease-out);
+}
+
+/* the space between rows of cards (the grid's own row gap is 0, so the
+   rows inside the cards stay tight) */
+.ip-card {
+  margin-bottom: var(--ip-gap);
+}
+
+.ip-cards--3 > .ip-card,
+.ip-cards--2 > .ip-card:nth-last-child(-n + 2) {
+  margin-bottom: 0;
+}
+
+.ip-card:hover {
+  border-color: var(--umm-hairline);
+}
+
+.ip-card > .fa {
+  border-radius: calc(var(--ip-r) - 8px);
+}
+
+.ip-card__text {
+  display: contents;
+}
+
+.ip-card .ip-card__text > * {
+  margin-inline: clamp(10px, 1vw, 16px);
+}
+
+.ip-card > .fa + .ip-card__text > :first-child {
+  margin-top: clamp(20px, 1.9vw, 28px);
+}
+
+.ip-card__text > :last-child {
+  margin-bottom: clamp(10px, 1vw, 16px);
+}
+
+.ip-card__text > .ip-label {
+  margin-bottom: 12px;
+}
+
+.ip-card__text > p:not(.ip-label) {
+  margin-top: 12px;
+  margin-bottom: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+/* --- bullets ------------------------------------------------------------- */
+
+.ip-points {
+  margin: clamp(22px, 2.2vw, 30px) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--umm-line);
+}
+
+.ip-card .ip-points {
+  margin-top: 26px;
+}
+
+.ip-points li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  padding: 13px 0;
+  border-bottom: 1px solid var(--umm-line);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.ip-card .ip-points li {
+  font-size: 15px;
+}
+
+.ip-points svg {
+  margin-top: 0.3em;
+  color: var(--umm-ink);
+}
+
+/* --- the point of view, and the closing lines of 08 and 09 ----------------- */
+
+.ip-pov,
+.ip-close {
+  display: grid;
+  grid-template-columns: var(--ip-cols);
+  column-gap: var(--ip-gap);
+}
+
+.ip-pov {
+  align-items: end;
+  margin-top: clamp(72px, 8vw, 120px);
+  padding-top: clamp(36px, 3.4vw, 52px);
+  border-top: 1px solid var(--umm-line);
+}
+
+.ip-pov > .ip-label {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(18px, 1.8vw, 26px);
+}
+
+.ip-pov__title,
+.ip-close__title {
+  grid-column: 1 / span 8;
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(26px, 2.6vw, 40px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+}
+
+.ip-pov__title span {
+  display: block;
+}
+
+.ip-pov__body,
+.ip-close__body {
+  grid-column: 9 / span 4;
+  margin: 0;
+  font-size: clamp(16px, 1.15vw, 18px);
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+.ip-close {
+  align-items: start;
+  margin-top: clamp(48px, 5vw, 80px);
+}
+
+.ip-close__title {
+  font-size: clamp(24px, 2.3vw, 34px);
+}
+
+/* --- a list of tabs beside its panel (03, 07) ------------------------------ */
+
+.ip-split {
+  display: grid;
+  grid-template-columns: var(--ip-cols);
+  column-gap: var(--ip-gap);
+  align-items: start;
+}
+
+.ip-list {
+  grid-column: 1 / span 5;
+  display: flex;
+  flex-direction: column;
+}
+
+.ip-list__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 18px;
+  width: 100%;
+  padding: clamp(16px, 1.6vw, 22px) 0;
+  border: 0;
+  border-bottom: 1px solid var(--umm-line);
+  background: none;
+  font: inherit;
+  font-size: clamp(18px, 1.55vw, 23px);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  text-align: left;
+  color: var(--umm-ink-quiet);
+  cursor: pointer;
+  transition: color var(--umm-dur) var(--umm-ease-out);
+}
+
+.ip-list__row:first-child {
+  padding-top: 0;
+}
+
+.ip-list--plain .ip-list__row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+/* the chosen row: in ink, with a line drawn under it */
+.ip-list__row::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  background: var(--umm-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s var(--umm-ease-out);
+}
+
+.ip-list__row:hover {
+  color: var(--umm-ink-soft);
+}
+
+.ip-list__row[aria-selected='true'] {
+  color: var(--umm-ink);
+}
+
+.ip-list__row[aria-selected='true']::after {
+  transform: scaleX(1);
+}
+
+.ip-list__row:focus-visible {
+  outline: 2px solid var(--umm-ink);
+  outline-offset: 4px;
+}
+
+.ip-list__num {
+  min-width: 2ch;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ip-list__arrow {
+  transition: transform var(--umm-dur) var(--umm-ease-out);
+}
+
+.ip-list__row[aria-selected='true'] .ip-list__arrow {
+  transform: rotate(45deg);
+}
+
+.ip-list--l .ip-list__row {
+  padding: clamp(18px, 1.8vw, 26px) 0;
+  font-size: clamp(26px, 2.8vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.ip-list--l .ip-list__row:first-child {
+  padding-top: 0;
+}
+
+.ip-panel {
+  grid-column: 7 / span 6;
+}
+
+.ip-panel > .fa {
+  height: clamp(220px, 21vw, 320px);
+  border-radius: var(--ip-r);
+}
+
+.ip-panel > .ip-h3 {
+  margin-top: clamp(28px, 2.6vw, 40px);
+}
+
+.ip-panel__body {
+  max-width: 36em;
+  margin: 14px 0 0;
+  font-size: clamp(16px, 1.15vw, 18px);
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+/* the panel's content changes in place */
+.ip-swap {
+  animation: ip-swap 0.6s var(--umm-ease-out) both;
+}
+
+@keyframes ip-swap {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* --- the connected view (03) ---------------------------------------------- */
+
+.ip-band {
+  display: grid;
+  grid-template-columns: var(--ip-lab) minmax(0, 1fr);
+  column-gap: var(--ip-gap);
+  align-items: baseline;
+  margin-top: clamp(56px, 6vw, 96px);
+  padding: var(--ip-pad);
+  border-radius: var(--ip-r);
+  background: color-mix(in srgb, var(--umm-sky) 42%, #fff);
+}
+
+.ip-band .ip-label {
+  color: var(--umm-ink);
+}
+
+.ip-band__body {
+  max-width: 46em;
+  margin: 0;
+  font-size: clamp(18px, 1.5vw, 22px);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+/* --- how it connects (05) ------------------------------------------------- */
+
+.ip-sec--ground .umm-tabs {
+  background: #fff;
+}
+
+.ip-map {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 1.4vw, 20px);
+  margin-top: clamp(28px, 3vw, 44px);
+}
+
+.ip-map__ref {
+  display: grid;
+  grid-template-columns: var(--ip-cols);
+  column-gap: var(--ip-gap);
+  align-items: start;
+  margin-bottom: clamp(10px, 1.4vw, 22px);
+}
+
+.ip-map__ref .ip-label {
+  grid-column: 1 / span 5;
+  color: var(--umm-ink);
+}
+
+.ip-map__summary {
+  grid-column: 7 / span 6;
+  margin: 0;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+/* every labelled row inside the boxes shares one label column */
+.ip-ai,
+.ip-exception,
+.ip-context {
+  display: grid;
+  grid-template-columns: var(--ip-lab) minmax(0, 1fr);
+  column-gap: var(--ip-gap);
+}
+
+/* AI assistance: the one ink band */
+.ip-ai {
+  padding: var(--ip-pad);
+  border-radius: var(--ip-r);
+  background: var(--umm-ink);
+  color: var(--umm-ink-paper);
+}
+
+.ip-ai__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ip-ai__live {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  animation: ip-live 2.6s ease-out infinite;
+}
+
+@keyframes ip-live {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--umm-citrus) 60%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 11px color-mix(in srgb, var(--umm-citrus) 0%, transparent);
+  }
+}
+
+.ip-ai__text .ip-h3 {
+  color: #fff;
+}
+
+.ip-ai__text p {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--umm-ink-paper-soft);
+}
+
+.ip-ai__text .ip-ai__ops {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--umm-ink-line-strong);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+/* a white box on the grey ground */
+.ip-box {
+  padding: var(--ip-pad);
+  border: 1px solid var(--umm-line);
+  border-radius: var(--ip-r);
+  background: #fff;
+}
+
+/* how AI changes this journey: three steps, an arrow in each gap */
+.ip-change {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 44px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ip-change li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 22px;
+  border-radius: 16px;
+  background: var(--umm-veil);
+}
+
+.ip-change li[data-step='1'] {
+  background: color-mix(in srgb, var(--umm-sky) 60%, #fff);
+}
+
+.ip-change li[data-step='2'] {
+  background: color-mix(in srgb, var(--umm-citrus) 50%, #fff);
+}
+
+.ip-change .ip-label {
+  font-size: 11px;
+}
+
+.ip-change__text {
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* the arrow drawn in the gap between two boxes, never on them */
+.ip-change li:not(:last-child)::after,
+.ip-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  background: var(--umm-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+/* the reference architecture */
+.ip-diagram {
+  display: flex;
+  flex-direction: column;
+}
+
+.ip-diagram__row {
+  display: grid;
+  grid-template-columns: var(--ip-lab) minmax(0, 1fr);
+  column-gap: var(--ip-gap);
+  align-items: center;
+}
+
+.ip-diagram .ip-label {
+  color: var(--umm-ink-quiet);
+}
+
+.ip-nodes {
+  display: grid;
+  gap: clamp(10px, 1vw, 16px);
+}
+
+.ip-nodes--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ip-nodes--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ip-node {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 12px 18px;
+  border: 1px solid rgb(16 14 20 / 0.1);
+  border-radius: 14px;
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+.ip-node--exp {
+  background: color-mix(in srgb, var(--umm-citrus) 48%, #fff);
+}
+
+.ip-node--flow {
+  background: color-mix(in srgb, var(--umm-sky) 62%, #fff);
+}
+
+.ip-node--sys {
+  border-color: var(--umm-hairline);
+  background: #fff;
+}
+
+.ip-spine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 54px;
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: var(--umm-ink);
+  font-size: clamp(15px, 1.2vw, 18px);
+  color: #fff;
+  text-align: center;
+}
+
+.ip-spine i {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+}
+
+/* the links between the rows: a short line, a dot running along it */
+.ip-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 8px 0;
+}
+
+.ip-links--one {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ip-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--umm-ink-soft);
+}
+
+.ip-link i {
+  position: relative;
+  flex: none;
+  width: 1.5px;
+  height: 30px;
+  border-radius: 1px;
+  background: rgb(16 14 20 / 0.16);
+}
+
+.ip-link i::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  animation: ip-down 2.6s var(--umm-ease-in-out) infinite;
+}
+
+.ip-link--up i::after {
+  animation-name: ip-up;
+}
+
+.ip-link--both i::after {
+  animation: ip-both 3.6s var(--umm-ease-in-out) infinite;
+}
+
+@keyframes ip-down {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
+
+@keyframes ip-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ip-both {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(30px);
+  }
+}
+
+.ip-diagram__controls {
+  display: grid;
+  grid-template-columns: var(--ip-lab) minmax(0, 1fr);
+  column-gap: var(--ip-gap);
+  align-items: baseline;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--umm-line);
+}
+
+.ip-diagram__controls p:last-child {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* how the work moves */
+.ip-steps-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: clamp(28px, 3vw, 44px);
+}
+
+.ip-steps-head .ip-label {
+  color: var(--umm-ink-quiet);
+}
+
+.ip-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 44px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ip-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 124px;
+  padding: 20px 22px 22px;
+  border: 1px solid var(--umm-line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.ip-step__num {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--umm-ink-quiet);
+}
+
+.ip-step__text {
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.ip-exception {
+  align-items: baseline;
+  padding: 20px var(--ip-pad);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--umm-coral) 45%, #fff);
+}
+
+.ip-exception .ip-label {
+  color: var(--umm-ink);
+}
+
+.ip-exception p:last-child,
+.ip-context p:last-child {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.ip-context {
+  align-items: baseline;
+  padding: 6px var(--ip-pad) 0;
+}
+
+.ip-context .ip-label {
+  color: var(--umm-ink-quiet);
+}
+
+.ip-context p:last-child {
+  color: var(--umm-ink-soft);
+}
+
+.ip-note {
+  margin: 6px 0 0;
+  padding: 0 var(--ip-pad);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--umm-ink-quiet);
+}
+
+/* --- relevant work (06) --------------------------------------------------- */
+
+.ip-work {
+  display: flex;
+  flex-direction: column;
+}
+
+.ip-case {
+  display: grid;
+  grid-template-columns: var(--ip-cols);
+  column-gap: var(--ip-gap);
+  align-items: center;
+  padding: clamp(40px, 4.4vw, 64px) 0;
+  border-top: 1px solid var(--umm-line);
+}
+
+.ip-case:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ip-case:last-child {
+  padding-bottom: 0;
+}
+
+.ip-case__visual {
+  grid-column: 1 / span 7;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 2.2vw, 34px) clamp(20px, 2.2vw, 34px) 0;
+  border-radius: var(--ip-r);
+  background: color-mix(in srgb, var(--umm-tone) 48%, #fff);
+  color: var(--umm-ink);
+  text-decoration: none;
+}
+
+.ip-case__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.9s var(--umm-ease-out);
+}
+
+.ip-case__visual:hover img {
+  transform: translateY(-6px);
+}
+
+.ip-case__view {
+  display: inline-flex;
+  align-self: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 clamp(16px, 1.6vw, 22px);
+  padding: 9px 14px 9px 16px;
+  border-radius: var(--umm-r-pill);
+  background: #fff;
+  font-size: 12px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    background var(--umm-dur) var(--umm-ease-out),
+    color var(--umm-dur) var(--umm-ease-out);
+}
+
+.ip-case__visual:hover .ip-case__view,
+.ip-case__visual:focus-visible .ip-case__view {
+  background: var(--umm-ink);
+  color: #fff;
+}
+
+.ip-case__text {
+  grid-column: 9 / span 4;
+}
+
+.ip-case__name {
+  margin: 14px 0 0;
+  font-family: var(--umm-font-display);
+  font-size: clamp(40px, 4.2vw, 64px);
+  font-weight: var(--umm-weight-medium);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.ip-case__title {
+  margin: 18px 0 0;
+  font-size: clamp(20px, 1.7vw, 26px);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+}
+
+.ip-case__body {
+  margin: 16px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+.ip-case__role-label {
+  margin-top: 26px;
+  color: var(--umm-ink-quiet);
+}
+
+.ip-case__role {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.ip-case__read {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--umm-ink);
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  text-decoration: none;
+}
+
+/* --- how AI is impacting (08) ---------------------------------------------- */
+
+.ip-card--impact,
+.ip-card--ai {
+  padding: var(--ip-pad);
+}
+
+.ip-impact__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.78fr);
+  gap: clamp(16px, 1.6vw, 24px);
+  align-items: start;
+}
+
+.ip-impact__top .ip-label {
+  margin-bottom: 14px;
+}
+
+.ip-impact__top .fa {
+  border-radius: 14px;
+}
+
+.ip-impact__body,
+.ip-ai-card__body {
+  margin: 22px 0 26px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--umm-ink-soft);
+}
+
+/* what this can change / measure what changes: level at the cards' feet */
+.ip-impact__change {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid var(--umm-line);
+}
+
+.ip-impact__change .ip-label {
+  color: var(--umm-ink-quiet);
+}
+
+.ip-impact__change p:last-child {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* --- AI in financial services (09) ----------------------------------------- */
+
+.ip-card--ai .ip-h3 {
+  margin-top: 14px;
+  font-size: clamp(22px, 1.9vw, 30px);
+}
+
+/* the three steps of the work, as a small timeline: a dot for each,
+   a line between them, the last one filled */
+.ip-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--umm-tone) 45%, #fff);
+  list-style: none;
+}
+
+.ip-flow li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.ip-flow li::before {
+  content: '';
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--umm-ink);
+}
+
+.ip-flow li:last-child::before {
+  background: var(--umm-ink);
+}
+
+.ip-flow li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(50% + 4.5px);
+  left: 3.75px;
+  width: 1.5px;
+  height: calc(100% + 1px);
+  background: rgb(16 14 20 / 0.35);
+}
+
+/* --- your next chapter (10) ------------------------------------------------ */
+
+.ip-next {
+  display: grid;
+  grid-template-columns: var(--ip-cols);
+  column-gap: var(--ip-gap);
+  align-items: center;
+}
+
+.ip-next__copy {
+  grid-column: 1 / span 6;
+}
+
+.ip-next__body {
+  max-width: 30em;
+  margin: clamp(20px, 2vw, 28px) 0 clamp(28px, 2.6vw, 36px);
+  font-size: clamp(16px, 1.25vw, 19px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* the hero's flowing colour, in a rounded panel; with a route, the
+   receipt sits on it */
+.ip-next__stage {
+  grid-column: 7 / span 6;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(320px, 34vw, 520px);
+  padding: clamp(28px, 3.6vw, 60px) clamp(20px, 3vw, 48px);
+  overflow: hidden;
+  border-radius: clamp(24px, 2.4vw, 36px);
+  background: var(--umm-sky);
+  isolation: isolate;
+}
+
+.ip-next__field {
+  position: absolute;
+  inset: 0;
+}
+
+.ip-next__field canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ip-next__field[data-flat] {
+  background:
+    radial-gradient(60% 80% at 20% 10%, var(--umm-sky), transparent 70%),
+    radial-gradient(50% 70% at 70% 0%, var(--umm-blossom), transparent 70%),
+    radial-gradient(60% 80% at 100% 60%, var(--umm-sun), transparent 70%),
+    linear-gradient(120deg, var(--umm-citrus), var(--umm-coral));
+}
+
+/* --- the drawings (FinArt) -------------------------------------------------- */
+
+.fa {
+  position: relative;
+  aspect-ratio: 360 / 220;
+  overflow: hidden;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--umm-tone) 34%, #fff);
+}
+
+.ip-panel > .fa {
+  aspect-ratio: auto;
+}
+
+/* the board keeps its proportions, centred, sized by the panel's height */
+.fa svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fa-sky {
+  fill: var(--umm-sky);
+}
+.fa-citrus {
+  fill: var(--umm-citrus);
+}
+.fa-blossom {
+  fill: var(--umm-blossom);
+}
+.fa-sun {
+  fill: var(--umm-sun);
+}
+.fa-paper {
+  fill: #fff;
+}
+.fa-veil {
+  fill: var(--umm-veil);
+}
+.fa-ink {
+  fill: var(--umm-ink);
+}
+
+.fa-edge {
+  stroke: rgb(16 14 20 / 0.14);
+  stroke-width: 1;
+}
+
+.fa-bar {
+  fill: rgb(16 14 20 / 0.3);
+}
+
+.fa-bar--quiet {
+  fill: rgb(16 14 20 / 0.14);
+}
+
+.fa-dash {
+  fill: none;
+  stroke: rgb(16 14 20 / 0.32);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.fa-rule {
+  stroke: rgb(16 14 20 / 0.12);
+  stroke-width: 1;
+}
+
+.fa-stroke {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.fa-tick {
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fa-tick--big {
+  stroke-width: 7;
+}
+
+.fa-t {
+  font-family: var(--umm-font-body);
+  fill: var(--umm-ink);
+}
+
+.fa-t--label {
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+}
+
+.fa-t--title {
+  font-size: 12px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: -0.01em;
+}
+
+.fa-t--quiet {
+  font-size: 9.5px;
+  fill: var(--umm-ink-quiet);
+}
+
+.fa-t--body {
+  font-size: 10.5px;
+}
+
+.fa-t--chip {
+  font-size: 8.5px;
+  font-weight: var(--umm-weight-medium);
+}
+
+.fa-t--caps {
+  font-size: 7.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+}
+
+.fa-t--on-ink {
+  fill: #fff;
+}
+
+.fa-t--mark {
+  font-size: 14px;
+  font-weight: var(--umm-weight-semibold);
+  letter-spacing: -0.02em;
+  fill: #fff;
+}
+
+/* each piece floats slowly, on its own beat */
+.fa-float {
+  animation: fa-float 8s ease-in-out infinite;
+}
+
+@keyframes fa-float {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* the payment on its way */
+.fa-run {
+  animation: fa-run 2.8s var(--umm-ease-in-out) infinite;
+}
+
+@keyframes fa-run {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+/* --- narrower windows -------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .ip-cards--3 > .ip-card {
+    margin-bottom: var(--ip-gap);
+  }
+
+  .ip-cards--3 > .ip-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .ip-cards--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ip-cards--3 > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .ip-cards--3 > :last-child:nth-child(odd) > .fa {
+    aspect-ratio: auto;
+    height: clamp(200px, 26vw, 280px);
+  }
+}
+
+@media (max-width: 900px) {
+  .ip-head,
+  .ip-pov,
+  .ip-close,
+  .ip-split,
+  .ip-map__ref,
+  .ip-case,
+  .ip-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ip-head > *,
+  .ip-pov > *,
+  .ip-close > *,
+  .ip-split > *,
+  .ip-map__ref > *,
+  .ip-case > *,
+  .ip-next > * {
+    grid-column: 1 / -1;
+  }
+
+  .ip-head {
+    align-items: start;
+  }
+
+  .ip-intro,
+  .ip-pov__body,
+  .ip-close__body,
+  .ip-map__summary {
+    margin-top: 16px;
+  }
+
+  .ip-cards--3,
+  .ip-cards--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ip-cards > .ip-card {
+    margin-bottom: var(--ip-gap);
+  }
+
+  .ip-cards > .ip-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .ip-cards--3 > :last-child:nth-child(odd) > .fa {
+    aspect-ratio: 360 / 220;
+    height: auto;
+  }
+
+  .ip-split {
+    row-gap: 36px;
+  }
+
+  .ip-panel > .fa {
+    height: clamp(190px, 52vw, 260px);
+  }
+
+  .ip-band,
+  .ip-ai,
+  .ip-exception,
+  .ip-context,
+  .ip-diagram__controls {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+
+  .ip-change,
+  .ip-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* the arrows turn to point down the column */
+  .ip-change li:not(:last-child)::after,
+  .ip-step:not(:last-child)::after {
+    top: auto;
+    right: auto;
+    bottom: -30px;
+    left: 50%;
+    margin: 0 0 0 -8px;
+    transform: rotate(90deg);
+  }
+
+  .ip-step {
+    min-height: 0;
+  }
+
+  .ip-steps-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ip-diagram__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ip-diagram__row > span:first-child {
+    display: none;
+  }
+
+  .ip-diagram__row > .ip-label {
+    margin: 6px 0 10px;
+  }
+
+  .ip-nodes--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ip-node {
+    min-height: 54px;
+  }
+
+  .ip-link {
+    font-size: 12px;
+  }
+
+  .ip-impact__top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ip-case__text {
+    margin-top: 28px;
+  }
+
+  .ip-next {
+    row-gap: 40px;
+  }
+
+  .ip-next__stage {
+    min-height: clamp(240px, 70vw, 340px);
+    padding: 20px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fa-float,
+  .fa-run,
+  .ip-link i::after,
+  .ip-ai__live,
+  .ip-swap {
+    animation: none;
+  }
+
+  .ip-list__row::after,
+  .ip-case__frame img {
+    transition: none;
+  }
+}

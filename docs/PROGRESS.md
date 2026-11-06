@@ -90,6 +90,447 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 6 Nov 2026, /fintech-final: 02 · The reality
+- **Krish's brief:** "take it from that box kind of thing only… make sure
+  that it looks extremely perfect".
+- **Built from Grid's reality section (`final/FinalReality.tsx`), in the
+  final hero's language, with no hairline frame:**
+  - **Top row:** as in the hero. On the left, the eyebrow and the heading,
+    with its second line in blue. On the right, the intro.
+  - **Studio tile:** shows a blue 3D element for each pressure
+    (`Element3D`):
+    - fragmented journeys: pieces drifting round an empty centre;
+    - time lost in operations: a fan of documents being sorted;
+    - growth with accountability: bars rising to a white check.
+  - **Beside the tile:**
+    - a numbered index of the three pressures, which steps on by itself;
+    - the chosen pressure's card, with its Cool Shapes icon, title and
+      text.
+  - **Below:** the point of view on a dark card, its second half in light
+    blue.
+- **Checks:** exactly one screen at 1440×900 and at 1366×768, phones
+  stack, no errors.
+- **Second pass (Krish: make the left card a little smaller so people can
+  focus on the content):**
+  - the columns swapped from 7:5 to 5:7, so the 3D tile is the narrower
+    one;
+  - the index and single card replaced by all three pressures as rows,
+    each with its icon, title, text and number, so all can be read at
+    once;
+  - the chosen row lifts onto a grey card with its icon in full colour,
+    and a blue line fills along its foot; the rows still step on by
+    themselves, and a click anywhere on a row picks it;
+  - still exactly one screen at both sizes, with no errors.
+- **Third pass (Krish: the blue in glass, the icons in solo colours):**
+  - `Element3D` has a `finish` prop. With `glass`, the faces are clear
+    glass tinted pale blue (transmission, dispersion, a little
+    iridescence), double-sided so pieces show through each other. The
+    tile's ground has soft pastel light round the element, painted for
+    the glass to refract.
+  - Section 02 uses glass; `?finish=blue` brings back the glossy blue,
+    and `?finish=glass` puts the hero's elements in glass too.
+  - The icons are the single-colour Cool Shapes (`CoolIcon look="single"`);
+    `?icons=pastel` brings back the gradient ones.
+
+### 6 Nov 2026, /fintech-final: 06–10, the rest of the page
+- **06 · Relevant work (`FinalWork.tsx`), after the Framer ImageScroller
+  he sent (1042 Studio's component):**
+  - The section is three screens tall, and one screen stays pinned while
+    you scroll through it.
+  - Each case takes the panel in turn: its poster (from the case-studies
+    page) becomes the blurred ground, settling from larger as it fades in.
+    Its site floats on the right, tilted, and its words change 0.2s after
+    the picture.
+  - A glass dock of thumbnails sits at the foot. A white outline glides to
+    the case in view on a spring, a hairline shows progress, and clicking a
+    thumbnail scrolls to its case.
+- **07 · Who we work with (`FinalAudiences.tsx`):**
+  - Four pastel panels; the chosen one opens wide with its name, its line
+    and the sentence.
+  - Its single-colour Cool Shape shows as a white cut-out, turning slowly.
+  - The closed panels show their names on end.
+  - The panels step on by themselves, and open on click or focus.
+- **08 · How AI is impacting financial services (`FinalImpact.tsx`), a
+  template for every industry page:**
+  - It takes any industry's `impact` content: the areas come from the
+    eyebrows, the shifts from the "From X to Y." titles, and the colours
+    from the tones.
+  - It is the page's one full dark sheet, with a fine grid and an aura in
+    the shift's colour.
+  - Four areas sit on the left. On the right, "From X" is struck through
+    and "to Y." rises in light, followed by the explanation and "What this
+    can change" in a glass pill.
+  - The closing word sits under a hairline.
+- **09 · AI in financial services (`FinalAi.tsx`):**
+  - Three cards. Each opens with its workflow in fine line: source, the AI
+    step and the person, with a case running along that glows at the AI
+    step and ends in a check.
+  - Under it: the title, the body, and "Measure what changes" as chips.
+  - The close turns its three sentences into three steps, with the body
+    beside them.
+- **10 · Your next chapter (`FinalContact.tsx`):** the hero's studio grey
+  with its flower, now in glass, on the right; the eyebrow, the heading
+  with its second line in blue, the question, and UMM's SplitButton.
+- **Checks:**
+  - Every section is exactly one screen at 1440×900 and 1366×768; the work
+    section is three screens of scroll.
+  - Phones stack.
+  - No errors, and the build passes.
+
+### 6 Nov 2026, /fintech-final: 05 · How it connects
+- **Krish's brief:** "i am not getting what that section is all about…
+  make sure that its perfectly interactive and great to enjoy… it needs to
+  be bestly beautiful and easy to understand."
+- **Built in `final/FinalSystem.tsx` and `fin-final-system.css`:** the
+  reference architecture as a guided tour.
+  - **Picker:** pick a journey from the picker; the journey's sentence sits
+    beside it.
+  - **Dark system view:** three lanes, labelled Reference architecture:
+    experiences, financial workflows, connected systems. Faint wires join
+    the boxes that work together.
+  - **Each step:** at each step of "How the work moves", the boxes in play
+    light up, their wires light and flow, and a glowing case runs along
+    them, down for requests and up for outcomes. The direction labels and
+    the identity and API spine light up as the case passes. AI assistance
+    is a sweep along the workflow lane, and the controls run along the
+    foot.
+  - **Steps:** they step on by themselves, with a fill line, and pause under
+    the pointer. Picking a step stops them; there is also a play/pause
+    button.
+  - **Exception path:** a switch. The case turns aside into the checks in
+    coral, and the steps give way to the exception and its context.
+  - **Hover:** hovering a box brings up its wires.
+  - **Side:** the AI assistance card (with AI operations) and "How AI
+    changes this journey" as friction → contribution → impact.
+  - The wires and the case are measured from the boxes themselves.
+- **Checks:**
+  - Exactly one screen at 1440×900 and 1366×768, for all five journeys;
+    nothing overflows.
+  - Phones stack, with the picker scrolling sideways.
+  - No errors.
+
+### 6 Nov 2026, /fintech-final: 04, second pass
+- **Krish:** the drawings were "too thick lined", and he asked for simple
+  light-lined animations like Lottie's.
+- **Default now `final/OpsLine.tsx`:** the drawings in fine line, made the
+  way line Lottie animations are:
+  - one hairline weight;
+  - lines that draw themselves on and off like trim paths, eased, in an
+    eight-second seamless loop;
+  - a small overshoot when a dot lands;
+  - secondary motion that never stops (a running trace, a turning ring,
+    typing dots, a ping where relationships stall).
+- **Options:**
+  - `?ops=bold` keeps the first drawings (`OpsArt.tsx`);
+  - `?ops=panel` brings back Panel's cards from his screenshot (a big
+    pastel Cool Shape in each card, and a glass foot that opens to the text
+    and points under the pointer).
+
+### 6 Nov 2026, /fintech-final: 04 · Beyond the transaction
+- **Krish's brief:** "next one is again cards this time try to take
+  inspiration from services cards".
+- **Built in `final/FinalOps.tsx`, `final/OpsArt.tsx` and
+  `fin-final-ops.css`:**
+  - **Top row:** as in section 02. On the left, the eyebrow and the
+    heading, with its second line in blue. On the right, the intro.
+  - **Three service cards:** the `.cx-svc` cards from the service pages,
+    with the same peel (`lib/cornerPeel.ts`) and the same entrance.
+    Each is a full pastel card (sky, citrus, blossom) with the bitten
+    corner and the black button.
+    - **Front:** the number and name, the title, the text, and a scene
+      drawn the way the service cards draw theirs: ink outlines on white,
+      an offset sheet behind, and the other pastels as fills. The scenes
+      are a chat beside the case history with a route to the resolver; a
+      CRM record over the journey, with progress lighting each milestone
+      and a rising chart; and a monitor trace, a prioritised queue, an
+      owner and a fallback switch. Each is always quietly animated.
+    - **Back:** the title, then the three points ticking themselves off
+      under the service cards' "What the work can include" label, then
+      "Let's talk".
+  - All type is set in Mosvita: the service cards' monospace index is
+    swapped for small capitals.
+- **Checks:** exactly one screen at 1440×900 and 1366×768. No overflow on
+  either side of any card. Two columns below 1100px, one on phones. No
+  errors.
+
+### 6 Nov 2026, /fintech-final: 03 · Financial journeys
+- **Krish's brief:** he liked Panel's version of this section ("sir
+  actually likes that kind of section") but wanted nice illustrations on
+  the right.
+- **Built in `final/FinalJourneys.tsx` and `fin-final-journeys.css`:**
+  - **Left:** the eyebrow, the heading with its second line in blue, and
+    the intro; the connected view sits on a grey card at the foot, level
+    with the end of the list.
+  - **Right:** the six journeys as an expanding list, which steps on by
+    itself with a blue line filling under the open row. The open card has
+    a fixed height: the title, the text, and the points under a hairline
+    on the left; its illustration on the right.
+- **Illustrations (`final/JourneyArt.tsx`):** one small product scene per
+  journey, made of frosted glass cards over soft light in the journey's
+  pastel, with blue for whatever moves:
+  - a balance with its sparkline and a bank card behind;
+  - an ID being scanned, with onboarding steps ticking through;
+  - a payment travelling along a route and stepping to settled;
+  - a loan application gathering evidence, with a policy-check gauge;
+  - a claim's timeline, with the people on it;
+  - transactions with one flagged, and a risk score.
+  
+  Each scene plays in as its journey opens. It is drawn on a 36 × 28 em
+  stage scaled with container units. Its words are part of the picture,
+  not page copy.
+- **Checks:** exactly one screen at 1440×900 and 1366×768, with no text
+  overflow in any journey at either size. Phones stack. No errors.
+
+### 6 Nov 2026, the final Fintech page at /fintech-final: hero
+- **Krish** is now building the final page section by section, taking
+  each section from the Panel and Grid pages and briefing it.
+- **Hero (`final/FinalHero.tsx`, `fin-final.css`):** it is Grid's hero
+  with three changes he asked for:
+  - no fluted glass;
+  - no hairline "block system";
+  - the left tile holds one big 3D object, after his reference (a flower
+    of glossy discs).
+- **The flower (`final/FlowerObject3D.tsx`):**
+  - Eight elliptical pastel discs fan round a centre. Each face shades
+    from tip to edge, and each rim is a shade deeper.
+  - It turns slowly and leans after the pointer.
+  - The sector pills recolour it: cool, warm or rose. A click spins it to
+    the next sector.
+- The first try, the fintech icon as four discs (`IconObject3D.tsx`), is
+  kept as `?object=discs`.
+
+**Third pass, same day (the layout Krish set out):**
+- **Top row:** on the left, the eyebrow over the heading. On the right,
+  the lead with the two UMM buttons under it.
+- **Below:** the two cards. The four section links are gone.
+- **Left card:** holds the Banking / Payments / Insurance pills. Each
+  sector has its own blue element, and they morph into each other in one
+  canvas (`Element3D`):
+  - Banking: the flower;
+  - Payments: a row of coins with a wave running along it;
+  - Insurance: a glass shield with a white check.
+- **Right card:** the glass bank card on dark again.
+- **Option:** the blue layers are kept as `?right=layers`.
+
+**Second pass, same day:**
+- **Buttons:** the CTAs use UMM's SplitButton, a pill plus its circle.
+- **Headline:** the hero starts lower. The headline's second line is in
+  the elements' blue gradient instead of grey.
+- **3D elements (`final/Element3D.tsx`):** Krish said these may be
+  saturated blue like his references, while icons stay pastel.
+  - Left tile: his flower of blue, glossy, translucent discs on studio
+    grey.
+  - Right tile: three blue glass plates lit from within, on black.
+- **Tile finish:** each tile has a glass tag and a count.
+  - Left tile: the sector's name, with round previous and next arrows.
+  - Right tile: the strapline, with UMM's round arrow.
+- **Kept as options:** `?object=pastel` (the pastel flower) and
+  `?object=discs` (the four discs). Each shows the old glass card on the
+  right.
+
+### 6 Nov 2026, Fintech page: two modern pages, Panel and Grid
+- **Krish:** wanted two interactive, really nice UMM-style pages. His
+  references were Tirtus and Fluxlab: "sir likes this kind of modern…
+  with our colors and our icons and such nice glass type of things…
+  mainly compact".
+- **Panel (`?page=panel`, `PanelPage.tsx`, `fin-panel.css`), after
+  Tirtus:**
+  - The hero is an ink panel lit through fluted glass, with a 3D glass
+    card in it.
+  - A white sheet rises over the hero, and the page sits on it.
+  - The rest:
+    - grey-answer headings;
+    - numbered icon cards behind reeded glass;
+    - an expanding journeys list;
+    - hover-open glass tiles;
+    - the architecture on a dark frosted panel, with steps lighting in
+      turn;
+    - a work list with pictures;
+    - a big-numeral impact card;
+    - an ink close with a glass coin.
+- **Grid (`?page=grid`, `GridPage.tsx`, `fin-grid.css`), after Fluxlab:**
+  - The page is a hairline editorial grid with pills and small-caps
+    numbered indexes.
+  - In the hero, the sector pills recolour the fluted tile.
+  - The rest:
+    - a glass shield;
+    - the grey journeys band;
+    - the architecture as a ruled table;
+    - image work cards;
+    - audience cells that fill with their colour;
+    - impact titles whose "from" is struck through.
+- **Shared kit (`industry/glass/`, `fin-kit.css`):**
+  - `FlutedGlass`, a live WebGL fluted-glass tile in the pastels;
+  - `GlassObject`, which reuses GlassCube3D;
+  - `CoolIcon`, the Cool Shapes pastel icons;
+  - `Reed`, a CSS reeded pane;
+  - `useCycle` and `useStep`.
+- **Checks:**
+  - Every section is exactly one screen at 1440×900 and at 1366×768.
+  - No console errors, no sideways scroll, build passes.
+- The `designed`, `route` and `draft` versions are unchanged and still
+  under `?options`.
+
+### 5 Nov 2026, Fintech page, version 3: designed (`?page=designed`, the default)
+- **Krish:** versions 1 and 2 were "trash design… nowhere near" the live
+  draft. Remove the Flow hero. He wants "properly designed and a proper
+  compact site": each section fits one screen, with "nice animations going
+  on".
+- **Hero (`FinHero.tsx`, `fin-hero.css`):** the words on the left. On the
+  right is the draft's scene, in the brand:
+  - a glass tile in sky→blossom with a sun glow;
+  - the ink bank card tilted in 3D (chip, "umm.", a sweeping sheen);
+  - "Your financial world";
+  - "Payment received", whose tick draws itself;
+  - a dashed route with a dot running round it.
+  The pieces arrive one by one, float, and lean after the pointer by depth.
+  It is the new default hero (`finance`); the others stay as options.
+- **Drawings (`FinScene.tsx`, `fin-scene.css`):** the six drawings get depth,
+  and each has its own animation as it comes into view. They sit on a
+  board scaled by container units.
+- **Sections (`FinSections.tsx`, `fin-page.css`):**
+  - Each fits one screen at 1440×900 and at 1366×768.
+  - White sections and soft pastel washes alternate.
+  - Section names sit in pills; headings are set medium, then light.
+  - Journeys and audiences step through themselves, with a filling line.
+  - The architecture pulses box by box, and its steps light in turn.
+  - How AI is impacting is four cards that turn over in turn.
+  - The close is a citrus→sun panel with the shield.
+- **Kept:** v2 (`?page=route`), v1 (`?page=draft`), every hero option.
+
+### 5 Nov 2026, Fintech page, version 2: one payment, start to finish (`?page=route`, the default)
+- **Krish:** the first build "seems like simple copy paste"; he wants an
+  industry page "on a level no one is able to think like that". Picked from
+  three ideas: one payment travelling the page, which carries to all ten
+  industries (each has its own traveller; table in the 5 Nov chat).
+- **What it is (`components/industry/Route.tsx`, `styles/route.css`,
+  `content/fintech.ts` → `route`):**
+  - A send card in the hero (£250.00 to Amara K., Nairobi), on columns 9–12,
+    level with the words; the Flow hero's colour keeps clear of it.
+    Pressing Send, or scrolling on, sends it.
+  - The payment rides one line: down from the card, along the gap under the
+    hero's words, down the left gutter (widened to 6.4vw for it), across
+    under the close and up into the receipt. Ink behind it, dashed ahead;
+    it rests at each section's name, where a stop lights and a short line
+    runs to the name.
+  - Each section's head gets its stop's stamp (status, time, note) on
+    columns 9–12: Held, Routed, Updated, Verified, In transit, Accepted,
+    Flagged (the coin turns coral), Cleared, Received.
+  - Financial journeys and How it connects turn to the payment's own tab
+    when it arrives (unless the visitor chose one); the architecture lights
+    the boxes it passes through, one after another.
+  - The close: the receipt on the hero's flowing colour, filling in stop by
+    stop; the coin docks into it: "Payment received · 1 min 4 s".
+- **Kept:** version 1 as `?page=draft` (Page row in `?options`); every
+  hero option.
+
+### 5 Nov 2026, Fintech page complete (`/fintech-banking-insurance`)
+- **Krish:** the live draft (umm-financial-services.ai-umm.chatgpt.site) is
+  the final structure and the final content; build the whole page.
+- **Content:** `content/fintech.ts`, word for word from the draft, all ten
+  sections and every tab (6 journeys, 5 architectures, 4 audiences). New
+  hero copy: "Finance moves fast. / Can your operations / keep up?".
+- **Sections 02–10:** `components/industry/FintechSections.tsx` and
+  `styles/industry-page.css`. The reality, financial journeys, beyond the
+  transaction, how it connects, relevant work, who we work with, how AI is
+  impacting, AI in financial services, your next chapter.
+  - One 12-column grid for every block; the cards use subgrid rows, so
+    titles, paragraphs and bullets start level across a row.
+  - Headings: first line ink, second quieter. Pastels are grounds for the
+    drawings and the diagram's boxes only; nothing over text, nothing
+    overlapping.
+  - `components/industry/FinArt.tsx`: the draft's six drawings redrawn flat
+    in the brand pastels (people, review, shield, search, card, payment),
+    floating slowly.
+  - Motion: dots run along the architecture's links; the close is the
+    hero's flowing colour in a panel, in the hero's palette.
+  - Case screenshots from the draft in `public/industry/fintech/`.
+- **Kept as before:** the Flow hero and every hero option behind `?options`.
+  Still left out (Krish, 2 Nov): the hero's page nav and "The next chapter
+  ↓". No footer: the site's own follows, as on the service pages.
+
+### 2 Nov 2026, industry pages begin: Fintech, Banking & Insurance hero (`/fintech-banking-insurance`)
+- **Process (Krish):** the industry pages get their own design, not the service
+  pages' locked one, built one section at a time: reference board → UMM
+  directions → his pick → build. The boards are in the git-ignored
+  `.tools/industry/` folder: `01-hero/board.html`, and the three hero stills
+  in `01-hero/stills/`.
+- **First build rejected:** a silk ribbon after Stripe, with a journey of
+  three cards riding it. Krish: "not giving me the Stripe feeling", copying
+  makes no sense, and the cards on the shader didn't look good.
+- **Stills:** he picked A, "Momentum". The headline is one sentence, "Built
+  for Trust. / Designed for / Momentum.", and the last word runs the full
+  width, drawn as a solid, lit object in glass, foil or pastel. He liked all
+  three fills.
+- **Built:**
+  - `components/industry/WordFill.ts` (raw WebGL): the word is set into a
+    mask, two blurs of it give a bevel, and the shader lights it.
+  - `components/industry/IndustryHero.tsx`, `styles/industry-hero.css`,
+    `content/fintech.ts`, `pages/FintechPage.tsx`.
+  - It opens on **Foil**, Krish's pick. `?options` shows the fill switch;
+    `?fill=glass|pastel` opens on another fill.
+  - **Foil is flat** (Krish: no embossed look): ink letters with a
+    holographic streak that rocks slowly end to end and back, never leaving
+    the word, plus a fainter cool band drifting the other way, so something
+    is always moving. Sky and blossom sit on the streak's flanks and citrus
+    and sun only in its middle, so no yellow mixes down to olive.
+  - Phones get calmer light, because a small word turned the glass's fine
+    detail to bands.
+- **The hero after Momentum (Krish, 2 Nov):**
+  - Momentum lost the house feel ("they won't accept" a sudden giant word).
+  - Then came three house-path layouts, a 3D orbit ring, the halo as live
+    light, and stills. His rule since: "keep it nice, simple and perfectly
+    aligned with our brand; no overlapping; everything on point".
+  - **Flow, the final candidate (his ask: "something like that Stripe thing
+    only but more nicer", one final options panel).** It is in
+    `FlowHero.tsx`, `FlowField.ts` and `flow-hero.css`.
+    - A field of the brand's colours flows like poured silk: warped noise as
+      a height field, lit for a sheen.
+    - It is clipped to a shape whose edge is worked out from where the copy
+      sits, so the colour never runs behind a word.
+    - The copy sits on the white at the foot, and the base line holds the
+      strapline and the sectors.
+    - `?options` opens one panel (the homepage's dock). Its first row is
+      Hero, then Flow's rows:
+      - Shape: slant, wave, quarter or panel.
+      - Palette: brand, night (pastels as light out of ink; the logo turns
+        white), cool or warm.
+      - Finish: smooth, silk, grain, or silk + grain.
+      - Motion: calm, flow or lively.
+      - Copy: left or centre.
+    - Every choice is kept in the address. The default is slant, brand,
+      silk, flow, left.
+  - **Every version is kept as an option** (his call). They are on the one
+    page, `?options` shows the switch, and `?hero=` opens one:
+    - `mosaic`: the copy beside a 5×4 board of quarter-circle
+      tiles. The eyebrow and buttons sit exactly on the board's top and bottom
+      edges, and one tile turns a quarter every 1.7s. It is
+      `MosaicHero.tsx` and `mosaic-hero.css`.
+    - `halo`: the halo as live light, with looks liquid, corona, prism and
+      soft (the still's CSS blur), set by `?halo=`. It is `HaloHero.tsx`,
+      `HaloLight.ts` and `halo-hero.css`.
+    - `orbit`: a twisted 3D band orbiting the headline, its far half behind
+      the words and its near half in front, in chrome, pearl or glass
+      (`?ring=`). It is `HaloRing.ts` and shares HaloHero.
+    - `wallet` and `rising`: the round-3 stills, a fanned deck of pastel
+      sector cards and three rising pastel columns. They are
+      `PastelHero.tsx` and `pastel-hero.css`.
+    - `card`, `centre` and `fluted`: a glass card, shield or coin in the house
+      language. They are `HouseHero.tsx` and `house-hero.css`, and the card,
+      shield and coin shapes are in `GlassCube3D.tsx`, whose studio now lives
+      in `v2/glassStudio.ts`.
+    - `momentum`: the last word drawn full width, in glass, foil or pastel
+      (`IndustryHero`).
+- **Removed (Krish):**
+  - the scroll effect (the word growing to fill the screen);
+  - the chapter nav (What we build ↘ … and "The next chapter ↓");
+  - the ribbon engine, the cards and the client strip.
+- **Open:**
+  - The doc's "Banking / Payments / Insurance" label sits on the hero's base
+    line (`hero.sectors`).
+  - The strapline sits as a caption under the word.
+  - Sections 02–09 are plain outlines until each is designed.
+
 ### 12 Oct 2026, AI & Automation page (`/ai-automation`) on the locked design
 - **Krish:** the CX design is locked; the AI page is a separate page on it.
   (A first pass with fresh section designs was rejected and removed.)

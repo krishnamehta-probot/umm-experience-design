@@ -1,0 +1,334 @@
+/* ============================================================================
+   INDUSTRY HERO (IndustryHero.tsx, WordFill.ts)
+
+   A full first screen: the site's nav, the headline as one sentence with its
+   last word drawn as a lit object, the paragraph and actions beside it.
+   ========================================================================== */
+
+.ind {
+  --hm-gutter: clamp(16px, 3.2vw, 62px);
+  background: #fff;
+  color: var(--umm-ink);
+  font-family: var(--umm-font-body);
+}
+
+/* --- the hero ------------------------------------------------------------- */
+
+.ih {
+  position: relative;
+}
+
+.ih__stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ih__layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ih__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ih .hm-nav {
+  position: relative;
+  inset: auto;
+  z-index: 3;
+}
+
+.ih__block {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  padding: 0 var(--hm-gutter);
+}
+
+.ih__eyebrow {
+  margin: 0 0 clamp(16px, 2.6svh, 26px);
+  font-size: 14px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ih__grid {
+  display: grid;
+  grid-template-areas:
+    'lines side'
+    'word word'
+    'strap strap';
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 29vw);
+  align-items: end;
+  gap: 0 40px;
+}
+
+.ih__head {
+  grid-area: lines;
+}
+
+.ih__lines {
+  margin: 0;
+  font-family: var(--umm-font-display);
+  font-size: min(6.4vw, 10.4svh);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.ih__line {
+  display: block;
+  overflow: hidden;
+  /* Mosvita's descenders run past the line box at this leading */
+  padding-bottom: 0.13em;
+  margin-bottom: -0.13em;
+}
+
+.ih__line > span {
+  display: inline-block;
+  transform: translateY(108%);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) calc(0.1s + var(--i) * 0.11s);
+}
+
+/* the word's place: the canvas draws it here (sized by the hero) */
+.ih__word {
+  grid-area: word;
+  margin-top: clamp(2px, 0.8svh, 10px);
+}
+
+/* the word itself is only shown as type when there is no WebGL */
+.ih__word > span {
+  display: none;
+}
+
+.ih[data-flat] .ih__word > span {
+  display: block;
+  padding-left: 5%;
+  font-size: var(--ih-word, 20vw);
+  font-weight: 600;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+}
+
+.ih__side {
+  grid-area: side;
+  padding-bottom: 0.3em;
+}
+
+.ih__lead {
+  max-width: 30em;
+  margin: 0;
+  font-size: clamp(16px, 1.3vw, 19px);
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.ih__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: 24px;
+}
+
+.ih__more {
+  font-size: 16px;
+  font-weight: var(--umm-weight-medium);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+}
+
+/* a caption under the right end of the word */
+.ih__strap {
+  grid-area: strap;
+  justify-self: end;
+  margin: clamp(6px, 1.2svh, 14px) 0 0;
+  font-size: 14px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+/* --- arrival, in reading order --- */
+
+.ih__eyebrow,
+.ih__side,
+.ih__layer {
+  transition: translate 1.2s var(--umm-ease-out);
+}
+
+.ih:not([data-in]) .ih__eyebrow,
+.ih:not([data-in]) .ih__side {
+  opacity: 0;
+  translate: 0 10px;
+}
+
+.ih:not([data-in]) .ih__layer {
+  opacity: 0;
+  translate: 0 24px;
+}
+
+.ih[data-in] .ih__eyebrow {
+  transition:
+    opacity 0.9s var(--umm-ease-out),
+    translate 1.2s var(--umm-ease-out);
+}
+
+.ih[data-in] .ih__layer {
+  transition:
+    opacity 1.4s var(--umm-ease-out) 0.35s,
+    translate 1.6s var(--umm-ease-out) 0.35s;
+}
+
+.ih[data-in] .ih__side {
+  transition:
+    opacity 1s var(--umm-ease-out) 0.6s,
+    translate 1.2s var(--umm-ease-out) 0.6s;
+}
+
+.ih[data-in] .ih__line > span {
+  transform: none;
+}
+
+/* --- the fill switch (?options) --- */
+
+.ih__dock,
+.ind-dock {
+  position: absolute;
+  right: var(--hm-gutter);
+  bottom: 18px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--umm-r-pill);
+  background: rgb(236 236 240 / 0.9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-size: 14px;
+}
+
+.ih__dock span,
+.ind-dock span {
+  padding: 0 10px 0 12px;
+  color: var(--umm-ink-soft);
+}
+
+.ih__dock button,
+.ind-dock button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--umm-r-pill);
+  background: transparent;
+  font: inherit;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink);
+  cursor: pointer;
+}
+
+.ih__dock button[aria-pressed='true'],
+.ind-dock button[aria-pressed='true'] {
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(16 14 20 / 0.12);
+}
+
+/* the review switch between the hero options (?options), kept on screen */
+.ind-dock {
+  position: fixed;
+  right: auto;
+  left: var(--hm-gutter);
+  z-index: 60;
+}
+
+/* the options panel (the homepage's dock), held on screen while scrolling */
+.ind .ha-dock {
+  position: fixed;
+  top: 96px;
+  z-index: 60;
+}
+
+/* --- sections still in outline ------------------------------------------- */
+
+.ind-outline {
+  min-height: 72svh;
+  padding: clamp(64px, 12svh, 140px) var(--hm-gutter);
+  border-top: 1px solid var(--umm-line);
+  background: #fff;
+}
+
+.ind-outline__num {
+  margin: 0 0 18px;
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  color: var(--umm-ink-quiet);
+}
+
+.ind-outline h2 {
+  max-width: 18ch;
+  margin: 0;
+  font-size: clamp(32px, 4vw, 60px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.ind-outline p:last-child {
+  max-width: 40em;
+  margin: 22px 0 0;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+/* --- phones and narrow windows ------------------------------------------- */
+
+@media (max-width: 900px) {
+  .ih__grid {
+    grid-template-areas:
+      'lines'
+      'word'
+      'strap'
+      'side';
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ih__strap {
+    justify-self: start;
+  }
+
+  .ih__lines {
+    font-size: clamp(38px, 10vw, 72px);
+  }
+
+  .ih__word {
+    margin-top: 12px;
+  }
+
+  .ih__side {
+    padding: 22px 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ih__line > span,
+  .ih__eyebrow,
+  .ih__side,
+  .ih__layer {
+    transition: none;
+  }
+}
