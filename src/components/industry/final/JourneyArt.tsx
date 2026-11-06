@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactElement, ReactNode } from 'react'
 
 /* ============================================================================
    THE FINAL FINTECH PAGE — 03 · THE JOURNEYS' ILLUSTRATIONS (Krish, 6 Nov:
@@ -362,7 +362,7 @@ function Fraud() {
   )
 }
 
-const SCENE: Record<JourneyId, () => JSX.Element> = {
+const SCENE: Record<JourneyId, () => ReactElement> = {
   neo: Neo,
   kyc: Kyc,
   payments: Payments,

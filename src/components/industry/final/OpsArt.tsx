@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactElement } from 'react'
 
 /* ============================================================================
    THE FINAL FINTECH PAGE — 04 · the operations cards' scenes
@@ -187,7 +187,7 @@ function AiOps() {
   )
 }
 
-const SCENE: Record<OpsScene, () => JSX.Element> = {
+const SCENE: Record<OpsScene, () => ReactElement> = {
   support: Support,
   revops: RevOps,
   aiops: AiOps,

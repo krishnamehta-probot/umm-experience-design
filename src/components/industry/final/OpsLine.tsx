@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactElement } from 'react'
 import type { OpsScene } from './OpsArt'
 
 /* ============================================================================
@@ -205,7 +205,7 @@ function AiOps() {
   )
 }
 
-const SCENE: Record<OpsScene, () => JSX.Element> = {
+const SCENE: Record<OpsScene, () => ReactElement> = {
   support: Support,
   revops: RevOps,
   aiops: AiOps,
