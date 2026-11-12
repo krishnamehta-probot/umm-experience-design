@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import { studio } from '../../v2/glassStudio'
 
 /* ============================================================================
    THE HERO'S 3D ELEMENTS (Krish, 6 Nov: "keep it more like what i had
@@ -40,7 +41,12 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
    deeper blue; all clear-coated. Or, as `finish="glass"` (Krish, 6 Nov:
    "whatever is made in blue can you make it in glass format"), clear glass
    tinted pale blue, refracting soft pastel light painted on the ground
-   behind it, with a little dispersion and iridescence at the edges. Everything leans after the pointer and
+   behind it, with a little dispersion and iridescence at the edges. Or, as
+   `finish="clear"` (Krish, 12 Nov, on the manufacturing page: "this glass
+   effect is not as per umm brand"), UMM's own glass, the service pages'
+   glass objects': colourless, refracting a dark studio with softbox strips
+   (seen only through the glass), so the edges catch hard white light and
+   split it into rainbow fringes, on a plain ground. Everything leans after the pointer and
    swells a little under it; a click on the element calls `onPick`.
 
    The canvas is opaque in the tile's own ground, so the glass refracts what
@@ -48,9 +54,9 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
    reduced motion; a run of slow frames drops the resolution.
    ========================================================================== */
 
-export type ElementKind = 'flower' | 'coins' | 'shield' | 'layers' | 'fragments' | 'papers' | 'bars'
+export type ElementKind = 'flower' | 'coins' | 'shield' | 'layers' | 'fragments' | 'papers' | 'bars' | 'line' | 'twin' | 'gears'
 
-export type Finish = 'blue' | 'glass'
+export type Finish = 'blue' | 'glass' | 'clear'
 
 const BLUE = {
   deep: '#0832c8',
@@ -77,6 +83,8 @@ type Built = {
   root: THREE.Group
   /** the element's size across, in world units, for framing */
   size: number
+  /** where the shadow's floor sits, if not just under the framing size */
+  floor?: number
   update: (f: Frame) => void
   dispose: () => void
 }
@@ -127,8 +135,29 @@ const glassMaterial = (tint?: string) =>
     side: THREE.DoubleSide,
   })
 
+/** UMM's glass (the service pages' glass objects, GlassCube3D): colourless,
+ *  thick, strongly dispersive; it shows the studio it refracts */
+const clearMaterial = (thickness = 1.2) =>
+  new THREE.MeshPhysicalMaterial({
+    color: '#ffffff',
+    metalness: 0,
+    roughness: 0.03,
+    transmission: 1,
+    thickness,
+    ior: 1.52,
+    dispersion: 4,
+    clearcoat: 1,
+    clearcoatRoughness: 0.02,
+    envMapIntensity: 2,
+    attenuationColor: new THREE.Color('#f0f4fa'),
+    attenuationDistance: 4,
+    side: THREE.DoubleSide,
+  })
+
 const faceMaterial = () =>
-  look === 'glass'
+  look === 'clear'
+    ? clearMaterial()
+    : look === 'glass'
     ? glassMaterial()
     : new THREE.MeshPhysicalMaterial({
     vertexColors: true,
@@ -147,7 +176,9 @@ const faceMaterial = () =>
   })
 
 const rimMaterial = () =>
-  look === 'glass'
+  look === 'clear'
+    ? clearMaterial(0.6)
+    : look === 'glass'
     ? glassMaterial('#dce8ff')
     : new THREE.MeshPhysicalMaterial({
     color: BLUE.rim,
@@ -688,6 +719,331 @@ function buildBars(): Built {
   }
 }
 
+/* --- manufacturing (12 Nov): the line, the gears ------------------------------------------- */
+
+/** the production line: a conveyor bed with its rollers, four lots riding it
+ *  through a quality gate. The line runs one lot's length, eases to a stop
+ *  with a lot under the gate, the gate's light sheet scans it while its
+ *  review light pulses, and the line runs on (an 6.4s loop) */
+function buildLine(): Built {
+  const L = 6.6
+  const D = 1.5
+  const d = L / 4
+  const G = 0
+
+  const bedGeo = new RoundedBoxGeometry(L, 0.3, D, 6, 0.13)
+  gradient(bedGeo, (x) => 0.25 + (x / L + 0.5) * 0.65)
+  const railGeo = new RoundedBoxGeometry(L + 0.02, 0.12, 0.1, 4, 0.05)
+  const rollerGeo = new THREE.CylinderGeometry(0.1, 0.1, D - 0.26, 28)
+  rollerGeo.rotateX(Math.PI / 2)
+  const lotGeo = new RoundedBoxGeometry(0.7, 0.52, 0.74, 6, 0.11)
+  gradient(lotGeo, (_x, y) => 0.35 + (y + 0.26) * 1.1)
+  const postGeo = new RoundedBoxGeometry(0.15, 1.3, 0.15, 4, 0.06)
+  const beamGeo = new RoundedBoxGeometry(0.18, 0.18, D + 0.42, 4, 0.08)
+  const lampGeo = new THREE.SphereGeometry(0.12, 24, 16)
+  const scanGeo = new THREE.BoxGeometry(0.05, 0.015, D - 0.1)
+
+  const face = faceMaterial()
+  const rim = rimMaterial()
+  const lotMat = faceMaterial()
+  const roller = look === 'clear' ? clearMaterial(0.4) : look === 'glass' ? glassMaterial('#f4f8ff') : whiteMaterial()
+  const lampMat = new THREE.MeshBasicMaterial({ color: '#ffc94d', transparent: true })
+  const scanMat = new THREE.MeshBasicMaterial({
+    color: look === 'glass' || look === 'clear' ? '#5c9dff' : '#bfe3ff',
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  })
+
+  const root = new THREE.Group()
+  const body = new THREE.Group()
+  root.add(body)
+
+  const bed = new THREE.Mesh(bedGeo, face)
+  bed.position.y = -0.24
+  bed.castShadow = true
+  body.add(bed)
+  for (const z of [-D / 2 + 0.02, D / 2 - 0.02]) {
+    const rail = new THREE.Mesh(railGeo, rim)
+    rail.position.set(0, -0.02, z)
+    rail.castShadow = true
+    body.add(rail)
+  }
+  const rollers = Array.from({ length: 17 }, (_, i) => {
+    const m = new THREE.Mesh(rollerGeo, roller)
+    m.position.set(-L / 2 + 0.3 + (i * (L - 0.6)) / 16, -0.05, 0)
+    body.add(m)
+    return m
+  })
+  const lots = Array.from({ length: 4 }, () => {
+    const m = new THREE.Mesh(lotGeo, lotMat)
+    m.castShadow = true
+    body.add(m)
+    return m
+  })
+  for (const z of [-(D / 2 + 0.12), D / 2 + 0.12]) {
+    const post = new THREE.Mesh(postGeo, rim)
+    post.position.set(G, 0.43, z)
+    post.castShadow = true
+    body.add(post)
+  }
+  const beam = new THREE.Mesh(beamGeo, rim)
+  beam.position.set(G, 1.12, 0)
+  beam.castShadow = true
+  body.add(beam)
+  const lamp = new THREE.Mesh(lampGeo, lampMat)
+  lamp.position.set(G, 1.3, 0)
+  body.add(lamp)
+  const scan = new THREE.Mesh(scanGeo, scanMat)
+  scan.position.set(G, 1, 0)
+  body.add(scan)
+
+  const MOVE = 4.4
+  const HOLD = 2
+  const P = MOVE + HOLD
+  const wrap = (x: number) => (((x % L) + L) % L) - L / 2
+  let prev = 0
+
+  return {
+    root,
+    size: 3.9,
+    floor: -1.05,
+    update: ({ t }) => {
+      const n = Math.floor(t / P)
+      const ph = t - n * P
+      const run = ease(ph / MOVE)
+      const s = (n + Math.min(1, run)) * d
+      const held = ph > MOVE ? (ph - MOVE) / HOLD : -1
+
+      const ds = s - prev
+      prev = s
+      if (ds > 0 && ds < 1) rollers.forEach((m) => (m.rotation.z -= ds / 0.1))
+
+      lots.forEach((m, k) => {
+        const x = wrap(s + k * d)
+        const edge = Math.min(x + L / 2, L / 2 - x)
+        const grow = ease(edge / 0.5)
+        const under = held >= 0 && Math.abs(x - G) < 0.05
+        const lift = under ? Math.sin(held * Math.PI) * 0.06 : 0
+        m.position.set(x, 0.3 + lift - (1 - grow) * 0.26, 0)
+        m.scale.setScalar(Math.max(0.0001, grow))
+      })
+
+      /* the gate: the light sheet sweeps down over the lot and back, the
+         review light pulses while it holds */
+      const k = held >= 0 ? held : 0
+      scan.position.y = 1 - 0.58 * (0.5 - 0.5 * Math.cos(k * Math.PI * 2))
+      scanMat.opacity = held >= 0 ? Math.sin(k * Math.PI) * 0.85 : 0
+      const pulse = held >= 0 ? 0.5 + 0.5 * Math.sin(k * Math.PI * 6) : 0
+      lamp.scale.setScalar(0.85 + pulse * 0.35)
+      lampMat.opacity = 0.55 + pulse * 0.45
+
+      root.userData.tilt = { x: 0.52 + Math.sin(t * 0.3) * 0.02, y: -0.62 + Math.sin(t * 0.21) * 0.06 }
+      root.userData.bob = Math.sin(t * 0.7) * 0.03
+      root.userData.swell = 1
+    },
+    dispose: () => {
+      ;[bedGeo, railGeo, rollerGeo, lotGeo, postGeo, beamGeo, lampGeo, scanGeo].forEach((g) => g.dispose())
+      ;[face, rim, lotMat, roller, lampMat, scanMat].forEach((m) => m.dispose())
+    },
+  }
+}
+
+/** the line's digital twin: the same line drawn in blue light, its lots
+ *  running on ahead without stopping (the twin rehearses), a grid under it */
+function buildTwin(): Built {
+  const L = 6.6
+  const D = 1.5
+  const d = L / 4
+  const lineMat = new THREE.LineBasicMaterial({ color: '#1f6dff', transparent: true, opacity: 0.85 })
+  const faintMat = new THREE.LineBasicMaterial({ color: '#1f6dff', transparent: true, opacity: 0.32 })
+  const fillMat = new THREE.MeshBasicMaterial({ color: '#cfe1ff', transparent: true, opacity: 0.28, depthWrite: false })
+  const lotFill = new THREE.MeshBasicMaterial({ color: '#9cc4ff', transparent: true, opacity: 0.32, depthWrite: false })
+  const geos: THREE.BufferGeometry[] = []
+  const edges = (g: THREE.BufferGeometry, mat: THREE.LineBasicMaterial, angle = 30) => {
+    const e = new THREE.EdgesGeometry(g, angle)
+    geos.push(g, e)
+    return new THREE.LineSegments(e, mat)
+  }
+
+  const root = new THREE.Group()
+  const body = new THREE.Group()
+  root.add(body)
+
+  const bedGeo = new RoundedBoxGeometry(L, 0.3, D, 2, 0.13)
+  const bed = edges(bedGeo, lineMat)
+  bed.position.y = -0.24
+  body.add(bed)
+  const bedFill = new THREE.Mesh(bedGeo, fillMat)
+  bedFill.position.y = -0.24
+  body.add(bedFill)
+  const rollerGeo = new THREE.CylinderGeometry(0.1, 0.1, D - 0.26, 10)
+  rollerGeo.rotateX(Math.PI / 2)
+  for (let i = 0; i < 17; i++) {
+    const m = edges(rollerGeo.clone(), faintMat, 40)
+    m.position.set(-L / 2 + 0.3 + (i * (L - 0.6)) / 16, -0.05, 0)
+    body.add(m)
+  }
+  const lotGeo = new RoundedBoxGeometry(0.7, 0.52, 0.74, 2, 0.11)
+  const lots = Array.from({ length: 4 }, () => {
+    const g = new THREE.Group()
+    g.add(edges(lotGeo.clone(), lineMat))
+    g.add(new THREE.Mesh(lotGeo, lotFill))
+    body.add(g)
+    return g
+  })
+  const gate = new THREE.Group()
+  const postGeo = new RoundedBoxGeometry(0.15, 1.3, 0.15, 2, 0.06)
+  const beamGeo = new RoundedBoxGeometry(0.18, 0.18, D + 0.42, 2, 0.08)
+  for (const z of [-(D / 2 + 0.12), D / 2 + 0.12]) {
+    const post = edges(postGeo.clone(), lineMat)
+    post.position.set(0, 0.43, z)
+    gate.add(post)
+  }
+  const beam = edges(beamGeo, lineMat)
+  beam.position.set(0, 1.12, 0)
+  gate.add(beam)
+  body.add(gate)
+  const grid = new THREE.GridHelper(10, 20, '#1f6dff', '#1f6dff')
+  const gm = grid.material as THREE.Material
+  gm.transparent = true
+  gm.opacity = 0.12
+  grid.position.y = -0.42
+  body.add(grid)
+
+  const wrap = (x: number) => (((x % L) + L) % L) - L / 2
+
+  return {
+    root,
+    size: 3.9,
+    update: ({ t }) => {
+      /* the twin runs ahead, rehearsing: steadily, twice the pace */
+      const s = t * 0.52
+      lots.forEach((g, k) => {
+        const x = wrap(s + k * d)
+        const edge = Math.min(x + L / 2, L / 2 - x)
+        const grow = ease(edge / 0.5)
+        g.position.set(x, 0.3 - (1 - grow) * 0.26, 0)
+        g.scale.setScalar(Math.max(0.0001, grow))
+      })
+      lineMat.opacity = 0.7 + Math.sin(t * 2.2) * 0.15
+      root.userData.tilt = { x: 0.52 + Math.sin(t * 0.3) * 0.02, y: -0.62 + Math.sin(t * 0.21) * 0.06 }
+      root.userData.bob = Math.sin(t * 0.7) * 0.03
+      root.userData.swell = 1
+    },
+    dispose: () => {
+      geos.forEach((g) => g.dispose())
+      ;[bedGeo, rollerGeo, lotGeo, postGeo, beamGeo].forEach((g) => g.dispose())
+      ;[lineMat, faintMat, fillMat, lotFill, gm].forEach((m) => m.dispose())
+      grid.geometry.dispose()
+    },
+  }
+}
+
+/** a gear's outline: N teeth on a pitch radius of module × N / 2, with a hub hole */
+function gearShape(N: number, m: number) {
+  const r = (m * N) / 2
+  const ra = r + m * 0.9
+  const rr = r - m * 1.15
+  const s = new THREE.Shape()
+  const step = (Math.PI * 2) / N
+  for (let i = 0; i < N; i++) {
+    const a = i * step
+    const pts: [number, number][] = [
+      [rr, a - step * 0.3],
+      [ra, a - step * 0.16],
+      [ra, a + step * 0.16],
+      [rr, a + step * 0.3],
+      [rr, a + step * 0.7],
+    ]
+    pts.forEach(([rad, ang], j) => {
+      const x = Math.cos(ang) * rad
+      const y = Math.sin(ang) * rad
+      if (i === 0 && j === 0) s.moveTo(x, y)
+      else s.lineTo(x, y)
+    })
+  }
+  s.closePath()
+  const hole = new THREE.Path()
+  hole.absarc(0, 0, r * 0.3, 0, Math.PI * 2, true)
+  s.holes.push(hole)
+  return { shape: s, r }
+}
+
+/** three glass gears meshing: one hands the turn to the next */
+function buildGears(): Built {
+  const M = 0.15
+  const spec = [
+    { N: 14, depth: 0.26 },
+    { N: 10, depth: 0.22 },
+    { N: 8, depth: 0.2 },
+  ]
+  const face = faceMaterial()
+  const rim = rimMaterial()
+  const geos: THREE.BufferGeometry[] = []
+  const root = new THREE.Group()
+  const body = new THREE.Group()
+  root.add(body)
+
+  /* centres: each gear sits on the last one's pitch circle plus its own */
+  const dirs = [0, 0.42, -0.62]
+  const centres: THREE.Vector2[] = []
+  const gears = spec.map((g, i) => {
+    const { shape, r } = gearShape(g.N, M)
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: g.depth,
+      bevelEnabled: true,
+      bevelThickness: 0.05,
+      bevelSize: 0.04,
+      bevelSegments: 5,
+      curveSegments: 24,
+    })
+    geo.center()
+    gradient(geo, (x, y) => 0.3 + (x + y + r * 2) / (r * 4) * 0.7)
+    geos.push(geo)
+    if (i === 0) centres.push(new THREE.Vector2(0, 0))
+    else {
+      const prevR = (M * spec[i - 1].N) / 2
+      const c = centres[i - 1].clone().add(new THREE.Vector2(Math.cos(dirs[i]), Math.sin(dirs[i])).multiplyScalar(prevR + r))
+      centres.push(c)
+    }
+    const mesh = new THREE.Mesh(geo, [face, rim])
+    mesh.castShadow = true
+    mesh.position.set(centres[i].x, centres[i].y, i * 0.04)
+    body.add(mesh)
+    return { mesh, N: g.N }
+  })
+  /* centre the group */
+  const mid = centres.reduce((a, c) => a.add(c), new THREE.Vector2()).multiplyScalar(1 / centres.length)
+  body.position.set(-mid.x, -mid.y, 0)
+
+  return {
+    root,
+    size: 4,
+    update: ({ t, over }) => {
+      /* gear i+1 turns against gear i, phased so the teeth fall into the gaps */
+      let theta = t * 0.32 * (1 + over * 0.6)
+      gears.forEach((g, i) => {
+        if (i > 0) {
+          const p = gears[i - 1]
+          const phi = dirs[i]
+          theta = -(p.N / g.N) * (theta - phi) + phi + Math.PI - Math.PI / g.N
+        }
+        g.mesh.rotation.z = theta
+      })
+      root.userData.tilt = { x: -0.32 + Math.sin(t * 0.4) * 0.04, y: 0.42 + Math.sin(t * 0.27) * 0.12 }
+      root.userData.bob = Math.sin(t * 0.8) * 0.05
+      root.userData.swell = 1 + over * 0.04
+    },
+    dispose: () => {
+      geos.forEach((g) => g.dispose())
+      face.dispose()
+      rim.dispose()
+    },
+  }
+}
+
 const BUILD: Record<ElementKind, () => Built> = {
   flower: buildFlower,
   coins: buildCoins,
@@ -696,6 +1052,9 @@ const BUILD: Record<ElementKind, () => Built> = {
   fragments: buildFragments,
   papers: buildPapers,
   bars: buildBars,
+  line: buildLine,
+  twin: buildTwin,
+  gears: buildGears,
 }
 
 /* --- the canvas --------------------------------------------------------------------------- */
@@ -719,7 +1078,8 @@ export default function Element3D({
   at?: [number, number]
   /** a soft shadow on an unseen floor (for a light ground) */
   shadow?: boolean
-  /** saturated glossy blue, or clear glass before soft pastel light */
+  /** saturated glossy blue, pale glass before soft pastel light, or UMM's
+   *  clear studio glass */
   finish?: Finish
   onPick?: () => void
 }) {
@@ -750,6 +1110,7 @@ export default function Element3D({
 
     const scene = new THREE.Scene()
     const glass = finish === 'glass'
+    const clear = finish === 'clear'
     const groundCanvas = glass ? document.createElement('canvas') : null
     const groundTex = groundCanvas ? new THREE.CanvasTexture(groundCanvas) : null
     if (groundTex) groundTex.colorSpace = THREE.SRGBColorSpace
@@ -757,9 +1118,17 @@ export default function Element3D({
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100)
 
     const pmrem = new THREE.PMREMGenerator(renderer)
-    const room = new RoomEnvironment()
-    const env = pmrem.fromScene(room, 0.04).texture
+    /* UMM's glass is lit by the studio and sees a second copy of it, drawn
+       only into the transmission pass (glassStudio.ts); made twice as big
+       so the camera stays inside it however far back it frames */
+    const room = clear ? new THREE.Scene().add(studio(false)) : new RoomEnvironment()
+    const env = pmrem.fromScene(room, clear ? 0.015 : 0.04).texture
     scene.environment = env
+    const seen = clear ? studio(true) : null
+    if (seen) {
+      seen.scale.setScalar(2.4)
+      scene.add(seen)
+    }
 
     const key = new THREE.DirectionalLight(0xffffff, dark ? 0.8 : 1.4)
     key.position.set(2, 8, 5)
@@ -791,7 +1160,7 @@ export default function Element3D({
       floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ opacity: 0.08 }))
       floor.rotation.x = -Math.PI / 2
       floor.receiveShadow = true
-      floor.position.y = -(S / 2 + 0.25)
+      floor.position.y = built[0].floor ?? -(S / 2 + 0.25)
       holder.add(floor)
     }
 
@@ -839,12 +1208,16 @@ export default function Element3D({
     }
 
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const t0 = performance.now()
-    let last = t0
+    /* a page can hold all motion still ("Pause motion", the manufacturing
+       page): time stops while an ancestor is marked data-motion="paused" */
+    const still = () => el.closest('[data-motion="paused"]') !== null
+    let last = performance.now()
+    let clock = 0
     const draw = (time: number) => {
-      const dt = calm ? 0 : Math.min(0.05, (time - last) / 1000)
+      const dt = calm || still() ? 0 : Math.min(0.05, (time - last) / 1000)
       last = time
-      const t = calm ? 0 : (time - t0) / 1000
+      clock += dt
+      const t = calm ? 0 : clock
       const kl = calm ? 1 : 1 - Math.exp(-dt * 2.6)
       const ks = calm ? 1 : 1 - Math.exp(-dt * 3.4)
       lean.x += (aim.x - lean.x) * kl
@@ -937,7 +1310,17 @@ export default function Element3D({
       groundTex?.dispose()
       env.dispose()
       pmrem.dispose()
-      room.dispose()
+      if ('dispose' in room) room.dispose()
+      const free = (g: THREE.Object3D) =>
+        g.traverse((o) => {
+          const m = o as THREE.Mesh
+          if (m.isMesh) {
+            m.geometry.dispose()
+            ;(m.material as THREE.Material).dispose()
+          }
+        })
+      if (clear) free(room)
+      if (seen) free(seen)
       renderer.dispose()
       renderer.forceContextLoss()
       renderer.domElement.remove()

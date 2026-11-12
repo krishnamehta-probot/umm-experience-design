@@ -1,0 +1,1012 @@
+/* ============================================================================
+   THE MANUFACTURING PAGE — 05 · the architecture (MfgArchitecture.tsx)
+   an ink stage: the AI layer over the value chain, the twin loop beside it,
+   the workflows told under it
+   ========================================================================== */
+
+.ma {
+  gap: clamp(10px, 1.6svh, 16px);
+  padding-block: clamp(20px, 3.4svh, 40px);
+  background: #f6f6f8;
+}
+
+.ma__stage {
+  --line: rgb(255 255 255 / 0.1);
+  --lit: #8fc2ff;
+  position: relative;
+  display: grid;
+  gap: 10px;
+  overflow: hidden;
+  padding: 12px;
+  border-radius: 26px;
+  background:
+    radial-gradient(40% 50% at 30% 0%, rgb(31 109 255 / 0.32), transparent 70%),
+    radial-gradient(30% 40% at 100% 100%, rgb(220 207 255 / 0.12), transparent 70%),
+    var(--umm-ink);
+  color: #fff;
+}
+
+/* --- the bar: the label, the three workflows, play ----------------------------------- */
+
+.ma__bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 2px 4px 2px 8px;
+}
+
+.ma__label {
+  display: grid;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.ma__label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.8);
+}
+
+.ma__label i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4aa8ff;
+  box-shadow: 0 0 0 3px rgb(74 168 255 / 0.25);
+  animation: ma-blink 1.6s ease-in-out infinite alternate;
+}
+
+.ma__flows {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ma__flows button,
+.ma__play {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.72);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+
+.ma__flows button:hover,
+.ma__play:hover {
+  color: #fff;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.ma__flows button[aria-pressed='true'] {
+  background: #fff;
+  box-shadow: none;
+  color: var(--umm-ink);
+}
+
+.ma__play {
+  background: #1f6dff;
+  box-shadow: none;
+  color: #fff;
+}
+
+.ma__play:hover {
+  background: #3a82ff;
+}
+
+.ma__play span {
+  font-size: 11px;
+}
+
+/* --- the grid: the chain and the twin -------------------------------------------------- */
+
+.ma__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(250px, 22vw, 330px);
+  gap: 10px;
+}
+
+.ma__chain {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+/* parts not in the step quieten while the tour runs */
+.ma__agent,
+.ma__stage-card,
+.ma__tile {
+  transition:
+    opacity 0.5s,
+    background 0.5s,
+    box-shadow 0.5s,
+    translate 0.5s var(--umm-ease-out);
+}
+
+.ma__stage .ma__agent:not([data-lit]),
+.ma__stage .ma__stage-card:not([data-lit]) {
+  opacity: 0.5;
+}
+
+/* the twin's tiles keep their ground over the loop; only their words quieten */
+.ma__stage .ma__tile:not([data-lit]) > * {
+  opacity: 0.5;
+}
+
+/* the AI layer */
+.ma__ai {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgb(31 109 255 / 0.18), rgb(31 109 255 / 0.06));
+  box-shadow: inset 0 0 0 1px rgb(143 194 255 / 0.22);
+}
+
+.ma__ai-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.ma__spark {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: var(--umm-citrus);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  animation: ma-spin 14s linear infinite;
+}
+
+.ma__ai-head p {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: clamp(15px, 1.25vw, 19px);
+  letter-spacing: -0.015em;
+}
+
+.ma__ai-head b {
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--umm-citrus);
+}
+
+.ma__ai-head .ma__ai-note {
+  display: block;
+  max-width: 36ch;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ma__agents {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ma__agent {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px 9px;
+  border: 0;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  text-align: left;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ma__agent small,
+.ma__stage-card small,
+.ma__tile small {
+  font-size: 9.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.ma__agent strong {
+  font-size: clamp(13.5px, 1.05vw, 15.5px);
+  font-weight: var(--umm-weight-regular);
+  letter-spacing: -0.01em;
+}
+
+.ma__agent span {
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.6);
+}
+
+.ma__agent[data-lit] {
+  background: rgb(143 194 255 / 0.2);
+  box-shadow:
+    inset 0 0 0 1px rgb(143 194 255 / 0.7),
+    0 0 30px -6px rgb(31 109 255 / 0.8);
+  translate: 0 -2px;
+}
+
+.ma__agent[aria-pressed='true'] {
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+.ma__agent[aria-pressed='true'] small,
+.ma__agent[aria-pressed='true'] span {
+  color: var(--umm-ink-quiet);
+}
+
+/* what travels up and down */
+.ma__transfer {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  height: clamp(34px, 4.6svh, 44px);
+}
+
+.ma__wire {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 14px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.ma__up {
+  text-align: right;
+}
+
+.ma__wire i {
+  position: relative;
+  justify-self: center;
+  width: 1px;
+  height: 100%;
+  background: rgb(255 255 255 / 0.18);
+}
+
+.ma__wire b {
+  position: absolute;
+  left: -2.5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+}
+
+.ma__wire b:first-child {
+  animation: ma-up 2.2s ease-in-out infinite;
+}
+
+.ma__wire b:last-child {
+  background: var(--umm-citrus);
+  animation: ma-down 2.2s ease-in-out 1.1s infinite;
+}
+
+.ma__wire[data-lit] {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.ma__wire[data-lit] i {
+  background: var(--lit);
+  box-shadow: 0 0 10px var(--lit);
+}
+
+.ma__wire[data-lit] b {
+  animation-duration: 1.1s;
+}
+
+/* the value chain */
+.ma__stages {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ma__stage-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto clamp(40px, 5.6svh, 54px) auto auto;
+  align-content: start;
+  gap: 5px;
+  padding: 9px 12px 11px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  text-align: left;
+  color: var(--umm-ink);
+  cursor: pointer;
+}
+
+.ma__stage-card small {
+  color: var(--umm-ink-quiet);
+}
+
+.ma__stage-art {
+  display: grid;
+  min-height: 0;
+}
+
+.ma__stage-art .ml-art {
+  max-height: 100%;
+}
+
+.ma__stage-card strong {
+  font-size: clamp(14px, 1.15vw, 17px);
+  font-weight: var(--umm-weight-regular);
+  letter-spacing: -0.015em;
+}
+
+.ma__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ma__pills em {
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: #f1f1f4;
+  font-size: 10.5px;
+  font-style: normal;
+  color: var(--umm-ink-soft);
+  white-space: nowrap;
+}
+
+.ma__stage-card[data-lit] {
+  box-shadow:
+    0 0 0 2px #8fc2ff,
+    0 0 36px -4px rgb(31 109 255 / 0.9);
+  translate: 0 -2px;
+}
+
+.ma__stage-card[aria-pressed='true'] {
+  box-shadow:
+    0 0 0 2px var(--umm-citrus),
+    0 0 36px -4px rgb(240 255 112 / 0.6);
+}
+
+/* the chevron to the next stage */
+.ma__next {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: -8px;
+  width: 8px;
+  height: 14px;
+  translate: 50% -50%;
+}
+
+.ma__next::before {
+  content: '';
+  position: absolute;
+  inset: 3px 1px;
+  border-top: 1.4px solid #fff;
+  border-right: 1.4px solid #fff;
+  rotate: 45deg;
+  scale: 0.8;
+}
+
+/* the shared context, its loop turning */
+.ma__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 6px;
+  padding: 7px 14px;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  font-size: 12.5px;
+}
+
+.ma__loop {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  font-size: 13px;
+  color: var(--umm-ink);
+  animation: ma-spin 4s linear infinite reverse;
+}
+
+.ma__context b {
+  font-weight: var(--umm-weight-medium);
+}
+
+.ma__context span:not(.ma__loop) {
+  color: rgb(255 255 255 / 0.6);
+}
+
+.ma__context em {
+  margin-left: auto;
+  font-style: normal;
+  color: rgb(255 255 255 / 0.85);
+}
+
+/* --- the twin loop ---------------------------------------------------------------------- */
+
+.ma__twin {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 18px;
+  background:
+    radial-gradient(80% 60% at 50% 70%, rgb(31 109 255 / 0.22), transparent 70%),
+    rgb(255 255 255 / 0.04);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+}
+
+.ma__twin-k {
+  font-size: 9.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.ma__twin-title {
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.ma__twin-title span {
+  color: #8fc2ff;
+}
+
+.ma__twin-body {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ma__loopgrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 14px;
+  min-height: 0;
+  padding: 2px;
+}
+
+/* the loop between the four tiles, a light running round it */
+.ma__ring {
+  position: absolute;
+  inset: 25%;
+  border: 1px dashed rgb(143 194 255 / 0.5);
+  border-radius: 14px;
+}
+
+.ma__ring i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--umm-citrus);
+  box-shadow: 0 0 12px var(--umm-citrus);
+  animation: ma-round 5.2s linear infinite;
+}
+
+.ma__tile {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: #1a1820;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  text-align: left;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ma__tile strong {
+  font-size: 13px;
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.2;
+}
+
+/* the loop runs plant → signals → twin → approval: clockwise from the top left */
+.ma__tile--physical {
+  grid-area: 1 / 1;
+}
+
+.ma__tile--iot {
+  grid-area: 1 / 2;
+}
+
+.ma__tile--twin {
+  grid-area: 2 / 2;
+}
+
+.ma__tile--approve {
+  grid-area: 2 / 1;
+}
+
+.ma__tile[data-lit] {
+  background: #1f3f8f;
+  box-shadow:
+    inset 0 0 0 1px #8fc2ff,
+    0 0 28px -4px rgb(31 109 255 / 0.9);
+}
+
+.ma__tile[aria-pressed='true'] {
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+.ma__tile[aria-pressed='true'] small {
+  color: var(--umm-ink-quiet);
+}
+
+.ma__twin-cap {
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.55);
+}
+
+/* --- the story -------------------------------------------------------------------------- */
+
+.ma__story {
+  position: relative;
+  min-height: clamp(72px, 9svh, 88px);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--umm-ink);
+  overflow: hidden;
+}
+
+.ma__step,
+.ma__inspect {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) auto;
+  align-items: start;
+  gap: 4px 28px;
+  height: 100%;
+  padding: 12px 18px 14px;
+  animation: ma-in 0.6s var(--umm-ease-out) both;
+}
+
+.ma__story-k {
+  font-size: 10px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.ma__flow {
+  display: grid;
+  gap: 4px;
+}
+
+.ma__flow-title {
+  font-size: clamp(14px, 1.08vw, 16px);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.ma__flow-intro {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.ma__now {
+  display: grid;
+  gap: 5px;
+}
+
+.ma__dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ma__dots button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f1f4;
+  font-size: 10.5px;
+  color: var(--umm-ink-quiet);
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+
+.ma__dots button[data-done] {
+  background: #d1e7ff;
+  color: var(--umm-ink);
+}
+
+.ma__dots button[aria-pressed='true'] {
+  background: var(--umm-ink);
+  color: #fff;
+}
+
+.ma__type {
+  margin-left: 8px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: #1f6dff;
+  font-size: 10px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.ma__story-title {
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.ma__story-copy {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+.ma__note {
+  align-self: end;
+  font-size: 11px;
+  color: var(--umm-ink-quiet);
+  white-space: nowrap;
+}
+
+.ma__progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #1f6dff;
+  transform-origin: left;
+  scale: var(--p, 0) 1;
+}
+
+.ma__stage[data-active='sel'] .ma__progress {
+  display: none;
+}
+
+.ma__inspect dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 0;
+}
+
+.ma__inspect-main {
+  display: grid;
+  gap: 4px;
+}
+
+.ma__inspect .ma__story-k {
+  grid-column: 1 / -1;
+}
+
+.ma__inspect dt {
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1f6dff;
+}
+
+.ma__inspect dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.ma__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  font-size: 18px;
+  line-height: 1;
+  color: #fff !important;
+  cursor: pointer;
+}
+
+/* --- governance ------------------------------------------------------------------------- */
+
+.ma__gov {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.ma__gov b {
+  margin-right: 6px;
+  font-size: 10.5px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.ma__gov span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 99px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+}
+
+.ma__gov span:not(.ma__hint)::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1f6dff;
+}
+
+.ma__gov .ma__hint {
+  margin-left: auto;
+  background: transparent;
+  box-shadow: none;
+  color: var(--umm-ink-quiet);
+}
+
+@keyframes ma-blink {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ma-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes ma-up {
+  0% {
+    opacity: 0;
+    top: 100%;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    top: 0%;
+  }
+}
+
+@keyframes ma-down {
+  0% {
+    opacity: 0;
+    top: 0%;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    top: 100%;
+  }
+}
+
+@keyframes ma-round {
+  0% {
+    top: 0%;
+    left: 0%;
+  }
+  25% {
+    top: 0%;
+    left: 100%;
+  }
+  50% {
+    top: 100%;
+    left: 100%;
+  }
+  75% {
+    top: 100%;
+    left: 0%;
+  }
+  100% {
+    top: 0%;
+    left: 0%;
+  }
+}
+
+@keyframes ma-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* --- smaller screens ----------------------------------------------------------------------- */
+
+@media (max-height: 820px) and (min-width: 901px) {
+  .ma {
+    gap: 10px;
+    padding-block: 14px;
+  }
+
+  .ma .mf-title {
+    font-size: min(clamp(30px, 3.4vw, 56px), 5.4svh);
+  }
+
+  .ma .mf-head {
+    gap: 10px;
+  }
+
+  .ma .mf-lead {
+    font-size: 13.5px;
+  }
+
+  .ma__stage {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .ma__label span,
+  .ma__agent small {
+    display: none;
+  }
+
+  .ma__ai-head p {
+    font-size: 15px;
+  }
+
+  .ma__pills em {
+    padding: 2px 7px;
+    font-size: 10px;
+  }
+
+  .ma__context {
+    margin-top: 4px;
+    padding-block: 5px;
+  }
+
+  .ma__step,
+  .ma__inspect {
+    padding-block: 10px 12px;
+  }
+
+  .ma__twin-body,
+  .ma__ai-note {
+    display: none !important;
+  }
+
+  .ma__stage-card {
+    grid-template-rows: auto 34px auto auto;
+  }
+
+  .ma__flow-intro {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+  .ma__pills em:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .ma__bar {
+    grid-template-columns: 1fr;
+  }
+
+  .ma__flows {
+    flex-wrap: nowrap;
+    justify-content: start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ma__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ma__agents,
+  .ma__stages {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ma__transfer {
+    display: none;
+  }
+
+  .ma__stages {
+    margin-top: 8px;
+  }
+
+  .ma__next {
+    display: none;
+  }
+
+  .ma__ai-head {
+    grid-template-columns: auto 1fr;
+  }
+
+  .ma__ai-head .ma__ai-note {
+    display: none;
+  }
+
+  .ma__step,
+  .ma__inspect {
+    grid-template-columns: 1fr;
+  }
+
+  .ma__inspect dl {
+    grid-template-columns: 1fr;
+  }
+
+  .ma__gov .ma__hint {
+    display: none;
+  }
+}

@@ -90,6 +90,93 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 12 Nov 2026, /manufacturing: Krish's review, applied in one pass
+
+From his doc "UMM industry page feedback" (nine screenshots with notes):
+
+- **Hero:** the foot bar (Plant / Supply / Service, the next chapter, Pause
+  motion) is gone, and the page's pause with it. The planning queue is
+  redrawn as the planner's screen: a time axis, three orders with their
+  slots, the now line, a late part landing, the two orders under review
+  trading places, and a toast saying what happened.
+- **Glass:** "not as per UMM brand". There is a new `finish="clear"` in
+  Element3D, which is the service pages' glass (GlassCube3D, glassStudio):
+  colourless, refracting a dark studio with softbox strips, with rainbow
+  fringes. It is used on the line (hero, model) and the gears (contact).
+  `glass` and `blue` stay as they were for Fintech.
+- **No gradients in pastel cards, no hover on cards.** Reality, the Enable
+  drawings, the work tiles, the twin tile and the rollout estate are now the
+  flat pastel itself.
+- **Timers never stop on hover.** This applies to useAuto (every
+  auto-stepping section) and the architecture tour.
+- **Enable:** the 00 procurement card no longer waits on the left for good.
+  It is the deck's first card, and the rail runs 00–04. The five drawings
+  are redrawn taller as scenes that play through:
+  - the PO confirmed and the truck docking, with the plan filling;
+  - a press over an indexing belt, stamping each part, with the live view
+    above;
+  - the camera's measure joining the quality, planning and supply pictures
+    into "Release the lot";
+  - the field unit calling, the portal answering with a spare, and the van
+    coming;
+  - edge, plant and cloud, with the shared context and the OT/IT lock.
+- **Model:** only the step in focus shows its text; the others show number,
+  verb and title, with no cut lines.
+- **Work:** one CTA, UMM's SplitButton "Read case study". The "Scope
+  illustration" pill and the in-drawing labels are gone. The three drawings
+  now play each engagement through on SMIL's clock:
+  - the recovery case stopping at each station as it lights, then the report;
+  - a price edited, the quote approved and stamped, and the field app taken
+    offline;
+  - area → question → answer.
+- **Audiences, redesigned:** one belt runs through four flat pastel cards,
+  and order SO-4471 rides it station to station. Each station works while
+  the order is in it:
+  - discrete: the press stamps Rev B;
+  - process: the batch pours and is released;
+  - OEM: the serial plate goes on and the spare is matched;
+  - contract: the customer's criteria are checked off.
+  
+  All words are always readable, and the titles are aligned by subgrid. The
+  old panels are kept at `?audiences=panels`.
+- Still one screen per section at 1440×900 and 1366×768, with no sideways
+  scroll at 390, and `npm run build` passes.
+
+### 12 Nov 2026, /manufacturing: the new industry flow, the whole page
+
+Krish gave the Manufacturing draft (umm-industry-pages.ai-umm.chatgpt.site/manufacturing)
+as the new structure for every industry page, and asked for the full page in
+"full creative mode": UMM pastels, Mosvita, fine-line Lottie-style drawings,
+scroll and component motion.
+
+- Content word for word, including what the draft shows only on a click (the
+  audience tabs, "What makes this work", the architecture's inspector and its
+  three workflows): `src/content/manufacturing.ts`, typed so another industry
+  writes the same fields.
+- Page `src/pages/ManufacturingPage.tsx`, sections in `src/components/industry/mfg/`,
+  styles `src/styles/mfg*.css`; built on /fintech-final's language.
+- 01 opening: the production line in clear glass (new `line` element in
+  Element3D: lots on rollers, a quality gate that scans and holds each lot),
+  the planning queue on ink resequencing; "Pause motion" holds every
+  animation on the page, the 3D included.
+- 02 reality: three pastel cards dealt in, each drawing acting out its
+  handoff; the point of view drawn as evidence ← decision → team.
+- 03 enable: pinned; procurement → four capabilities dealt as a deck as you
+  scroll → revenue operations.
+- 04 model: the glass line beside its digital twin (new `twin` element, blue
+  wireframe on a grid), signals across the seam, three plans compared, the
+  plan sent back; three auto-stepping steps.
+- 05 architecture: ink stage, AI layer over the value chain with live wires,
+  the twin loop, three workflows played step by step, every part clickable
+  for what it reads and returns.
+- 06 work: pinned sideways track: Mohawk Industries, then Recover, PriceFX,
+  Benefits with their scope illustrations.
+- 07 audiences: four expanding pastel panels. 08 impact: the dark-sheet
+  template, "What makes this work" as a formula into the decision owner.
+  09 rollout: one line to three plants. 10 contact: glass gears (new `gears`).
+- One screen per section at 1440×900 and 1366×768 (03 and 06 pin by design);
+  phones stack; `npm run build` passes.
+
 ### 6 Nov 2026, /fintech-final: 02 · The reality
 - **Krish's brief:** "take it from that box kind of thing only… make sure
   that it looks extremely perfect".

@@ -1,0 +1,406 @@
+/* ============================================================================
+   THE MANUFACTURING PAGE — 04 · the next manufacturing model (MfgModel.tsx)
+   the plant and its twin side by side, what passes between them by step
+   ========================================================================== */
+
+.mo {
+  background: #f7f7f9;
+}
+
+.mo__body {
+  display: grid;
+  gap: 12px;
+}
+
+.mo__split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+  height: clamp(250px, 38svh, 400px);
+}
+
+.mo__side {
+  min-height: 0;
+}
+
+.mo__side--twin {
+  background: var(--umm-sky);
+}
+
+.mo__tag {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+}
+
+/* --- the seam -------------------------------------------------------------------------- */
+
+.mo__seam {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.mo__seam::before {
+  content: '';
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(transparent, rgb(31 109 255 / 0.4), transparent);
+}
+
+/* the plant's signals, crossing into the twin */
+.mo__sig {
+  position: absolute;
+  top: calc(30% + var(--k) * 10%);
+  left: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1f6dff;
+  box-shadow: 0 0 10px rgb(31 109 255 / 0.6);
+  opacity: 0;
+  animation: mo-sig 1.8s ease-in-out calc(var(--k) * 0.32s) infinite;
+}
+
+/* the plan, going back the other way */
+.mo__plan {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+  box-shadow: 0 10px 24px -10px rgb(16 14 20 / 0.6);
+  opacity: 0;
+  scale: 0.4;
+}
+
+.mo__plan svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* observe: signals across. simulate: quieter. act: the plan back */
+.mo__body[data-step='1'] .mo__sig {
+  animation-duration: 3.2s;
+  background: #9cc4ff;
+}
+
+.mo__body[data-step='2'] .mo__sig {
+  animation-name: mo-back;
+}
+
+.mo__body[data-step='2'] .mo__plan {
+  animation: mo-plan 2.6s var(--umm-ease-out) 0.2s infinite;
+}
+
+/* --- the twin compares three plans ------------------------------------------------- */
+
+.mo__compare {
+  position: absolute;
+  z-index: 2;
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  gap: 6px;
+  width: min(46%, 220px);
+  padding: 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.66);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.9),
+    0 14px 30px -18px rgb(31 109 255 / 0.45);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  translate: 0 10px;
+  transition:
+    opacity 0.6s,
+    translate 0.6s var(--umm-ease-out);
+}
+
+.mo__body:is([data-step='1'], [data-step='2']) .mo__compare {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.mo__opt {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--umm-ink-quiet);
+}
+
+.mo__opt i {
+  height: 8px;
+  border-radius: 99px;
+  background: rgb(31 109 255 / 0.18);
+  transform-origin: left;
+  scale: var(--w) 1;
+  transition: scale 1s var(--umm-ease-out) calc(var(--k) * 0.12s);
+}
+
+.mo__body[data-step='1'] .mo__opt i {
+  animation: mo-try 1.4s ease-in-out calc(var(--k) * 0.2s) infinite alternate;
+}
+
+.mo__body[data-step='2'] .mo__opt[data-best] i {
+  background: #1f6dff;
+}
+
+.mo__body[data-step='2'] .mo__opt[data-best] b {
+  color: var(--umm-ink);
+}
+
+/* --- the three steps -------------------------------------------------------------------- */
+
+.mo__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* the step in focus shows everything; the others only their number, verb
+   and title, never a cut line (Krish, 12 Nov) */
+.mo__steps button {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto 0fr;
+  grid-template-areas:
+    'num verb'
+    'num title'
+    'num text';
+  align-content: start;
+  column-gap: 16px;
+  row-gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: clamp(12px, 2svh, 18px) clamp(14px, 1.4vw, 20px) clamp(14px, 2.2svh, 20px);
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    grid-template-rows 0.7s var(--umm-ease-out),
+    background 0.5s,
+    box-shadow 0.5s;
+}
+
+.mo__steps li[data-on] button {
+  grid-template-rows: auto auto 1fr;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(16 14 20 / 0.05),
+    0 22px 44px -30px rgb(16 14 20 / 0.35);
+}
+
+.mo__steps li:not([data-on]) :is(.mo__num, .mo__title) {
+  color: rgb(16 14 20 / 0.42);
+}
+
+.mo__num {
+  grid-area: num;
+  font-size: min(clamp(40px, 3.8vw, 64px), 7.4svh);
+  font-weight: var(--umm-weight-light);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+}
+
+.mo__steps li[data-on] .mo__num {
+  background: linear-gradient(180deg, #0a36d6, #4aa8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mo__verb {
+  grid-area: verb;
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.mo__title {
+  grid-area: title;
+  font-size: clamp(17px, 1.35vw, 21px);
+  letter-spacing: -0.02em;
+}
+
+.mo__text {
+  grid-area: text;
+  min-height: 0;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mo__steps li[data-on] .mo__text {
+  opacity: 1;
+  transition: opacity 0.6s 0.2s;
+}
+
+.mo__bar {
+  position: absolute;
+  right: 20px;
+  bottom: 0;
+  left: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--umm-ink);
+  transform-origin: left;
+  scale: 0 1;
+}
+
+.mo__steps li[data-on] .mo__bar {
+  scale: var(--p, 1) 1;
+}
+
+/* --- the reference ----------------------------------------------------------------------- */
+
+.mo__ref {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 7fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding-top: clamp(12px, 2svh, 18px);
+  border-top: 1px solid var(--umm-line);
+}
+
+.mo__ref-k {
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--umm-ink-quiet);
+}
+
+.mo__ref-body {
+  max-width: 82ch;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+}
+
+.mo__ref-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+
+.mo__ref-links .mf-link {
+  font-size: 13px;
+}
+
+@keyframes mo-sig {
+  0% {
+    opacity: 0;
+    left: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    left: calc(100% - 7px);
+  }
+}
+
+@keyframes mo-back {
+  0% {
+    opacity: 0;
+    left: calc(100% - 7px);
+  }
+  20%,
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    left: 0;
+  }
+}
+
+@keyframes mo-plan {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+    translate: 60px 0;
+  }
+  25% {
+    opacity: 1;
+    scale: 1.08;
+    translate: 20px 0;
+  }
+  55% {
+    opacity: 1;
+    scale: 1;
+    translate: -20px 0;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.6;
+    translate: -70px 0;
+  }
+}
+
+@keyframes mo-try {
+  from {
+    scale: calc(var(--w) * 0.6) 1;
+  }
+  to {
+    scale: var(--w) 1;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 901px) {
+  .mo__split {
+    height: calc(100svh - 490px);
+    min-height: 220px;
+  }
+
+}
+
+@media (max-width: 900px) {
+  .mo__split {
+    grid-template-columns: 1fr;
+    grid-template-rows: 240px 40px 240px;
+    height: auto;
+  }
+
+  .mo__seam {
+    rotate: 90deg;
+  }
+
+  .mo__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .mo__ref {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

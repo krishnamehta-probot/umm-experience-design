@@ -1,0 +1,910 @@
+/* ============================================================================
+   THE MANUFACTURING PAGE — the drawings (MfgArt.tsx), in fine line
+
+   One hairline weight; lines drawing on, holding and drawing off like
+   Lottie's trim paths on one eight-second loop; a small overshoot on what
+   lands; secondary motion that never stops. The accents follow the tone of
+   whatever holds the drawing (data-tone), from the brand pastels.
+   ========================================================================== */
+
+.ml {
+  --ml-ink: rgb(16 14 20 / 0.86);
+  --ml-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --ml-a: var(--umm-sky);
+  --ml-b: var(--umm-citrus);
+  --ml-c: var(--umm-blossom);
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+[data-tone='sky'] .ml,
+.ml[data-tone='sky'] {
+  --ml-a: var(--umm-sky);
+  --ml-b: var(--umm-citrus);
+  --ml-c: var(--umm-blossom);
+}
+
+[data-tone='sun'] .ml {
+  --ml-a: var(--umm-sun);
+  --ml-b: var(--umm-sky);
+  --ml-c: var(--umm-blossom);
+}
+
+[data-tone='blossom'] .ml {
+  --ml-a: var(--umm-blossom);
+  --ml-b: var(--umm-sky);
+  --ml-c: var(--umm-sun);
+}
+
+[data-tone='citrus'] .ml {
+  --ml-a: var(--umm-citrus);
+  --ml-b: var(--umm-sky);
+  --ml-c: var(--umm-blossom);
+}
+
+[data-tone='lilac'] .ml {
+  --ml-a: var(--umm-lilac);
+  --ml-b: var(--umm-citrus);
+  --ml-c: var(--umm-sky);
+}
+
+[data-tone='coral'] .ml {
+  --ml-a: var(--umm-coral);
+  --ml-b: var(--umm-sky);
+  --ml-c: var(--umm-sun);
+}
+
+.ml-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  font-family: var(--umm-font-body);
+}
+
+.ml-art path,
+.ml-art rect,
+.ml-art circle {
+  fill: none;
+  stroke: var(--ml-ink);
+  stroke-width: 0.95;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ml-art .ml-sheet {
+  fill: rgb(255 255 255 / 0.92);
+  stroke: none;
+}
+
+.ml-art .ml-under {
+  fill: rgb(16 14 20 / 0.06);
+  stroke: none;
+}
+
+.ml-art .ml-a,
+.ml-art .ml-b,
+.ml-art .ml-c {
+  stroke: none;
+}
+
+.ml-art .ml-a {
+  fill: var(--ml-a);
+}
+
+.ml-art .ml-b {
+  fill: var(--ml-b);
+}
+
+.ml-art .ml-c {
+  fill: var(--ml-c);
+}
+
+.ml-art .ml-node {
+  fill: #fff;
+}
+
+.ml-art .ml-ink {
+  fill: var(--umm-ink);
+  stroke: none;
+}
+
+.ml-art .ml-on-ink {
+  stroke: #fff;
+  stroke-width: 1.2;
+}
+
+.ml-art .ml-quiet {
+  stroke-opacity: 0.45;
+}
+
+.ml-art .ml-hair {
+  stroke-opacity: 0.14;
+}
+
+.ml-art .ml-bold {
+  stroke-width: 1.8;
+}
+
+.ml-art .ml-roll {
+  fill: #fff;
+  stroke-opacity: 0.5;
+}
+
+.ml-t {
+  fill: var(--umm-ink-quiet);
+  font-size: 6.6px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ml-t--ink {
+  fill: #fff;
+  font-size: 6.4px;
+}
+
+.ml-t--big {
+  fill: var(--umm-ink);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
+
+/* figures: no capitals to set, a little tighter */
+.ml-t--num {
+  letter-spacing: 0.04em;
+}
+
+.ml-t--dark {
+  fill: var(--umm-ink);
+}
+
+/* a ring that swells out from a station as it lights (SMIL sets r) */
+.ml-art .ml-ring {
+  stroke-width: 1.2;
+}
+
+/* the hand pointing (SMIL moves it) */
+.ml-art .ml-pointer {
+  fill: var(--umm-ink);
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+/* parts a press has finished, and the one finished under it each beat */
+.ml-art .ml-done {
+  fill: var(--ml-b);
+}
+
+.ml-art .ml-stamped {
+  animation: ml-stamped 3.2s linear infinite;
+}
+
+/* --- the loop: drawn on, held, drawn off the way it came ----------------------- */
+
+.ml-art .ml-draw {
+  stroke-dasharray: 1;
+  animation: ml-draw 8s var(--ml-ease) var(--t, 0s) infinite both;
+}
+
+.ml-art .ml-fade {
+  animation: ml-fade 8s var(--ml-ease) var(--t, 0s) infinite both;
+}
+
+.ml-art .ml-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ml-pop 8s var(--t, 0s) infinite both;
+}
+
+.ml-art .ml-grow {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: ml-grow 8s var(--ml-ease) var(--t, 0s) infinite both;
+}
+
+.ml-art .ml-fill {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: ml-fill 4s ease-in-out var(--t, 0s) infinite alternate both;
+}
+
+.ml-art .ml-stamp {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ml-stamp 8s var(--t, 0s) infinite both;
+}
+
+/* --- secondary motion ------------------------------------------------------------ */
+
+.ml-art .ml-dash {
+  stroke-dasharray: 2 3.2;
+  stroke-opacity: 0.6;
+  animation: ml-dash 1.6s linear infinite;
+}
+
+.ml-art .ml-trace {
+  stroke-width: 1.3;
+  stroke-dasharray: 0.3 0.7;
+  animation: ml-trace 2.8s linear infinite;
+}
+
+.ml-art .ml-ping {
+  stroke-opacity: 0.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ml-ping 2.4s ease-out infinite;
+}
+
+.ml-art .ml-belt {
+  animation: ml-belt var(--dur, 3.4s) linear infinite;
+}
+
+.ml-art .ml-cargo {
+  transform-box: fill-box;
+  animation: ml-cargo 3s linear calc(var(--t, 0s) * -1) infinite both;
+}
+
+.ml-art .ml-turn,
+.ml-art .ml-spin {
+  transform-box: view-box;
+  animation: ml-spin 9s linear infinite;
+}
+
+.ml-art .ml-spin {
+  animation-duration: 4s;
+}
+
+.ml-art .ml-arm,
+.ml-art .ml-arm2 {
+  transform-box: view-box;
+  animation: ml-arm 3.2s ease-in-out infinite alternate;
+}
+
+.ml-art .ml-arm2 {
+  animation-name: ml-arm2;
+  animation-duration: 2.6s;
+}
+
+.ml-art .ml-blink {
+  animation: ml-blink 1.4s ease-in-out infinite alternate;
+}
+
+.ml-art .ml-scan {
+  stroke: #1f6dff;
+  stroke-width: 1.2;
+  stroke-opacity: 0.8;
+  animation: ml-scan 2.6s ease-in-out infinite alternate;
+}
+
+.ml-art .ml-scan--x {
+  --range: -14px;
+}
+
+.ml-art .ml-wave {
+  stroke-opacity: 0;
+  animation: ml-wave 2.1s ease-out var(--t, 0s) infinite;
+}
+
+.ml-art .ml-rise {
+  animation: ml-rise 2.4s ease-in var(--t, 0s) infinite both;
+}
+
+/* a truck arriving from the left and parking, then driving on in */
+.ml-art .ml-arrive {
+  animation: ml-arrive 8s var(--ml-ease) infinite both;
+}
+
+/* a van arriving from the right */
+.ml-art .ml-arrive-l {
+  animation: ml-arrive-l 8s var(--ml-ease) infinite both;
+}
+
+/* an indexing belt: a part's length, then a rest while the press works */
+.ml-art .ml-index {
+  animation: ml-index 3.2s var(--ml-ease) infinite;
+}
+
+.ml-art .ml-press {
+  animation: ml-press 3.2s infinite;
+}
+
+.ml-art .ml-float {
+  animation: ml-float 3.6s ease-in-out infinite alternate;
+}
+
+.ml-art .ml-tilt {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: ml-tilt 5s ease-in-out infinite alternate;
+}
+
+.ml-art .ml-drive {
+  animation: ml-drive 2.2s ease-in-out infinite alternate;
+}
+
+.ml-art .ml-depart {
+  animation: ml-depart 8s var(--ml-ease) infinite both;
+}
+
+.ml-art .ml-shift {
+  animation: ml-shift 8s var(--ml-ease) infinite both;
+}
+
+.ml-art .ml-part {
+  animation: ml-part 8s var(--ml-ease) infinite both;
+}
+
+.ml-art .ml-late {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ml-late 8s infinite both;
+}
+
+.ml-art .ml-flick {
+  animation: ml-flick 3.2s var(--ml-ease) infinite;
+}
+
+.ml-art .ml-cursor {
+  fill: var(--umm-ink);
+  stroke: #fff;
+  stroke-width: 1;
+  animation: ml-cursor 8s var(--ml-ease) infinite both;
+}
+
+.ml-art .ml-rebuild {
+  stroke-dasharray: 1;
+}
+
+/* --- keyframes ------------------------------------------------------------------- */
+
+@keyframes ml-draw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  14%,
+  80% {
+    stroke-dashoffset: 0;
+  }
+  94%,
+  100% {
+    stroke-dashoffset: -1;
+  }
+}
+
+@keyframes ml-fade {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  16%,
+  80% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ml-pop {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  5% {
+    opacity: 1;
+    scale: 1.14;
+  }
+  8%,
+  82% {
+    opacity: 1;
+    scale: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+
+@keyframes ml-grow {
+  0% {
+    scale: 0 1;
+  }
+  12%,
+  80% {
+    scale: 1 1;
+  }
+  94%,
+  100% {
+    scale: 0 1;
+  }
+}
+
+@keyframes ml-fill {
+  from {
+    scale: 1 0.78;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes ml-stamp {
+  0%,
+  6% {
+    opacity: 0;
+    scale: 1.8;
+  }
+  10% {
+    opacity: 1;
+    scale: 0.92;
+  }
+  13%,
+  80% {
+    opacity: 1;
+    scale: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@keyframes ml-dash {
+  to {
+    stroke-dashoffset: -10.4;
+  }
+}
+
+@keyframes ml-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ml-ping {
+  0% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.2;
+  }
+}
+
+@keyframes ml-belt {
+  to {
+    translate: var(--step, 52px) 0;
+  }
+}
+
+@keyframes ml-cargo {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 34px 0;
+  }
+}
+
+@keyframes ml-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes ml-arm {
+  from {
+    rotate: -9deg;
+  }
+  to {
+    rotate: 7deg;
+  }
+}
+
+@keyframes ml-arm2 {
+  from {
+    rotate: 12deg;
+  }
+  to {
+    rotate: -14deg;
+  }
+}
+
+@keyframes ml-blink {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ml-scan {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 var(--range, 28px);
+  }
+}
+
+@keyframes ml-wave {
+  0% {
+    stroke-opacity: 0;
+  }
+  20% {
+    stroke-opacity: 0.7;
+  }
+  100% {
+    stroke-opacity: 0;
+  }
+}
+
+@keyframes ml-rise {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 var(--rise, -72px);
+  }
+}
+
+@keyframes ml-arrive {
+  0%,
+  6% {
+    opacity: 0;
+    translate: -110px 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  30%,
+  74% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  90%,
+  100% {
+    opacity: 0;
+    translate: 40px 0;
+  }
+}
+
+@keyframes ml-arrive-l {
+  0%,
+  10% {
+    opacity: 0;
+    translate: 90px 0;
+  }
+  16% {
+    opacity: 1;
+  }
+  36%,
+  76% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    translate: -24px 0;
+  }
+}
+
+@keyframes ml-index {
+  0% {
+    translate: 0 0;
+  }
+  40%,
+  100% {
+    translate: 56px 0;
+  }
+}
+
+@keyframes ml-press {
+  0%,
+  54% {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5);
+  }
+  64% {
+    translate: 0 13px;
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  }
+  86%,
+  100% {
+    translate: 0 0;
+  }
+}
+
+@keyframes ml-stamped {
+  0%,
+  64% {
+    fill: #fff;
+  }
+  66%,
+  100% {
+    fill: var(--ml-b);
+  }
+}
+
+@keyframes ml-float {
+  from {
+    translate: 0 -2px;
+  }
+  to {
+    translate: 0 3px;
+  }
+}
+
+@keyframes ml-tilt {
+  from {
+    rotate: -5deg;
+  }
+  to {
+    rotate: -2deg;
+  }
+}
+
+@keyframes ml-drive {
+  from {
+    translate: -3px 0;
+  }
+  to {
+    translate: 3px 0;
+  }
+}
+
+@keyframes ml-depart {
+  0%,
+  10% {
+    opacity: 0;
+    translate: -16px 0;
+  }
+  22%,
+  66% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  88%,
+  100% {
+    opacity: 0;
+    translate: 34px 0;
+  }
+}
+
+@keyframes ml-shift {
+  0%,
+  30% {
+    translate: 0 0;
+  }
+  42%,
+  78% {
+    translate: 30px 0;
+  }
+  90%,
+  100% {
+    translate: 0 0;
+  }
+}
+
+@keyframes ml-part {
+  0%,
+  8% {
+    opacity: 0;
+    translate: 8px -10px;
+  }
+  20%,
+  80% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  92%,
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes ml-late {
+  0%,
+  82% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  86% {
+    opacity: 1;
+    scale: 1.18;
+  }
+  89%,
+  97% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@keyframes ml-flick {
+  0%,
+  35% {
+    translate: 0 0;
+  }
+  50%,
+  85% {
+    translate: 20px 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+@keyframes ml-cursor {
+  0% {
+    opacity: 0;
+    translate: 4px -24px;
+  }
+  8%,
+  22% {
+    opacity: 1;
+    translate: 0 -30px;
+  }
+  32%,
+  44% {
+    translate: 0 0;
+  }
+  54%,
+  62% {
+    translate: 0 30px;
+  }
+  74%,
+  84% {
+    opacity: 1;
+    translate: 80px -6px;
+  }
+  94%,
+  100% {
+    opacity: 0;
+    translate: 80px -6px;
+  }
+}
+
+/* --- the stations (07): idle, then at work while the order is in them --------- */
+
+.ml-art .st-on {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+[data-on] .ml-art .st-on {
+  animation: st-on 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) var(--d, 1s) both;
+}
+
+.ml-art .st-press {
+  transform-box: view-box;
+}
+
+[data-on] .ml-art .st-press {
+  animation: st-press 1.3s ease-in-out 0.8s both;
+}
+
+.ml-art .st-grow {
+  transform-box: fill-box;
+  transform-origin: left center;
+  scale: 0.25 1;
+  transition: scale 0.4s;
+}
+
+[data-on] .ml-art .st-grow {
+  animation: st-grow 0.9s var(--ml-ease) var(--d, 1s) both;
+}
+
+.ml-art .st-pour {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+[data-on] .ml-art .st-pour {
+  animation: st-pour 2s var(--ml-ease) 0.9s both;
+}
+
+.ml-art .st-drip {
+  opacity: 0;
+}
+
+[data-on] .ml-art .st-drip {
+  animation: st-drip 0.9s ease-in var(--d, 1s) 3;
+}
+
+@keyframes st-on {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes st-press {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  40%,
+  55% {
+    translate: 0 24px;
+  }
+}
+
+@keyframes st-grow {
+  from {
+    scale: 0.25 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes st-pour {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 1 0.55;
+  }
+}
+
+@keyframes st-drip {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-art * {
+    animation: none !important;
+  }
+
+  [data-on] .ml-art .st-on {
+    opacity: 1;
+  }
+}

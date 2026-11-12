@@ -1,0 +1,348 @@
+/* ============================================================================
+   THE MANUFACTURING PAGE — 03 · what UMM enables (MfgEnable.tsx)
+   pinned; the chain (00–04) on the left, the cards dealt as a deck
+   ========================================================================== */
+
+.me {
+  position: relative;
+  height: calc(100svh + (var(--n) - 1) * 66svh);
+}
+
+.me__pin {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(14px, 2.6svh, 28px);
+  height: 100svh;
+  padding: clamp(24px, 5svh, 64px) var(--g);
+  overflow: hidden;
+}
+
+.me__main {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 12px;
+  height: clamp(420px, calc(100svh - 290px), 620px);
+}
+
+.me__k {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--umm-ink-soft);
+}
+
+.me__k span {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 99px;
+  background: var(--umm-ink);
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+/* --- the chain ----------------------------------------------------------------------- */
+
+.me__chain {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  min-height: 0;
+}
+
+.me__rail {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+/* the chain's spine */
+.me__rail::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 20px;
+  width: 1px;
+  background: var(--umm-line);
+}
+
+.me__rail button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  width: 100%;
+  min-height: clamp(38px, 6svh, 52px);
+  padding: 0 12px 0 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  font-size: clamp(14px, 1.05vw, 16px);
+  letter-spacing: -0.01em;
+  text-align: left;
+  color: var(--umm-ink-quiet);
+  cursor: pointer;
+  transition:
+    color 0.4s,
+    background 0.4s;
+}
+
+.me__rail button span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+  font-size: 11px;
+  font-weight: var(--umm-weight-medium);
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+
+/* how far the deck has come: the dot fills */
+.me__rail button i {
+  position: absolute;
+  bottom: 6px;
+  left: 42px;
+  right: 12px;
+  height: 1px;
+  background: var(--umm-ink);
+  transform-origin: left;
+  scale: var(--f, 0) 1;
+  opacity: 0.18;
+}
+
+.me__rail button[aria-current] {
+  background: #f4f4f7;
+  color: var(--umm-ink);
+}
+
+.me__rail button[aria-current] span {
+  background: var(--umm-ink);
+  box-shadow: none;
+  color: #fff;
+}
+
+.me__end {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: clamp(14px, 2.2svh, 20px) clamp(16px, 1.6vw, 24px);
+  border-radius: 22px;
+  background: var(--umm-ink);
+  color: #fff;
+}
+
+.me__end p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.72);
+}
+
+.me__end .mf-link {
+  color: #fff;
+}
+
+/* --- the deck -------------------------------------------------------------------------- */
+
+.me__deck {
+  position: relative;
+  min-height: 0;
+}
+
+.me-card {
+  --tone: var(--umm-sky);
+  position: absolute;
+  inset: 34px 0 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(16 14 20 / 0.06),
+    0 30px 60px -36px rgb(16 14 20 / 0.4);
+  transform-origin: 50% 0;
+  translate: 0 calc((1 - var(--in)) * 112% + var(--d) * -16px);
+  scale: calc(1 - var(--d) * 0.045);
+  will-change: translate, scale;
+}
+
+.me-card[data-tone='citrus'] {
+  --tone: var(--umm-citrus);
+}
+
+.me-card[data-tone='blossom'] {
+  --tone: var(--umm-blossom);
+}
+
+.me-card[data-tone='lilac'] {
+  --tone: var(--umm-lilac);
+}
+
+/* the ones behind: their faces quieten */
+.me-card > * {
+  opacity: calc(1 - min(var(--d), 1) * 0.55);
+}
+
+.me-card__text {
+  display: grid;
+  align-content: start;
+  gap: clamp(8px, 1.4svh, 14px);
+  padding: clamp(14px, 2.4svh, 26px) clamp(14px, 1.4vw, 24px);
+  min-height: 0;
+}
+
+.me-card h3 {
+  font-size: min(clamp(24px, 2.3vw, 38px), 4.6svh);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+
+.me-card__sub {
+  max-width: 36ch;
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.45;
+  color: var(--umm-ink-soft);
+}
+
+.me-card__points {
+  display: grid;
+  margin-top: 4px;
+}
+
+.me-card__points li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: clamp(8px, 1.3svh, 12px) 0;
+  border-top: 1px solid var(--umm-line);
+  font-size: clamp(13px, 0.95vw, 14.5px);
+  line-height: 1.45;
+}
+
+.me-card__points svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  padding: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tone) 70%, #fff);
+  fill: none;
+  stroke: var(--umm-ink);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the drawing on the flat pastel (no gradient: Krish, 12 Nov) */
+.me-card__art {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  padding: clamp(10px, 2svh, 22px) clamp(10px, 1.2vw, 22px);
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--tone);
+}
+
+.me-card[data-tone='sun'] {
+  --tone: var(--umm-sun);
+}
+
+/* procurement's card has no list: its words read larger */
+.me-card[data-start] .me-card__sub {
+  max-width: 34ch;
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.5;
+}
+
+.me-card__num {
+  position: absolute;
+  bottom: 8px;
+  left: 18px;
+  font-size: min(clamp(56px, 6vw, 104px), 12svh);
+  font-weight: var(--umm-weight-light);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: rgb(16 14 20 / 0.16);
+}
+
+/* --- smaller screens ----------------------------------------------------------------------- */
+
+@media (max-height: 820px) and (min-width: 901px) {
+  .me__main {
+    height: calc(100svh - 250px);
+  }
+
+  .me-card__points li {
+    padding: 6px 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .me {
+    height: auto;
+  }
+
+  .me__pin {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .me__main {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .me__rail {
+    display: none;
+  }
+
+  .me__chain {
+    order: 2;
+    display: block;
+  }
+
+  .me__deck {
+    display: grid;
+    gap: 12px;
+  }
+
+  .me-card {
+    position: relative;
+    inset: auto;
+    grid-template-columns: 1fr;
+    translate: none;
+    scale: none;
+  }
+
+  .me-card > * {
+    opacity: 1;
+  }
+
+  .me-card__art {
+    height: 220px;
+  }
+}

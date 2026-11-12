@@ -24,6 +24,9 @@ const UxCommercePage = lazy(() =>
 )
 const FintechPage = lazy(() => import('./pages/FintechPage').then((m) => ({ default: m.FintechPage })))
 const FintechFinal = lazy(() => import('./pages/FintechFinal').then((m) => ({ default: m.FintechFinal })))
+const ManufacturingPage = lazy(() =>
+  import('./pages/ManufacturingPage').then((m) => ({ default: m.ManufacturingPage })),
+)
 const CaseConcepts = lazy(() => import('./pages/CaseConcepts').then((m) => ({ default: m.CaseConcepts })))
 const CaseStudies = lazy(() => import('./pages/CaseStudies').then((m) => ({ default: m.CaseStudies })))
 const FilmRenderPage = lazy(() =>
@@ -73,6 +76,7 @@ const FilmRenderPage = lazy(() =>
  *   /fintech-banking-insurance  the first industry page (2 Nov): its own
  *                design, the engraved ribbon hero, built section by section
  *   /fintech-final  the final Fintech page (6 Nov), built section by section
+ *   /manufacturing  the Manufacturing page (12 Nov), the new industry flow
  *                from Krish's briefs; the hero first
  *   /casestudies  the case-study main page (5 Nov): Krish's two columns and
  *                one big card playing the film; ?cards ?layout ?bg
@@ -181,6 +185,13 @@ export function App() {
     return (
       <Suspense fallback={null}>
         <FintechFinal />
+      </Suspense>
+    )
+  }
+  if (path === '/manufacturing') {
+    return (
+      <Suspense fallback={null}>
+        <ManufacturingPage />
       </Suspense>
     )
   }
