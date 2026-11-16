@@ -28,6 +28,12 @@
   list-style: none;
 }
 
+/* the shared pills, a size up here (Krish, 16 Nov: the type, bigger) */
+.mf .ff-eyebrow,
+.mf .ff-glass {
+  font-size: 14.5px;
+}
+
 /* low specificity, so any component's own colour wins */
 :where(.mf) button {
   font: inherit;
@@ -98,7 +104,7 @@
 
 .mf-lead {
   max-width: 46ch;
-  font-size: clamp(14px, 1vw, 15.5px);
+  font-size: clamp(16.5px, 1.18vw, 18.5px);
   line-height: 1.6;
   color: var(--umm-ink-soft);
 }
@@ -124,7 +130,7 @@
   gap: 8px;
   padding-bottom: 3px;
   border-bottom: 1px solid currentColor;
-  font-size: 14px;
+  font-size: 16.5px;
   color: var(--umm-ink);
   text-decoration: none;
   white-space: nowrap;
@@ -191,7 +197,7 @@
 
 .mh__lead {
   max-width: 44ch;
-  font-size: clamp(14px, 1vw, 15.5px);
+  font-size: clamp(16.5px, 1.18vw, 18.5px);
   line-height: 1.55;
   color: var(--umm-ink-soft);
 }
@@ -211,7 +217,7 @@
 .mh__link {
   display: inline-flex;
   gap: 6px;
-  font-size: 13.5px;
+  font-size: 16px;
   color: var(--umm-ink);
   text-decoration: none;
 }
@@ -255,7 +261,7 @@
 }
 
 .mh__chip-k {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -266,7 +272,7 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  font-size: clamp(16px, 1.4vw, 21px);
+  font-size: clamp(17.5px, 1.54vw, 23px);
   letter-spacing: -0.02em;
 }
 
@@ -292,7 +298,7 @@
   z-index: 2;
   bottom: 16px;
   left: 20px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -338,7 +344,7 @@
 
 .mh-q__axis {
   padding: 0 10px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -390,14 +396,14 @@
 }
 
 .mh-q__id b {
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.02em;
 }
 
 .mh-q__id small {
   overflow: hidden;
-  font-size: 10.5px;
+  font-size: 12.5px;
   color: rgb(255 255 255 / 0.5);
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -443,7 +449,7 @@
   align-items: center;
   justify-self: end;
   gap: 6px;
-  font-size: 11px;
+  font-size: 13px;
   color: rgb(255 255 255 / 0.7);
 }
 
@@ -506,7 +512,7 @@
   padding: 0 12px 0 10px;
   border-radius: 99px;
   background: rgb(255 255 255 / 0.08);
-  font-size: 11.5px;
+  font-size: 13.5px;
   color: #fff;
   opacity: 0;
 }
@@ -661,7 +667,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -680,14 +686,14 @@
 }
 
 .mr-card h3 {
-  font-size: clamp(19px, 1.6vw, 25px);
+  font-size: clamp(21px, 1.76vw, 27.5px);
   font-weight: var(--umm-weight-regular);
   line-height: 1.12;
   letter-spacing: -0.025em;
 }
 
 .mr-card__text > p:last-child {
-  font-size: clamp(13px, 0.92vw, 14.5px);
+  font-size: clamp(15.5px, 1.09vw, 17px);
   line-height: 1.55;
   color: rgb(16 14 20 / 0.72);
 }
@@ -696,7 +702,7 @@
 .mr__pov {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 3.6fr) minmax(0, 4.6fr) minmax(0, 3.8fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.3fr);
   align-items: center;
   gap: clamp(16px, 2vw, 32px);
   overflow: hidden;
@@ -723,25 +729,29 @@
 }
 
 .mr__pov-body {
-  font-size: 13.5px;
+  font-size: 16px;
   line-height: 1.55;
   color: rgb(255 255 255 / 0.66);
 }
 
 .mr__route {
   display: grid;
-  grid-template-columns: auto minmax(18px, 1fr) auto minmax(18px, 1fr) auto;
+  grid-template-columns: auto minmax(18px, 40px) auto minmax(18px, 40px) auto;
   align-items: center;
   gap: 8px;
 }
 
 .mr__end {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  line-height: 1.3;
   color: rgb(255 255 255 / 0.6);
-  white-space: nowrap;
+  text-align: center;
+  /* at the larger size the labels take two lines, so the route keeps
+     its own width beside the words */
+  max-width: 9em;
 }
 
 .mr__wire {
@@ -792,7 +802,7 @@
   display: grid;
   place-items: center;
   padding: 0 16px;
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: var(--umm-weight-medium);
   white-space: nowrap;
   opacity: 0;

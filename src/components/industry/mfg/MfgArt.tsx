@@ -1111,7 +1111,7 @@ function StationDiscrete() {
         <rect key={k} className={k === 1 ? 'ml-b' : 'ml-node'} x={164 + k * 22} y="80" width="16" height="18" rx="3" />
       ))}
       <rect x="186" y="80" width="16" height="18" rx="3" />
-      <OnCheck x={194} y={66} r={5.4} d="1.9s" />
+      <OnCheck x={208} y={66} r={5.4} d="1.9s" />
       <Rollers />
     </svg>
   )

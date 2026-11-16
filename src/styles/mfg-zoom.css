@@ -1,0 +1,653 @@
+/* ============================================================================
+   THE MANUFACTURING PAGE — 09 · from pilots to operating impact, the zoom
+   (MfgRolloutZoom.tsx): pinned, the camera pulling out from one machine to
+   five plants as the reader scrolls
+   ========================================================================== */
+
+.mz {
+  position: relative;
+  height: calc(100svh + 3 * 90svh);
+  background: #fff;
+}
+
+.mz__pin {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(14px, 2.6svh, 28px);
+  height: 100svh;
+  padding: var(--mf-pad) var(--g);
+  overflow: hidden;
+}
+
+.mz__body {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--mf-gap);
+  flex: 1;
+  min-height: 0;
+  max-height: 640px;
+}
+
+/* --- beside the stage: how much is in view, and the four steps ----------------------------- */
+
+.mz__side {
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(14px, 2.4svh, 24px);
+  min-height: 0;
+}
+
+.mz__count {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  line-height: 1;
+}
+
+.mz__count b {
+  font-size: min(clamp(80px, 9vw, 150px), 17svh);
+  font-weight: var(--umm-weight-light);
+  letter-spacing: -0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mz__count span {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 0.5em;
+  font-size: clamp(17px, 1.3vw, 20px);
+}
+
+.mz__count em {
+  font-size: 13px;
+  font-style: normal;
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1658f2;
+}
+
+.mz__steps {
+  display: grid;
+  border-top: 1px solid var(--umm-line);
+}
+
+.mz__steps button {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-rows: auto 0fr;
+  column-gap: 12px;
+  width: 100%;
+  padding: clamp(10px, 1.6svh, 15px) 0;
+  border: 0;
+  border-bottom: 1px solid var(--umm-line);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: grid-template-rows 0.6s var(--umm-ease-out);
+}
+
+.mz__steps li[data-on] button {
+  grid-template-rows: auto 1fr;
+}
+
+.mz__num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 22px;
+  border-radius: 99px;
+  box-shadow: inset 0 0 0 1px var(--umm-line);
+  font-size: 12.5px;
+  font-weight: var(--umm-weight-medium);
+  color: var(--umm-ink-quiet);
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+
+.mz__steps li[data-done] .mz__num {
+  color: var(--umm-ink);
+}
+
+.mz__steps li[data-on] .mz__num {
+  background: var(--umm-ink);
+  box-shadow: none;
+  color: #fff;
+}
+
+.mz__title {
+  font-size: clamp(17px, 1.35vw, 21px);
+  letter-spacing: -0.015em;
+  color: var(--umm-ink-quiet);
+  transition: color 0.4s;
+}
+
+.mz__steps li:is([data-on], [data-done]) .mz__title {
+  color: var(--umm-ink);
+}
+
+.mz__text {
+  grid-column: 2;
+  overflow: hidden;
+  min-height: 0;
+  font-size: clamp(15px, 1.1vw, 16.5px);
+  line-height: 1.55;
+  color: var(--umm-ink-soft);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.mz__steps li[data-on] .mz__text {
+  padding-top: 6px;
+  opacity: 1;
+  transition-delay: 0.15s;
+}
+
+/* --- the stage ---------------------------------------------------------------------------- */
+
+.mz__stage {
+  grid-column: 5 / -1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 26px;
+  background: var(--umm-sky);
+}
+
+.mz-world {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--umm-font-body);
+}
+
+/* hairlines at every scale */
+.mz-world * {
+  vector-effect: non-scaling-stroke;
+}
+
+.mz-world path,
+.mz-world rect,
+.mz-world circle {
+  fill: none;
+  stroke: rgb(16 14 20 / 0.86);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mz-world text {
+  stroke: none;
+  fill: var(--umm-ink-quiet);
+  font-weight: var(--umm-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mz-t {
+  font-size: 9px;
+}
+
+.mz-t--small {
+  font-size: 3.4px;
+}
+
+.mz-t--shift {
+  font-size: 7px;
+}
+
+.mz-world .mz-t--rec {
+  font-size: 6.4px;
+  fill: #fff;
+}
+
+.mz-world .mz-read {
+  font-size: 5.6px;
+  fill: var(--umm-ink);
+  letter-spacing: 0.04em;
+}
+
+.mz-world .mz-name {
+  font-size: 26px;
+  fill: var(--umm-ink);
+  letter-spacing: 0.08em;
+}
+
+.mz-world .mz-plant {
+  fill: #fff;
+  stroke: rgb(16 14 20 / 0.4);
+}
+
+.mz-world .mz-track {
+  stroke-opacity: 0.35;
+}
+
+/* the machines: the pilot lit from the start; its line joined, then
+   proven; the pattern spreading to the rest */
+.mz-world .mz-m {
+  fill: #fff;
+  transition: fill 0.6s var(--umm-ease-out);
+}
+
+.mz-world .mz-m[data-pilot] {
+  fill: var(--umm-citrus);
+}
+
+.mz__body[data-level='1'] .mz-m[data-row]:not([data-pilot]) {
+  fill: #fff7b8;
+}
+
+.mz__body:is([data-level='2'], [data-level='3']) .mz-m[data-row] {
+  fill: var(--umm-citrus);
+}
+
+.mz__body[data-level='3'] .mz-line .mz-m {
+  fill: var(--umm-citrus);
+  transition-delay: calc(var(--li) * 0.25s);
+}
+
+.mz-world .mz-m--far {
+  transition: fill 0.5s var(--umm-ease-out) calc(0.6s + var(--k) * 0.45s + var(--li) * 0.12s);
+}
+
+.mz__body[data-level='3'] .mz-m--far {
+  fill: var(--umm-citrus);
+}
+
+/* each scale's detail, only around its own framing */
+.mz-l0 {
+  opacity: var(--o0);
+}
+
+.mz-l1 {
+  opacity: var(--o1);
+}
+
+.mz-l2 {
+  opacity: var(--o2);
+}
+
+.mz-l3 {
+  opacity: var(--o3);
+}
+
+.mz-pin {
+  opacity: var(--pin);
+}
+
+.mz-world .mz-pin path {
+  fill: var(--umm-ink);
+  stroke: none;
+}
+
+.mz-world .mz-pin circle {
+  fill: #fff;
+  stroke: none;
+}
+
+/* 01 · the press working, the scrap rate against its baseline */
+.mz-ram {
+  animation: mz-press 1.6s var(--umm-ease-out) infinite;
+}
+
+.mz-world .mz-ram rect {
+  fill: #fff;
+}
+
+.mz-world .mz-part {
+  fill: var(--umm-blossom);
+}
+
+.mz-world .mz-base {
+  stroke-dasharray: 3 4;
+  stroke-opacity: 0.5;
+}
+
+.mz-world .mz-now {
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: mz-grow 3.2s var(--umm-ease-out) infinite;
+}
+
+/* 02 · the wires to the shared record, the references running up them */
+.mz-world .mz-record {
+  fill: var(--umm-ink);
+  stroke: none;
+}
+
+.mz-world .mz-wire {
+  stroke-dasharray: 2 4;
+  stroke-opacity: 0.6;
+}
+
+.mz-world .mz-bit {
+  fill: #1f6dff;
+  stroke: none;
+}
+
+/* 03 · a shift sweeping the plant, the line checked shift by shift */
+.mz-world .mz-sweep {
+  fill: rgb(31 109 255 / 0.1);
+  stroke: none;
+  animation: mz-sweep 6s linear infinite;
+}
+
+.mz-world .mz-ok {
+  fill: var(--umm-ink);
+  stroke: none;
+}
+
+.mz-world .mz-ok-tick {
+  stroke: #fff;
+  stroke-width: 1.4;
+}
+
+.mz-pass {
+  opacity: 0;
+  animation: 6s linear infinite;
+}
+
+.mz-pass--0 {
+  animation-name: mz-pass-0;
+}
+
+.mz-pass--1 {
+  animation-name: mz-pass-1;
+}
+
+.mz-pass--2 {
+  animation-name: mz-pass-2;
+}
+
+/* 04 · the routes out, the pattern travelling them */
+.mz-world .mz-route {
+  stroke-dasharray: 4 6;
+  stroke-opacity: 0.55;
+}
+
+.mz-world .mz-runner {
+  fill: var(--umm-ink);
+  stroke: none;
+}
+
+/* --- on the stage: where you are, the scale bar, the step's own words ----------------------- */
+
+.mz__tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  animation: mz-in 0.5s var(--umm-ease-out) both;
+}
+
+.mz__scale {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 5px 5px 15px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.9);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+/* the track from the first scale to the last, and its marker gliding with
+   the scroll */
+.mz__scale::before {
+  content: '';
+  position: absolute;
+  right: calc(5px + (100% - 10px) / 8);
+  bottom: 8px;
+  left: calc(5px + (100% - 10px) / 8);
+  height: 1px;
+  background: rgb(16 14 20 / 0.2);
+}
+
+.mz__scale > i {
+  position: absolute;
+  bottom: 4.5px;
+  left: calc(5px + (100% - 10px) / 8 + (100% - 10px) * 0.75 * var(--L) / 3);
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--umm-ink);
+}
+
+.mz__scale button {
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  font-size: 14px;
+  color: var(--umm-ink-quiet);
+  cursor: pointer;
+  transition:
+    color 0.3s,
+    background 0.3s;
+}
+
+.mz__scale button[data-on] {
+  background: #fff;
+  color: var(--umm-ink);
+}
+
+.mz__chips {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: calc(100% - 32px);
+}
+
+.mz__chips li {
+  padding: 8px 14px;
+  border-radius: 99px;
+  background: #fff;
+  font-size: 15px;
+  animation: mz-in 0.5s var(--umm-ease-out) both;
+  animation-delay: calc(var(--k) * 0.07s);
+}
+
+.mz__chips li[data-on] {
+  background: var(--umm-ink);
+  color: #fff;
+}
+
+@keyframes mz-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+@keyframes mz-press {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  40% {
+    translate: 0 6px;
+  }
+  60% {
+    translate: 0 6px;
+  }
+}
+
+@keyframes mz-grow {
+  0% {
+    scale: 0 1;
+  }
+  45%,
+  100% {
+    scale: 1 1;
+  }
+}
+
+@keyframes mz-sweep {
+  0% {
+    translate: 0 0;
+    opacity: 1;
+  }
+  26% {
+    translate: 330px 0;
+  }
+  26.01% {
+    translate: 0 0;
+  }
+  52% {
+    translate: 330px 0;
+  }
+  52.01% {
+    translate: 0 0;
+  }
+  78% {
+    translate: 330px 0;
+    opacity: 1;
+  }
+  80%,
+  100% {
+    translate: 330px 0;
+    opacity: 0;
+  }
+}
+
+@keyframes mz-pass-0 {
+  0%,
+  25% {
+    opacity: 0;
+  }
+  27%,
+  95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes mz-pass-1 {
+  0%,
+  51% {
+    opacity: 0;
+  }
+  53%,
+  95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes mz-pass-2 {
+  0%,
+  77% {
+    opacity: 0;
+  }
+  79%,
+  95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mz-ram,
+  .mz-world .mz-now,
+  .mz-world .mz-sweep {
+    animation: none;
+  }
+
+  .mz-pass {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* --- smaller screens ------------------------------------------------------------------------ */
+
+@media (max-height: 820px) and (min-width: 901px) {
+  .mz__steps button {
+    padding-block: 9px;
+  }
+
+  .mz__count b {
+    font-size: min(clamp(72px, 8vw, 120px), 15svh);
+  }
+}
+
+@media (max-width: 900px) {
+  .mz {
+    height: calc(100svh + 3 * 70svh);
+  }
+
+  .mz__pin {
+    gap: 14px;
+    padding-block: 20px;
+  }
+
+  .mz .mf-lead {
+    display: none;
+  }
+
+  .mz__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    row-gap: 14px;
+  }
+
+  .mz__stage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .mz__side {
+    grid-column: 1;
+    grid-row: 2;
+    gap: 10px;
+  }
+
+  .mz__count b {
+    font-size: 60px;
+  }
+
+  .mz__steps li:not([data-on]) {
+    display: none;
+  }
+
+  .mz__tag {
+    display: none;
+  }
+
+  .mz__scale {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .mz__scale button {
+    padding: 4px 6px;
+    font-size: 12.5px;
+  }
+
+  .mz__chips li {
+    padding: 6px 11px;
+    font-size: 13.5px;
+  }
+}

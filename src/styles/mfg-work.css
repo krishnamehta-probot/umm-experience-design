@@ -85,7 +85,7 @@
 
 .mw-feat__body {
   max-width: 40ch;
-  font-size: 14px;
+  font-size: 16.5px;
   line-height: 1.55;
   color: rgb(255 255 255 / 0.7);
 }
@@ -104,14 +104,14 @@
   border: 0;
   border-top: 1px solid rgb(255 255 255 / 0.14);
   background: transparent;
-  font-size: 14.5px;
+  font-size: 17px;
   text-align: left;
   color: #fff;
   cursor: pointer;
 }
 
 .mw-feat__areas span {
-  font-size: 11px;
+  font-size: 13px;
   color: rgb(255 255 255 / 0.5);
 }
 
@@ -122,6 +122,170 @@
 
 .mw-feat__areas button:hover i {
   translate: 4px 0;
+}
+
+/* --- in Mohawk's colours (the default; ?work=ink is the version above alone) ------------- */
+
+.mw__stage {
+  display: contents;
+}
+
+.mw[data-look='mohawk'] {
+  --mohawk: #c3161d;
+}
+
+/* the stage, inset as the Fintech page's is, in Mohawk's red */
+.mw[data-look='mohawk'] .mw__stage {
+  position: relative;
+  display: block;
+  margin-inline: var(--g);
+  padding-block: clamp(10px, 1.6svh, 18px);
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 28px;
+  background: var(--mohawk);
+}
+
+.mw[data-look='mohawk'] .mw__track {
+  padding-inline: clamp(10px, 1.2vw, 18px);
+  height: clamp(360px, calc(100svh - 330px), 590px);
+}
+
+/* each engagement's poster, crossfading in as its card arrives, blended
+   into the red so the stage stays Mohawk's colour */
+.mw__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  scale: 1.12;
+  transition:
+    opacity 0.9s ease-in-out,
+    scale 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.mw__bg[data-on] {
+  opacity: 0.75;
+  scale: 1;
+}
+
+/* the blend sits on the layer itself: an image blending inside its own
+   (scaled, so isolated) layer would show plain */
+.mw__bg {
+  mix-blend-mode: overlay;
+}
+
+.mw__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(18px) saturate(1.2);
+  transform: scale(1.12);
+}
+
+/* the opening ground: the red alone, a light moving slowly across it */
+.mw__bg:first-child {
+  background:
+    radial-gradient(45% 60% at 20% 10%, rgb(255 255 255 / 0.22), transparent 70%),
+    radial-gradient(50% 60% at 80% 100%, rgb(120 0 10 / 0.5), transparent 70%);
+}
+
+/* the featured manufacturer, straight on the red */
+.mw[data-look='mohawk'] .mw-feat {
+  background: transparent;
+  padding-inline: clamp(14px, 1.6vw, 26px);
+}
+
+/* the stage's own light does the aura's work here */
+.mw[data-look='mohawk'] .mw-feat__aura {
+  display: none;
+}
+
+.mw[data-look='mohawk'] .mw-feat > .ff-glass {
+  left: clamp(14px, 1.6vw, 26px);
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+.mw[data-look='mohawk'] .mw-feat > .ff-glass::before {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.25);
+}
+
+/* Mohawk's mark, in white */
+.mw-feat__logo {
+  position: absolute;
+  top: 18px;
+  right: clamp(14px, 1.6vw, 26px);
+  height: clamp(30px, 4.6svh, 44px);
+  filter: brightness(0) invert(1);
+}
+
+.mw[data-look='mohawk'] .mw-feat__body {
+  color: rgb(255 255 255 / 0.86);
+}
+
+.mw[data-look='mohawk'] .mw-feat__areas button {
+  grid-template-columns: 54px 1fr auto;
+  padding: 9px 0;
+  border-top-color: rgb(255 255 255 / 0.26);
+}
+
+/* each area carries its engagement's poster */
+.mw-feat__thumb {
+  width: 42px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.5);
+}
+
+/* the cases, straight on the red as the Fintech page's words sit on their
+   poster: the drawing a pastel tile beside them, the words in white */
+.mw[data-look='mohawk'] .mw__track {
+  gap: clamp(20px, 2.4vw, 40px);
+}
+
+.mw[data-look='mohawk'] .mw-case {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+}
+
+.mw[data-look='mohawk'] .mw-case__art {
+  border-radius: 22px;
+  box-shadow: 0 34px 60px -34px rgb(60 0 6 / 0.7);
+}
+
+.mw[data-look='mohawk'] .mw-case__tag {
+  color: var(--umm-ink);
+}
+
+.mw[data-look='mohawk'] .mw-case__k {
+  color: rgb(255 255 255 / 0.82);
+}
+
+.mw[data-look='mohawk'] .mw-case__k span {
+  background: #fff;
+  color: var(--mohawk);
+}
+
+.mw[data-look='mohawk'] .mw-case__body {
+  color: rgb(255 255 255 / 0.88);
+}
+
+.mw[data-look='mohawk'] .mw-case__role p {
+  color: rgb(255 255 255 / 0.72);
+}
+
+.mw[data-look='mohawk'] .mw-case__role li {
+  background: rgb(255 255 255 / 0.14);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.32);
+}
+
+.mw[data-look='mohawk'] .mw__bar::after {
+  background: var(--mohawk);
 }
 
 /* an engagement */
@@ -176,7 +340,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -202,13 +366,13 @@
 }
 
 .mw-case__title {
-  font-size: clamp(16px, 1.3vw, 20px);
+  font-size: clamp(17.5px, 1.43vw, 22px);
   line-height: 1.3;
   letter-spacing: -0.015em;
 }
 
 .mw-case__body {
-  font-size: 13.5px;
+  font-size: 16px;
   line-height: 1.55;
   color: var(--umm-ink-soft);
 }
@@ -220,7 +384,7 @@
 }
 
 .mw-case__role p {
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -237,7 +401,7 @@
   padding: 6px 11px;
   border-radius: 99px;
   background: var(--tone);
-  font-size: 12.5px;
+  font-size: 15px;
 }
 
 .mw-case__go {
@@ -249,7 +413,7 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 18px;
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: var(--umm-weight-medium);
 }
 
@@ -356,7 +520,7 @@
   padding: 0 9px;
   border-radius: 99px;
   background: rgb(255 255 255 / 0.75);
-  font-size: 11.5px;
+  font-size: 13.5px;
   font-weight: var(--umm-weight-medium);
 }
 
@@ -366,7 +530,7 @@
   bottom: 22px;
   left: 18px;
   max-height: calc(100% - 90px);
-  font-size: clamp(18px, 1.5vw, 24px);
+  font-size: clamp(20px, 1.65vw, 26.5px);
   line-height: 1.1;
   letter-spacing: -0.025em;
   writing-mode: vertical-rl;
@@ -379,7 +543,7 @@
   bottom: auto;
   left: 60px;
   max-height: none;
-  font-size: clamp(15px, 1.1vw, 17px);
+  font-size: clamp(17.5px, 1.3vw, 20px);
   writing-mode: horizontal-tb;
   rotate: none;
 }
@@ -455,7 +619,7 @@
 }
 
 .mu-p__copy {
-  font-size: 14px;
+  font-size: 16.5px;
   line-height: 1.55;
   color: var(--umm-ink-soft);
 }
@@ -525,6 +689,16 @@
   aspect-ratio: 240 / 150;
 }
 
+/* the stations draw at a quarter of the row, so their labels a step larger */
+.mu-c__art .ml-t {
+  font-size: 8.2px;
+  letter-spacing: 0.08em;
+}
+
+.mu-c__art .ml-t--ink {
+  font-size: 7.4px;
+}
+
 /* the words share rows across the four cards (subgrid), so the titles line
    up even where a name runs to two lines */
 .mu-c__text {
@@ -553,7 +727,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -581,14 +755,14 @@
 }
 
 .mu-c h3 {
-  font-size: min(clamp(18px, 1.5vw, 23px), 3.4svh);
+  font-size: min(clamp(20px, 1.65vw, 25.5px), 3.74svh);
   font-weight: var(--umm-weight-regular);
   line-height: 1.14;
   letter-spacing: -0.025em;
 }
 
 .mu-c__body {
-  font-size: clamp(13px, 0.92vw, 14px);
+  font-size: clamp(15.5px, 1.09vw, 16.5px);
   line-height: 1.55;
   color: rgb(16 14 20 / 0.72);
 }
@@ -620,7 +794,7 @@
   box-shadow:
     inset 0 0 0 1px rgb(16 14 20 / 0.86),
     0 8px 16px -10px rgb(16 14 20 / 0.5);
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.06em;
   color: var(--umm-ink);
@@ -686,6 +860,16 @@
 
   .mw-feat {
     min-height: 420px;
+  }
+
+  .mw[data-look='mohawk'] .mw__track {
+    height: auto;
+    padding-inline: 10px;
+  }
+
+  /* stacked: the opening red alone behind them all */
+  .mw__bg:not(:first-child) {
+    display: none;
   }
 
   .mw-case {

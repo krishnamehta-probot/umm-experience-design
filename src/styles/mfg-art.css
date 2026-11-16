@@ -137,7 +137,7 @@
 
 .ml-t {
   fill: var(--umm-ink-quiet);
-  font-size: 6.6px;
+  font-size: 7.2px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -145,12 +145,12 @@
 
 .ml-t--ink {
   fill: #fff;
-  font-size: 6.4px;
+  font-size: 6.8px;
 }
 
 .ml-t--big {
   fill: var(--umm-ink);
-  font-size: 8px;
+  font-size: 8.6px;
   letter-spacing: 0.16em;
 }
 

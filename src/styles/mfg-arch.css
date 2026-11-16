@@ -39,7 +39,7 @@
 .ma__label {
   display: grid;
   gap: 3px;
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -52,7 +52,7 @@
   gap: 7px;
   letter-spacing: 0.06em;
   text-transform: none;
-  font-size: 12px;
+  font-size: 14px;
   color: rgb(255 255 255 / 0.8);
 }
 
@@ -83,7 +83,7 @@
   border-radius: 99px;
   background: rgb(255 255 255 / 0.06);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
-  font-size: 13px;
+  font-size: 15.5px;
   color: rgb(255 255 255 / 0.72);
   cursor: pointer;
   white-space: nowrap;
@@ -115,7 +115,7 @@
 }
 
 .ma__play span {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* --- the grid: the chain and the twin -------------------------------------------------- */
@@ -185,12 +185,12 @@
   display: flex;
   align-items: baseline;
   gap: 12px;
-  font-size: clamp(15px, 1.25vw, 19px);
+  font-size: clamp(16.5px, 1.38vw, 21px);
   letter-spacing: -0.015em;
 }
 
 .ma__ai-head b {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -200,7 +200,7 @@
 .ma__ai-head .ma__ai-note {
   display: block;
   max-width: 36ch;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
   text-align: right;
   color: rgb(255 255 255 / 0.55);
@@ -228,7 +228,7 @@
 .ma__agent small,
 .ma__stage-card small,
 .ma__tile small {
-  font-size: 9.5px;
+  font-size: 11.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -236,13 +236,13 @@
 }
 
 .ma__agent strong {
-  font-size: clamp(13.5px, 1.05vw, 15.5px);
+  font-size: clamp(16px, 1.24vw, 18.5px);
   font-weight: var(--umm-weight-regular);
   letter-spacing: -0.01em;
 }
 
 .ma__agent span {
-  font-size: 12px;
+  font-size: 14px;
   color: rgb(255 255 255 / 0.6);
 }
 
@@ -278,7 +278,7 @@
   grid-template-columns: 1fr 14px 1fr;
   align-items: center;
   gap: 8px;
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.25;
   color: rgb(255 255 255 / 0.45);
 }
@@ -363,7 +363,7 @@
 }
 
 .ma__stage-card strong {
-  font-size: clamp(14px, 1.15vw, 17px);
+  font-size: clamp(16.5px, 1.36vw, 20px);
   font-weight: var(--umm-weight-regular);
   letter-spacing: -0.015em;
 }
@@ -378,7 +378,7 @@
   padding: 3px 8px;
   border-radius: 99px;
   background: #f1f1f4;
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-style: normal;
   color: var(--umm-ink-soft);
   white-space: nowrap;
@@ -429,7 +429,7 @@
   border-radius: 99px;
   background: rgb(255 255 255 / 0.05);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
-  font-size: 12.5px;
+  font-size: 15px;
 }
 
 .ma__loop {
@@ -439,7 +439,7 @@
   height: 22px;
   border-radius: 50%;
   background: var(--umm-citrus);
-  font-size: 13px;
+  font-size: 15.5px;
   color: var(--umm-ink);
   animation: ma-spin 4s linear infinite reverse;
 }
@@ -473,7 +473,7 @@
 }
 
 .ma__twin-k {
-  font-size: 9.5px;
+  font-size: 11.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -481,7 +481,7 @@
 }
 
 .ma__twin-title {
-  font-size: clamp(16px, 1.3vw, 20px);
+  font-size: clamp(17.5px, 1.43vw, 22px);
   line-height: 1.15;
   letter-spacing: -0.02em;
 }
@@ -491,7 +491,7 @@
 }
 
 .ma__twin-body {
-  font-size: 11.5px;
+  font-size: 13.5px;
   line-height: 1.4;
   color: rgb(255 255 255 / 0.55);
 }
@@ -542,7 +542,7 @@
 }
 
 .ma__tile strong {
-  font-size: 13px;
+  font-size: 15.5px;
   font-weight: var(--umm-weight-regular);
   line-height: 1.2;
 }
@@ -581,7 +581,7 @@
 }
 
 .ma__twin-cap {
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.35;
   color: rgb(255 255 255 / 0.55);
 }
@@ -609,7 +609,7 @@
 }
 
 .ma__story-k {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -622,13 +622,13 @@
 }
 
 .ma__flow-title {
-  font-size: clamp(14px, 1.08vw, 16px);
+  font-size: clamp(16.5px, 1.27vw, 19px);
   line-height: 1.2;
   letter-spacing: -0.015em;
 }
 
 .ma__flow-intro {
-  font-size: 12.5px;
+  font-size: 15px;
   line-height: 1.45;
   color: var(--umm-ink-soft);
 }
@@ -653,7 +653,7 @@
   border: 0;
   border-radius: 50%;
   background: #f1f1f4;
-  font-size: 10.5px;
+  font-size: 12.5px;
   color: var(--umm-ink-quiet);
   cursor: pointer;
   transition:
@@ -676,7 +676,7 @@
   padding: 4px 10px;
   border-radius: 99px;
   background: #1f6dff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -684,20 +684,20 @@
 }
 
 .ma__story-title {
-  font-size: clamp(16px, 1.3vw, 20px);
+  font-size: clamp(17.5px, 1.43vw, 22px);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .ma__story-copy {
-  font-size: 13px;
+  font-size: 15.5px;
   line-height: 1.5;
   color: var(--umm-ink-soft);
 }
 
 .ma__note {
   align-self: end;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--umm-ink-quiet);
   white-space: nowrap;
 }
@@ -735,7 +735,7 @@
 
 .ma__inspect dt {
   margin-bottom: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -744,7 +744,7 @@
 
 .ma__inspect dd {
   margin: 0;
-  font-size: 13px;
+  font-size: 15.5px;
   line-height: 1.45;
 }
 
@@ -770,12 +770,12 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  font-size: 12.5px;
+  font-size: 15px;
 }
 
 .ma__gov b {
   margin-right: 6px;
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -889,6 +889,38 @@
 
 /* --- smaller screens ----------------------------------------------------------------------- */
 
+/* the governance row on one line: the hint goes where it would wrap it */
+@media (max-width: 1640px) {
+  .ma__gov .ma__hint {
+    display: none;
+  }
+}
+
+/* 900 high: the larger type (16 Nov) still on one screen, a few repeats out */
+@media (max-height: 960px) and (min-width: 901px) {
+  .ma {
+    padding-block: 20px;
+  }
+
+  .ma__label span,
+  .ma__agent small,
+  .ma__flow-intro {
+    display: none;
+  }
+
+  .ma__stage-card {
+    grid-template-rows: auto clamp(34px, 4.6svh, 42px) auto auto;
+  }
+
+  .ma .mf-title {
+    font-size: min(clamp(30px, 3.4vw, 56px), 5.4svh);
+  }
+
+  .ma .mf-head {
+    gap: 10px;
+  }
+}
+
 @media (max-height: 820px) and (min-width: 901px) {
   .ma {
     gap: 10px;
@@ -904,7 +936,7 @@
   }
 
   .ma .mf-lead {
-    font-size: 13.5px;
+    font-size: 16px;
   }
 
   .ma__stage {
@@ -918,12 +950,12 @@
   }
 
   .ma__ai-head p {
-    font-size: 15px;
+    font-size: 17.5px;
   }
 
   .ma__pills em {
     padding: 2px 7px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .ma__context {
@@ -942,7 +974,11 @@
   }
 
   .ma__stage-card {
-    grid-template-rows: auto 34px auto auto;
+    grid-template-rows: auto auto auto;
+  }
+
+  .ma__stage-art {
+    display: none;
   }
 
   .ma__flow-intro {

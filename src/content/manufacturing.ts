@@ -403,11 +403,17 @@ export const work = {
   featured: {
     eyebrow: 'Featured manufacturer',
     name: 'Mohawk Industries',
+    logo: '/casestudies/logo/mohawk-recover.webp',
     body: 'Enterprise change reaches beyond the production line. It includes the recovered material, the approved dealer price and the information employees need.',
     areas: ['Recovery & sustainability', 'Commercial operations', 'Employee experience'],
   },
+  /* the options for this section (16 Nov), Krish to choose */
+  book: 'Three engagements, one manufacturer',
+  loop: { title: 'One tile, three lives', hint: 'Drag the tile round', order: [2, 1, 0] },
+  carpet: { hint: 'Scroll to unroll' },
   roleLabel: 'UMM’s role',
   read: 'Read case study',
+  view: 'Show',
   cases: [
     {
       tag: 'Drawing / Rev. 04',
@@ -417,6 +423,13 @@ export const work = {
       body: 'UMM connected recovery requests, scheduling, logistics and reporting in a custom platform, helping teams trace activity through the recovery process.',
       role: ['Request and scheduling workflows', 'Logistics coordination', 'Recovery traceability', 'Sustainability reporting'],
       href: `${U}/casestudies/mohawk-recover/`,
+      poster: '/casestudies/mohawk-recover.webp',
+      film: '/industry/manufacturing/mohawk-recover.webm',
+      still: '/industry/manufacturing/mohawk-recover.webp',
+      thumb: '/industry/manufacturing/mohawk-recover-thumb.webp',
+      alt: 'The ReCover recycling programme site UMM built for Mohawk, from the case film',
+      life: 'Recovered',
+      weave: 'loop',
       art: 'recover',
       tone: 'citrus',
     },
@@ -429,6 +442,13 @@ export const work = {
       body: 'UMM built price-list search, creation, review and approval workflows, alongside a Windows application that keeps authorised pricing information available offline.',
       role: ['Pricing workflow design', 'Approvals', 'Offline application'],
       href: `${U}/casestudies/mohawk-pricefx/`,
+      poster: '/casestudies/mohawk-pricefx.webp',
+      film: '/industry/manufacturing/mohawk-pricefx.webm',
+      still: '/industry/manufacturing/mohawk-pricefx.webp',
+      thumb: '/industry/manufacturing/mohawk-pricefx-thumb.webp',
+      alt: 'The Mohawk Pricing app UMM built, from the case film',
+      life: 'Sold',
+      weave: 'twill',
       art: 'pricing',
       tone: 'sky',
     },
@@ -440,6 +460,13 @@ export const work = {
       body: 'UMM organised and presented employee benefits information around the questions people needed to answer.',
       role: ['Information architecture', 'Navigation', 'Visual design'],
       href: `${U}/casestudies/mohawk-benefits/`,
+      poster: '/casestudies/mohawk-benefits.webp',
+      film: '/industry/manufacturing/mohawk-benefits.webm',
+      still: '/industry/manufacturing/mohawk-benefits.webp',
+      thumb: '/industry/manufacturing/mohawk-benefits-thumb.webp',
+      alt: 'The Mohawk Benefits site UMM built, from the case film',
+      life: 'Made',
+      weave: 'basket',
       art: 'benefits',
       tone: 'blossom',
     },
@@ -606,6 +633,17 @@ export const rollout = {
       body: 'Put recommendations into planning, MES or maintenance workflows. Assign approval, monitoring and rollback, then adapt the pattern to the next line.',
     },
   ],
+  /* the zoom (16 Nov): each step at the scale it works at, from one machine
+     out to the plants. The chips are the step's own words. */
+  zoom: {
+    unit: ['machine', 'machines'],
+    levels: [
+      { name: 'Machine', tag: 'Press 04 / Line 01', count: 1, where: 'The pilot', chips: ['Scrap', 'Changeover', 'Downtime', 'Energy per unit'] },
+      { name: 'Line', tag: 'Line 01', count: 4, where: 'One line', chips: ['Asset', 'Lot', 'Time'] },
+      { name: 'Plant', tag: 'Plant A', count: 12, where: 'One plant', chips: ['Shift A', 'Shift B', 'Shift C'] },
+      { name: 'Network', tag: 'Five plants', count: 60, where: 'Every plant', chips: ['Approval', 'Monitoring', 'Rollback'] },
+    ],
+  },
 }
 
 /* ── 10 · Work with UMM ──────────────────────────────────────────────────── */

@@ -90,6 +90,107 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 16 Nov 2026, /manufacturing: Relevant work, final
+
+Krish liked none of the three options ("make a single final one whatever
+you feel will be best… you only choose on your own"). The final is
+MfgWorkFilm, the default. It is the Fintech page's approved work section
+(FinalWork / fin-final-work.css) carrying Mohawk's real work:
+
+- The section is three screens tall and one screen stays pinned. Each
+  engagement takes the stage in turn:
+  - its case-study poster (Mohawk's red) is the blurred ground;
+  - its case film plays on the right: the ReCover site, the Pricing app,
+    the Benefits site. Only the one in view plays, and only on screen;
+  - its words arrive a beat later: eyebrow, name, title, body, UMM's role
+    as chips, and UMM's SplitButton in paper on the dark ground.
+- Mohawk's mark sits top right in white. A dock of film stills sits at the
+  foot, with the gliding outline and progress hairline.
+- The films are the case films (two from umm.digital, PriceFX's local),
+  re-cut at 720p VP9 without sound. PriceFX skips its blank first 1.6s.
+  Each has a poster and a dock thumb, all in
+  `public/industry/manufacturing/` (0.6–1.6 MB each).
+- Kept as options: `?work=swatch | loop | carpet | red | ink`.
+- **Never a cut line** (his screenshot: the body showed a line and a half).
+  Nothing in the words' column shrinks now. The column measures its own
+  height (a container query) and lets whole pieces go as it runs short:
+  - first the "UMM's role" label, with the body clamped to two full lines;
+  - then the role chips;
+  - then the body.
+  The film is capped by the stage's height too, so on short screens it
+  never rides up into the Mohawk mark. Checked from 1920×950 down to
+  1280×600.
+
+### 16 Nov 2026, /manufacturing: the rollout zoom, three Mohawk options
+
+- **From pilots to operating impact, the zoom** ("make this section also
+  nicer", and of three ideas he chose this one). It is MfgRolloutZoom with
+  mfg-zoom.css:
+  - The section pins. Scrolling pulls the camera out of one press, to its
+    line, to Plant A, to five plants.
+  - Each step arrives at its scale:
+    - 01: the press, with scrap 4.2% against a 30-day baseline;
+    - 02: the line's four machines wired into one shared record, with
+      references running up the wires;
+    - 03: a shift sweeping the plant, with the line checked for shifts A,
+      B and C;
+    - 04: the routes out, and plants B–E lighting in turn.
+  - The estate is one SVG, and the camera is its viewBox, eased on a log
+    scale. The strokes are non-scaling, so they stay hairlines at every
+    scale.
+  - Beside it, a counter shows what is in view (1 → 4 → 12 → 60
+    machines), with the four steps and the current one open.
+  - A map-style scale bar (Machine / Line / Plant / Network) jumps to each
+    scale, and chips show the step's own words.
+  - The estate plan before it is kept at `?rollout=estate`.
+- **Relevant work: the red version was turned down** ("I was not asking to
+  do it like this… make it interactive that it can be remembered"). Three
+  simple options are up for his review, sharing CaseCard and Weave
+  (WorkParts.tsx) and styled in mfg-work-opts.css:
+  - `?work=swatch` (the default): the engagements are samples in a
+    flooring swatch book, each woven in its own construction (loop pile,
+    twill, basket). The book fans open on arrival. The sample in hand
+    stands upright, pulled out, and picking another swings the book round
+    to it.
+  - `?work=loop`: one tile, three lives. Made (Benefits), sold (PriceFX),
+    recovered (Recover) round a loop. The tile rides it by itself, can be
+    dragged round, and snaps to the nearest stop.
+  - `?work=carpet`: a Mohawk runner unrolling as you scroll:
+    - the roll, in the next length's colour, travels right and lays down
+      Mohawk, then each engagement;
+    - each length has a woven border band, a stitched edge and a fringe;
+    - each length's words settle once it is down.
+  - Earlier versions: `?work=red`, the sideways track on Mohawk's red, and
+    `?work=ink`, the track on ink.
+
+### 16 Nov 2026, /manufacturing: bigger type, Mohawk in red
+
+- **Type, a size up across the page** ("not able to read, its too small"):
+  labels 9.5–11.5px became 11.5–13.5px, and body copy 12–15px became
+  14–17.5px. Small clamps grew 18% and mid ones 10%. The display titles stay
+  as they were. The shared pills are 14.5px. Labels inside the drawings
+  are 7.2px (the stations 8.2px). Each section still fits one screen at
+  1440×900 and 1366×768:
+  - Model's twin tiles are a little shorter.
+  - Architecture's governance hint hides where it would wrap.
+  - On 900px-high screens, Architecture drops a few repeats: the
+    "AI capability" eyebrows, the "Interactive architecture" line and the
+    flow intro. Its title is a step smaller there.
+  - The Reality point-of-view route keeps its own width; its labels wrap
+    to two lines.
+- **Relevant work in Mohawk's colours** ("make it red coloured, or something
+  unique like what we have done for that other industry page"). As on
+  Fintech, the cases ride on one inset stage in the client's own ground,
+  here Mohawk's red (#c3161d):
+  - Each engagement's poster (`/casestudies/mohawk-*.webp`) crossfades into
+    the red as its card arrives. It is blended (overlay) so the stage
+    stays red.
+  - The featured panel sits straight on the red, with Mohawk's mark in
+    white. Its three areas carry their engagement's poster as a thumbnail.
+  - The cases' words are white on the red, with the pastel drawing as a
+    tile beside them.
+  - The ink version is kept at `?work=ink`.
+
 ### 12 Nov 2026, /manufacturing: Krish's review, applied in one pass
 
 From his doc "UMM industry page feedback" (nine screenshots with notes):

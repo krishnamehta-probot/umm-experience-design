@@ -31,7 +31,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -88,7 +88,7 @@
   border: 0;
   border-radius: 14px;
   background: transparent;
-  font-size: clamp(14px, 1.05vw, 16px);
+  font-size: clamp(16.5px, 1.24vw, 19px);
   letter-spacing: -0.01em;
   text-align: left;
   color: var(--umm-ink-quiet);
@@ -109,7 +109,7 @@
   border-radius: 50%;
   background: #fff;
   box-shadow: inset 0 0 0 1px var(--umm-line);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   transition:
     background 0.4s,
@@ -151,7 +151,7 @@
 }
 
 .me__end p {
-  font-size: 13px;
+  font-size: 15.5px;
   line-height: 1.55;
   color: rgb(255 255 255 / 0.72);
 }
@@ -220,7 +220,7 @@
 
 .me-card__sub {
   max-width: 36ch;
-  font-size: clamp(14px, 1.05vw, 16px);
+  font-size: clamp(16.5px, 1.24vw, 19px);
   line-height: 1.45;
   color: var(--umm-ink-soft);
 }
@@ -237,7 +237,7 @@
   align-items: start;
   padding: clamp(8px, 1.3svh, 12px) 0;
   border-top: 1px solid var(--umm-line);
-  font-size: clamp(13px, 0.95vw, 14.5px);
+  font-size: clamp(15.5px, 1.12vw, 17px);
   line-height: 1.45;
 }
 
@@ -273,7 +273,7 @@
 /* procurement's card has no list: its words read larger */
 .me-card[data-start] .me-card__sub {
   max-width: 34ch;
-  font-size: clamp(15px, 1.2vw, 18px);
+  font-size: clamp(16.5px, 1.32vw, 20px);
   line-height: 1.5;
 }
 

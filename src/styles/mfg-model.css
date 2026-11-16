@@ -15,7 +15,7 @@
 .mo__split {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
-  height: clamp(250px, 38svh, 400px);
+  height: clamp(240px, 34svh, 380px);
 }
 
 .mo__side {
@@ -141,7 +141,7 @@
   grid-template-columns: 16px 1fr;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--umm-ink-quiet);
 }
 
@@ -231,7 +231,7 @@
 
 .mo__verb {
   grid-area: verb;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -240,7 +240,7 @@
 
 .mo__title {
   grid-area: title;
-  font-size: clamp(17px, 1.35vw, 21px);
+  font-size: clamp(18.5px, 1.49vw, 23px);
   letter-spacing: -0.02em;
 }
 
@@ -248,7 +248,7 @@
   grid-area: text;
   min-height: 0;
   overflow: hidden;
-  font-size: 13px;
+  font-size: 15.5px;
   line-height: 1.5;
   color: var(--umm-ink-soft);
   opacity: 0;
@@ -288,7 +288,7 @@
 }
 
 .mo__ref-k {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--umm-weight-medium);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -297,7 +297,7 @@
 
 .mo__ref-body {
   max-width: 82ch;
-  font-size: 13px;
+  font-size: 15.5px;
   line-height: 1.55;
   color: var(--umm-ink-soft);
 }
@@ -309,7 +309,7 @@
 }
 
 .mo__ref-links .mf-link {
-  font-size: 13px;
+  font-size: 15.5px;
 }
 
 @keyframes mo-sig {
@@ -378,8 +378,8 @@
 
 @media (max-height: 820px) and (min-width: 901px) {
   .mo__split {
-    height: calc(100svh - 490px);
-    min-height: 220px;
+    height: calc(100svh - 536px);
+    min-height: 200px;
   }
 
 }
