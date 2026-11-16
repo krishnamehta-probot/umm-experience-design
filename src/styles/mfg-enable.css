@@ -1,6 +1,8 @@
 /* ============================================================================
    THE MANUFACTURING PAGE — 03 · what UMM enables (MfgEnable.tsx)
-   pinned; the chain (00–04) on the left, the cards dealt as a deck
+   pinned; the chain on the left (00 procurement held at the top, the rail
+   01–04), the capabilities dealt as a deck. [data-deck]: the 12 Nov version,
+   procurement dealt as the deck's first card, the rail 00–04
    ========================================================================== */
 
 .me {
@@ -53,15 +55,80 @@
 
 .me__chain {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto auto;
   gap: 10px;
   min-height: 0;
+}
+
+.me[data-deck] .me__chain {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+/* 00, held for good: what the plant can make starts with the material. It
+   takes the room the rail and the close leave. Its pieces stack in a column
+   that wraps: one that does not fit moves whole into the next column, out of
+   sight, so on a short screen the body goes (then the title and drawing)
+   and nothing is ever cut mid-line */
+.me__start {
+  container-type: size;
+  display: flex;
+  flex-flow: column wrap;
+  align-content: flex-start;
+  gap: 10px 200px;
+  min-height: 0;
+  padding: clamp(12px, 2svh, 20px) clamp(14px, 1.4vw, 20px);
+  overflow: hidden;
+  border-radius: 22px;
+  background: #f4f4f7;
+}
+
+.me__start > * {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.me__start-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+}
+
+.me__start h3 {
+  font-size: clamp(19px, 1.5vw, 24px);
+  font-weight: var(--umm-weight-regular);
+  line-height: 1.14;
+  letter-spacing: -0.025em;
+}
+
+/* the drawing on the flat pastel, beside the title, reaching up beside 00 */
+.me__start-art {
+  width: clamp(80px, 18cqw, 108px);
+  aspect-ratio: 240 / 260;
+  margin-top: -32px;
+  padding: 5px;
+  border-radius: 14px;
+  background: var(--umm-sun);
+}
+
+.me__start-body {
+  font-size: clamp(15.5px, 1.08vw, 16.5px);
+  line-height: 1.5;
+  color: var(--umm-ink-soft);
+}
+
+/* too narrow for the drawing beside the words */
+@container (max-width: 340px) {
+  .me__start-art {
+    display: none;
+  }
 }
 
 .me__rail {
   position: relative;
   display: grid;
   align-content: center;
+  min-height: 0;
   gap: 2px;
   padding: 4px 0;
 }
@@ -96,6 +163,10 @@
   transition:
     color 0.4s,
     background 0.4s;
+}
+
+.me:not([data-deck]) .me__rail button {
+  min-height: clamp(34px, 5.2svh, 48px);
 }
 
 .me__rail button span {
@@ -295,6 +366,27 @@
     height: calc(100svh - 250px);
   }
 
+  /* room for 00's words on a laptop */
+  .me:not([data-deck]) .me__chain {
+    gap: 8px;
+  }
+
+  .me__start {
+    row-gap: 8px;
+  }
+
+  .me:not([data-deck]) .me__rail button {
+    min-height: 36px;
+  }
+
+  .me:not([data-deck]) .me__end {
+    padding: 14px 18px;
+  }
+
+  .me__start-art {
+    width: 72px;
+  }
+
   .me-card__points li {
     padding: 6px 0;
   }
@@ -320,7 +412,22 @@
     display: none;
   }
 
+  /* procurement first, the deck, revenue operations last */
   .me__chain {
+    display: contents;
+  }
+
+  .me__start {
+    container-type: normal;
+    flex-wrap: nowrap;
+    order: -1;
+  }
+
+  .me__end {
+    order: 2;
+  }
+
+  .me[data-deck] .me__chain {
     order: 2;
     display: block;
   }

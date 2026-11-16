@@ -37,8 +37,10 @@ import '@/styles/mfg-zoom.css'
  *   01 opening     the line in UMM's clear glass, the planning queue on ink
  *   02 reality     three handoffs on flat pastel cards, each acted out; the
  *                  point of view drawn
- *   03 enable      procurement and the four capabilities dealt as one deck
- *                  as you scroll, revenue operations closing the chain
+ *   03 enable      procurement held at the top of the chain, the four
+ *                  capabilities dealt as a deck as you scroll, revenue
+ *                  operations closing the chain (?enable=deck: procurement
+ *                  dealt as the deck's first card, 12 Nov)
  *   04 model       the plant and its digital twin, side by side
  *   05 architecture  the value chain, the AI layer over it and the twin
  *                  loop, three workflows played through it
@@ -62,6 +64,7 @@ export function ManufacturingPage() {
   const panels = q?.get('audiences') === 'panels'
   const work = q?.get('work') ?? 'film'
   const estate = q?.get('rollout') === 'estate'
+  const enableDeck = q?.get('enable') === 'deck'
   useEffect(() => {
     document.title = meta.title
   }, [])
@@ -71,7 +74,7 @@ export function ManufacturingPage() {
       <MfgHero />
       <main>
         <MfgReality />
-        <MfgEnable />
+        <MfgEnable deck={enableDeck} />
         <MfgModel />
         <MfgArchitecture />
         {work === 'loop' ? (

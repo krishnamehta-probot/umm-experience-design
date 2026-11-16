@@ -90,6 +90,29 @@ clicks a tab, then that project loops.
 
 ## Log
 
+### 16 Nov 2026, /manufacturing: 00 back at the top of Enable
+
+Krish, on "What we enable": "previously that 00 was stuck now i got what
+was it for, no problem make it like that which was before". So the 12 Nov
+change is undone, and the later work is kept:
+
+- **00 "Start with procurement" is held at the top of the left column
+  for good,** as before 12 Nov. The procurement drawing sits on a flat sun
+  panel beside the title, with the body under it on the grey card.
+- The rail runs 01–04 again. The deck deals only the four capabilities.
+- The bigger type and flat pastels from today are kept.
+- **Never a cut line.** The card takes whatever room the rail and the
+  revenue close leave. Its pieces sit in a column that wraps, so a piece
+  that doesn't fit moves out of sight whole:
+  - the body shows at 1366×768 and up;
+  - on shorter screens only the title and drawing show;
+  - at 1280×600 only the 00 line shows.
+- The drawing drops when the column is narrow (1024).
+- On phones the order is procurement, the four cards, then revenue
+  operations.
+- The 12 Nov version (procurement as the deck's first card, rail 00–04) is
+  kept at `?enable=deck`.
+
 ### 16 Nov 2026, /manufacturing: Relevant work, final
 
 Krish liked none of the three options ("make a single final one whatever

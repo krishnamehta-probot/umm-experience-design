@@ -12,22 +12,26 @@ import { scrollThrough, useProgress } from './hooks'
    capabilities, revenue operations last. The section pins for a while and
    tells it in that order as the reader scrolls:
 
-     left   the chain as a rail, 00 to 04: procurement, then the four
-            capabilities, each filling as its card is dealt; revenue
-            operations closing the flow at the foot, with the way on to the
+     left   the chain: 00 "Start with procurement" held at the top for
+            good, its drawing beside it (the material ordered, shipped and
+            planned), because every capability after it starts from the
+            material (Krish, 16 Nov: back as it was before 12 Nov, "now i
+            got what was it for"); the four capabilities as a rail, 01 to
+            04, each filling as its card is dealt; revenue operations
+            closing the flow at the foot, with the way on to the
             architecture
-     right  the deck. Procurement is its first card (Krish, 12 Nov: the 00
-            card no longer waits on the left for good; it is dealt like the
-            rest), then each capability slides up over the last, which
+     right  the deck: each capability slides up over the last, which
             settles back a step behind it. Each card: its number, its
             words, and its drawing on the flat pastel, a scene that plays
-            through (the material ordered, shipped and planned; the line
-            running under its live view; the evidence joined into one
-            release; the machine in the field calling its service; the data
-            rising from edge to cloud)
+            through (the line running under its live view; the evidence
+            joined into one release; the machine in the field calling its
+            service; the data rising from edge to cloud)
+
+   `deck` (?enable=deck) is the 12 Nov version: procurement dealt as the
+   deck's first card, the rail running 00 to 04.
 
    A click on the rail scrolls to that card. On a phone the deck is a plain
-   list, unpinned.
+   list, unpinned, procurement first and revenue operations last.
    ========================================================================== */
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v))
@@ -42,11 +46,12 @@ type Card = {
   tone: string
 }
 
-export function MfgEnable() {
+export function MfgEnable({ deck = false }: { deck?: boolean }) {
   const c = enable
-  /* the deck: procurement first, then the four capabilities */
+  const start: Card = { key: 'start', k: c.start.eyebrow, title: c.start.title, sub: c.start.body, points: [], art: 'material', tone: 'sun' }
+  /* the deck: the four capabilities (with `deck`, procurement dealt first) */
   const cards: Card[] = [
-    { key: 'start', k: c.start.eyebrow, title: c.start.title, sub: c.start.body, points: [], art: 'material', tone: 'sun' },
+    ...(deck ? [start] : []),
     ...c.capabilities.map((x) => ({
       key: x.title,
       k: x.eyebrow.replace(/^\d+ \/ /, ''),
@@ -58,18 +63,36 @@ export function MfgEnable() {
     })),
   ]
   const n = cards.length
+  /* 00 is procurement's, wherever it sits */
+  const num = (k: number) => pad(deck ? k - 1 : k)
   const { ref, p } = useProgress<HTMLElement>()
   /* 0 → n-1 across the pinned scroll, with a little rest at each end */
   const step = clamp((p - 0.05) / 0.9) * (n - 1)
   const on = Math.min(n - 1, Math.round(step))
 
   return (
-    <section id={c.id} ref={ref} className="me" style={{ '--n': n } as CSSProperties} aria-labelledby="me-title">
+    <section id={c.id} ref={ref} className="me" data-deck={deck || undefined} style={{ '--n': n } as CSSProperties} aria-labelledby="me-title">
       <div className="me__pin">
         <Head id="me-title" head={c.head} />
 
         <div className="me__main">
           <aside className="me__chain" data-umm-reveal>
+            {!deck && (
+              <div className="me__start">
+                <p className="me__k">
+                  <span>{num(-1)}</span>
+                  {start.k}
+                </p>
+                <div className="me__start-head">
+                  <h3>{start.title}</h3>
+                  <div className="me__start-art">
+                    <MfgArt name={start.art} />
+                  </div>
+                </div>
+                <p className="me__start-body">{start.sub}</p>
+              </div>
+            )}
+
             <ol className="me__rail">
               {cards.map((x, k) => {
                 const fill = clamp(step - k + 1)
@@ -81,8 +104,8 @@ export function MfgEnable() {
                       style={{ '--f': k === 0 ? 1 : fill } as CSSProperties}
                       onClick={() => scrollThrough(ref.current, 0.05 + (k / (n - 1)) * 0.9)}
                     >
-                      <span>{pad(k - 1)}</span>
-                      {k === 0 ? x.k : x.title}
+                      <span>{num(k)}</span>
+                      {x.key === 'start' ? x.k : x.title}
                       <i />
                     </button>
                   </li>
@@ -108,13 +131,13 @@ export function MfgEnable() {
                   key={x.key}
                   className="me-card"
                   data-tone={x.tone}
-                  data-start={k === 0 || undefined}
+                  data-start={x.key === 'start' || undefined}
                   data-on={k === on || undefined}
                   style={{ '--in': arrive, '--d': depth, zIndex: k + 1 } as CSSProperties}
                 >
                   <div className="me-card__text">
                     <p className="me__k">
-                      <span>{pad(k - 1)}</span>
+                      <span>{num(k)}</span>
                       {x.k}
                     </p>
                     <h3>{x.title}</h3>
@@ -133,7 +156,7 @@ export function MfgEnable() {
                     )}
                   </div>
                   <div className="me-card__art">
-                    <span className="me-card__num">{pad(k - 1)}</span>
+                    <span className="me-card__num">{num(k)}</span>
                     <MfgArt name={x.art} />
                   </div>
                 </article>
